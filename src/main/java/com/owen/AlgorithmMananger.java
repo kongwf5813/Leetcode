@@ -1,11 +1,6 @@
 package com.owen;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class AlgorithmMananger {
 
@@ -750,11 +745,65 @@ public class AlgorithmMananger {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
+    //[49] 字母异位分组
+    public static List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> groupMap = new HashMap<>();
+        for (String str : strs) {
+            char[] sorted = str.toCharArray();
+            Arrays.sort(sorted);
+            String key = String.valueOf(sorted);
+            List<String> value = groupMap.get(key);
+            if (value == null) {
+                value = new ArrayList<>();
+                groupMap.put(key, value);
+            }
+            value.add(str);
+        }
+        List<List<String>> result = new ArrayList<>();
+        for (List<String> val : groupMap.values()) {
+            result.add(val);
+        }
+        return result;
+    }
 
-        System.out.println(getPermutation(3, 3));
-        System.out.println(getPermutation(4, 9));
-        System.out.println(getPermutation(1, 1));
+    //50 Pow(x,n)
+    public static double myPow(double x, int n) {
+        if (n == 0) return 1;
+        if (n == 1) return x;
+        if (n == -1) return 1 / x;
+
+        double half = myPow(x, n / 2);
+        double rest = myPow(x, n % 2);
+        return half * half * rest;
+    }
+
+    //28. 实现strStr()
+    public static int strStr(String haystack, String needle) {
+        if (needle == null || needle.length() == 0) {
+            return 0;
+        }
+        if (haystack == null || haystack.length() == 0 || needle.length() > haystack.length()) {
+            return -1;
+        }
+        int l = 0;
+        int r = 0;
+        while (l < haystack.length() && r < needle.length()) {
+            if (needle.charAt(r) == haystack.charAt(l)) {
+                r++;
+                l++;
+            } else {
+                l = l - r + 1;
+                r = 0;
+            }
+        }
+        if (r == needle.length()) {
+            return l - needle.length();
+        } else {
+            return -1;
+        }
+    }
+
+    public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
 //
@@ -842,19 +891,38 @@ public class AlgorithmMananger {
 //        63.
 //        System.out.println(uniquePathsWithObstacles(new int[][]{{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}));
 
+//        60.
+//        System.out.println(getPermutation(3, 3));
+//        System.out.println(getPermutation(4, 9));
+//        System.out.println(getPermutation(1, 1));
 
-        ListNode f = new ListNode(1);
-        ListNode s = new ListNode(2);
-        ListNode t = new ListNode(4);
-        f.next = s;
-        s.next = t;
+//        21.
+//        ListNode f = new ListNode(1);
+//        ListNode s = new ListNode(2);
+//        ListNode t = new ListNode(4);
+//        f.next = s;
+//        s.next = t;
+//        ListNode f1 = new ListNode(1);
+//        ListNode s1 = new ListNode(3);
+//        ListNode t1 = new ListNode(4);
+//        f1.next = s1;
+//        s1.next = t1;
+//        ListNode result = mergeTwoLists(f, f1);
+//        System.out.println();
 
-        ListNode f1 = new ListNode(1);
-        ListNode s1 = new ListNode(3);
-        ListNode t1 = new ListNode(4);
-        f1.next = s1;
-        s1.next = t1;
-        ListNode result = mergeTwoLists(f, f1);
-        System.out.println();
+//        49.
+//        System.out.println(groupAnagrams(new String[]{}));
+
+//        50.
+//        System.out.println(myPow(2.00000d, 10));
+//        System.out.println(myPow(2.10000d, 3));
+//        System.out.println(myPow(2.00000d, -2));
+
+//        28.
+//        System.out.println(strStr("abaclallb", "ll"));
+//        System.out.println(strStr("aaaaa", "bba"));
+//        System.out.println(strStr("hello", "ll"));
+//        System.out.println(strStr("", "1"));
+//        System.out.println(strStr("aaaaaab", "aab"));
     }
 }
