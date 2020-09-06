@@ -803,6 +803,55 @@ public class AlgorithmMananger {
         }
     }
 
+    //64. 最小路径和
+    public static int minPathSum(int[][] grid) {
+        int m;
+        if ((m = grid.length) == 0) {
+            return -1;
+        }
+        int n = grid[0].length;
+        int[][] dp = new int[m][n];
+        dp[0][0] = grid[0][0];
+        for (int i = 1; i < m; i++) {
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
+        }
+        for (int j = 1; j < n; j++) {
+            dp[0][j] = dp[0][j - 1] + grid[0][j];
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(dp[i][j - 1], dp[i - 1][j]) + grid[i][j];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    //77. 组合
+    public static List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (n < k) return res;
+
+        LinkedList<Integer> select = new LinkedList<>();
+        backtraceForCombine(n, k, 1, select, res);
+        return res;
+    }
+
+    private static void backtraceForCombine(int n, int k, int start, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (select.size() == k) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+        //定义start，让选择不回头重新选择
+        for (int i = start; i <= n; i++) {
+            if (select.contains(i)) {
+                continue;
+            }
+            select.add(i);
+            backtraceForCombine(n, k, i + 1, select, res);
+            select.removeLast();
+        }
+    }
+
     public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
@@ -924,5 +973,13 @@ public class AlgorithmMananger {
 //        System.out.println(strStr("hello", "ll"));
 //        System.out.println(strStr("", "1"));
 //        System.out.println(strStr("aaaaaab", "aab"));
+
+//        64. 最小路径和
+//        System.out.println(minPathSum(new int[][]{{1,3,1},{1,5,1},{4,2,1}}));
+
+//        77. 组合
+//        System.out.println(combine(4, 2));
+//        System.out.println(combine(2, 2));
+
     }
 }
