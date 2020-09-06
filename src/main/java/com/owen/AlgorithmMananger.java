@@ -432,23 +432,6 @@ public class AlgorithmMananger {
         sb.deleteCharAt(sb.length() - 1);
     }
 
-    //78. 子集
-    public static List<List<Integer>> subsets(int[] nums) {
-        List<List<Integer>> whole = new ArrayList<>();
-        List<Integer> select = new ArrayList<>();
-        backForSubsets(nums, 0, select, whole);
-        return whole;
-    }
-
-    private static void backForSubsets(int[] nums, int start, List<Integer> select, List<List<Integer>> whole) {
-        whole.add(new ArrayList<>(select));
-        for (int i = start; i < nums.length; i++) {
-            select.add(nums[i]);
-            backForSubsets(nums, i + 1, select, whole);
-            select.remove(select.size() - 1);
-        }
-    }
-
     //19.删除链表的倒数第N个节点
     public static ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode fast = head, slow = head, pre = null;
@@ -852,6 +835,46 @@ public class AlgorithmMananger {
         }
     }
 
+    //78. 子集
+    public static List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> whole = new ArrayList<>();
+        List<Integer> select = new ArrayList<>();
+        backForSubsets(nums, 0, select, whole);
+        return whole;
+    }
+
+    private static void backForSubsets(int[] nums, int start, List<Integer> select, List<List<Integer>> whole) {
+        whole.add(new ArrayList<>(select));
+        for (int i = start; i < nums.length; i++) {
+            select.add(nums[i]);
+            backForSubsets(nums, i + 1, select, whole);
+            select.remove(select.size() - 1);
+        }
+    }
+
+    //90. 子集II
+    public static List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> whole = new ArrayList<>();
+        LinkedList<Integer> select = new LinkedList<>();
+        Arrays.sort(nums);
+        backtraceForSubsetsWithDup(nums, 0, select, whole);
+        return whole;
+
+    }
+
+    private static void backtraceForSubsetsWithDup(int[] nums, int start, LinkedList<Integer> select, List<List<Integer>> res) {
+        res.add(new ArrayList<>(select));
+        for (int i = start; i < nums.length; i++) {
+            //i>start，只对下次选择有影响，但不影响下次递归
+            if (i > start && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            select.add(nums[i]);
+            backtraceForSubsetsWithDup(nums, i + 1, select, res);
+            select.removeLast();
+        }
+    }
+
     public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
@@ -879,7 +902,7 @@ public class AlgorithmMananger {
 //        System.out.println(permute(new int[]{1,2,3}));
 //        System.out.println(generateParenthesis(0));
 //        System.out.println(solveNQueens(8));
-//        System.out.println(subsets(new int[]{1, 2, 3}));
+
 //        int[][] d = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 //        int x = 7, y = 7;
 //        for (int i = 0; i < 4; i++) {reverseList
@@ -981,5 +1004,11 @@ public class AlgorithmMananger {
 //        System.out.println(combine(4, 2));
 //        System.out.println(combine(2, 2));
 
+//        78.子集
+//        System.out.println(subsets(new int[]{1, 2, 3}));
+//        90. 子集II
+        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
+        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
+        System.out.println(subsetsWithDup(new int[]{}));
     }
 }
