@@ -155,6 +155,33 @@ public class AlgorithmMananger {
         return result;
     }
 
+    //17.电话号码的字母组合
+    public static List<String> letterCombinations(String digits) {
+        String[] choice = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        List<String> result = new ArrayList<>();
+        if (digits.length() == 0) {
+            return result;
+        }
+        StringBuilder select = new StringBuilder();
+        backtraceForLetterCombinations(choice, digits, 0, select, result);
+        return result;
+    }
+
+    private static void backtraceForLetterCombinations(String[] choice, String digits, int start, StringBuilder select, List<String> result) {
+        if (select.length() == digits.length()) {
+            result.add(select.toString());
+            return;
+        }
+
+        char[] chars = choice[digits.charAt(start) - '0'].toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            select.append(chars[i]);
+            backtraceForLetterCombinations(choice, digits, start + 1, select, result);
+            select.deleteCharAt(select.length() - 1);
+        }
+    }
+
+
     //[53]最大子序列和
     public static int maxSubArray(int[] nums) {
         int size = nums.length;
@@ -875,6 +902,26 @@ public class AlgorithmMananger {
         }
     }
 
+
+    //单调栈
+    public static int[] nextGreaterNumber(int[] data) {
+        int[] res = new int[data.length];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = data.length - 1; i >= 0; i--) {
+            while (!stack.empty() && data[i] >= stack.peek()) {
+                //不断地剔除最小值，保留栈顶最大值
+                stack.pop();
+            }
+
+            int max = stack.empty() ? -1 : stack.peek();
+            res[i] = max;
+
+            //放入每个值
+            stack.push(data[i]);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
@@ -948,6 +995,10 @@ public class AlgorithmMananger {
 //        int[][] matrix = new int[][]{{1, 2}};
 //        System.out.println(spiralOrder(matrix));
 
+//        17.
+//        letterCombinations("23");
+//        letterCombinations("");
+
 //        54.
 //        int[][] fi = new int[][]{{1, 3}, {2, 6}, {4, 5}, {7, 8}};
 //        int[][] se = new int[][]{{1, 3}, {2, 6}, {8, 10}, {15, 18}};
@@ -1007,8 +1058,11 @@ public class AlgorithmMananger {
 //        78.子集
 //        System.out.println(subsets(new int[]{1, 2, 3}));
 //        90. 子集II
-        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
-        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
-        System.out.println(subsetsWithDup(new int[]{}));
+//        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
+//        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
+//        System.out.println(subsetsWithDup(new int[]{}));
+//        单调栈
+//        nextGreaterNumber(new int[]{1, 2, 3});
+//        nextGreaterNumber(new int[]{2, 1, 2, 4, 3});
     }
 }
