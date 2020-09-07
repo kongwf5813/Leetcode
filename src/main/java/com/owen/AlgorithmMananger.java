@@ -922,7 +922,35 @@ public class AlgorithmMananger {
         return res;
     }
 
+    public static String convert(String s, int numRows) {
+        StringBuilder sb = new StringBuilder();
+
+        int index = 0, flag = -1;
+        String[] results = new String[numRows];
+        while (index != s.length()) {
+            if (index % (numRows - 1) == 0 || index % (numRows - 1) == 0) {
+                flag = -flag;
+            }
+            if (flag == -1) {
+                int real = numRows - 1 - (index % (numRows - 1));
+                results[real] = results[real] == null ? "" + s.charAt(index) : results[real] + s.charAt(index);
+            } else {
+                int real = index % (numRows - 1);
+                results[real] = results[real] == null ? "" + s.charAt(index) : results[real] + s.charAt(index);
+            }
+
+            index++;
+        }
+        for (String result : results) {
+            sb.append(result);
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
+
+        System.out.println(convert("LEETCODEISHIRING", 4));
+        System.out.println(convert("", 4));
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
 //
