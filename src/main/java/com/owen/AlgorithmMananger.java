@@ -922,21 +922,23 @@ public class AlgorithmMananger {
         return res;
     }
 
+    // Z字形变化
     public static String convert(String s, int numRows) {
         StringBuilder sb = new StringBuilder();
 
         int index = 0, flag = -1;
         String[] results = new String[numRows];
+        for (int i = 0; i < numRows; i++) results[i] = "";
         while (index != s.length()) {
-            if (index % (numRows - 1) == 0 || index % (numRows - 1) == 0) {
+            if (index % (numRows - 1) == 0) {
                 flag = -flag;
             }
             if (flag == -1) {
                 int real = numRows - 1 - (index % (numRows - 1));
-                results[real] = results[real] == null ? "" + s.charAt(index) : results[real] + s.charAt(index);
+                results[real] += s.charAt(index);
             } else {
                 int real = index % (numRows - 1);
-                results[real] = results[real] == null ? "" + s.charAt(index) : results[real] + s.charAt(index);
+                results[real] += s.charAt(index);
             }
 
             index++;
@@ -947,10 +949,22 @@ public class AlgorithmMananger {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
+    //打家劫舍
+    public static int rob(int[] nums) {
+        int size = nums.length;
+        if (size == 0) return 0;
+        if (size == 1) return nums[0];
+        int[] dp = new int[size + 1];
+        //the maximum money robbed from i to n
+        //base case
+        dp[size - 1] = nums[size - 1];
+        for (int i = nums.length - 2; i >= 0; i--) {
+            dp[i] = Math.max(nums[i] + dp[i + 2], dp[i + 1]);
+        }
+        return dp[0];
+    }
 
-        System.out.println(convert("LEETCODEISHIRING", 4));
-        System.out.println(convert("", 4));
+    public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
 //
@@ -1092,5 +1106,12 @@ public class AlgorithmMananger {
 //        单调栈
 //        nextGreaterNumber(new int[]{1, 2, 3});
 //        nextGreaterNumber(new int[]{2, 1, 2, 4, 3});
+
+//        System.out.println(convert("LEETCODEISHIRING", 4));
+//        System.out.println(convert("", 4));
+//
+//        System.out.println(rob(new int[]{1, 2, 3, 1}));
+//        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
+//        System.out.println(rob(new int[]{2, 2, 1}));
     }
 }
