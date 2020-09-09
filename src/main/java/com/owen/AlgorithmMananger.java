@@ -949,7 +949,7 @@ public class AlgorithmMananger {
         return sb.toString();
     }
 
-    //打家劫舍
+    //[198].打家劫舍
     public static int rob(int[] nums) {
         int size = nums.length;
         if (size == 0) return 0;
@@ -959,9 +959,72 @@ public class AlgorithmMananger {
         //base case
         dp[size - 1] = nums[size - 1];
         for (int i = nums.length - 2; i >= 0; i--) {
+            //选择打劫i是nums[i] + dp[i + 2]，不打劫i是dp[i + 1]
             dp[i] = Math.max(nums[i] + dp[i + 2], dp[i + 1]);
         }
         return dp[0];
+    }
+
+    //[73].矩阵置零
+    public static void setZeroes(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        //需要刷第一列
+        boolean setCol = false;
+        for (int i = 0; i < m; i++) {
+            if (matrix[i][0] == 0) {
+                setCol = true;
+            }
+            //关键点,映射到第一列上，但不能遍历第一列
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        //从[1][1]先覆盖即可
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+
+        //第一个曾经是0或者第一行曾经出现过0，覆盖掉第一行
+        if (matrix[0][0] == 0) {
+            for (int i = 1; i < n; i++) {
+                matrix[0][i] = 0;
+            }
+        }
+        //第一列曾经出现过0，覆盖掉第一列
+        if (setCol) {
+            for (int i = 0; i < m; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+    }
+
+    //[75].颜色分类
+    public static void sortColors(int[] nums) {
+        int cur = 0, start = 0, end = nums.length - 1;
+        while (cur <= end) {
+            if (nums[cur] == 2) {
+                int temp = nums[end];
+                nums[end] = nums[cur];
+                nums[cur] = temp;
+                end--;
+            } else if (nums[cur] == 1) {
+                cur++;
+            } else if (nums[cur] == 0) {
+                int temp = nums[start];
+                nums[start] = nums[cur];
+                nums[cur] = temp;
+                start++;
+                cur++;
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -1113,5 +1176,22 @@ public class AlgorithmMananger {
 //        System.out.println(rob(new int[]{1, 2, 3, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
 //        System.out.println(rob(new int[]{2, 2, 1}));
+
+//        198.打家劫舍
+//        System.out.println(rob(new int[]{2,7,9,3,1}));
+//        75.颜色分类
+//        int[] sort = new int[]{};
+//        sortColors(sort);
+//        System.out.println(Arrays.toString(sort));
+
+//        73.矩阵置零
+//        int [][] a = new int[][]{{1,1,1},{1,0,1},{1,1,1}};
+//        int [][] b = new int[][]{{0,1,2,0},{3,4,5,2},{1,3,1,5}};
+//        int [][] c = new int[][]{{1,0,1,1},{1,1,1,1},{0,1,1,1},{1,1,0,1}};
+//        int [][] d = new int[][]{{1,2,3,4},{5,0,7,8},{0,10,11,12},{13,14,15,0}};
+//        setZeroes(a);
+//        setZeroes(b);
+//        setZeroes(c);
+//        setZeroes(d);
     }
 }
