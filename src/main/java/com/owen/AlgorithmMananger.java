@@ -1027,6 +1027,51 @@ public class AlgorithmMananger {
         }
     }
 
+    //[55].跳跃游戏
+    public static boolean canJump(int[] nums) {
+        //[3,2,1,0,4]
+        // 3,3,3,3
+        int fast = 0;
+        for (int i = 0; i < nums.length - 1; i++) {
+            fast = Math.max(fast, i + nums[i]);
+            if (fast <= i) return false;
+        }
+        return true;
+    }
+
+    //[74].搜索二维矩阵
+    public static boolean searchMatrix(int[][] matrix, int target) {
+        int m = matrix.length, n = m == 0 ? 0 : matrix[0].length;
+        int start = 0, end = m * n - 1;
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
+            int i = mid / n, j = mid % n;
+            if (matrix[i][j] == target) {
+                return true;
+            } else if (matrix[i][j] > target) {
+                end = mid - 1;
+            } else {
+                start = mid + 1;
+            }
+        }
+        return false;
+    }
+
+    //[121].买卖股票的最佳时机
+    public static int maxProfit(int[] prices) {
+        int n = prices.length;
+        if (n == 0)  return 0;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //卖的最大利润(今天的利润，与昨天的利润哪个最多)
+            dp[i][0] = Math.max(dp[i - 1][1] + prices[i], dp[i - 1][0]);
+            //买的最大利润(上一天与今天亏的，哪个亏的更多)
+            dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+        }
+        return dp[n - 1][0];
+    }
     public static void main(String[] args) {
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
@@ -1193,5 +1238,17 @@ public class AlgorithmMananger {
 //        setZeroes(b);
 //        setZeroes(c);
 //        setZeroes(d);
+
+//        55.跳跃游戏
+//        System.out.println(canJump(new int[]{3, 2, 1, 0, 4}));
+
+//        74.搜索二维矩阵
+//        int[][] matrix = new int[][]{{1, 3, 5, 7}, {10, 11, 16, 20}, {23, 30, 34, 50}};
+//        System.out.println(searchMatrix(matrix, 13));
+
+//        121.买卖股票的最佳时机
+//        System.out.println(maxProfit(new int[]{2, 1, 4, 9}));
+//        System.out.println(maxProfit(new int[]{7, 4, 3, 1}));
+//        System.out.println(maxProfit(new int[]{7, 1, 5, 3, 6, 4}));
     }
 }
