@@ -170,6 +170,19 @@ public class DynamicProgramming {
         return dp[s.length() - 1];
     }
 
+    //[96].不同的二叉搜索树(卡特兰数 fn = f0*fn-1 + f1*fn-2+ ...+ fn-1*f0)
+    public static int numTrees(int n) {
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i < n + 1; i++) {
+            for (int j = 0; j < i; j++) {
+                dp[i] += dp[j] * dp[i - j - 1];
+            }
+        }
+        return dp[n];
+    }
+
     //[121].买卖股票的最佳时机
     public static int maxProfit(int[] prices) {
         int n = prices.length;
@@ -224,6 +237,12 @@ public class DynamicProgramming {
 //        System.out.println(numDecodings("226"));
 //        System.out.println(numDecodings("2360"));
 //
+//        [96].不同的二叉搜索树
+//        System.out.println(numTrees(3));
+//        System.out.println(numTrees(5));
+//        System.out.println(numTrees(2));
+//        System.out.println(numTrees(1));
+
 //        121.买卖股票的最佳时机
 //        System.out.println(maxProfit(new int[]{2, 1, 4, 9}));
 //        System.out.println(maxProfit(new int[]{7, 4, 3, 1}));

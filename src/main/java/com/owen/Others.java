@@ -1,8 +1,22 @@
 package com.owen;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Others {
+
+    public static class TreeNode {
+        int val;
+        TreeNode left;
+        TreeNode right;
+
+        TreeNode(int x) {
+            val = x;
+        }
+    }
 
     //[3]无重复子串的最长子串（双指针）
     public static int lengthOfLongestSubstring(String s) {
@@ -121,6 +135,85 @@ public class Others {
         return res;
     }
 
+    //[94] 二叉树的中序遍历(递归版本)
+    public static List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        recursionForInorder(root, res);
+        return res;
+    }
+
+    private static void recursionForInorder(TreeNode root, List<Integer> result) {
+        if (root == null) {
+            return;
+        }
+        recursionForInorder(root.left, result);
+        result.add(root.val);
+        recursionForInorder(root.right, result);
+    }
+
+    //[98].验证二叉搜索树
+    public static boolean isValidBST(TreeNode root) {
+        AtomicLong preMax = new AtomicLong(Long.MIN_VALUE);
+        return dfsForBST(root, preMax);
+    }
+
+    private static boolean dfsForBST(TreeNode root, AtomicLong preMax) {
+        if (root == null) return true;
+        if (!dfsForBST(root.left, preMax)) {
+            return false;
+        }
+        //访问当前节点：如果当前节点小于等于中序遍历的前一个节点
+        if (root.val <= preMax.get()) {
+            return false;
+        }
+        preMax.set(root.val);
+        return dfsForBST(root.right, preMax);
+    }
+
+    //[94].二叉树的中序遍历(迭代版本)
+    public static List<Integer> inorderTraversalV2(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            //一直遍历访问左节点，压栈操作
+            if (cur != null) {
+                stack.add(cur);
+                cur = cur.left;
+            } else {
+                //已经没有左节点了，把根返回，并且遍历右节点，压栈操作
+                cur = stack.pop();
+                res.add(cur.val);
+                cur = cur.right;
+            }
+        }
+        return res;
+    }
+
+    //[102]二叉树的层序遍历
+    public static List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedBlockingQueue<>();
+        if (root != null) {
+            queue.add(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> layer = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                if (cur.left != null) {
+                    queue.add(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.add(cur.right);
+                }
+                layer.add(cur.val);
+            }
+            res.add(layer);
+        }
+        return res;
+    }
 
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
@@ -156,5 +249,46 @@ public class Others {
 //        单调栈
 //        nextGreaterNumber(new int[]{1, 2, 3});
 //        nextGreaterNumber(new int[]{2, 1, 2, 4, 3});
+//
+//        [94] 二叉树的中序遍历
+//        TreeNode root = new TreeNode(1);
+//        TreeNode r1 = new TreeNode(2);
+//        TreeNode r2 = new TreeNode(3);
+//        root.right = r1;
+//        r1.left = r2;
+//        System.out.println(inorderTraversal(root));
+//        System.out.println(inorderTraversalV2(root));
+//
+//        [98].验证二叉搜索树
+//        TreeNode root = new TreeNode(5);
+//        TreeNode l1 = new TreeNode(1);
+//        TreeNode r1 = new TreeNode(4);
+//        TreeNode r2 = new TreeNode(3);
+//        TreeNode r3 = new TreeNode(6);
+//        root.left = l1;
+//        root.right = r1;
+//        r1.left = r2;
+//        r1.right = r3;
+//        System.out.println(isValidBST(root));
+//        TreeNode root = new TreeNode(4);
+//        TreeNode l1 = new TreeNode(1);
+//        TreeNode l2 = new TreeNode(5);
+//        TreeNode r1 = new TreeNode(6);
+//        root.left = l1;
+//        l1.right = l2;
+//        root.right = r1;
+//        System.out.println(isValidBST(root));
+
+//        102.二叉树的层序遍历
+//        TreeNode root = new TreeNode(3);
+//        TreeNode l1 = new TreeNode(9);
+//        TreeNode r1 = new TreeNode(20);
+//        TreeNode r2 = new TreeNode(15);
+//        TreeNode r3 = new TreeNode(7);
+//        root.left = l1;
+//        root.right = r1;
+//        r1.left = r2;
+//        r1.right = r3;
+//        System.out.println(levelOrder(root));
     }
 }

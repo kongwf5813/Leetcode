@@ -137,6 +137,35 @@ public class BackTrace {
         }
     }
 
+    //[40].组合总和II
+    public static List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) return res;
+        Arrays.sort(candidates);
+        LinkedList<Integer> path = new LinkedList<>();
+        backForcombinationSum2(candidates, 0, target, res, path);
+        return res;
+    }
+
+    private static void backForcombinationSum2(int[] candidates, int start, int target, List<List<Integer>> res, LinkedList<Integer> path) {
+        if (target == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = start; i < candidates.length; i++) {
+            if (i > start && candidates[i] == candidates[i - 1]) {
+                continue;
+            }
+            if (candidates[i] > target) {
+                continue;
+            }
+            path.add(candidates[i]);
+            backForcombinationSum2(candidates, i + 1, target - candidates[i], res, path);
+            path.removeLast();
+        }
+    }
+
     //[46]全排列
     public static List<List<Integer>> permute(int[] nums) {
         List<List<Integer>> res = new LinkedList<>();
@@ -364,6 +393,35 @@ public class BackTrace {
         return false;
     }
 
+    //[89].格雷编码
+    public static List<Integer> grayCode(int n) {
+        boolean[] visited = new boolean[1<<n];
+        LinkedList<Integer> select = new LinkedList<>();
+        dfsForGrayCode(0, n, visited, select);
+        return select;
+    }
+
+    private static boolean dfsForGrayCode(int cur, int n, boolean[] visited, LinkedList<Integer> select) {
+        if (select.size() == 1 << n) {
+            return true;
+        }
+
+        select.add(cur);
+        visited[cur] = true;
+
+        for (int i = 0; i < n; i++) {
+            //选择下一个值，用异或生成一个合法值
+            int next = cur ^ (1 << i);
+            if (!visited[next] && dfsForGrayCode(next, n, visited, select)) {
+                return true;
+            }
+        }
+//        可以被注释掉，因为只要找到一个解就可以了
+//        visited[cur] = false;
+//        select.removeLast();
+        return false;
+    }
+
     //90. 子集II
     public static List<List<Integer>> subsetsWithDup(int[] nums) {
         List<List<Integer>> whole = new ArrayList<>();
@@ -397,6 +455,10 @@ public class BackTrace {
 //
 //        [39].组合总和
 //        combinationSum(new int[]{2, 3, 6, 7}, 7);
+
+//        [40].组合总和II
+//        combinationSum2(new int[]{10,1,2,7,6,1,5}, 8);
+//        combinationSum2(new int[]{2,5,2,1,2}, 5);
 //
 //        [46]全排列
 //        System.out.println(permute(new int[]{1, 2, 3}));
@@ -422,6 +484,11 @@ public class BackTrace {
 //        System.out.println(exist(board, "SEE"));
 //        char[][] board2 = new char[][]{{'A'}};
 //        System.out.println(exist(board2, "A"));
+//
+//        [89].格雷编码
+//        System.out.println(grayCode(4));
+//        System.out.println(grayCode(3));
+//        System.out.println(grayCode(0));
 //
 //        90. 子集II
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));

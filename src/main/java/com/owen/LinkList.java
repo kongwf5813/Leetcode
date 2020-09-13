@@ -145,6 +145,43 @@ public class LinkList {
         return slow;
     }
 
+    //[86].分隔链表
+    public static ListNode partition(ListNode head, int x) {
+        ListNode dummyMinHead = new ListNode(Integer.MIN_VALUE), min = dummyMinHead, dummyMaxHead = null, cur = head, preMax = null;
+        while (cur != null) {
+            ListNode next = cur.next;
+            if (cur.val < x) {
+                if (min == dummyMinHead) {
+                    //刚开始就给小链表
+                    dummyMinHead.next = cur;
+                    //min通过这个指针移动
+                    min = cur;
+                } else {
+                    min.next = cur;
+                    min = min.next;
+                }
+                //max通过这个指针移动，将链表粘起来
+                if (preMax != null) {
+                    preMax.next = next;
+                }
+            } else {
+                //如果有大链表，则给头
+                if (dummyMaxHead == null) {
+                    dummyMaxHead = cur;
+                }
+                //max通过这个指针移动
+                preMax = cur;
+            }
+            cur = next;
+        }
+
+        if (dummyMaxHead != null) {
+            //粘到小链表尾部
+            min.next = dummyMaxHead;
+        }
+        return dummyMinHead.next;
+    }
+
     //[92].反转链表II
     public static ListNode reverseBetween(ListNode head, int m, int n) {
         ListNode dummyHead = new ListNode(0);
@@ -264,6 +301,32 @@ public class LinkList {
 //        four.next = five;
 //        ListNode result = swapPairs(f);
 //
+//        [86].分隔链表
+//        ListNode n1 = new ListNode(1);
+//        ListNode n2= new ListNode(4);
+//        ListNode n3 = new ListNode(3);
+//        ListNode n4 = new ListNode(2);
+//        ListNode n5 = new ListNode(5);
+//        ListNode n6 = new ListNode(2);
+//        n1.next = n2;
+//        n2.next = n3;
+//        n3.next = n4;
+//        n4.next = n5;
+//        n5.next = n6;
+//        partition(n1, 3);
+//        ListNode n1 = new ListNode(1);
+//        ListNode n2 = new ListNode(2);
+//        ListNode n3 = new ListNode(4);
+//        ListNode n4 = new ListNode(5);
+//        ListNode n5 = new ListNode(6);
+//        ListNode n6 = new ListNode(7);
+//        n1.next = n2;
+//        n2.next = n3;
+//        n3.next = n4;
+//        n4.next = n5;
+//        n5.next = n6;
+//        partition(n6, 8);
+
 //        92.反转列表
 //        ListNode f = new ListNode(1);
 //        ListNode s = new ListNode(2);
