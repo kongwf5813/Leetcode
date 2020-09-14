@@ -1,4 +1,4 @@
-package com.owen;
+package com.owen.algorithm;
 
 /**
  * Created by OKONG on 2020/9/13.
