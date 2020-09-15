@@ -1,4 +1,4 @@
-package com.owen;
+package com.owen.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
