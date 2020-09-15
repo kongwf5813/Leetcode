@@ -1,9 +1,7 @@
 package com.owen;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Others {
@@ -190,6 +188,29 @@ public class Others {
         return res;
     }
 
+    //[100]相同的树
+    public static boolean isSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p.val != q.val) return false;
+        return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    }
+
+    //[101]对称二叉树
+    public static boolean isSymmetric(TreeNode root) {
+        if (root == null) return true;
+        return isSymmetric(root.left, root.right);
+    }
+
+    private static boolean isSymmetric(TreeNode left, TreeNode right) {
+        if (left == null && right == null) return true;
+        if (left == null && right != null) return false;
+        if (left != null && right == null) return false;
+        if (left.val != right.val) return false;
+        return isSymmetric(left.left, right.right) && isSymmetric(left.right, right.left);
+    }
+
     //[102]二叉树的层序遍历
     public static List<List<Integer>> levelOrder(TreeNode root) {
         List<List<Integer>> res = new ArrayList<>();
@@ -213,6 +234,53 @@ public class Others {
             res.add(layer);
         }
         return res;
+    }
+
+    //[103].二叉树的锯齿形层次遍历
+    public static List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        boolean flag = true;
+        List<List<Integer>> res = new ArrayList<>();
+        Stack<TreeNode> queue = new Stack<>();
+        if (root != null) {
+            queue.add(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> layer = new ArrayList<>();
+            List<TreeNode> temp = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.pop();
+                layer.add(cur.val);
+                if (flag) {
+                    if (cur.left != null) {
+                        temp.add(cur.left);
+                    }
+                    if (cur.right != null) {
+                        temp.add(cur.right);
+                    }
+                } else {
+                    if (cur.right != null) {
+                        temp.add(cur.right);
+                    }
+                    if (cur.left != null) {
+                        temp.add(cur.left);
+                    }
+                }
+            }
+            for (TreeNode node : temp) {
+                queue.add(node);
+            }
+            flag = !flag;
+            res.add(layer);
+        }
+        return res;
+    }
+
+    //[104].二叉树的最大深度
+    public static int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        if (root.left == null && root.right == null) return 1;
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
     public static void main(String[] args) {
@@ -278,7 +346,36 @@ public class Others {
 //        l1.right = l2;
 //        root.right = r1;
 //        System.out.println(isValidBST(root));
-
+//
+//        [100].相同的树
+//        TreeNode one = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode l2 = new TreeNode(3);
+//        TreeNode two = new TreeNode(1);
+//        TreeNode r1 = new TreeNode(3);
+//        TreeNode r2 = new TreeNode(2);
+//        one.left = l1;
+//        one.right = l2;
+//        two.left = r1;
+//        two.right = r2;
+//        System.out.println(isSameTree(one, two));
+//
+//        [101].对称的二叉树
+//        TreeNode one = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(2);
+//        TreeNode l2 = new TreeNode(3);
+//        TreeNode l3 = new TreeNode(4);
+//        TreeNode r2 = new TreeNode(4);
+//        TreeNode r3 = new TreeNode(3);
+//        one.left = l1;
+//        one.right = r1;
+//        l1.left = l2;
+//        l1.right = l3;
+//        r1.left = r2;
+//        r1.right = r3;
+//        System.out.println(isSymmetric(one));
+//
 //        102.二叉树的层序遍历
 //        TreeNode root = new TreeNode(3);
 //        TreeNode l1 = new TreeNode(9);
@@ -290,5 +387,36 @@ public class Others {
 //        r1.left = r2;
 //        r1.right = r3;
 //        System.out.println(levelOrder(root));
+//        [103].二叉树的锯齿形层次遍历
+//        TreeNode root = new TreeNode(3);
+//        TreeNode l1 = new TreeNode(9);
+//        TreeNode l2 = new TreeNode(8);
+//        TreeNode l22 = new TreeNode(18);
+//        TreeNode r1 = new TreeNode(20);
+//        TreeNode r2 = new TreeNode(15);
+//        TreeNode r21 = new TreeNode(6);
+//        TreeNode r22 = new TreeNode(22);
+//        TreeNode r3 = new TreeNode(7);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.left = l2;
+//        l2.left = l22;
+//        r1.left = r2;
+//        r1.right = r3;
+//        r2.left = r21;
+//        r2.right = r22;
+//        System.out.println(zigzagLevelOrder(root));
+
+//        104.二叉树的最大深度
+//        TreeNode root = new TreeNode(3);
+//        TreeNode l1 = new TreeNode(9);
+//        TreeNode r1 = new TreeNode(20);
+//        TreeNode r2 = new TreeNode(15);
+//        TreeNode r3 = new TreeNode(7);
+//        root.left = l1;
+//        root.right = r1;
+//        r1.left = r2;
+//        r1.right = r3;
+//        System.out.println(maxDepth(root));
     }
 }
