@@ -7,11 +7,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Others {
 
     public static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
+        public int val;
+        public TreeNode left;
+        public TreeNode right;
 
-        TreeNode(int x) {
+        public TreeNode(int x) {
             val = x;
         }
     }
@@ -283,6 +283,54 @@ public class Others {
         return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
+    //[114].二叉树展开为链表
+    public static void flatten(TreeNode root) {
+        if (root == null) return;
+
+        flatten(root.left);
+        flatten(root.right);
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        //左变右
+        root.left = null;
+        root.right = left;
+
+        //老右粘到新右
+        TreeNode p = root;
+        while (p.right != null) {
+            p = p.right;
+        }
+        p.right = right;
+    }
+
+    //[129].求根到叶子节点的数字之和
+    public static int sumNumbers(TreeNode root) {
+        return count(root, 0);
+    }
+
+    private static int count(TreeNode root, int pre) {
+        if (root == null) return 0;
+        int value = pre * 10 + root.val;
+        //当为叶子节点都为空的时候，需要返回自己的值
+        if (root.left == null && root.right == null) return value;
+        return count(root .left, value) + count(root.right, value);
+    }
+
+    //[226].翻转二叉树
+    public static TreeNode invertTree(TreeNode root) {
+        if (root == null) return null;
+
+        TreeNode temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+
+        invertTree(root.left);
+        invertTree(root.right);
+        return root;
+    }
+
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
 //        System.out.println(lengthOfLongestSubstring("dvdf"));
@@ -418,5 +466,47 @@ public class Others {
 //        r1.left = r2;
 //        r1.right = r3;
 //        System.out.println(maxDepth(root));
+
+//        [114].二叉树展开为链表
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(5);
+//        TreeNode l11 = new TreeNode(3);
+//        TreeNode l12 = new TreeNode(4);
+//        TreeNode r11 = new TreeNode(6);
+//        root.left = l1;
+//        root.right = r1;
+//        r1.right = r11;
+//        l1.left = l11;
+//        l1.right = l12;
+//        flatten(root);
+//
+//        [129].求根到叶子节点的数字之和
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(5);
+//        TreeNode l11 = new TreeNode(3);
+//        TreeNode l12 = new TreeNode(4);
+//        TreeNode r11 = new TreeNode(6);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.left = l11;
+//        l1.right = l12;
+//        r1.right = r11;
+//        System.out.println(sumNumbers(root));
+//
+//        [226].翻转二叉树
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(5);
+//        TreeNode l11 = new TreeNode(3);
+//        TreeNode l12 = new TreeNode(4);
+//        TreeNode r11 = new TreeNode(6);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.left = l11;
+//        l1.right = l12;
+//        r1.right = r11;
+//        TreeNode result = invertTree(root);
     }
 }
