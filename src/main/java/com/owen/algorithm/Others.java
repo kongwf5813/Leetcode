@@ -283,6 +283,31 @@ public class Others {
         return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
+    //[107].二叉树的层次遍历II
+    public static List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedBlockingQueue<>();
+        if (root != null) {
+            queue.add(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> layer = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                if (cur.left != null) {
+                    queue.add(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.add(cur.right);
+                }
+                layer.add(cur.val);
+            }
+            res.add(0, layer);
+        }
+        return res;
+    }
+
     //[114].二叉树展开为链表
     public static void flatten(TreeNode root) {
         if (root == null) return;
@@ -315,7 +340,7 @@ public class Others {
         int value = pre * 10 + root.val;
         //当为叶子节点都为空的时候，需要返回自己的值
         if (root.left == null && root.right == null) return value;
-        return count(root .left, value) + count(root.right, value);
+        return count(root.left, value) + count(root.right, value);
     }
 
     //[226].翻转二叉树
