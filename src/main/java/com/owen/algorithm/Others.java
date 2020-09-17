@@ -16,6 +16,23 @@ public class Others {
         }
     }
 
+    public class ListNode {
+       public int val;
+       public ListNode next;
+
+        public ListNode() {
+        }
+
+        public ListNode(int val) {
+            this.val = val;
+        }
+
+        public ListNode(int val, ListNode next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
     //[3]无重复子串的最长子串（双指针）
     public static int lengthOfLongestSubstring(String s) {
         //滑动窗口
@@ -308,6 +325,40 @@ public class Others {
         return res;
     }
 
+    //[108].将有序数组转换为二叉搜索树
+    public static TreeNode sortedArrayToBST(int[] nums) {
+        return dfsForSortedArray(nums, 0, nums.length - 1);
+    }
+
+    private static TreeNode dfsForSortedArray(int[] nums, int lo, int hi) {
+        if (lo > hi) {
+            return null;
+        }
+        int mid = lo + (hi - lo) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = dfsForSortedArray(nums, lo, mid - 1);
+        root.right = dfsForSortedArray(nums, mid + 1, hi);
+        return root;
+    }
+
+    //[109].有序链表转换为二叉搜索树
+    public static TreeNode sortedListToBST(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head, fast = head, pre = null;
+        while(fast != null && fast.next != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        TreeNode root = new TreeNode(slow.val);
+        if (pre == null) return root;
+
+        pre.next = null;
+        root.left = sortedListToBST(head);
+        root.right = sortedListToBST(slow.next);
+        return root;
+    }
+
     //[114].二叉树展开为链表
     public static void flatten(TreeNode root) {
         if (root == null) return;
@@ -354,6 +405,16 @@ public class Others {
         invertTree(root.left);
         invertTree(root.right);
         return root;
+    }
+
+    //[876]链表的中间结点
+    public static ListNode middleNode(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
     }
 
     public static void main(String[] args) {
