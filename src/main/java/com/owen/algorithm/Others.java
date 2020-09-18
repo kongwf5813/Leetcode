@@ -17,8 +17,8 @@ public class Others {
     }
 
     public class ListNode {
-       public int val;
-       public ListNode next;
+        public int val;
+        public ListNode next;
 
         public ListNode() {
         }
@@ -300,6 +300,56 @@ public class Others {
         return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
+    //[105].从前序与中序遍历构造二叉树
+    public static TreeNode buildTree(int[] preorder, int[] inorder) {
+        int pLen = preorder.length;
+        int iLen = inorder.length;
+        if (pLen != iLen) return null;
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree(preorder, 0, pLen - 1, inorder, 0, iLen - 1, indexMap);
+    }
+
+    private static TreeNode dfsForBuildTree(int[] preorder, int ps, int pe, int[] indorder, int is, int ie, Map<Integer, Integer> indexMap) {
+        if (ps > pe || is > ie) {
+            return null;
+        }
+        int val = preorder[ps];
+        TreeNode root = new TreeNode(val);
+        int pIndex = indexMap.get(val);
+        TreeNode left = dfsForBuildTree(preorder, ps + 1, pIndex - is + ps, indorder, is, pIndex - 1, indexMap);
+        TreeNode right = dfsForBuildTree(preorder, pIndex - is + ps + 1, pe, indorder, pIndex + 1, ie, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[106].从中序与后续遍历序列构造二叉树
+    public static TreeNode buildTree2(int[] inorder, int[] postorder) {
+        int iLen = inorder.length;
+        int pLen = postorder.length;
+        if (pLen != iLen) return null;
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree2(inorder, 0, iLen - 1, postorder, 0, pLen - 1, indexMap);
+    }
+
+    private static TreeNode dfsForBuildTree2(int[] inorder, int is, int ie, int[] postorder, int ps, int pe, Map<Integer, Integer> indexMap) {
+        if (is > ie || ps > pe) return null;
+        int val = postorder[pe];
+        TreeNode root = new TreeNode(val);
+        int pIndex = indexMap.get(val);
+        TreeNode left = dfsForBuildTree2(inorder, is, pIndex - 1, postorder, ps, pIndex - 1 - is + ps, indexMap);
+        TreeNode right = dfsForBuildTree2(inorder, pIndex + 1, ie, postorder, pIndex - is + ps, pe - 1, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
     //[107].二叉树的层次遍历II
     public static List<List<Integer>> levelOrderBottom(TreeNode root) {
         List<List<Integer>> res = new ArrayList<>();
@@ -345,7 +395,7 @@ public class Others {
     public static TreeNode sortedListToBST(ListNode head) {
         if (head == null) return null;
         ListNode slow = head, fast = head, pre = null;
-        while(fast != null && fast.next != null) {
+        while (fast != null && fast.next != null) {
             pre = slow;
             slow = slow.next;
             fast = fast.next.next;
@@ -521,6 +571,7 @@ public class Others {
 //        r1.left = r2;
 //        r1.right = r3;
 //        System.out.println(levelOrder(root));
+//
 //        [103].二叉树的锯齿形层次遍历
 //        TreeNode root = new TreeNode(3);
 //        TreeNode l1 = new TreeNode(9);
@@ -540,7 +591,7 @@ public class Others {
 //        r2.left = r21;
 //        r2.right = r22;
 //        System.out.println(zigzagLevelOrder(root));
-
+//
 //        104.二叉树的最大深度
 //        TreeNode root = new TreeNode(3);
 //        TreeNode l1 = new TreeNode(9);
@@ -552,7 +603,13 @@ public class Others {
 //        r1.left = r2;
 //        r1.right = r3;
 //        System.out.println(maxDepth(root));
-
+//
+//        [105].从前序与中序遍历构造二叉树
+//        TreeNode result = buildTree(new int[]{3, 9, 20, 15, 7}, new int[]{9, 3, 15, 20, 7});
+//
+//        [106].从中序与后序遍历构造二叉树
+//        TreeNode result = buildTree2(new int[]{9, 3, 15, 20, 7}, new int[]{9, 15, 7, 20, 3});
+//
 //        [114].二叉树展开为链表
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
