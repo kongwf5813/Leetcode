@@ -33,6 +33,27 @@ public class Others {
         }
     }
 
+    public class Node {
+        public int val;
+        public Node left;
+        public Node right;
+        public Node next;
+
+        public Node() {
+        }
+
+        public Node(int _val) {
+            val = _val;
+        }
+
+        public Node(int _val, Node _left, Node _right, Node _next) {
+            val = _val;
+            left = _left;
+            right = _right;
+            next = _next;
+        }
+    }
+
     //[3]无重复子串的最长子串（双指针）
     public static int lengthOfLongestSubstring(String s) {
         //滑动窗口
@@ -409,6 +430,31 @@ public class Others {
         return root;
     }
 
+    //[113].路径总和II
+    public static List<List<Integer>> pathSum(TreeNode root, int sum) {
+        LinkedList<Integer> select = new LinkedList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForPathSum(root, sum, select, res);
+        return res;
+    }
+
+    private static void dfsForPathSum(TreeNode root, int sum, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (root == null) {
+            return;
+        }
+
+        select.add(root.val);
+
+        //因为左右字节点都为空时才可以判定结束，所以结束条件后置。
+        if (root.val == sum && root.left == null && root.right == null) {
+            res.add(new ArrayList<>(select));
+            //不能有return,否则会少删除一个值。
+        }
+        dfsForPathSum(root.left, sum - root.val, select, res);
+        dfsForPathSum(root.right, sum - root.val, select, res);
+        select.removeLast();
+    }
+
     //[114].二叉树展开为链表
     public static void flatten(TreeNode root) {
         if (root == null) return;
@@ -431,6 +477,52 @@ public class Others {
         p.right = right;
     }
 
+    //[116].填充每个节点的下一个右侧节点指针
+    public static Node connect(Node root) {
+        if (root == null) return null;
+        dfsForConnect(root.left, root.right);
+        return root;
+    }
+
+    private static void dfsForConnect(Node left, Node right) {
+        if (left == null || right == null) return;
+        left.next = right;
+        dfsForConnect(left.left, left.right);
+        dfsForConnect(right.left, right.right);
+        dfsForConnect(left.right, right.left);
+    }
+
+    //[117].填充每个节点的下一个右侧节点指针II
+    public static Node connect2(Node root) {
+        if (root == null) return null;
+        dfsForConnect2(root, null);
+        return root;
+    }
+
+    private static void dfsForConnect2(Node left, Node right) {
+        if (left != null) {
+            left.next = right;
+            Node nextRight = null, next = right;
+            while (next != null) {
+                if (next.left != null) {
+                    nextRight = next.left;
+                    break;
+                }
+                if (next.right != null) {
+                    nextRight = next.right;
+                    break;
+                }
+                next = next.next;
+            }
+            if (left.right != null) {
+                dfsForConnect2(left.right, nextRight);
+                dfsForConnect2(left.left, left.right);
+            } else {
+                dfsForConnect2(left.left, nextRight);
+            }
+        }
+    }
+
     //[129].求根到叶子节点的数字之和
     public static int sumNumbers(TreeNode root) {
         return count(root, 0);
@@ -442,6 +534,28 @@ public class Others {
         //当为叶子节点都为空的时候，需要返回自己的值
         if (root.left == null && root.right == null) return value;
         return count(root.left, value) + count(root.right, value);
+    }
+
+    //[136]只出现一次的数字
+    public static int singleNumber(int[] nums) {
+        int res = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            res ^= nums[i];
+        }
+        return res;
+    }
+
+    //[137]只出现一次的数字II
+    public static int singleNumber2(int[] nums) {
+        int res = 0;
+        for (int i = 0; i < 32; i++) {
+            int bit = 0;
+            for (int j = 0; j < nums.length; j++) {
+                bit += (nums[j] >>> i) & 1;
+            }
+            res |= (bit % 3) << i;
+        }
+        return res;
     }
 
     //[226].翻转二叉树
@@ -610,6 +724,28 @@ public class Others {
 //        [106].从中序与后序遍历构造二叉树
 //        TreeNode result = buildTree2(new int[]{9, 3, 15, 20, 7}, new int[]{9, 15, 7, 20, 3});
 //
+//        [113].路径总和II
+//        TreeNode root = new TreeNode(5);
+//        TreeNode l1 = new TreeNode(4);
+//        TreeNode r1 = new TreeNode(8);
+//        TreeNode l2 = new TreeNode(11);
+//        TreeNode l3 = new TreeNode(7);
+//        TreeNode l4 = new TreeNode(2);
+//        TreeNode r2 = new TreeNode(13);
+//        TreeNode r3 = new TreeNode(4);
+//        TreeNode r4 = new TreeNode(5);
+//        TreeNode r5 = new TreeNode(1);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.left = l2;
+//        l2.left = l3;
+//        l2.right = l4;
+//        r1.left = r2;
+//        r1.right = r3;
+//        r3.left = r4;
+//        r3.right = r5;
+//        System.out.println(pathSum(root, 22));
+//
 //        [114].二叉树展开为链表
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -637,6 +773,10 @@ public class Others {
 //        l1.right = l12;
 //        r1.right = r11;
 //        System.out.println(sumNumbers(root));
+//
+//        [137]只出现一次的数字II
+//        System.out.println(singleNumber2(new int[]{0,1,0,1,0,1,99}));
+//        System.out.println(singleNumber2(new int[]{99}));
 //
 //        [226].翻转二叉树
 //        TreeNode root = new TreeNode(1);

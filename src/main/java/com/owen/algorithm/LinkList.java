@@ -201,6 +201,61 @@ public class LinkList {
         return dummyHead.next;
     }
 
+    //[141]环形链表
+    public static boolean hasCycle(ListNode head) {
+        if (head == null) return false;
+        ListNode slow = head, fast = head;
+        while(fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+    //[142]环形链表II
+    public static ListNode detectCycle(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head, fast = head;
+        while(fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) break;
+        }
+        //说明无环
+        if(fast == null || fast.next == null) return null;
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+
+    //[143].重排链表
+    public static void reorderList(ListNode head) {
+        if (head == null) return;
+        ListNode slow = head, fast = head, mid = null;
+        while (fast != null && fast.next != null) {
+            mid = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        if (fast != null) {
+            mid = slow;
+        }
+        ListNode q = reverseList(mid.next);
+        mid.next = null;
+        ListNode p = head;
+        while (q != null) {
+            ListNode qN = q.next;
+            ListNode pN = p.next;
+            q.next = pN;
+            p.next = q;
+            q = qN;
+            p = pN;
+        }
+    }
+
     //206. 反转链表迭代
     public static ListNode reverse(ListNode start, ListNode end) {
         //注意一定要三个节点，否则可能死循环
@@ -223,6 +278,7 @@ public class LinkList {
 
         ListNode last = reverseList(head.next);
         head.next.next = head;
+        //断链呀
         head.next = null;
         return last;
     }
@@ -340,5 +396,20 @@ public class LinkList {
 //
 //        ListNode a = reverseBetween(f, 1, 1);
 //        ListNode b = reverseBetween(f, 2, 4);
+
+        ListNode f = new ListNode(1);
+        ListNode s = new ListNode(2);
+        ListNode t = new ListNode(3);
+        ListNode four = new ListNode(4);
+        ListNode five = new ListNode(5);
+//        f.next = s;
+//        s.next = t;
+//        t.next = four;
+//        four.next = five;
+        reorderList(f);
+        System.out.println();
+
+        ListNode result = detectCycle(f);
+        System.out.println();
     }
 }

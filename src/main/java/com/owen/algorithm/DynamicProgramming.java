@@ -1,5 +1,9 @@
 package com.owen.algorithm;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by OKONG on 2020/9/13.
  */
@@ -183,6 +187,32 @@ public class DynamicProgramming {
         return dp[n];
     }
 
+    //[120]三角形最小路径和
+    public static int minimumTotal(List<List<Integer>> triangle) {
+        int m = triangle.size();
+        int[] dp = new int[m];
+        dp[0] = triangle.get(0).get(0);
+        int pre = 0, cur;
+        for (int i = 1; i < m; i++) {
+            for (int j = 0; j <= i; j++) {
+                cur = dp[j];
+                if (j == 0) {
+                    dp[j] = cur + triangle.get(i).get(j);
+                } else if (j == i) {
+                    dp[j] = pre + triangle.get(i).get(j);
+                } else {
+                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
+                }
+                pre = cur;
+            }
+        }
+        int res = dp[0];
+        for (int i = 1; i < m; i++) {
+            res = Math.min(res, dp[i]);
+        }
+        return res;
+    }
+
     //[121].买卖股票的最佳时机
     public static int maxProfit(int[] prices) {
         int n = prices.length;
@@ -242,6 +272,14 @@ public class DynamicProgramming {
 //        System.out.println(numTrees(5));
 //        System.out.println(numTrees(2));
 //        System.out.println(numTrees(1));
+
+        List<List<Integer>> triangle = new ArrayList<>();
+        triangle.add(Arrays.asList(2));
+        triangle.add(Arrays.asList(3, 4));
+        triangle.add(Arrays.asList(6, 5, 7));
+        triangle.add(Arrays.asList(4, 1, 8, 3));
+
+        System.out.println(minimumTotal(triangle));
 
 //        121.买卖股票的最佳时机
 //        System.out.println(maxProfit(new int[]{2, 1, 4, 9}));
