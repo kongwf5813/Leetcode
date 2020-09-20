@@ -16,7 +16,7 @@ public class Others {
         }
     }
 
-    public class ListNode {
+    public static class ListNode {
         public int val;
         public ListNode next;
 
@@ -33,11 +33,12 @@ public class Others {
         }
     }
 
-    public class Node {
+    public static class Node {
         public int val;
         public Node left;
         public Node right;
         public Node next;
+        public Node random;
 
         public Node() {
         }
@@ -214,7 +215,7 @@ public class Others {
         while (cur != null || !stack.isEmpty()) {
             //一直遍历访问左节点，压栈操作
             if (cur != null) {
-                stack.add(cur);
+                stack.push(cur);
                 cur = cur.left;
             } else {
                 //已经没有左节点了，把根返回，并且遍历右节点，压栈操作
@@ -224,6 +225,78 @@ public class Others {
             }
         }
         return res;
+    }
+
+    //[144].二叉树的前序遍历(迭代)
+    public static List<Integer> preorderTraversalV2(TreeNode root) {
+        Stack<TreeNode> stack = new Stack<>();
+        List<Integer> res = new ArrayList<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            //先pop
+            TreeNode top = stack.pop();
+            res.add(top.val);
+            if (top.right != null) {
+                stack.push(top.right);
+            }
+            if (top.left != null) {
+                stack.push(top.left);
+            }
+        }
+        return res;
+    }
+
+    //[145].二叉树的后序遍历(迭代)
+    public static List<Integer> postorderTraversalV2(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                stack.push(cur);
+                //先访问根
+                res.add(0, cur.val);
+                //再访问右
+                cur = cur.right;
+            } else {
+                //最后访问左
+                cur = stack.pop();
+                cur = cur.left;
+            }
+        }
+        return res;
+    }
+
+    //[144].二叉树的前序遍历(递归)
+    public static List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        dfsForPreorder(root, res);
+        return res;
+    }
+
+    private static void dfsForPreorder(TreeNode root, List<Integer> res) {
+        if (root == null) {
+            return;
+        }
+        res.add(root.val);
+        dfsForPreorder(root.left, res);
+        dfsForPreorder(root.right, res);
+    }
+
+    //[145].二叉树的后序遍历(递归)
+    public static List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        dfsForPostorder(root, res);
+        return res;
+    }
+
+    private static void dfsForPostorder(TreeNode root, List<Integer> res) {
+        if (root == null) {
+            return;
+        }
+        dfsForPostorder(root.left, res);
+        dfsForPostorder(root.right, res);
+        res.add(root.val);
     }
 
     //[100]相同的树
@@ -558,6 +631,59 @@ public class Others {
         return res;
     }
 
+    //[138]复制带随机指针的链表
+    public static Node copyRandomList(Node head) {
+        Map<Node, Node> newMap = new HashMap<>();
+        Node cur = head;
+        while (cur != null) {
+            Node newOne = new Node(cur.val);
+            newMap.put(cur, newOne);
+            cur = cur.next;
+        }
+        cur = head;
+        while (cur != null) {
+            Node newOne = newMap.get(cur);
+            Node newLink = newMap.get(cur.random);
+            newOne.next = newMap.get(cur.next);
+            newOne.random = newLink;
+            cur = cur.next;
+        }
+        return newMap.get(head);
+    }
+
+    //[146].LRU缓存机制
+    public static class LRUCache {
+        LinkedHashMap<Integer, Integer> cache = new LinkedHashMap<>();
+        int size;
+
+        public LRUCache(int capacity) {
+            this.size = capacity;
+        }
+
+        public int get(int key) {
+            if (!cache.containsKey(key)) {
+                return -1;
+            }
+            Integer value = cache.get(key);
+            cache.remove(key);
+            cache.put(key, value);
+            return value;
+        }
+
+        public void put(int key, int value) {
+            if (cache.containsKey(key)) {
+                cache.remove(key);
+                cache.put(key, value);
+                return;
+            }
+
+            if (cache.size() >= this.size) {
+                cache.remove(cache.keySet().iterator().next());
+            }
+            cache.put(key, value);
+        }
+    }
+
     //[226].翻转二叉树
     public static TreeNode invertTree(TreeNode root) {
         if (root == null) return null;
@@ -778,6 +904,42 @@ public class Others {
 //        System.out.println(singleNumber2(new int[]{0,1,0,1,0,1,99}));
 //        System.out.println(singleNumber2(new int[]{99}));
 //
+//        [138].复制带随机指针的链表
+//        Node o = new Node(7);
+//        Node t = new Node(13);
+//        Node t1 = new Node(11);
+//        Node f = new Node(10);
+//        Node s = new Node(1);
+//        o.next = t;
+//        t.next = t1;
+//        t1.next = f;
+//        f.next = s;
+//        t.random = o;
+//        t1.random = s;
+//        f.random = t1;
+//        s.random = o;
+//        Node x = copyRandomList(o);
+//
+//        [144].二叉树的前序遍历
+//        TreeNode root = new TreeNode(1);
+//        TreeNode r1 = new TreeNode(2);
+//        TreeNode r2 = new TreeNode(3);
+//        root.right = r1;
+//        r1.left = r2;
+//        System.out.println(preorderTraversalV2(root));
+//
+//        [146].LRU缓存机制
+//        LRUCache cache = new LRUCache(2 /* 缓存容量 */);
+//        cache.put(1, 1);
+//        cache.put(2, 2);
+//        System.out.println(cache.get(1));       // 返回  1
+//        cache.put(3, 3);    // 该操作会使得关键字 2 作废
+//        System.out.println(cache.get(2));       // 返回 -1 (未找到)
+//        cache.put(4, 4);    // 该操作会使得关键字 1 作废
+//        System.out.println(cache.get(1));       // 返回 -1 (未找到)
+//        System.out.println(cache.get(3));       // 返回  3
+//        System.out.println(cache.get(4));       // 返回  4
+
 //        [226].翻转二叉树
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);

@@ -395,7 +395,7 @@ public class BackTrace {
 
     //[89].格雷编码
     public static List<Integer> grayCode(int n) {
-        boolean[] visited = new boolean[1<<n];
+        boolean[] visited = new boolean[1 << n];
         LinkedList<Integer> select = new LinkedList<>();
         dfsForGrayCode(0, n, visited, select);
         return select;
@@ -444,6 +444,39 @@ public class BackTrace {
             select.removeLast();
         }
     }
+
+    //[131]分割回文串
+    public static List<List<String>> partition(String s) {
+        int size = s.length();
+        boolean[][] dp = new boolean[size][size];
+        for (int i = 0; i < size; i++) {
+            dp[i][i] = true;
+        }
+        for (int i = size - 2; i >= 0; i--) {
+            for (int j = i + 1; j <= size - 1; j++) {
+                dp[i][j] = (s.charAt(i) == s.charAt(j)) && (j - i < 3 || dp[i + 1][j - 1]);
+            }
+        }
+
+        LinkedList<String> path = new LinkedList<>();
+        List<List<String>> res = new ArrayList<>();
+        backtraceForPartition(s, 0, path, res, dp);
+        return res;
+    }
+
+    private static void backtraceForPartition(String s, int start, LinkedList<String> path, List<List<String>> res, boolean[][] dp) {
+        if (start == s.length()) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = start; i < s.length(); i++) {
+            if (!dp[start][i]) continue;
+            path.add(s.substring(start, i + 1));
+            backtraceForPartition(s, i + 1, path, res, dp);
+            path.removeLast();
+        }
+    }
+
 
     public static void main(String[] args) {
 //        17.电话号码的字母组合
@@ -494,6 +527,10 @@ public class BackTrace {
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
 //        System.out.println(subsetsWithDup(new int[]{}));
-
+//
+//        [131].分割回文串
+//        System.out.println(partition("aba"));
+//        System.out.println(partition("aab"));
+//        System.out.println(partition("aabbaacbc"));
     }
 }

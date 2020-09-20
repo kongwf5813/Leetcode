@@ -229,6 +229,20 @@ public class DynamicProgramming {
         return dp[n - 1][0];
     }
 
+    //[139].单词拆分
+    public static boolean wordBreak(String s, List<String> wordDict) {
+        //dp[i] 前i个是否能拆分
+        boolean[] dp = new boolean[s.length() + 1];
+        dp[0] = true;
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = i - 1; j >= 0; j--) {
+                dp[i] = dp[j] & wordDict.contains(s.substring(j, i));
+                if (dp[i]) break;
+            }
+        }
+        return dp[s.length()];
+    }
+
     //[198].打家劫舍
     public static int rob(int[] nums) {
         int size = nums.length;
@@ -272,20 +286,22 @@ public class DynamicProgramming {
 //        System.out.println(numTrees(5));
 //        System.out.println(numTrees(2));
 //        System.out.println(numTrees(1));
-
-        List<List<Integer>> triangle = new ArrayList<>();
-        triangle.add(Arrays.asList(2));
-        triangle.add(Arrays.asList(3, 4));
-        triangle.add(Arrays.asList(6, 5, 7));
-        triangle.add(Arrays.asList(4, 1, 8, 3));
-
-        System.out.println(minimumTotal(triangle));
+//
+//        [120].三角形最小路径和
+//        List<List<Integer>> triangle = new ArrayList<>();
+//        triangle.add(Arrays.asList(2));
+//        triangle.add(Arrays.asList(3, 4));
+//        triangle.add(Arrays.asList(6, 5, 7));
+//        triangle.add(Arrays.asList(4, 1, 8, 3));
+//        System.out.println(minimumTotal(triangle));
 
 //        121.买卖股票的最佳时机
 //        System.out.println(maxProfit(new int[]{2, 1, 4, 9}));
 //        System.out.println(maxProfit(new int[]{7, 4, 3, 1}));
 //        System.out.println(maxProfit(new int[]{7, 1, 5, 3, 6, 4}));
 //
+//        [139].单词拆分
+        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
 //        198.打家劫舍
 //        System.out.println(rob(new int[]{1, 2, 3, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
