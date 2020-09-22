@@ -684,6 +684,29 @@ public class Others {
         }
     }
 
+    //[150].逆波兰表达式求值
+    public static int evalRPN(String[] tokens) {
+        Stack<String> stack = new Stack<>();
+        for (String token : tokens) {
+            if (token.equals("+") || token.equals("-") || token.equals("*") || token.equals("/")) {
+                Integer lastNumber = Integer.parseInt(stack.pop());
+                Integer firstNumber = Integer.parseInt(stack.pop());
+                if (token.equals("+")) {
+                    stack.push("" + (firstNumber + lastNumber));
+                } else if (token.equals("-")) {
+                    stack.push("" + (firstNumber - lastNumber));
+                } else if (token.equals("*")) {
+                    stack.push("" + (firstNumber * lastNumber));
+                } else {
+                    stack.push("" + (firstNumber / lastNumber));
+                }
+            } else {
+                stack.push(token);
+            }
+        }
+        return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
+    }
+
     //[226].翻转二叉树
     public static TreeNode invertTree(TreeNode root) {
         if (root == null) return null;
