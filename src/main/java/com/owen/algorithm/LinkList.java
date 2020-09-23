@@ -205,24 +205,25 @@ public class LinkList {
     public static boolean hasCycle(ListNode head) {
         if (head == null) return false;
         ListNode slow = head, fast = head;
-        while(fast != null && fast.next != null) {
+        while (fast != null && fast.next != null) {
             fast = fast.next.next;
             slow = slow.next;
             if (slow == fast) return true;
         }
         return false;
     }
+
     //[142]环形链表II
     public static ListNode detectCycle(ListNode head) {
         if (head == null) return null;
         ListNode slow = head, fast = head;
-        while(fast != null && fast.next != null) {
+        while (fast != null && fast.next != null) {
             fast = fast.next.next;
             slow = slow.next;
             if (slow == fast) break;
         }
         //说明无环
-        if(fast == null || fast.next == null) return null;
+        if (fast == null || fast.next == null) return null;
         slow = head;
         while (slow != fast) {
             slow = slow.next;
@@ -254,6 +255,31 @@ public class LinkList {
             q = qN;
             p = pN;
         }
+    }
+
+    //[147].对链表进行插入排序
+    public static ListNode insertionSortList(ListNode head) {
+        ListNode dummyHead = new ListNode(Integer.MIN_VALUE);
+        ListNode f = head;
+        while (f != null) {
+            ListNode s = dummyHead;
+            while (s.val < f.val) {
+                if (s.next != null) {
+                    if ( s.next.val > f.val) {
+                        break;
+                    }
+                    s = s.next;
+                } else {
+                    break;
+                }
+            }
+            ListNode fastNext = f.next;
+            ListNode slowNext = s.next;
+            f.next = slowNext;
+            s.next = f;
+            f = fastNext;
+        }
+        return dummyHead.next;
     }
 
     //206. 反转链表迭代
@@ -397,19 +423,33 @@ public class LinkList {
 //        ListNode a = reverseBetween(f, 1, 1);
 //        ListNode b = reverseBetween(f, 2, 4);
 
-        ListNode f = new ListNode(1);
-        ListNode s = new ListNode(2);
-        ListNode t = new ListNode(3);
-        ListNode four = new ListNode(4);
-        ListNode five = new ListNode(5);
+//        [143].重排链表
+//        ListNode f = new ListNode(1);
+//        ListNode s = new ListNode(2);
+//        ListNode t = new ListNode(3);
+//        ListNode four = new ListNode(4);
+//        ListNode five = new ListNode(5);
 //        f.next = s;
 //        s.next = t;
 //        t.next = four;
 //        four.next = five;
-        reorderList(f);
-        System.out.println();
+//        reorderList(f);
+//
+//        [142]环形链表II
+//        ListNode result = detectCycle(f);
 
-        ListNode result = detectCycle(f);
+//        [147].对链表进行插入排序
+//        -1->5->3->4->0
+        ListNode f = new ListNode(-1);
+        ListNode s = new ListNode(5);
+        ListNode t = new ListNode(3);
+        ListNode four = new ListNode(4);
+        ListNode fiv = new ListNode(0);
+        f.next = s;
+        s.next = t;
+        t.next = four;
+        four.next = fiv;
+        ListNode result = insertionSortList(f);
         System.out.println();
     }
 }
