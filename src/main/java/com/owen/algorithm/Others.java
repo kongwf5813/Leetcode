@@ -39,6 +39,7 @@ public class Others {
         public Node right;
         public Node next;
         public Node random;
+        public List<Node> neighbors;
 
         public Node() {
         }
@@ -684,6 +685,42 @@ public class Others {
         }
     }
 
+    public static Node cloneGraph(Node node) {
+        if (node == null) return null;
+        Node head = new Node(node.val);
+        Map<Node, Node> map = new HashMap<>();
+        Map<Node, Boolean> visited = new HashMap<>();
+        map.put(node, head);
+
+        Queue<Node> que = new ArrayDeque<>();
+        que.add(node);
+        while (!que.isEmpty()) {
+            int size = que.size();
+            for (int i = 0; i < size; i++) {
+                Node top = que.poll();
+                if (Boolean.TRUE.equals(visited.get(top))) {
+                    continue;
+                }
+
+                visited.put(top, Boolean.TRUE);
+                map.putIfAbsent(top, new Node(top.val));
+
+                Node copy = map.get(top);
+                if (top.neighbors != null) {
+                    List<Node> copyNeighbors = new ArrayList<>();
+                    for (Node neigh : top.neighbors) {
+                        map.putIfAbsent(neigh, new Node(neigh.val));
+
+                        copyNeighbors.add(map.get(neigh));
+                        que.add(neigh);
+                    }
+                    copy.neighbors = copyNeighbors;
+                }
+            }
+        }
+        return head;
+    }
+
     //[150].逆波兰表达式求值
     public static int evalRPN(String[] tokens) {
         Stack<String> stack = new Stack<>();
@@ -963,6 +1000,17 @@ public class Others {
 //        System.out.println(cache.get(3));       // 返回  3
 //        System.out.println(cache.get(4));       // 返回  4
 
+
+        Node f1 = new Node(1);
+        Node f2 = new Node(2);
+        Node f3 = new Node(3);
+        Node f4 = new Node(4);
+        f1.neighbors = Arrays.asList(f2, f4);
+        f2.neighbors = Arrays.asList(f1, f3);
+        f3.neighbors = Arrays.asList(f2, f4);
+        f4.neighbors = Arrays.asList(f1, f3);
+
+        Node res = cloneGraph(f1);
 //        [226].翻转二叉树
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
