@@ -596,6 +596,50 @@ public class Others {
         }
     }
 
+    //[127].单词接龙
+    public static int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        if (!wordList.contains(endWord)) return 0;
+        Queue<String> q1 = new ArrayDeque<>();
+        q1.add(beginWord);
+        Set<String> visited = new HashSet<>();
+        visited.add(beginWord);
+        int res = 1;
+        while (!q1.isEmpty()) {
+            int size = q1.size();
+            for (int i = 0; i < size; i++) {
+                String selected = q1.poll();
+                for (String word : wordList) {
+                    if (visited.contains(word)) {
+                        continue;
+                    }
+                    if (!canConvert(selected, word)) {
+                        continue;
+                    }
+                    if (word.equals(endWord)) {
+                        return res + 1;
+                    }
+                    q1.offer(word);
+                    visited.add(word);
+                }
+            }
+            res += 1;
+        }
+        return 0;
+    }
+
+    private static boolean canConvert(String source, String target) {
+        if (source.length() != target.length()) return false;
+        char[] sChars = source.toCharArray();
+        char[] tChars = target.toCharArray();
+        int difCount = 0;
+        for (int i = 0; i < source.length(); i++) {
+            if (sChars[i] != tChars[i]) {
+                difCount += 1;
+            }
+        }
+        return difCount == 1;
+    }
+
     //[129].求根到叶子节点的数字之和
     public static int sumNumbers(TreeNode root) {
         return count(root, 0);
@@ -705,6 +749,66 @@ public class Others {
             }
         }
         return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
+    }
+
+    //[151].翻转字符串里的单词
+    public static String reverseWords(String s) {
+        String words[] = s.trim().split("[\\s\\u00A0]+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            sb.insert(0, word + ' ');
+        }
+        if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+
+    //[165].比较版本号
+    public static int compareVersion(String version1, String version2) {
+        String[] ves1 = version1.split("\\.");
+        String[] ves2 = version2.split("\\.");
+        int maxLen = Math.max(ves1.length, ves2.length);
+        for (int i = 0; i < maxLen; i++) {
+            int v1 = i > ves1.length - 1 ? 0 : Integer.parseInt(ves1[i]);
+            int v2 = i > ves2.length - 1 ? 0 : Integer.parseInt(ves2[i]);
+            if (v1 > v2) {
+                return 1;
+            } else if (v1 < v2) {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    //[166].分数到小数
+    public static String fractionToDecimal(int numerator, int denominator) {
+        if (numerator == 0) return "0";
+        StringBuilder sb = new StringBuilder();
+        if (numerator < 0 ^ denominator < 0) {
+            sb.append('-');
+        }
+        long num = Math.abs(Long.valueOf(numerator));
+        long div = Math.abs(Long.valueOf(denominator));
+        sb.append(num / div);
+        long remain = num % div;
+        if (remain == 0)
+            return sb.toString();
+
+        sb.append('.');
+        HashMap<Long, Integer> remainPos = new HashMap<>();
+        while (remain != 0) {
+            if (remainPos.containsKey(remain)) {
+                int pos = remainPos.get(remain);
+                sb.insert(pos, '(');
+                sb.append(')');
+                break;
+            } else {
+                remainPos.put(remain, sb.length());
+                num = remain * 10;
+                sb.append(num / div);
+                remain = num % div;
+            }
+        }
+        return sb.toString();
     }
 
     //[226].翻转二叉树
@@ -909,6 +1013,8 @@ public class Others {
 //        l1.right = l12;
 //        flatten(root);
 //
+        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log")));
+        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log", "cog")));
 //        [129].求根到叶子节点的数字之和
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -951,6 +1057,10 @@ public class Others {
 //        r1.left = r2;
 //        System.out.println(preorderTraversalV2(root));
 //
+//        [151]翻转字符串里的单词
+//        System.out.println(reverseWords("a good   example"));
+//        System.out.println(reverseWords("  hello world!  "));
+//
 //        [146].LRU缓存机制
 //        LRUCache cache = new LRUCache(2 /* 缓存容量 */);
 //        cache.put(1, 1);
@@ -963,6 +1073,12 @@ public class Others {
 //        System.out.println(cache.get(3));       // 返回  3
 //        System.out.println(cache.get(4));       // 返回  4
 
+//        System.out.println(compareVersion("0.1", "1.1"));
+//        System.out.println(compareVersion("1.0.1", "1"));
+//        System.out.println(compareVersion("1.01", "1.001"));
+
+        System.out.println(fractionToDecimal(-4, 17));
+        System.out.println(fractionToDecimal(2, 3));
 //        [226].翻转二叉树
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);

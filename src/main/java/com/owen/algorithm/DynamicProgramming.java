@@ -243,6 +243,29 @@ public class DynamicProgramming {
         return dp[s.length()];
     }
 
+    //[152].乘积最大子数组
+    public static int maxProduct(int[] nums) {
+        int size = nums.length;
+        //dp[i][0] 表示最大值， dp[i][1]表示最小值
+        int[][] dp = new int[size][2];
+        dp[0][0] = nums[0];
+        dp[0][1] = nums[0];
+        int max = nums[0];
+        for (int i = 1; i < size; i++) {
+            if (nums[i] > 0) {
+                dp[i][0] = Math.max(dp[i - 1][0] * nums[i], nums[i]);
+                dp[i][1] = Math.min(dp[i - 1][1] * nums[i], nums[i]);
+            } else {
+                //上一次的最小值可能是负数 * 负数 = 最大值
+                dp[i][0] = Math.max(dp[i - 1][1] * nums[i], nums[i]);
+                //上一次的最大值可能是正数 * 负数 = 最小值
+                dp[i][1] = Math.min(dp[i - 1][0] * nums[i], nums[i]);
+            }
+            max = Math.max(dp[i][0], max);
+        }
+        return max;
+    }
+
     //[198].打家劫舍
     public static int rob(int[] nums) {
         int size = nums.length;
@@ -301,7 +324,12 @@ public class DynamicProgramming {
 //        System.out.println(maxProfit(new int[]{7, 1, 5, 3, 6, 4}));
 //
 //        [139].单词拆分
-        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
+//        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
+//
+//        [152].乘积最大子数组
+//        System.out.println(maxProduct(new int[]{2,3,-2,4}));
+//        System.out.println(maxProduct(new int[]{2,3,0,4}));
+//
 //        198.打家劫舍
 //        System.out.println(rob(new int[]{1, 2, 3, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
