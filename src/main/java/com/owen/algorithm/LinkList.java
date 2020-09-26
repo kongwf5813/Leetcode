@@ -282,6 +282,46 @@ public class LinkList {
         return dummyHead.next;
     }
 
+    //[148].排序链表
+    public static ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode slow = head, fast = head, pre = null;
+        while (fast != null && fast.next != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        pre.next = null;
+        ListNode left = sortList(head);
+        ListNode right = sortList(slow);
+        return merge(left, right);
+    }
+
+    private static ListNode merge(ListNode first, ListNode second) {
+        ListNode dummyHead = new ListNode(-1);
+        ListNode p = first, q = second, cur = dummyHead;
+        while (p != null && q != null) {
+            if (p.val < q.val) {
+                cur.next = p;
+                p = p.next;
+            } else {
+                cur.next = q;
+                q = q.next;
+            }
+            cur = cur.next;
+        }
+
+        if (p != null) {
+            cur.next = p;
+        }
+        if (q != null) {
+            cur.next = q;
+        }
+        return dummyHead.next;
+    }
+
     //206. 反转链表迭代
     public static ListNode reverse(ListNode start, ListNode end) {
         //注意一定要三个节点，否则可能死循环
@@ -440,16 +480,29 @@ public class LinkList {
 
 //        [147].对链表进行插入排序
 //        -1->5->3->4->0
-        ListNode f = new ListNode(-1);
-        ListNode s = new ListNode(5);
-        ListNode t = new ListNode(3);
-        ListNode four = new ListNode(4);
-        ListNode fiv = new ListNode(0);
-        f.next = s;
-        s.next = t;
-        t.next = four;
-        four.next = fiv;
-        ListNode result = insertionSortList(f);
-        System.out.println();
+//        ListNode f = new ListNode(-1);
+//        ListNode s = new ListNode(5);
+//        ListNode t = new ListNode(3);
+//        ListNode four = new ListNode(4);
+//        ListNode fiv = new ListNode(0);
+//        f.next = s;
+//        s.next = t;
+//        t.next = four;
+//        four.next = fiv;
+//        ListNode result = insertionSortList(f);
+
+//        [148].排序链表
+//        ListNode f = new ListNode(-1);
+//        ListNode f1 = new ListNode(5);
+//        ListNode f2 = new ListNode(3);
+//        ListNode f3 = new ListNode(4);
+//        ListNode f4 = new ListNode(0);
+//        ListNode f5 = new ListNode(7);
+//        f.next = f1;
+//        f1.next = f2;
+//        f2.next = f3;
+//        f3.next = f4;
+//        f4.next = f5;
+//        ListNode result = sortList(f);
     }
 }
