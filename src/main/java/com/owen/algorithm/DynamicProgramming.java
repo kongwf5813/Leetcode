@@ -282,6 +282,31 @@ public class DynamicProgramming {
         return dp[0];
     }
 
+
+    //[221].最大正方形
+    public static int maximalSquare(char[][] matrix) {
+        int row = matrix.length;
+        if (row == 0) return 0;
+
+        int col = matrix[0].length;
+        //dp[i][j]为(0,0) -> (i,j)的最大边长
+        int[][] dp = new int[row][col];
+        int maxSide = 0;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i - 1][j - 1], dp[i][j - 1])) + 1;
+                    }
+                    maxSide = Math.max(dp[i][j], maxSide);
+                }
+            }
+        }
+        return maxSide * maxSide;
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -335,6 +360,13 @@ public class DynamicProgramming {
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
 //        System.out.println(rob(new int[]{2, 2, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
+
+        char[][] area = new char[][]{{'1', '0', '1', '0', '0'}, {'1', '0', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'1', '0', '0', '1', '0'}};
+        System.out.println(maximalSquare(area));
+        //1 0 1 0 0
+//1 0 1 1 1
+//1 1 1 1 1
+//1 0 0 1 0
     }
 
 }

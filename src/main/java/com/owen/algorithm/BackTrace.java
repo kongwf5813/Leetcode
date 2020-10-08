@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -477,6 +478,30 @@ public class BackTrace {
         }
     }
 
+    //[216]组合总数III
+    public static List<List<Integer>> combinationSum3(int k, int n) {
+        LinkedList<Integer> select = new LinkedList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        if (n < 0) return res;
+        backForCombinationSum3(select, res, 1, k, n);
+        return res;
+    }
+
+    private static void backForCombinationSum3(LinkedList<Integer> select, List<List<Integer>> res, int start, int k, int target) {
+        //k是多个元素，n是总数等于几，选择1～9
+        if (k == select.size()) {
+            if (target == 0) {
+                res.add(new ArrayList<>(select));
+            }
+            return;
+        }
+
+        for (int i = start; i <= 9; i++) {
+            select.add(i);
+            backForCombinationSum3(select, res, i + 1, k, target - i);
+            select.removeLast();
+        }
+    }
 
     public static void main(String[] args) {
 //        17.电话号码的字母组合
@@ -532,5 +557,11 @@ public class BackTrace {
 //        System.out.println(partition("aba"));
 //        System.out.println(partition("aab"));
 //        System.out.println(partition("aabbaacbc"));
+
+        System.out.println(combinationSum3(3, 9));
+        System.out.println(combinationSum3(3, 7));
+        System.out.println(combinationSum3(3, 1));
+        System.out.println(combinationSum3(1, -1));
+
     }
 }

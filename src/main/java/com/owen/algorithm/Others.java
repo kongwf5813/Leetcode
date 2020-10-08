@@ -1,7 +1,9 @@
 package com.owen.algorithm;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Others {
@@ -728,6 +730,47 @@ public class Others {
             cache.put(key, value);
         }
     }
+
+    //[130].被围绕的区域
+    public static void solve(char[][] board) {
+        if (board.length == 0 || board[0].length == 0) return;
+        for (int i = 0; i < board.length; i++) {
+            dfsForSolve(board, i, 0);
+            dfsForSolve(board, i, board[0].length - 1);
+        }
+
+        for (int i = 0; i < board[0].length; i++) {
+            dfsForSolve(board, 0, i);
+            dfsForSolve(board, board.length - 1, i);
+        }
+
+        //边缘的0先变成#，再变成0，而内部的0，变成X
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] == '#') {
+                    board[i][j] = 'O';
+                } else if (board[i][j] == 'O') {
+                    board[i][j] = 'X';
+                }
+            }
+        }
+    }
+
+    private static void dfsForSolve(char[][] board, int i, int j) {
+        //一定要加#的判断，否则导致剪支失败
+        if (i < 0 || i > board.length - 1
+                || j < 0 || j > board[0].length - 1
+                || board[i][j] == 'X'
+                || board[i][j] == '#') {
+            return;
+        }
+        board[i][j] = '#';
+        dfsForSolve(board, i + 1, j);
+        dfsForSolve(board, i - 1, j);
+        dfsForSolve(board, i, j + 1);
+        dfsForSolve(board, i, j - 1);
+    }
+
     //[131]克隆图
     public static Node cloneGraph(Node node) {
         if (node == null) return null;
@@ -848,6 +891,272 @@ public class Others {
         return sb.toString();
     }
 
+    //[199]二叉树的右视图
+    public static List<Integer> rightSideView(TreeNode root) {
+        Queue<TreeNode> queue = new ArrayDeque<>();
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode top = queue.poll();
+                //每一层的最后一个
+                if (i == size - 1) {
+                    res.add(top.val);
+                }
+
+                if (top.left != null) {
+                    queue.add(top.left);
+                }
+                if (top.right != null) {
+                    queue.add(top.right);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[200].岛屿的数量
+    public static int numIslands(char[][] grid) {
+        int res = 0;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == '1') {
+                    dfsForNumIslands(grid, i, j);
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    private static void dfsForNumIslands(char[][] grid, int i, int j) {
+        if (i < 0 || i > grid.length - 1 || j < 0 || j > grid[0].length - 1 || grid[i][j] == '0') {
+            return;
+        }
+        grid[i][j] = '0';
+
+        dfsForNumIslands(grid, i + 1, j);
+        dfsForNumIslands(grid, i - 1, j);
+        dfsForNumIslands(grid, i, j + 1);
+        dfsForNumIslands(grid, i, j - 1);
+    }
+
+    //[201].数字范围按位与
+    public static int rangeBitwiseAnd(int m, int n) {
+        int count = 0;
+        while (m < n) {
+            count++;
+            m >>= 1;
+            n >>= 1;
+        }
+        return m << count;
+    }
+
+    //[208].实现Trie(前缀树)
+    public static class Trie {
+        boolean isEnd;
+        Trie[] next;
+
+        /**
+         * Initialize your data structure here.
+         */
+        public Trie() {
+            next = new Trie[26];
+            isEnd = false;
+        }
+
+        /**
+         * Inserts a word into the trie.
+         */
+        public void insert(String word) {
+            Trie root = this;
+            char[] chars = word.toCharArray();
+            for (char single : chars) {
+                int index = single - 'a';
+                Trie next = root.next[index];
+                if (next == null) {
+                    next = new Trie();
+                    root.next[index] = next;
+                }
+                root = next;
+            }
+            root.isEnd = true;
+        }
+
+        /**
+         * Returns if the word is in the trie.
+         */
+        public boolean search(String word) {
+            char[] chars = word.toCharArray();
+            Trie root = this;
+            for (char single : chars) {
+                int index = single - 'a';
+                Trie next = root.next[index];
+                if (next == null) {
+                    return false;
+                }
+                root = next;
+            }
+            return root.isEnd;
+        }
+
+        /**
+         * Returns if there is any word in the trie that starts with the given prefix.
+         */
+        public boolean startsWith(String prefix) {
+            char[] chars = prefix.toCharArray();
+            Trie root = this;
+            for (char single : chars) {
+                int index = single - 'a';
+                Trie next = root.next[index];
+                if (next == null) {
+                    return false;
+                }
+                root = next;
+            }
+            return true;
+        }
+    }
+
+    //[222].完全二叉树的节点个数
+    public static int countNodes(TreeNode root) {
+        if (root == null) return 0;
+
+        int leftLevel = countLevel(root.left);
+        int rightLevel = countLevel(root.right);
+
+        if (leftLevel == rightLevel) {
+            return countNodes(root.right) + (1 << leftLevel);
+        } else {
+            return countNodes(root.left) + (1 << rightLevel);
+        }
+    }
+
+    private static int countLevel(TreeNode root) {
+        if (root == null) return 0;
+        int level = 0;
+        while (root != null) {
+            level++;
+            //最左边的节点就是层高
+            root = root.left;
+        }
+        return level;
+    }
+
+    //[223].矩形面积
+    public static int computeArea(int A, int B, int C, int D, int E, int F, int G, int H) {
+        int area1 = (C - A) * (D - B);
+        int area2 = (G - E) * (H - F);
+        //不相交
+        if (E > C || A > G || F > D || B > H) {
+            return area1 + area2;
+        }
+
+        int dupWidth = Math.min(C, G) - Math.max(A, E);
+        int dupHeight = Math.min(D, H) - Math.max(B, F);
+        return area1 + area2 - dupHeight * dupWidth;
+    }
+
+    //[224].基本计算器
+    public static int calculate(String s) {
+        return dfsForCalculate(s.trim().toCharArray(), new AtomicInteger());
+    }
+
+    private static int dfsForCalculate(char[] chars, AtomicInteger index) {
+        Stack<Integer> stack = new Stack<>();
+        int num = 0;
+        char sign = '+';
+        for (; index.get() < chars.length; index.incrementAndGet()) {
+            char ch = chars[index.get()];
+            if (ch == ' ') {
+                continue;
+            }
+
+            boolean isDig = '0' <= ch && ch <= '9';
+            if (isDig) {
+                num = num * 10 + (ch - '0');
+            }
+
+            //递归计算
+            if (ch == '(') {
+                index.incrementAndGet();
+                num = dfsForCalculate(chars, index);
+            }
+
+            if (!isDig || index.get() == chars.length - 1) {
+                switch (sign) {
+                    case '+':
+                        stack.push(num);
+                        break;
+                    case '-':
+                        stack.push(-num);
+                        break;
+                }
+                sign = ch;
+                num = 0;
+            }
+
+            //递归结束计算
+            if (ch == ')') {
+                break;
+            }
+        }
+
+        int res = 0;
+        while (!stack.isEmpty()) {
+            res += stack.pop();
+        }
+        return res;
+    }
+
+    //[225].队列实现栈
+    class MyStack {
+
+        Queue<Integer> queue;
+
+        /**
+         * Initialize your data structure here.
+         */
+        public MyStack() {
+            queue = new LinkedList<>();
+        }
+
+        /**
+         * Push element x onto stack.
+         */
+        public void push(int x) {
+            int size = queue.size();
+            queue.offer(x);
+            for (int i = 0; i < size; i++) {
+                queue.offer(queue.poll());
+            }
+        }
+
+        /**
+         * Removes the element on top of the stack and returns that element.
+         */
+        public int pop() {
+            return queue.poll();
+        }
+
+        /**
+         * Get the top element.
+         */
+        public int top() {
+            return queue.peek();
+        }
+
+        /**
+         * Returns whether the stack is empty.
+         */
+        public boolean empty() {
+            return queue.isEmpty();
+        }
+    }
+
     //[226].翻转二叉树
     public static TreeNode invertTree(TreeNode root) {
         if (root == null) return null;
@@ -859,6 +1168,253 @@ public class Others {
         invertTree(root.left);
         invertTree(root.right);
         return root;
+    }
+
+    //[227].基本计算器II
+    public static int calculate2(String s) {
+        char[] arr = s.trim().toCharArray();
+        Stack<Integer> stack = new Stack<>();
+        int num = 0;
+        char preSign = '+';
+        for (int i = 0; i < arr.length; i++) {
+            char single = arr[i];
+            if (single == ' ') {
+                continue;
+            }
+            boolean isDig = '0' <= single && single <= '9';
+            if (isDig) {
+                num = num * 10 + (single - '0');
+            }
+
+            if (!isDig || i == arr.length - 1) {
+                switch (preSign) {
+                    case '+':
+                        stack.push(num);
+                        break;
+                    case '-':
+                        stack.push(-num);
+                        break;
+                    case '*':
+                        stack.push(stack.pop() * num);
+                        break;
+                    case '/':
+                        stack.push(stack.pop() / num);
+                        break;
+                }
+                preSign = single;
+                num = 0;
+            }
+        }
+
+        int res = 0;
+        while (!stack.isEmpty()) {
+            res += stack.pop();
+        }
+        return res;
+    }
+
+    //[230].二叉搜索数中第K小的元素
+    public static int kthSmallest(TreeNode root, int k) {
+        AtomicInteger res = new AtomicInteger();
+        dfsForKthSmallest(root, k, new AtomicInteger(0), res);
+        return res.get();
+    }
+
+    private static void dfsForKthSmallest(TreeNode root, int k, AtomicInteger count, AtomicInteger res) {
+        if (root == null) {
+            return;
+        }
+
+        dfsForKthSmallest(root.left, k, count, res);
+        if (count.incrementAndGet() == k) {
+            res.addAndGet(root.val);
+            return;
+        }
+        dfsForKthSmallest(root.right, k, count, res);
+    }
+
+    //[232].用栈实现队列
+    class MyQueue {
+
+        Stack<Integer> s1;
+        Stack<Integer> s2;
+
+        /**
+         * Initialize your data structure here.
+         */
+        public MyQueue() {
+            s1 = new Stack<>();
+            s2 = new Stack<>();
+        }
+
+        /**
+         * Push element x to the back of queue.
+         */
+        public void push(int x) {
+            while (!s1.isEmpty()) {
+                s2.push(s1.pop());
+            }
+            s1.push(x);
+            while (!s2.isEmpty()) {
+                s1.push(s2.pop());
+            }
+        }
+
+        /**
+         * Removes the element from in front of queue and returns that element.
+         */
+        public int pop() {
+            return s1.pop();
+        }
+
+        /**
+         * Get the front element.
+         */
+        public int peek() {
+            return s1.peek();
+        }
+
+        /**
+         * Returns whether the queue is empty.
+         */
+        public boolean empty() {
+            return s1.isEmpty();
+        }
+    }
+
+    //[235].二叉搜索数的最近公共祖先
+    public static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root.val > p.val && root.val > q.val) return lowestCommonAncestor(root.left, p, q);
+        else if (root.val < p.val && root.val < q.val)
+            return lowestCommonAncestor(root.right, p, q);
+        else return root;
+    }
+
+    //[236].二叉树的最近公共祖先
+    public static TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null || root == p || root == q) return root;
+        TreeNode left = lowestCommonAncestor2(root.left, p, q);
+        TreeNode right = lowestCommonAncestor2(root.right, p, q);
+        if (left == null) return right;
+        if (right == null) return left;
+        return root;
+    }
+
+    //[241].为运算表达式设计优先级
+    public static List<Integer> diffWaysToCompute(String input) {
+        return dfsForDiffWaysToCompute(input, new HashMap<>());
+    }
+
+    private static List<Integer> dfsForDiffWaysToCompute(String input, Map<String, List<Integer>> map) {
+        if (map.containsKey(input)) {
+            return map.get(input);
+        }
+
+        List<Integer> res = new ArrayList<>();
+        char[] chars = input.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
+            //开始分治
+            if (ch == '+' || ch == '-' || ch == '*') {
+                //递归调用左边的运算式子
+                List<Integer> left = dfsForDiffWaysToCompute(input.substring(0, i), map);
+                //递归调用右边的运算式子
+                List<Integer> right = dfsForDiffWaysToCompute(input.substring(i + 1), map);
+                for (int l : left) {
+                    for (int r : right) {
+                        if (ch == '+') {
+                            res.add(l + r);
+                        } else if (ch == '-') {
+                            res.add(l - r);
+                        } else {
+                            res.add(l * r);
+                        }
+                    }
+                }
+            }
+        }
+
+        //意味着全是数字
+        if (res.size() == 0) {
+            res.add(Integer.parseInt(input));
+        }
+
+        map.put(input, res);
+        return res;
+    }
+
+    //[257].二叉树的所有路径
+    public static List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        dfsForBinaryTreePaths(res, "", root);
+        return res;
+    }
+
+    private static void dfsForBinaryTreePaths(List<String> res, String path, TreeNode root) {
+        if (root == null) {
+            return;
+        }
+
+        path += root.val + "->";
+        //左右字节点都为空才是叶子节点
+        if (root.left == null && root.right == null) {
+            res.add(path.substring(0, path.length() - 2));
+            return;
+        }
+        dfsForBinaryTreePaths(res, path, root.left);
+        dfsForBinaryTreePaths(res, path, root.right);
+    }
+
+    //[260].只出现一次的数字III
+    public static int[] singleNumber3(int[] nums) {
+        int xor = 0;
+        for (int num : nums) {
+            xor ^= num;
+        }
+        //因为是异或，最低位上的1，肯定表示某一位是不相同的，分成两个组，各自异或一次
+        int mask = xor & (-xor);
+        int res1 = 0;
+        int res2 = 0;
+        for (int num : nums) {
+            if ((num & mask) == 0) {
+                res1 ^= num;
+            } else {
+                res2 ^= num;
+            }
+        }
+        return new int[]{res1, res2};
+    }
+
+    //[263].丑数
+    public static boolean isUgly(int num) {
+        if (num < 1) return false;
+        int remain = num;
+        while (remain != 1) {
+            if (remain % 2 == 0) {
+                remain /= 2;
+            } else if (remain % 3 == 0) {
+                remain /= 3;
+            } else if (remain % 5 == 0) {
+                remain /= 5;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[264].丑数II
+    public static int nthUglyNumber(int n) {
+        int p2 = 0, p3 = 0, p5 = 0;
+        int[] dp = new int[n];
+        dp[0] = 1;
+        for (int i = 1; i < n; i++) {
+            dp[i] = Math.min(dp[p2] * 2, Math.min(dp[p3] * 3, dp[p5] * 5));
+            if (dp[i] == dp[p2] * 2) p2++;
+            if (dp[i] == dp[p3] * 3) p3++;
+            if (dp[i] == dp[p5] * 5) p5++;
+        }
+        return dp[n - 1];
     }
 
     //[876]链表的中间结点
@@ -1050,8 +1606,9 @@ public class Others {
 //        l1.right = l12;
 //        flatten(root);
 //
-        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log")));
-        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log", "cog")));
+//        [127].单词接龙
+//        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log")));
+//        System.out.println(ladderLength("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log", "cog")));
 //        [129].求根到叶子节点的数字之和
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -1065,6 +1622,11 @@ public class Others {
 //        l1.right = l12;
 //        r1.right = r11;
 //        System.out.println(sumNumbers(root));
+//
+//        [130].被围绕的区域
+//        char[][] board = new char[][]{{'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}};
+//        char[][] board2 = new char[][]{{'O'}};
+//        solve(board);
 //
 //        [137]只出现一次的数字II
 //        System.out.println(singleNumber2(new int[]{0,1,0,1,0,1,99}));
@@ -1109,14 +1671,17 @@ public class Others {
 //        System.out.println(cache.get(1));       // 返回 -1 (未找到)
 //        System.out.println(cache.get(3));       // 返回  3
 //        System.out.println(cache.get(4));       // 返回  4
-
+//
+//        [165].比较版本号
 //        System.out.println(compareVersion("0.1", "1.1"));
 //        System.out.println(compareVersion("1.0.1", "1"));
 //        System.out.println(compareVersion("1.01", "1.001"));
-
+//
+//        [166].分数到小数
 //        System.out.println(fractionToDecimal(-4, 17));
 //        System.out.println(fractionToDecimal(2, 3));
 //
+//        [133].克隆图
 //        Node f1 = new Node(1);
 //        Node f2 = new Node(2);
 //        Node f3 = new Node(3);
@@ -1125,8 +1690,61 @@ public class Others {
 //        f2.neighbors = Arrays.asList(f1, f3);
 //        f3.neighbors = Arrays.asList(f2, f4);
 //        f4.neighbors = Arrays.asList(f1, f3);
-//
 //        Node res = cloneGraph(f1);
+
+//        [199].二叉树的右视图
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(3);
+//        TreeNode l2 = new TreeNode(5);
+//        TreeNode r2 = new TreeNode(4);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.right = l2;
+//        r1.left = r2;
+//        System.out.println(rightSideView(root));
+//
+//        [200].岛屿数量
+//        char[][] islands = {{'1', '1', '0', '0', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '1', '0', '0'}, {'0', '0', '0', '1', '1'}};
+//        char[][] islands2 = {{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '0', '0', '0'}};
+//        System.out.println(numIslands(islands2));
+//
+//        [201].数字范围按位与
+//        System.out.println(rangeBitwiseAnd(1,1));
+//        System.out.println(rangeBitwiseAnd(7, 8));
+//        System.out.println(rangeBitwiseAnd(5,7));
+//
+//        [208].实现Trie(前缀树)
+//        Trie trie = new Trie();
+//        trie.insert("apple");
+//        System.out.println(trie.search("apple"));   // 返回 true
+//        System.out.println(trie.search("app"));     // 返回 false
+//        System.out.println(trie.startsWith("app")); // 返回 true
+//        trie.insert("app");
+//        System.out.println(trie.search("app"));     // 返回 true
+//        trie.insert("banana");
+//        System.out.println(trie.startsWith("banana"));
+//
+//        [222].完全二叉树的节点个数
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(3);
+//        TreeNode l11 = new TreeNode(4);
+//        TreeNode l12 = new TreeNode(5);
+//        root.left = l1;
+//        root.right = r1;
+//        l1.left = l11;
+//        l1.right = l12;
+//        System.out.println(countNodes(root));
+//
+//        [223].矩形面积
+//        System.out.println(computeArea(-3, 0, 3, 4, 0, -1, 9, 2));
+//
+//        [224].基本计算器
+//        System.out.println(calculate("(1+(4+5+2)-3)"));
+//        System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));
+//        System.out.println(calculate("(1+2"));
+//
 //        [226].翻转二叉树
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -1140,5 +1758,48 @@ public class Others {
 //        l1.right = l12;
 //        r1.right = r11;
 //        TreeNode result = invertTree(root);
+//
+//        [227]基本计算器II
+//        System.out.println(calculate2("3+2*2"));
+//        System.out.println(calculate2(" 3+5 / 2 "));
+//        System.out.println(calculate2(" 3/2 "));
+//        System.out.println(calculate2(" 1 "));
+//
+//        [230].二叉搜索数中第K小的元素
+//        TreeNode root = new TreeNode(3);
+//        TreeNode l1 = new TreeNode(1);
+//        TreeNode l2 = new TreeNode(2);
+//        TreeNode r1 = new TreeNode(4);
+//        root.left = l1;
+//        l1.right = l2;
+//        root.right = r1;
+//        System.out.println(kthSmallest(root, 5));
+//
+//        [241].为运算表达式设计优先级
+//        System.out.println(diffWaysToCompute("2*3-14*5"));
+//        System.out.println(diffWaysToCompute("2-1-1"));
+//
+//        [263].丑数
+//        System.out.println(isUgly(6));
+//        System.out.println(isUgly(8));
+//        System.out.println(isUgly(14));
+//        System.out.println(isUgly(2123366400));
+//
+//        [264].丑数II
+//        System.out.println(nthUglyNumber(10));
+//        System.out.println(nthUglyNumber(1690));
+//
+//        [260].只出现一次的数字III
+//        singleNumber3(new int[]{1, 2, 1, 3, 2, 5});
+
+//        [257].二叉树的所有路径
+//        TreeNode root = new TreeNode(1);
+//        TreeNode l1 = new TreeNode(2);
+//        TreeNode l2 = new TreeNode(5);
+//        TreeNode r1 = new TreeNode(3);
+//        root.left = l1;
+//        l1.right = l2;
+//        root.right = r1;
+//        System.out.println(binaryTreePaths(root));
     }
 }

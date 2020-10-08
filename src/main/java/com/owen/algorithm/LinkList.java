@@ -265,7 +265,7 @@ public class LinkList {
             ListNode s = dummyHead;
             while (s.val < f.val) {
                 if (s.next != null) {
-                    if ( s.next.val > f.val) {
+                    if (s.next.val > f.val) {
                         break;
                     }
                     s = s.next;
@@ -347,6 +347,29 @@ public class LinkList {
         //断链呀
         head.next = null;
         return last;
+    }
+
+    //[234]回文链表
+    private static ListNode left;
+    public static boolean isPalindrome(ListNode head) {
+        left = head;
+        return traverse(head);
+    }
+
+    //递归判断链表是否为回文
+    private static boolean traverse(ListNode right) {
+        if (right == null) return true;
+        //right后面的是否为回文
+        boolean res = traverse(right.next);
+        res = res && left.val == right.val;
+        left = left.next;
+        return res;
+    }
+
+    //[237].删除链表中的节点
+    public static void deleteNode(ListNode node) {
+        node.val = node.next.val;
+        node.next = node.next.next;
     }
 
     public static void main(String[] args) {

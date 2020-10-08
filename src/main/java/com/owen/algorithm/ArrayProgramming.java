@@ -441,6 +441,314 @@ public class ArrayProgramming {
         return sb.toString();
     }
 
+    //[209].长度最小的子数组
+    public static int minSubArrayLen(int s, int[] nums) {
+        int res = Integer.MAX_VALUE;
+        int sum = 0;
+        for (int p = 0, q = 0; q < nums.length; q++) {
+            sum += nums[q];
+
+            //一旦窗口满足，则移动起始节点，直到找到窗口不满足条件为止
+            while (sum >= s) {
+                res = Math.min(res, q - p + 1);
+                sum -= nums[p++];
+            }
+
+        }
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
+    //[215].数组中的第K个最大元素
+    public static int findKthLargest(int[] nums, int k) {
+        //第K大意味着是从小到大是第n-k位
+        return quickSort(nums, 0, nums.length - 1, nums.length - k);
+    }
+
+    private static int quickSort(int[] nums, int left, int right, int index) {
+        int l = left, r = right;
+        int pivot = nums[l];
+        while (l < r) {
+            while (l < r && pivot <= nums[r]) r--;
+            //右边的小值赋值给左边
+            nums[l] = nums[r];
+
+            while (l < r && nums[l] <= pivot) l++;
+            //左边的大值赋值给右边
+            nums[r] = nums[l];
+        }
+        nums[l] = pivot;
+
+        if (l == index) {
+            return nums[l];
+        } else if (l > index) {
+            return quickSort(nums, left, l - 1, index);
+        } else {
+            return quickSort(nums, l + 1, right, index);
+        }
+    }
+
+
+    //[163].多数元素
+    public static int majorityElement(int[] nums) {
+        int candidate = nums[0];
+        int count = 0;
+        for (int num : nums) {
+            //票数为0，意味着需要替换候选人
+            if (0 == count) {
+                candidate = num;
+            }
+
+            //候选人相同+1
+            if (num == candidate) {
+                count++;
+            } else {
+                //候选人不相同，减票数
+                count--;
+            }
+        }
+        return candidate;
+    }
+
+    //[217].存在重复元素
+    public static boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i - 1] == nums[i]) return true;
+        }
+        return false;
+    }
+
+    //[219].存在重复元素II
+    public static boolean containsNearbyDuplicate(int[] nums, int k) {
+        Set<Integer> window = new HashSet<>(k);
+        for (int i = 0; i < nums.length; i++) {
+            if (window.contains(nums[i])) return true;
+            window.add(nums[i]);
+
+            if (window.size() > k) {
+                window.remove(nums[i - k]);
+            }
+        }
+        return false;
+    }
+
+    //[220].存在重复元素III
+    public static boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        TreeSet<Long> set = new TreeSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            Long ceiling = set.ceiling((long) nums[i]);
+            if (ceiling != null && ceiling - (long) nums[i] <= (long) t) return true;
+
+            Long floor = set.floor((long) nums[i]);
+            if (floor != null && (long) nums[i] - floor <= (long) t) return true;
+
+            set.add((long) nums[i]);
+            if (set.size() > k) {
+                set.remove((long) nums[i - k]);
+            }
+        }
+        return false;
+    }
+
+    //[228].汇总区间
+    public static List<String> summaryRanges(int[] nums) {
+        // 输入：nums = [0,2,3,4,6,8,9]
+//输出：["0","2->4","6","8->9"]
+        List<String> res = new ArrayList<>();
+        if (nums.length == 0) return res;
+        if (nums.length == 1) {
+            res.add("" + nums[0]);
+            return res;
+        }
+
+        int left = nums[0], right = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            if (right + 1 != nums[i]) {
+                //添加结果
+                if (left == right) res.add("" + left);
+                else res.add(left + "->" + right);
+                //更新区间
+                left = nums[i];
+                right = nums[i];
+            } else {
+                //大1，就更新右区间
+                right = nums[i];
+            }
+
+            if (i == nums.length - 1) {
+                //添加结果
+                if (left == right) res.add("" + left);
+                else res.add(left + "->" + right);
+            }
+        }
+        return res;
+    }
+
+    //[229].求众数II
+    public static List<Integer> majorityElement2(int[] nums) {
+        List<Integer> res = new ArrayList<>();
+        int size = nums.length;
+        if (size == 0) return res;
+
+        //超过n/3的票数意味着最多两个众数
+        int candidate1 = nums[0];
+        int candidate2 = nums[0];
+        int count1 = 0, count2 = 0;
+        for (int num : nums) {
+            //与A相等
+            if (candidate1 == num) {
+                count1++;
+                continue;
+            }
+            //与B相等
+            if (candidate2 == num) {
+                count2++;
+                continue;
+            }
+
+            //如果当前值与AB都不等 且票据为0，则更新候选人
+            if (count1 == 0) {
+                candidate1 = num;
+                count1 = 1;
+                continue;
+            }
+            if (count2 == 0) {
+                candidate2 = num;
+                count2 = 1;
+                continue;
+            }
+
+            //当前值与AB都不想等，且票据不为0，不需要更新候选人
+            count1--;
+            count2--;
+        }
+
+        //上一轮遍历找出了两个候选人，但是这两个候选人是否均满足票数大于N/3仍然没法确定，需要重新遍历，确定票数
+        count1 = count2 = 0;
+        for (int num : nums) {
+            if (num == candidate1) {
+                count1++;
+            } else if (num == candidate2) {
+                count2++;
+            }
+        }
+
+        if (count1 > size / 3) {
+            res.add(candidate1);
+        }
+        if (count2 > size / 3) {
+            res.add(candidate2);
+        }
+        return res;
+    }
+
+    //[238].除自身以外数组的乘积
+    public static int[] productExceptSelf(int[] nums) {
+        //left[i] 定义为0～i-1的前缀乘积
+        int[] left = new int[nums.length + 1];
+        //right[i]定义为i~n-1的后缀乘积
+        int[] right = new int[nums.length + 1];
+
+        left[0] = 1;
+        for (int i = 0; i < nums.length; i++) {
+            left[i + 1] = left[i] * nums[i];
+        }
+
+        right[nums.length] = 1;
+        for (int j = nums.length - 1; j >= 0; j--) {
+            right[j] = right[j + 1] * nums[j];
+        }
+
+        int[] res = new int[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            res[i] = left[i] * right[i + 1];
+        }
+        return res;
+    }
+
+    //[240].搜索二维矩阵II
+    public static boolean searchMatrix2(int[][] matrix, int target) {
+        if (matrix == null || matrix.length < 1 || matrix[0].length < 1) return false;
+        int row = 0, col = matrix[0].length - 1;
+        while (row < matrix.length && col >= 0) {
+            if (matrix[row][col] == target) {
+                return true;
+            } else if (matrix[row][col] < target) {
+                row++;
+            } else {
+                col--;
+            }
+        }
+        return false;
+    }
+
+    //[274].H指数
+    public static int hIndex(int[] citations) {
+        int count = 0;
+        Arrays.sort(citations);
+        while (count < citations.length && citations[citations.length - 1 - count] > count) {
+            count++;
+        }
+        return count;
+    }
+
+    //[275].H指数II
+    public static int hIndex2(int[] citations) {
+        int n = citations.length;
+        int left = 0, right = n - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (n - mid == citations[mid]) {
+                return n - mid;
+            } else if (n - mid < citations[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return n - left;
+    }
+
+    //[287].寻找重复数(二分搜索)
+    public static int findDuplicate(int[] nums) {
+        //题目是从1到n的数字,一共n+1个数
+        int n = nums.length - 1;
+        int left = 1, right = n;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            int count = 0;
+            for (int i = 0; i <= n; i++) {
+                if (nums[i] <= mid) {
+                    count++;
+                }
+            }
+
+            //1,3,4,2,2, mid = 2， count = 3， 说明重复数在区间[1,2]
+            if (count > mid) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    //[287].寻找重复数(双指针，判断链表有环)
+    public static int findDuplicateV2(int[] nums) {
+        int slow = 0, fast = 0;
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+        slow = 0;
+
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
+    }
+
     //洗牌算法
     void shuffle(int[] nums) {
         for (int i = 0; i < nums.length; i++) {
@@ -517,21 +825,74 @@ public class ArrayProgramming {
 //        System.out.println(searchII(new int[]{2, 5, 6, 0, 0, 1, 2}, 0));
 //        System.out.println(searchII(new int[]{1, 0, 1}, 1));
 //        System.out.println(searchII(new int[]{1, 0, 1}, 0));
-
+//
 //        [153].寻找旋转排序数组中的最小值
 //        System.out.println(findMin(new int[]{4, 5, 6, 7, 0, 1, 2}));
 //        System.out.println(findMin(new int[]{3, 4, 5, 1, 2}));
 //        System.out.println(findMin(new int[]{0, 1, 2, 3, 4}));
 //        System.out.println(findMin(new int[]{3, 1, 2}));
 //        System.out.println(findMin(new int[]{4, 1, 2, 3}));
-
+//
 //        [154].寻找旋转排序数组中的最小值II
 //        System.out.println(findMin2(new int[]{2, 2, 0, 1, 2}));
 //        System.out.println(findMin2(new int[]{0, 1, 0}));
 //        System.out.println(findMin2(new int[]{1, 0, 1, 1, 1, 1}));
-
+//
+//        [162].寻找峰值
 //        System.out.println(findPeakElement(new int[]{1, 2, 3}));
 //        System.out.println(findPeakElement(new int[]{1,2,3,1}));
 //        System.out.println(findPeakElement(new int[]{1,2,1,3,5,6,4}));
+//
+//        [163].多数元素
+//        System.out.println(majorityElement(new int[]{1, 2, 1, 2, 3, 2}));
+//
+//        [229].求众数II
+//        System.out.println(majorityElement2(new int[]{1}));
+//        [209].长度最小的子数组
+//        System.out.println(minSubArrayLen(7, new int[]{2, 3, 1, 2, 4, 3}));
+//        System.out.println(minSubArrayLen(7, new int[]{2, 3, 9, 2, 4, 3}));
+//        System.out.println(minSubArrayLen(7, new int[]{}));
+//
+//        [215].数组中的第K个最大元素
+//        System.out.println(findKthLargest(new int[]{3, 2, 1, 5, 6, 4}, 2));
+//        System.out.println(findKthLargest(new int[]{3, 2, 3, 1, 2, 4, 5, 5, 6}, 4));
+//
+//        [217].存在重复元素
+//        System.out.println(containsDuplicate(new int[]{1, 2, 3, 1}));
+//        System.out.println(containsDuplicate(new int[]{1}));
+//        System.out.println(containsDuplicate(new int[]{}));
+//
+//        [219].存在重复元素II
+//        System.out.println(containsNearbyDuplicate(new int[]{1, 2, 3, 1}, 3));
+//
+//        [220].存在重复元素III
+//        System.out.println(containsNearbyAlmostDuplicate(new int[]{1, 2, 3, 1}, 3, 0));
+//        System.out.println(containsNearbyAlmostDuplicate(new int[]{1, 5, 9, 1, 5, 9}, 2, 3));
+//        System.out.println(containsNearbyAlmostDuplicate(new int[]{-2147483648, 2147483647}, 1, 1));
+
+//        [228].汇总区间
+//        System.out.println(summaryRanges(new int[]{}));
+//        System.out.println(summaryRanges(new int[]{0}));
+//        System.out.println(summaryRanges(new int[]{0, 1}));
+//        System.out.println(summaryRanges(new int[]{0, 1, 2, 4, 5, 7}));
+//        System.out.println(summaryRanges(new int[]{0, 2, 3, 4, 6, 8, 9}));
+//
+//        [238].除资深以为数组的乘积
+//        System.out.println(Arrays.toString(productExceptSelf(new int[]{1, 2, 3, 4})));
+//        System.out.println(Arrays.toString(productExceptSelf(new int[]{9, 7})));
+//
+//        [240].搜索二维矩阵IIx
+//        int[][] res = new int[][]{{1, 4, 7, 11, 15}, {2, 5, 8, 12, 19}, {3, 6, 9, 16, 22}, {10, 13, 14, 17, 24}, {18, 21, 23, 26, 30}};
+//        System.out.println(searchMatrix2(res, 9));
+//
+//        [274].H指数
+//        System.out.println(hIndex(new int[]{3, 0, 6, 1, 5}));
+//
+//        [275].H指数II
+//        System.out.println(hIndex2(new int[]{0, 1, 3, 5, 6}));
+//        System.out.println(hIndex2(new int[]{0, 2, 4, 5, 6}));
+
+        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
+        System.out.println(findDuplicateV2(new int[]{1, 3, 4, 2, 2}));
     }
 }
