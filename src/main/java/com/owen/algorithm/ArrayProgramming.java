@@ -709,6 +709,21 @@ public class ArrayProgramming {
         return n - left;
     }
 
+    //[283].移动零
+    public static void moveZeroes(int[] nums) {
+        int slow = 0, fast = 0;
+        while (fast < nums.length) {
+            if (nums[fast] != 0) {
+                nums[slow] = nums[fast];
+                slow++;
+            }
+            fast++;
+        }
+        for (int i = slow; i < nums.length; i++) {
+            nums[i] = 0;
+        }
+    }
+
     //[287].寻找重复数(二分搜索)
     public static int findDuplicate(int[] nums) {
         //题目是从1到n的数字,一共n+1个数
@@ -869,7 +884,7 @@ public class ArrayProgramming {
 //        System.out.println(containsNearbyAlmostDuplicate(new int[]{1, 2, 3, 1}, 3, 0));
 //        System.out.println(containsNearbyAlmostDuplicate(new int[]{1, 5, 9, 1, 5, 9}, 2, 3));
 //        System.out.println(containsNearbyAlmostDuplicate(new int[]{-2147483648, 2147483647}, 1, 1));
-
+//
 //        [228].汇总区间
 //        System.out.println(summaryRanges(new int[]{}));
 //        System.out.println(summaryRanges(new int[]{0}));
@@ -891,8 +906,14 @@ public class ArrayProgramming {
 //        [275].H指数II
 //        System.out.println(hIndex2(new int[]{0, 1, 3, 5, 6}));
 //        System.out.println(hIndex2(new int[]{0, 2, 4, 5, 6}));
-
-        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
-        System.out.println(findDuplicateV2(new int[]{1, 3, 4, 2, 2}));
+//
+//        [283].移动零
+//        moveZeroes(new int[]{0,1,2,3});
+//        moveZeroes(new int[]{0,1,0,3,12});
+//        moveZeroes(new int[]{1});
+//
+//        [287].寻找重复数
+//        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
+//        System.out.println(findDuplicateV2(new int[]{1, 3, 4, 2, 2}));
     }
 }

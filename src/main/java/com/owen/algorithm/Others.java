@@ -891,6 +891,55 @@ public class Others {
         return sb.toString();
     }
 
+    //[173].二叉搜索树迭代器
+    class BSTIterator {
+        Stack<TreeNode> stack;
+
+        public BSTIterator(TreeNode root) {
+            stack = new Stack<>();
+            pushMin(root);
+        }
+
+        /**
+         * @return the next smallest number
+         */
+        public int next() {
+            TreeNode top = stack.pop();
+            pushMin(top.right);
+            return top.val;
+        }
+
+        /**
+         * @return whether we have a next smallest number
+         */
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+
+        public void pushMin(TreeNode root) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
+        }
+    }
+
+    //[187].重复的DNA序列
+    public static List<String> findRepeatedDnaSequences(String s) {
+        if (s.length() <= 10) return new ArrayList<>();
+
+        Set<String> res = new HashSet<>();
+        Set<String> unique = new HashSet<>();
+        for (int i = 9; i < s.length(); i++) {
+            String sub = s.substring(i - 9, i + 1);
+            if (unique.contains(sub)) {
+                res.add(sub);
+            }
+            unique.add(sub);
+        }
+        return new ArrayList<>(res);
+    }
+
     //[199]二叉树的右视图
     public static List<Integer> rightSideView(TreeNode root) {
         Queue<TreeNode> queue = new ArrayDeque<>();
@@ -1417,6 +1466,30 @@ public class Others {
         return dp[n - 1];
     }
 
+    //[299].猜数字游戏
+    public static String getHint(String secret, String guess) {
+        int[] cache = new int[10];
+        int bullCount = 0;
+        for (int i = 0; i < secret.length(); i++) {
+            if (secret.charAt(i) == guess.charAt(i)) {
+                bullCount++;
+            } else {
+                cache[secret.charAt(i) - '0'] += 1;
+            }
+        }
+        int cowCount = 0;
+        for (int i = 0; i < guess.length(); i++) {
+            char g = guess.charAt(i);
+            if (secret.charAt(i) != g) {
+                if (cache[g - '0'] > 0) {
+                    cache[g - '0'] -= 1;
+                    cowCount++;
+                }
+            }
+        }
+        return bullCount + "A" + cowCount + "B";
+    }
+
     //[876]链表的中间结点
     public static ListNode middleNode(ListNode head) {
         ListNode slow = head, fast = head;
@@ -1681,6 +1754,11 @@ public class Others {
 //        System.out.println(fractionToDecimal(-4, 17));
 //        System.out.println(fractionToDecimal(2, 3));
 //
+//        [187].重复的DNA序列
+//        System.out.println(findRepeatedDnaSequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"));
+//        System.out.println(findRepeatedDnaSequences("AAAAAAAAAAAA"));
+//        System.out.println(findRepeatedDnaSequences("AAAAAAAAAA"));
+//
 //        [133].克隆图
 //        Node f1 = new Node(1);
 //        Node f2 = new Node(2);
@@ -1801,5 +1879,9 @@ public class Others {
 //        l1.right = l2;
 //        root.right = r1;
 //        System.out.println(binaryTreePaths(root));
+//
+//        [299].猜数字游戏
+//        System.out.println(getHint("1807", "7810"));
+//        System.out.println(getHint("1123", "0111"));
     }
 }
