@@ -5,6 +5,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.CheckedOutputStream;
 
 public class Others {
 
@@ -1490,7 +1491,39 @@ public class Others {
         return bullCount + "A" + cowCount + "B";
     }
 
-    //[876]链表的中间结点
+    //[316].去除重复字母
+    public static String removeDuplicateLetters(String s) {
+        if (s == null)  return null;
+        int[] count = new int[256];
+        for (char ch : s.toCharArray()) {
+            count[ch]++;
+        }
+        Stack<Character> stack = new Stack<>();
+        boolean[] inStack = new boolean[256];
+        for (char ch : s.toCharArray()) {
+            count[ch]--;
+            if (inStack[ch]) {
+                continue;
+            }
+            while (!stack.isEmpty() && stack.peek() > ch) {
+                if (count[stack.peek()] == 0) {
+                    break;
+                }
+                inStack[stack.pop()] = false;
+            }
+
+            stack.push(ch);
+            inStack[ch] = true;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.append(stack.pop());
+        }
+        return sb.reverse().toString();
+    }
+
+    //[876].链表的中间结点
     public static ListNode middleNode(ListNode head) {
         ListNode slow = head, fast = head;
         while (fast != null && fast.next != null) {
@@ -1883,5 +1916,10 @@ public class Others {
 //        [299].猜数字游戏
 //        System.out.println(getHint("1807", "7810"));
 //        System.out.println(getHint("1123", "0111"));
+//
+//        [316].去除重复字母
+//        System.out.println(removeDuplicateLetters("cbacdcbc"));
+//        System.out.println(removeDuplicateLetters("bcabc"));
+//        System.out.println(removeDuplicateLetters(""));
     }
 }

@@ -325,6 +325,38 @@ public class DynamicProgramming {
         return length;
     }
 
+    //[304].二位区域和检索-矩阵不可变
+    static class NumMatrix {
+        int[][] dp;
+
+        public NumMatrix(int[][] matrix) {
+            if (matrix.length > 0 && matrix[0].length > 0) {
+                dp = new int[matrix.length][matrix[0].length];
+                for (int i = 0; i < matrix.length; i++) {
+                    for (int j = 0; j < matrix[0].length; j++) {
+                        if (i == 0 && j == 0) {
+                            dp[i][j] = matrix[i][j];
+                        } else if (i == 0) {
+                            dp[i][j] = dp[i][j - 1] + matrix[i][j];
+                        } else if (j == 0) {
+                            dp[i][j] = dp[i - 1][j] + matrix[i][j];
+                        } else {
+                            dp[i][j] = dp[i - 1][j] + dp[i][j - 1] - dp[i - 1][j - 1] + matrix[i][j];
+                        }
+                    }
+                }
+            }
+        }
+
+        public int sumRegion(int row1, int col1, int row2, int col2) {
+            if (dp == null || dp.length == 0) return 0;
+            int left = col1 != 0 ? dp[row2][col1 - 1] : 0;
+            int top = row1 != 0 ? dp[row1 - 1][col2] : 0;
+            int leftTop = col1 != 0 && row1 != 0 ? dp[row1 - 1][col1 - 1] : 0;
+            return dp[row2][col2] - left - top + leftTop;
+        }
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -373,18 +405,20 @@ public class DynamicProgramming {
 //        System.out.println(maxProduct(new int[]{2,3,-2,4}));
 //        System.out.println(maxProduct(new int[]{2,3,0,4}));
 //
-//        198.打家劫舍
+//        [198].打家劫舍
 //        System.out.println(rob(new int[]{1, 2, 3, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
 //        System.out.println(rob(new int[]{2, 2, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
-
-        char[][] area = new char[][]{{'1', '0', '1', '0', '0'}, {'1', '0', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'1', '0', '0', '1', '0'}};
-        System.out.println(maximalSquare(area));
-        //1 0 1 0 0
-//1 0 1 1 1
-//1 1 1 1 1
-//1 0 0 1 0
+//
+//        [221].最大正方形
+//        char[][] area = new char[][]{{'1', '0', '1', '0', '0'}, {'1', '0', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'1', '0', '0', '1', '0'}};
+//        System.out.println(maximalSquare(area));
+//
+//        [304].二位区域和检索-矩阵不可变
+//        NumMatrix numMatrix = new NumMatrix(new int[][]{{3, 0, 1, 4, 2}, {5, 6, 3, 2, 1}, {1, 2, 0, 1, 5}, {4, 1, 0, 1, 7}, {1, 0, 3, 0, 5}});
+//        System.out.println(numMatrix.sumRegion(2, 1, 4, 3));// -> 8
+//        System.out.println(numMatrix.sumRegion(1, 1, 2, 2));// -> 11
+//        System.out.println(numMatrix.sumRegion(1, 2, 2, 4));//-> 12
     }
-
 }
