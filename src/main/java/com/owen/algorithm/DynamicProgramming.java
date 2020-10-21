@@ -307,6 +307,20 @@ public class DynamicProgramming {
         return maxSide * maxSide;
     }
 
+    //[279].完全平方数
+    public static int numSquares(int n) {
+        if (n <= 0) return 0;
+        int[] dp = new int[n + 1];
+        dp[0] = 0;
+        for (int i = 1; i <= n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 1; j * j <= i; j++) {
+                dp[i] = Math.min(dp[i - j * j] + 1, dp[i]);
+            }
+        }
+        return dp[n];
+    }
+
     //[300]最长上升子序列
     public static int lengthOfLIS(int[] nums) {
         int size = nums.length;
@@ -356,6 +370,7 @@ public class DynamicProgramming {
             return dp[row2][col2] - left - top + leftTop;
         }
     }
+
 
     public static void main(String[] args) {
 //        [5]最长回文子串
@@ -413,6 +428,12 @@ public class DynamicProgramming {
 //
 //        [221].最大正方形
 //        char[][] area = new char[][]{{'1', '0', '1', '0', '0'}, {'1', '0', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'1', '0', '0', '1', '0'}};
+//
+//        [279].完全平方数
+//        System.out.println(numSquares(13));
+//        System.out.println(numSquares(12));
+//        System.out.println(numSquares(16));
+//        System.out.println(numSquares(1));
 //        System.out.println(maximalSquare(area));
 //
 //        [304].二位区域和检索-矩阵不可变
