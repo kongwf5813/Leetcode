@@ -371,6 +371,21 @@ public class DynamicProgramming {
         }
     }
 
+    //[322].兑换零钱
+    public static int coinChange(int[] coins, int amount) {
+        //总金额为i最少需要多少硬币
+        int[] dp = new int[amount + 1];
+        dp[0] = 0;
+        for (int i = 1; i < dp.length; i++) {
+            dp[i] = amount + 1;
+            for (int coin : coins) {
+                if (i < coin) continue;
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+        return dp[amount] == amount + 1 ? -1 : dp[amount];
+    }
+
 
     public static void main(String[] args) {
 //        [5]最长回文子串
@@ -441,5 +456,10 @@ public class DynamicProgramming {
 //        System.out.println(numMatrix.sumRegion(2, 1, 4, 3));// -> 8
 //        System.out.println(numMatrix.sumRegion(1, 1, 2, 2));// -> 11
 //        System.out.println(numMatrix.sumRegion(1, 2, 2, 4));//-> 12
+//
+//        [322].兑换零钱
+//        System.out.println(coinChange(new int[] {2}, 3));
+//        System.out.println(coinChange(new int[] {1}, 0));
+//        System.out.println(coinChange(new int[] {1,2,5}, 11));
     }
 }
