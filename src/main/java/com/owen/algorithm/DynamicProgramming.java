@@ -282,7 +282,6 @@ public class DynamicProgramming {
         return dp[0];
     }
 
-
     //[221].最大正方形
     public static int maximalSquare(char[][] matrix) {
         int row = matrix.length;
@@ -385,7 +384,6 @@ public class DynamicProgramming {
         }
         return dp[amount] == amount + 1 ? -1 : dp[amount];
     }
-
 
     public static void main(String[] args) {
 //        [5]最长回文子串

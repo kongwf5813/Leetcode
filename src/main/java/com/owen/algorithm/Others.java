@@ -1493,7 +1493,7 @@ public class Others {
 
     //[316].去除重复字母
     public static String removeDuplicateLetters(String s) {
-        if (s == null)  return null;
+        if (s == null) return null;
         int[] count = new int[256];
         for (char ch : s.toCharArray()) {
             count[ch]++;
@@ -1521,6 +1521,40 @@ public class Others {
             sb.append(stack.pop());
         }
         return sb.reverse().toString();
+    }
+
+    //[318].最大单词长度乘积
+    public static int maxProduct(String[] words) {
+        int size = words.length;
+        if (size == 0 ) return 0;
+        int[] values = new int[size];
+        for (int i = 0; i < size; i++) {
+            int r1 = 0;
+            for (char ch : words[i].toCharArray()) {
+                r1 |= 1 << ch - 'a';
+            }
+            values[i] = r1;
+        }
+
+        int res = 0;
+        for (int i = 0; i < size; i++) {
+            for (int j = i + 1; j < size; j++) {
+                //不包含字母意味着 与等于0
+                if ((values[i] & values[j]) == 0) {
+                    res = Math.max(res, words[i].length() * words[j].length());
+                }
+            }
+        }
+        return res;
+    }
+
+    //[319].灯泡开关
+    public static int bulbSwitch(int n) {
+        int cnt = 0;
+        for (int i = 1; i * i <= n; i++) {
+            cnt++;
+        }
+        return cnt;
     }
 
     //[876].链表的中间结点
@@ -1921,5 +1955,13 @@ public class Others {
 //        System.out.println(removeDuplicateLetters("cbacdcbc"));
 //        System.out.println(removeDuplicateLetters("bcabc"));
 //        System.out.println(removeDuplicateLetters(""));
+//
+//        [318].最大单词长度乘积
+        System.out.println(maxProduct(new String[]{"abcw", "baz", "foo", "bar", "xtfn", "abcdef"}));
+        System.out.println(maxProduct(new String[]{"a", "ab", "abc", "d", "cd", "bcd", "abcd"}));
+        System.out.println(maxProduct(new String[]{"a", "aa", "aaa", "aaaa"}));
+
+        //[319].灯泡开关
+//        System.out.println(bulbSwitch(12));
     }
 }

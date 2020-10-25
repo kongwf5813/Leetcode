@@ -351,6 +351,7 @@ public class LinkList {
 
     //[234]回文链表
     private static ListNode left;
+
     public static boolean isPalindrome(ListNode head) {
         left = head;
         return traverse(head);
@@ -370,6 +371,20 @@ public class LinkList {
     public static void deleteNode(ListNode node) {
         node.val = node.next.val;
         node.next = node.next.next;
+    }
+
+    //[328].奇偶链表
+    public static ListNode oddEvenList(ListNode head) {
+        if (head == null) return null;
+        ListNode odd = head, even = head.next, x = even;
+        while (even != null && even.next != null) {
+            odd.next = even.next;
+            even.next = even.next.next;
+            odd = odd.next;
+            even = even.next;
+        }
+        odd.next = x;
+        return head;
     }
 
     public static void main(String[] args) {
@@ -527,5 +542,21 @@ public class LinkList {
 //        f3.next = f4;
 //        f4.next = f5;
 //        ListNode result = sortList(f);
+
+//        [328].奇偶链表
+//        ListNode head = new ListNode(2);
+//        ListNode one = new ListNode(1);
+//        ListNode tr = new ListNode(3);
+//        ListNode fi = new ListNode(5);
+//        ListNode si = new ListNode(6);
+//        ListNode fo = new ListNode(4);
+//        ListNode se = new ListNode(7);
+//        head.next = one;
+//        one.next = tr;
+//        tr.next = fi;
+//        fi.next = si;
+//        si.next = fo;
+//        fo.next = se;
+//        ListNode res = oddEvenList(head);
     }
 }

@@ -764,13 +764,52 @@ public class ArrayProgramming {
         return slow;
     }
 
-    //洗牌算法
-    void shuffle(int[] nums) {
-        for (int i = 0; i < nums.length; i++) {
-            int rand = new Random().nextInt(nums.length - i + 1) + i;
-            int temp = nums[i];
-            nums[i] = nums[rand];
-            nums[rand] = temp;
+    //[324].摆动排序II
+    public static void wiggleSort(int[] nums) {
+        int size = nums.length;
+        //从小到大排列
+        Arrays.sort(nums);
+        int[] temp = nums.clone();
+        for (int i = 0; i < size / 2; i++) {
+            //较小区间的最大值
+            nums[2 * i] = temp[(size - 1) / 2 - i];
+            //较大区间的最大值
+            nums[2 * i + 1] = temp[size - 1 - i];
+        }
+        //奇函数，前面一个没有赋值到temp中
+        if (size % 2 == 1) {
+            nums[size - 1] = temp[0];
+        }
+    }
+
+    //[384].打乱数组
+    static class Solution {
+        private int[] original;
+
+        public Solution(int[] nums) {
+            original = nums;
+        }
+
+        /**
+         * Resets the array to its original configuration and return it.
+         */
+        public int[] reset() {
+            return original;
+        }
+
+        /**
+         * Returns a random shuffling of the array.
+         */
+        public int[] shuffle() {
+            Random random = new Random();
+            int[] arr = original.clone();
+            for (int i = 0; i < arr.length; i++) {
+                int randomIdx = random.nextInt(arr.length - i) + i;
+                int temp = arr[i];
+                arr[i] = arr[randomIdx];
+                arr[randomIdx] = temp;
+            }
+            return arr;
         }
     }
 
@@ -915,5 +954,21 @@ public class ArrayProgramming {
 //        [287].寻找重复数
 //        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
 //        System.out.println(findDuplicateV2(new int[]{1, 3, 4, 2, 2}));
+//
+//        [324].摆动排序II
+//        int[] wiggle1 = new int[]{1,3,2,2,3,1};
+//        wiggleSort(wiggle1);
+//        System.out.println(Arrays.toString(wiggle1));
+//        int[] wiggle2 = new int[]{1, 5, 1, 1, 6, 4};
+//        wiggleSort(wiggle2);
+//        System.out.println(Arrays.toString(wiggle2));
+//        int[] wiggle3 = new int[]{1, 1, 2, 3, 3, 3, 4};
+//        wiggleSort(wiggle3);
+//        System.out.println(Arrays.toString(wiggle3));
+
+        Solution res = new Solution(new int[]{1, 2, 3});
+        System.out.println(Arrays.toString(res.shuffle()));
+        res.reset();
+        System.out.println(Arrays.toString(res.shuffle()));
     }
 }

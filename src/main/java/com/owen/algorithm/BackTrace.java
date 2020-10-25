@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -503,6 +502,50 @@ public class BackTrace {
         }
     }
 
+    //[306].累加数
+    public static boolean isAdditiveNumber(String num) {
+        return dfsForAdditiveNumber(0, 0, 0, num, 0);
+    }
+
+    private static boolean dfsForAdditiveNumber(long sum, long pre, int start, String num, int k) {
+        if (start == num.length()) {
+            //遍历完，并且要保证有三个数操作
+            return k > 2;
+        }
+        for (int i = start; i < num.length(); i++) {
+            //选择一个值，进行判断
+            long cur = selectNumber(num, start, i);
+            if (cur == -1) {
+                continue;
+            }
+
+            //初始阶段是前两次必然不等, 但是得选择110
+            //剪枝，不相等，说明不合法
+            if (k >= 2 && sum != cur) {
+                continue;
+            }
+
+            //合法值，进行选择
+            if (dfsForAdditiveNumber(pre + cur, cur, i + 1, num, k + 1)) {
+                return true;
+            }
+        }
+        //全部遍历完也没发现合法的
+        return false;
+    }
+
+    private static long selectNumber(String num, int l, int r) {
+        if (l < r && num.charAt(l) == '0') {
+            return -1;
+        }
+        long res = 0;
+        while (l <= r) {
+            res = res * 10 + num.charAt(l++) - '0';
+        }
+        return res;
+    }
+
+
     public static void main(String[] args) {
 //        17.电话号码的字母组合
 //        letterCombinations("23");
@@ -557,11 +600,19 @@ public class BackTrace {
 //        System.out.println(partition("aba"));
 //        System.out.println(partition("aab"));
 //        System.out.println(partition("aabbaacbc"));
-
-        System.out.println(combinationSum3(3, 9));
-        System.out.println(combinationSum3(3, 7));
-        System.out.println(combinationSum3(3, 1));
-        System.out.println(combinationSum3(1, -1));
+//
+//        [216].组合总数III
+//        System.out.println(combinationSum3(3, 9));
+//        System.out.println(combinationSum3(3, 7));
+//        System.out.println(combinationSum3(3, 1));
+//        System.out.println(combinationSum3(1, -1));
+//
+//        [306].累加数
+//        System.out.println(isAdditiveNumber("11"));
+//        System.out.println(isAdditiveNumber(""));
+//        System.out.println(isAdditiveNumber("110"));
+//        System.out.println(isAdditiveNumber("112"));
+//        System.out.println(isAdditiveNumber("199100199"));
 
     }
 }
