@@ -782,6 +782,25 @@ public class ArrayProgramming {
         }
     }
 
+    //[334].递增的三元子序列
+    public static boolean increasingTriplet(int[] nums) {
+        //最小和次最小
+        int min = Integer.MAX_VALUE, secondMin = Integer.MAX_VALUE;
+        for (int num : nums) {
+            if (num <= min) {
+                //更新最小
+                min = num;
+            } else if (num <= secondMin) {
+                //更新次小
+                secondMin = num;
+            } else {
+                //大于最小和次小，则找到了递增子序列
+                return true;
+            }
+        }
+        return false;
+    }
+
     //[384].打乱数组
     static class Solution {
         private int[] original;
@@ -965,10 +984,11 @@ public class ArrayProgramming {
 //        int[] wiggle3 = new int[]{1, 1, 2, 3, 3, 3, 4};
 //        wiggleSort(wiggle3);
 //        System.out.println(Arrays.toString(wiggle3));
-
-        Solution res = new Solution(new int[]{1, 2, 3});
-        System.out.println(Arrays.toString(res.shuffle()));
-        res.reset();
-        System.out.println(Arrays.toString(res.shuffle()));
+//
+//        [384].打乱数组
+//        Solution res = new Solution(new int[]{1, 2, 3});
+//        System.out.println(Arrays.toString(res.shuffle()));
+//        res.reset();
+//        System.out.println(Arrays.toString(res.shuffle()));
     }
 }
