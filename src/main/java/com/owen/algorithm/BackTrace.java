@@ -2,8 +2,10 @@ package com.owen.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -545,6 +547,32 @@ public class BackTrace {
         return res;
     }
 
+    //[332].重新安排行程
+    public static List<String> findItinerary(List<List<String>> tickets) {
+        List<String> res = new LinkedList<>();
+        if (tickets == null || tickets.size() == 0) {
+            return res;
+        }
+        Map<String, List<String>> graph = new HashMap<>();
+        for (List<String> ticket : tickets) {
+            graph.putIfAbsent(ticket.get(0), new LinkedList<>());
+            graph.get(ticket.get(0)).add(ticket.get(1));
+        }
+        graph.values().forEach(x -> x.sort(String::compareTo));
+        dfs(graph, "JFK", res);
+        return res;
+    }
+
+    private static void dfs(Map<String, List<String>> graph, String src, List<String> res) {
+        List<String> dest = graph.get(src);
+        while (dest != null && dest.size() > 0) {
+            //选择
+            String det = dest.remove(0);
+            dfs(graph, det, res);
+        }
+        //所有的遍历完，就是结束
+        res.add(0, src);
+    }
 
     public static void main(String[] args) {
 //        17.电话号码的字母组合
@@ -613,6 +641,13 @@ public class BackTrace {
 //        System.out.println(isAdditiveNumber("110"));
 //        System.out.println(isAdditiveNumber("112"));
 //        System.out.println(isAdditiveNumber("199100199"));
+//
+//        [332].重新安排行程
+//        System.out.println(findItinerary(Arrays.asList(Arrays.asList("JFK", "SFO"),
+//                Arrays.asList("JFK", "ATL"),
+//                Arrays.asList("SFO", "ATL"),
+//                Arrays.asList("ATL", "JFK"),
+//                Arrays.asList("ATL", "SFO"))));
 
     }
 }
