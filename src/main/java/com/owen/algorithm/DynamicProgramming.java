@@ -72,7 +72,6 @@ public class DynamicProgramming {
         return res;
     }
 
-
     //62.不同路径 动态规划
     public static int uniquePaths(int m, int n) {
         if (m == 0 || n == 0) return 0;
@@ -275,6 +274,7 @@ public class DynamicProgramming {
         //the maximum money robbed from i to n
         //base case
         dp[size - 1] = nums[size - 1];
+        //自底向上
         for (int i = nums.length - 2; i >= 0; i--) {
             //选择打劫i是nums[i] + dp[i + 2]，不打劫i是dp[i + 1]
             dp[i] = Math.max(nums[i] + dp[i + 2], dp[i + 1]);
@@ -311,6 +311,7 @@ public class DynamicProgramming {
         if (n <= 0) return 0;
         int[] dp = new int[n + 1];
         dp[0] = 0;
+        //自顶向下
         for (int i = 1; i <= n; i++) {
             dp[i] = Integer.MAX_VALUE;
             for (int j = 1; j * j <= i; j++) {
@@ -385,6 +386,25 @@ public class DynamicProgramming {
         return dp[amount] == amount + 1 ? -1 : dp[amount];
     }
 
+    //[338].比特位计数
+    public static int[] countBits(int num) {
+        //000 001 010 011 100 101 110 111 1000 1001  1010  1011  1100   1101  1110 1111  10000
+        //0   1    2   3   4   5   6   7   8    9     10    11    12     13    14   15    16
+        //0   1    1   2   1   2   2   3   1    2     2     3      2      3    3    4     1
+        int[] dp = new int[num + 1];
+        dp[0] = 0;
+        int power = 1;
+        for (int i = 1; i <= num; i++) {
+            if (i == 1 << power) {
+                dp[i] = 1;
+                power++;
+            } else {
+                int recent = (1 << (power - 1)) - 1;
+                dp[i] = dp[recent & i] + 1;
+            }
+        }
+        return dp;
+    }
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
