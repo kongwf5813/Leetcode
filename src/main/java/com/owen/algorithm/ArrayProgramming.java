@@ -666,6 +666,41 @@ public class ArrayProgramming {
         return res;
     }
 
+    //[239].滑动窗口最大值
+    public static int[] maxSlidingWindow(int[] nums, int k) {
+        List<Integer> res = new ArrayList<>();
+        LinkedList<Integer> monotonic = new LinkedList<>();
+        for (int i = 0; i < nums.length; i++) {
+            if (i < k - 1) {
+                //先填满k-1个数字
+                while (!monotonic.isEmpty() && monotonic.peekLast() < nums[i]) {
+                    monotonic.pollLast();
+                }
+                monotonic.add(nums[i]);
+            } else {
+                //添加新数字
+                while (!monotonic.isEmpty() && monotonic.peekLast() < nums[i]) {
+                    monotonic.pollLast();
+                }
+                monotonic.add(nums[i]);
+
+                //取最大值
+                res.add(monotonic.getFirst());
+
+                //移出旧数字
+                if (monotonic.getFirst() == nums[i - k + 1]) {
+                    monotonic.pollFirst();
+                }
+            }
+        }
+        int[] arr = new int[res.size()];
+        int i = 0;
+        for (Integer num : res) {
+            arr[i++] = num;
+        }
+        return arr;
+    }
+
     //[240].搜索二维矩阵II
     public static boolean searchMatrix2(int[][] matrix, int target) {
         if (matrix == null || matrix.length < 1 || matrix[0].length < 1) return false;
@@ -832,6 +867,26 @@ public class ArrayProgramming {
         }
     }
 
+    //[347].前K个高频元素
+    public static int[] topKFrequent(int[] nums, int k) {
+
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        //用大根堆
+        PriorityQueue<Map.Entry<Integer, Integer>> queue = new PriorityQueue<>((a, b) -> b.getValue() - a.getValue());
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            queue.offer(entry);
+        }
+        int[] res = new int[k];
+        for (int i = 0; i < k; i++) {
+            res[i] = queue.poll().getKey();
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        [15]三数之和
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
@@ -990,5 +1045,11 @@ public class ArrayProgramming {
 //        System.out.println(Arrays.toString(res.shuffle()));
 //        res.reset();
 //        System.out.println(Arrays.toString(res.shuffle()));
+//        [347].前K个高频元素
+//        System.out.println(Arrays.toString(topKFrequent(new int[] {1,1,1,2,2,3}, 2)));
+//        System.out.println(Arrays.toString(topKFrequent(new int[] {1}, 1)));
+
+        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1,3,-1,-3,5,3,6,7}, 3)));
+        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1}, 1)));
     }
 }

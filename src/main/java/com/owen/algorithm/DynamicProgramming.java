@@ -405,6 +405,7 @@ public class DynamicProgramming {
         }
         return dp;
     }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
