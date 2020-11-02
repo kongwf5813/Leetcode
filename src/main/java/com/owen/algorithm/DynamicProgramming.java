@@ -406,6 +406,21 @@ public class DynamicProgramming {
         return dp;
     }
 
+    //[343].整数拆分
+    public static int integerBreak(int n) {
+        //1  2  3   4    5
+        //0  1  2  2*2   4
+        int[] dp = new int[n + 1];
+        //dp[j] * (i-j)  (i-j) * j
+        for (int i = 1; i <= n; i++) {
+            //j作为被拆的数，剩下的数是j-i
+            for (int j = 1; j < i; j++) {
+                dp[i] = Math.max(dp[i], Math.max(dp[j] * (i - j), j * (i - j)));
+            }
+        }
+        return dp[n];
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -480,5 +495,8 @@ public class DynamicProgramming {
 //        System.out.println(coinChange(new int[] {2}, 3));
 //        System.out.println(coinChange(new int[] {1}, 0));
 //        System.out.println(coinChange(new int[] {1,2,5}, 11));
+//
+//        [343].整数拆分
+//        System.out.println(integerBreak(10));
     }
 }
