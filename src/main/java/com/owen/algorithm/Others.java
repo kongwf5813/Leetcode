@@ -1526,7 +1526,7 @@ public class Others {
     //[318].最大单词长度乘积
     public static int maxProduct(String[] words) {
         int size = words.length;
-        if (size == 0 ) return 0;
+        if (size == 0) return 0;
         int[] values = new int[size];
         for (int i = 0; i < size; i++) {
             int r1 = 0;
@@ -1555,6 +1555,48 @@ public class Others {
             cnt++;
         }
         return cnt;
+    }
+
+    //[344].反转字符串
+    public static void reverseString(char[] s) {
+        if (s == null) return;
+        int l = 0, r = s.length - 1;
+        while (l < r) {
+            char temp = s[l];
+            s[l] = s[r];
+            s[r] = temp;
+            l++;
+            r--;
+        }
+    }
+
+    //[345].反转字符串中的元音字母
+    public static String reverseVowels(String s) {
+        if (s == null) return null;
+        char[] res = s.toCharArray();
+        int l = 0, r = res.length - 1;
+        while (l < r) {
+            if (!isVowel(res[l])) {
+                l++;
+                continue;
+            }
+            if (!isVowel(res[r])) {
+                r--;
+                continue;
+            }
+            //直到找到元音字母交换
+            char temp = res[l];
+            res[l] = res[r];
+            res[r] = temp;
+            l++;
+            r--;
+        }
+        return String.valueOf(res);
+    }
+
+    private static boolean isVowel(char ch) {
+        return ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u'
+                || ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U';
     }
 
     //[876].链表的中间结点
@@ -1957,11 +1999,19 @@ public class Others {
 //        System.out.println(removeDuplicateLetters(""));
 //
 //        [318].最大单词长度乘积
-        System.out.println(maxProduct(new String[]{"abcw", "baz", "foo", "bar", "xtfn", "abcdef"}));
-        System.out.println(maxProduct(new String[]{"a", "ab", "abc", "d", "cd", "bcd", "abcd"}));
-        System.out.println(maxProduct(new String[]{"a", "aa", "aaa", "aaaa"}));
+//        System.out.println(maxProduct(new String[]{"abcw", "baz", "foo", "bar", "xtfn", "abcdef"}));
+//        System.out.println(maxProduct(new String[]{"a", "ab", "abc", "d", "cd", "bcd", "abcd"}));
+//        System.out.println(maxProduct(new String[]{"a", "aa", "aaa", "aaaa"}));
 
-        //[319].灯泡开关
+//        [319].灯泡开关
 //        System.out.println(bulbSwitch(12));
+
+//        [344].反转字符串
+//        char[] res = new char[]{};
+//        reverseString(res);
+//
+//        [345].反转字符串中的元音字母
+//        System.out.println(reverseVowels("leetcodo"));
+
     }
 }

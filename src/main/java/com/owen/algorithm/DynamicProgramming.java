@@ -421,6 +421,25 @@ public class DynamicProgramming {
         return dp[n];
     }
 
+    //[357].计算各个位数不同的数字个数
+    public static int countNumbersWithUniqueDigits(int n) {
+        if (n == 0) return 1;
+        if (n == 1) return 10;
+        int[] dp = new int[n + 1];
+        //dp[i]: 数字为i位，组合成不重复的数字的个数
+        // dp[1] = 9
+        // dp[2] = 9*9
+        // dp[3] = 9*9*8
+        dp[0] = 1;
+        dp[1] = 9;
+        int res = 10;
+        for (int i = 2; i <= Math.min(n, 10); i++) {
+            dp[i] = dp[i - 1] * (10 - i + 1);
+            res += dp[i];
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
