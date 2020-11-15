@@ -509,6 +509,26 @@ public class ArrayProgramming {
         return candidate;
     }
 
+    //[189].旋转数组
+    public static void rotate(int[] nums, int k) {
+        int realK = k % nums.length;
+        //前n-k个
+        swap(nums, 0, nums.length - realK - 1);
+        //后k个
+        swap(nums, nums.length - realK, nums.length - 1);
+        swap(nums, 0, nums.length - 1);
+    }
+
+    private static void swap(int[] nums, int x, int y) {
+        while (x < y) {
+            int temp = nums[y];
+            nums[y] = nums[x];
+            nums[x] = temp;
+            x++;
+            y--;
+        }
+    }
+
     //[217].存在重复元素
     public static boolean containsDuplicate(int[] nums) {
         Arrays.sort(nums);
@@ -1009,6 +1029,10 @@ public class ArrayProgramming {
 //        System.out.println(Arrays.toString(productExceptSelf(new int[]{1, 2, 3, 4})));
 //        System.out.println(Arrays.toString(productExceptSelf(new int[]{9, 7})));
 //
+//        [239].滑动窗口最大值
+//        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3)));
+//        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1}, 1)));
+//
 //        [240].搜索二维矩阵IIx
 //        int[][] res = new int[][]{{1, 4, 7, 11, 15}, {2, 5, 8, 12, 19}, {3, 6, 9, 16, 22}, {10, 13, 14, 17, 24}, {18, 21, 23, 26, 30}};
 //        System.out.println(searchMatrix2(res, 9));
@@ -1049,7 +1073,11 @@ public class ArrayProgramming {
 //        System.out.println(Arrays.toString(topKFrequent(new int[] {1,1,1,2,2,3}, 2)));
 //        System.out.println(Arrays.toString(topKFrequent(new int[] {1}, 1)));
 
-        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1,3,-1,-3,5,3,6,7}, 3)));
-        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1}, 1)));
+
+//        int[] res = new int[]{1, 2, 3, 4, 5, 6, 7};
+//        rotate(res, 3);
+        int[] res = new int[]{-1, -100, 3, 99};
+        rotate(res, 2);
+        System.out.println(Arrays.toString(res));
     }
 }

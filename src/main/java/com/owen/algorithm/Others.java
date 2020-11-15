@@ -1599,6 +1599,40 @@ public class Others {
                 || ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U';
     }
 
+    //[371].两整数之和
+    public static int getSum(int a, int b) {
+        while (b != 0) {
+            int lower = a ^ b;
+            int carry = (a & b & 0x7fffffff) << 1;
+            b = carry;
+            a = lower;
+            System.out.println(a + "-" + b);
+        }
+        return a;
+    }
+
+    //[372].超级次方
+    public static int superPow(int a, int[] b) {
+        if (b.length == 0) return 1;
+        int part1 = myPow(a, b[b.length - 1]);
+        b = Arrays.copyOf(b, b.length - 1);
+        int part2 = myPow(superPow(a, b), 10);
+        return (part1 * part2) % 1337;
+    }
+
+    private static int myPow(int a, int b) {
+        int base = 1337;
+        if (b == 0) return 1;
+
+        a %= base;
+        if (b % 2 == 1) {
+            return (myPow(a, b - 1) * a) % base;
+        } else {
+            int half = myPow(a, b / 2);
+            return (half * half) % base;
+        }
+    }
+
     //[876].链表的中间结点
     public static ListNode middleNode(ListNode head) {
         ListNode slow = head, fast = head;
@@ -2012,6 +2046,14 @@ public class Others {
 //
 //        [345].反转字符串中的元音字母
 //        System.out.println(reverseVowels("leetcodo"));
+//
+//        [371].两整数之和
+//        System.out.println(getSum(2, 3));
+//        System.out.println(getSum(-2, 3));
 
+        System.out.println(superPow(2147483647, new int[]{2, 0, 0}));
+        System.out.println(superPow(1, new int[]{4, 3, 3, 8, 5, 2}));
+        System.out.println(superPow(2, new int[]{3}));
+        System.out.println(superPow(2, new int[]{1, 0}));
     }
 }

@@ -1,5 +1,8 @@
 package com.owen.algorithm;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * Created by OKONG on 2020/9/13.
  */
@@ -387,6 +390,39 @@ public class LinkList {
         return head;
     }
 
+    //[382].链表随机节点
+    class Solution {
+
+        ListNode head;
+        /** @param head The linked list's head.
+        Note that the head is guaranteed to be not null, so it contains at least one node. */
+        public Solution(ListNode head) {
+            this.head = head;
+        }
+
+        /** Returns a random node's value. */
+        public int getRandom() {
+            if (head == null) return -1;
+
+            Random random = new Random();
+            ListNode cur = head;
+            int res = cur.val;
+            int count = 1;
+
+            cur = cur.next;
+            while (cur != null) {
+                count++;
+
+                int index = random.nextInt(count);
+                //取第一个即可
+                if (index == 0) {
+                    res = cur.val;
+                }
+                cur = cur.next;
+            }
+            return res;
+        }
+    }
     public static void main(String[] args) {
 //        [2]两数相加
 //        ListNode f = new ListNode(2);

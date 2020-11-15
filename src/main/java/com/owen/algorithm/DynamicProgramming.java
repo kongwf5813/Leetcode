@@ -440,6 +440,61 @@ public class DynamicProgramming {
         return res;
     }
 
+    //[368].最大整除子集
+    public static List<Integer> largestDivisibleSubset(int[] nums) {
+        List<Integer> res = new ArrayList<>();
+        int size = nums.length;
+        if (size == 0) return res;
+
+        Arrays.sort(nums);
+        int maxNum = 1;
+        int maxIndex = 0;
+        //前i个数的最大子集个数是多少
+        int[] dp = new int[size];
+        for (int i = 0; i < size; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] % nums[j] == 0) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            if (dp[i] > maxNum) {
+                maxNum = dp[i];
+                maxIndex = i;
+            }
+        }
+
+        for (int i = maxIndex; i >= 0; i--) {
+            //最大子集个数 == 当前位置的最大子集个数 && 最大值能被当前整数整除
+            if (nums[maxIndex] % nums[i] == 0 && dp[i] == maxNum) {
+                res.add(0, nums[i]);
+                //最大子集个数减一
+                maxNum--;
+                //替换到另一个
+                maxIndex = i;
+            }
+        }
+        return res;
+    }
+
+    //[372].猜数字大小 II
+    public static int getMoneyAmount(int n) {
+        int[][] dp = new int[n + 1][n + 1];
+        for (int i = n - 1; i >= 1; i--) {
+            for (int j = i; j <= n; j++) {
+                if (i == j) {
+                    dp[i][j] = 0;
+                } else {
+                    dp[i][j] = Integer.MAX_VALUE;
+                    for (int x = i; x < j; x++) {
+                        dp[i][j] = Math.min(Math.max(dp[i][x - 1], dp[x + 1][j]) + x, dp[i][j]);
+                    }
+                }
+            }
+        }
+        return dp[1][n];
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -517,5 +572,13 @@ public class DynamicProgramming {
 //
 //        [343].整数拆分
 //        System.out.println(integerBreak(10));
+//
+//        [368].最大整除子集
+//        System.out.println(largestDivisibleSubset(new int[]{1, 2, 3, 4, 8}));
+//        System.out.println(largestDivisibleSubset(new int[]{1}));
+//
+//        [375].猜数字大小 II
+//        System.out.println(getMoneyAmount(8));
+//        System.out.println(getMoneyAmount(1));
     }
 }

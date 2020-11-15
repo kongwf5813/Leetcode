@@ -104,6 +104,30 @@ public class BinarySearch {
         return half * half * rest;
     }
 
+
+    //[374].猜数字大小
+    public class Solution {
+        public int guessNumber(int n) {
+            int left = 1, right = n;
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                int res = guess(mid);
+                if (res == 0) {
+                    return mid;
+                } else if (res < 0) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            return -1;
+        }
+
+        private int guess(int mid) {
+            return 0;
+        }
+    }
+
     public static void main(String[] args) {
 //        34. 在排序数组中查找元素的第一个和最后一个的位置
 //        int[] result2 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 6);
