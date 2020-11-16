@@ -495,6 +495,34 @@ public class DynamicProgramming {
         return dp[1][n];
     }
 
+
+    //[376].摆动序列
+    public static int wiggleMaxLength(int[] nums) {
+        if (nums.length < 2) return nums.length;
+        //i为结尾的上升子序列的最大长度
+        int[] up = new int[nums.length];
+        //i为结尾的下降子序列的最大长度
+        int[] down = new int[nums.length];
+
+        down[0] = 1;
+        up[0] = 1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] > nums[i - 1]) {
+                //上升, 以i-1为结尾的下降子序列的最大长度+1
+                up[i] = down[i - 1] + 1;
+                down[i] = down[i - 1];
+            } else if (nums[i] < nums[i - 1]) {
+                //下降, 以i-1为结尾的上升子序列的最大长度+1
+                down[i] = up[i - 1] + 1;
+                up[i] = up[i - 1];
+            } else {
+                down[i] = down[i - 1];
+                up[i] = up[i - 1];
+            }
+        }
+        return Math.max(up[nums.length - 1], down[nums.length - 1]);
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -580,5 +608,8 @@ public class DynamicProgramming {
 //        [375].猜数字大小 II
 //        System.out.println(getMoneyAmount(8));
 //        System.out.println(getMoneyAmount(1));
+//        [376].摆动序列
+//        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
+//        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
     }
 }
