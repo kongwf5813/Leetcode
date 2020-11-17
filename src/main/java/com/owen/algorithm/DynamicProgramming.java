@@ -523,6 +523,22 @@ public class DynamicProgramming {
         return Math.max(up[nums.length - 1], down[nums.length - 1]);
     }
 
+    public static int combinationSum4(int[] nums, int target) {
+
+        //和为i的组合总数
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        for (int i = 1; i <= target; i++) {
+            for (int num : nums) {
+                //选择num之后，可以有多少种
+                if (i - num >= 0) {
+                    dp[i] += dp[i - num];
+                }
+            }
+        }
+        return dp[target];
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -611,5 +627,7 @@ public class DynamicProgramming {
 //        [376].摆动序列
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
+
+        System.out.println(combinationSum4(new int[] {1, 2, 3}, 4));
     }
 }
