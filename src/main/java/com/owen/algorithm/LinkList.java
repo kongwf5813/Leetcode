@@ -186,7 +186,7 @@ public class LinkList {
     }
 
     //[92].反转链表II
-    public static ListNode reverseBetween(ListNode head, int m, int n) {
+    public static ListNode reverseBetween(ListNode head, int m, int n) { 
         ListNode dummyHead = new ListNode(0);
         dummyHead.next = head;
         ListNode s = dummyHead, e = dummyHead.next;
@@ -323,6 +323,20 @@ public class LinkList {
             cur.next = q;
         }
         return dummyHead.next;
+    }
+
+    //[203].移除链表元素
+    public static ListNode removeElements(ListNode head, int val) {
+        if (head == null) {
+            return null;
+        }
+        ListNode last = removeElements(head.next, val);
+        head.next = last;
+        if (head.val == val) {
+            return head.next;
+        } else {
+            return head;
+        }
     }
 
     //206. 反转链表迭代
