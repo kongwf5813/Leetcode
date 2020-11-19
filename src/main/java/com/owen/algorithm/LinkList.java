@@ -423,6 +423,16 @@ public class LinkList {
             return res;
         }
     }
+
+    //[876].链表的中间结点
+    public static ListNode middleNode(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
     public static void main(String[] args) {
 //        [2]两数相加
 //        ListNode f = new ListNode(2);

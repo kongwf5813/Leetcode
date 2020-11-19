@@ -1633,15 +1633,22 @@ public class Others {
         }
     }
 
-    //[876].链表的中间结点
-    public static ListNode middleNode(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            slow = slow.next;
-            fast = fast.next.next;
+    //[392].判断子序列
+    public static boolean isSubsequence(String s, String t) {
+        if (s.length() == 0) return true;
+        int i = 0, j = 0;
+        while (j < t.length()) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+                if (i == s.length()) {
+                    return true;
+                }
+            }
+            j++;
         }
-        return slow;
+        return false;
     }
+
 
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
@@ -2051,9 +2058,13 @@ public class Others {
 //        System.out.println(getSum(2, 3));
 //        System.out.println(getSum(-2, 3));
 
-        System.out.println(superPow(2147483647, new int[]{2, 0, 0}));
-        System.out.println(superPow(1, new int[]{4, 3, 3, 8, 5, 2}));
-        System.out.println(superPow(2, new int[]{3}));
-        System.out.println(superPow(2, new int[]{1, 0}));
+//        [372].超级次方
+//        System.out.println(superPow(2147483647, new int[]{2, 0, 0}));
+//        System.out.println(superPow(1, new int[]{4, 3, 3, 8, 5, 2}));
+//        System.out.println(superPow(2, new int[]{3}));
+//        System.out.println(superPow(2, new int[]{1, 0}));
+
+        System.out.println(isSubsequence("axc", "ahbgdc"));
+        System.out.println(isSubsequence("abc", "ahbgdc"));
     }
 }

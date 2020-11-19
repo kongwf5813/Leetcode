@@ -128,6 +128,38 @@ public class BinarySearch {
         }
     }
 
+    public static int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        int left = matrix[0][0], right = matrix[n - 1][n - 1];
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (check(matrix, k, mid, n)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    private static boolean check(int[][] matrix, int k, int mid, int n) {
+        int x = n - 1;
+        int y = 0;
+        int num = 0;
+        while (x >= 0 && y < n) {
+            //从左下角开始统计
+            if (matrix[x][y] <= mid) {
+                //统计比mid小的总数
+                num += x + 1;
+                y++;
+            } else {
+                x--;
+            }
+        }
+        //如果比mid小的总数大于等于k,意味着需要右边界需要缩小范围
+        return num >= k;
+    }
+
     public static void main(String[] args) {
 //        34. 在排序数组中查找元素的第一个和最后一个的位置
 //        int[] result2 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 6);
