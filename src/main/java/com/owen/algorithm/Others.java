@@ -1633,6 +1633,59 @@ public class Others {
         }
     }
 
+    //[380].常数时间插入、删除和获取随机元素
+    public static class RandomizedSet {
+        Map<Integer, Integer> map;
+        List<Integer> data;
+        Random rand = new Random();
+        /**
+         * Initialize your data structure here.
+         */
+        public RandomizedSet() {
+            this.map = new HashMap<>();
+            this.data = new ArrayList<>();
+        }
+
+        /**
+         * Inserts a value to the set. Returns true if the set did not already contain the specified element.
+         */
+        public boolean insert(int val) {
+            if (map.containsKey(val)) {
+                return false;
+            }
+            int index = data.size();
+            map.put(val, index);
+            data.add(index, val);
+            return true;
+        }
+
+        /**
+         * Removes a value from the set. Returns true if the set contained the specified element.
+         */
+        public boolean remove(int val) {
+            if (!map.containsKey(val)) {
+                return false;
+            }
+            int index = map.get(val);
+            int lastIndex = data.size() - 1;
+            int lastValue = data.get(lastIndex);
+
+            data.set(index, lastValue);
+            map.put(lastValue, index);
+
+            data.remove(lastIndex);
+            map.remove(val);
+            return true;
+        }
+
+        /**
+         * Get a random element from the set.
+         */
+        public int getRandom() {
+            return data.get(rand.nextInt(data.size()));
+        }
+    }
+
     //[392].判断子序列
     public static boolean isSubsequence(String s, String t) {
         if (s.length() == 0) return true;
@@ -1645,10 +1698,10 @@ public class Others {
                 }
             }
             j++;
+
         }
         return false;
     }
-
 
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
@@ -2019,7 +2072,7 @@ public class Others {
 //
 //        [260].只出现一次的数字III
 //        singleNumber3(new int[]{1, 2, 1, 3, 2, 5});
-
+//
 //        [257].二叉树的所有路径
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -2043,10 +2096,10 @@ public class Others {
 //        System.out.println(maxProduct(new String[]{"abcw", "baz", "foo", "bar", "xtfn", "abcdef"}));
 //        System.out.println(maxProduct(new String[]{"a", "ab", "abc", "d", "cd", "bcd", "abcd"}));
 //        System.out.println(maxProduct(new String[]{"a", "aa", "aaa", "aaaa"}));
-
+//
 //        [319].灯泡开关
 //        System.out.println(bulbSwitch(12));
-
+//
 //        [344].反转字符串
 //        char[] res = new char[]{};
 //        reverseString(res);
@@ -2057,14 +2110,24 @@ public class Others {
 //        [371].两整数之和
 //        System.out.println(getSum(2, 3));
 //        System.out.println(getSum(-2, 3));
-
+//
 //        [372].超级次方
 //        System.out.println(superPow(2147483647, new int[]{2, 0, 0}));
 //        System.out.println(superPow(1, new int[]{4, 3, 3, 8, 5, 2}));
 //        System.out.println(superPow(2, new int[]{3}));
 //        System.out.println(superPow(2, new int[]{1, 0}));
-
-        System.out.println(isSubsequence("axc", "ahbgdc"));
-        System.out.println(isSubsequence("abc", "ahbgdc"));
+//
+//        [380].常数时间插入、删除和获取随机元素
+//        RandomizedSet set = new RandomizedSet();
+//        set.insert(1);
+//        set.insert(2);
+//        System.out.println(set.insert(2));;
+//        set.insert(3);
+//        set.remove(2);
+//        System.out.println(set.getRandom());
+//
+//        [392].判断子序列
+//        System.out.println(isSubsequence("axc", "ahbgdc"));
+//        System.out.println(isSubsequence("abc", "ahbgdc"));
     }
 }
