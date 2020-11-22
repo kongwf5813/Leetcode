@@ -1,5 +1,7 @@
 package com.owen.algorithm;
 
+import com.sun.org.apache.regexp.internal.RE;
+
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -1071,6 +1073,68 @@ public class Others {
         }
     }
 
+    //[207].课程表
+    public static boolean canFinish(int numCourses, int[][] prerequisites) {
+        //入度表
+        int[] indegrees = new int[numCourses];
+        for (int[] pre : prerequisites) {
+            indegrees[pre[0]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < indegrees.length; i++) {
+            if (indegrees[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        int count = 0;
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            count++;
+            for (int[] prereq : prerequisites) {
+                //如果节点是 == 另一个节点的入度节点，再进行选择
+                if (prereq[1] != cur) continue;
+
+                //将入度减一
+                indegrees[prereq[0]]--;
+                //如果入度为0
+                if (indegrees[prereq[0]] == 0) {
+                    queue.offer(prereq[0]);
+                }
+            }
+        }
+        return count == numCourses;
+    }
+
+    //[210].课程表II
+    public static int[] findOrder(int numCourses, int[][] prerequisites) {
+        //p[], p[0] <- p[1]
+        int[] indegrees = new int[numCourses];
+        for (int[] p : prerequisites) {
+            indegrees[p[0]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegrees[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int[] res = new int[numCourses];
+        int i = 0;
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            res[i++] = cur;
+            for (int[] p : prerequisites) {
+                if (p[1] != cur) continue;
+                indegrees[p[0]]--;
+                if (indegrees[p[0]] == 0) {
+                    queue.offer(p[0]);
+                }
+            }
+        }
+        return i == numCourses ? res : new int[0];
+    }
+
     //[222].完全二叉树的节点个数
     public static int countNodes(TreeNode root) {
         if (root == null) return 0;
@@ -1557,6 +1621,26 @@ public class Others {
         return cnt;
     }
 
+    //[331].验证二叉树的前序序列化
+    public static boolean isValidSerialization(String preorder) {
+        String[] pre = preorder.split(",");
+        Stack<String> stack = new Stack<>();
+        for (String ch : pre) {
+            if (ch.equals("#")) {
+                while (!stack.isEmpty() && stack.peek().equals("#")) {
+                    stack.pop();
+                    //##， ###
+                    if (stack.isEmpty() || stack.pop().equals("#")) return false;
+                }
+                stack.push(ch);
+            } else {
+                stack.push(ch);
+            }
+        }
+        //#要比正常节点数多1，最后剩下的一定是#
+        return stack.size() == 1 && stack.peek().equals("#");
+    }
+
     //[344].反转字符串
     public static void reverseString(char[] s) {
         if (s == null) return;
@@ -1638,6 +1722,7 @@ public class Others {
         Map<Integer, Integer> map;
         List<Integer> data;
         Random rand = new Random();
+
         /**
          * Initialize your data structure here.
          */
@@ -2006,6 +2091,11 @@ public class Others {
 //        trie.insert("banana");
 //        System.out.println(trie.startsWith("banana"));
 //
+
+//        [210].课程表II
+//        System.out.println(Arrays.toString(findOrder(4, new int[][]{{1, 0}, {2, 0}, {3, 1}, {3, 2}})));
+//        System.out.println(Arrays.toString(findOrder(2, new int[][]{{1, 0}, {0, 1}})));
+//
 //        [222].完全二叉树的节点个数
 //        TreeNode root = new TreeNode(1);
 //        TreeNode l1 = new TreeNode(2);
@@ -2100,6 +2190,8 @@ public class Others {
 //        [319].灯泡开关
 //        System.out.println(bulbSwitch(12));
 //
+        System.out.println(isValidSerialization("9,#,#,1"));
+//        System.out.println(isValidSerialization("9,3,4,#,#,1,#,#,2,#,6,#,#"));
 //        [344].反转字符串
 //        char[] res = new char[]{};
 //        reverseString(res);

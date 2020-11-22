@@ -573,7 +573,7 @@ public class ArrayProgramming {
     //[228].汇总区间
     public static List<String> summaryRanges(int[] nums) {
         // 输入：nums = [0,2,3,4,6,8,9]
-//输出：["0","2->4","6","8->9"]
+        //输出：["0","2->4","6","8->9"]
         List<String> res = new ArrayList<>();
         if (nums.length == 0) return res;
         if (nums.length == 1) {
@@ -856,6 +856,41 @@ public class ArrayProgramming {
         return false;
     }
 
+    //[347].前K个高频元素
+    public static int[] topKFrequent(int[] nums, int k) {
+
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        //用大根堆
+        PriorityQueue<Map.Entry<Integer, Integer>> queue = new PriorityQueue<>((a, b) -> b.getValue() - a.getValue());
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            queue.offer(entry);
+        }
+        int[] res = new int[k];
+        for (int i = 0; i < k; i++) {
+            res[i] = queue.poll().getKey();
+        }
+        return res;
+    }
+
+    //[383].赎金信
+    public static boolean canConstruct(String ransomNote, String magazine) {
+        int[] bucket = new int[26];
+        for (char ch : magazine.toCharArray()) {
+            bucket[ch - 'a']++;
+        }
+
+        for (char ch : ransomNote.toCharArray()) {
+            if (--bucket[ch - 'a'] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     //[384].打乱数组
     static class Solution {
         private int[] original;
@@ -885,26 +920,6 @@ public class ArrayProgramming {
             }
             return arr;
         }
-    }
-
-    //[347].前K个高频元素
-    public static int[] topKFrequent(int[] nums, int k) {
-
-        Map<Integer, Integer> map = new HashMap<>();
-        for (int num : nums) {
-            map.put(num, map.getOrDefault(num, 0) + 1);
-        }
-
-        //用大根堆
-        PriorityQueue<Map.Entry<Integer, Integer>> queue = new PriorityQueue<>((a, b) -> b.getValue() - a.getValue());
-        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            queue.offer(entry);
-        }
-        int[] res = new int[k];
-        for (int i = 0; i < k; i++) {
-            res[i] = queue.poll().getKey();
-        }
-        return res;
     }
 
     public static void main(String[] args) {
@@ -994,6 +1009,13 @@ public class ArrayProgramming {
 //        [163].多数元素
 //        System.out.println(majorityElement(new int[]{1, 2, 1, 2, 3, 2}));
 //
+//        [189].旋转数组
+//        int[] res = new int[]{1, 2, 3, 4, 5, 6, 7};
+//        rotate(res, 3);
+//        int[] res = new int[]{-1, -100, 3, 99};
+//        rotate(res, 2);
+//        System.out.println(Arrays.toString(res));
+//
 //        [229].求众数II
 //        System.out.println(majorityElement2(new int[]{1}));
 //        [209].长度最小的子数组
@@ -1064,20 +1086,17 @@ public class ArrayProgramming {
 //        wiggleSort(wiggle3);
 //        System.out.println(Arrays.toString(wiggle3));
 //
+//        [347].前K个高频元素
+//        System.out.println(Arrays.toString(topKFrequent(new int[] {1,1,1,2,2,3}, 2)));
+//        System.out.println(Arrays.toString(topKFrequent(new int[] {1}, 1)));
+//
+//        [383].赎金信
+//        System.out.println(canConstruct("aa", "ab"));
+//        System.out.println(canConstruct("aa", "aab"));
 //        [384].打乱数组
 //        Solution res = new Solution(new int[]{1, 2, 3});
 //        System.out.println(Arrays.toString(res.shuffle()));
 //        res.reset();
 //        System.out.println(Arrays.toString(res.shuffle()));
-//        [347].前K个高频元素
-//        System.out.println(Arrays.toString(topKFrequent(new int[] {1,1,1,2,2,3}, 2)));
-//        System.out.println(Arrays.toString(topKFrequent(new int[] {1}, 1)));
-
-
-//        int[] res = new int[]{1, 2, 3, 4, 5, 6, 7};
-//        rotate(res, 3);
-        int[] res = new int[]{-1, -100, 3, 99};
-        rotate(res, 2);
-        System.out.println(Arrays.toString(res));
     }
 }

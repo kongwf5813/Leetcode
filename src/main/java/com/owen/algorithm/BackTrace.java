@@ -574,6 +574,25 @@ public class BackTrace {
         res.add(0, src);
     }
 
+    //[386].字典序排数
+    public static List<Integer> lexicalOrder(int n) {
+        List<Integer> res = new ArrayList<>();
+        for (int i = 1; i < 10; i++) {
+            dfsForLexicalOrder(n, i, res);
+        }
+        return res;
+    }
+
+    private static void dfsForLexicalOrder(int n, int i, List<Integer> res) {
+        if (n < i) {
+            return;
+        }
+        res.add(i);
+        for (int j = 0; j <= 9; j++) {
+            dfsForLexicalOrder(n, i * 10 + j, res);
+        }
+    }
+
     public static void main(String[] args) {
 //        17.电话号码的字母组合
 //        letterCombinations("23");
@@ -644,10 +663,13 @@ public class BackTrace {
 //
 //        [332].重新安排行程
 //        System.out.println(findItinerary(Arrays.asList(Arrays.asList("JFK", "SFO"),
-//                Arrays.asList("JFK", "ATL"),
+//        Arrays.asList("JFK", "ATL"),
 //                Arrays.asList("SFO", "ATL"),
 //                Arrays.asList("ATL", "JFK"),
 //                Arrays.asList("ATL", "SFO"))));
 
+        System.out.println(lexicalOrder(9));
+        System.out.println(lexicalOrder(13));
+        System.out.println(lexicalOrder(2002));
     }
 }
