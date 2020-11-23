@@ -1771,6 +1771,27 @@ public class Others {
         }
     }
 
+    //[390].消除游戏
+    public static int lastRemaining(int n) {
+        return calForLastRemaining(n);
+    }
+
+    private static int calForLastRemaining(int n) {
+        if (n == 1) return 1;
+        if (n == 2) return 2;
+
+        if (n % 2 != 0) {
+            //dp[9] = dp[8]
+            return calForLastRemaining(n - 1);
+        } else {
+            // 逆序等于 6, 正序等于4 (2 + 8 -6)
+            // dp[8] = 2 4 6 8
+            // dp[4] = 1 2 3 4
+            // dp[8] = 2(1 + 4 - dp[4])
+            return 2 * (1 + n / 2 - calForLastRemaining(n / 2));
+        }
+    }
+
     //[392].判断子序列
     public static boolean isSubsequence(String s, String t) {
         if (s.length() == 0) return true;
@@ -2190,8 +2211,10 @@ public class Others {
 //        [319].灯泡开关
 //        System.out.println(bulbSwitch(12));
 //
-        System.out.println(isValidSerialization("9,#,#,1"));
+//        [331].验证二叉树的前序序列化
+//        System.out.println(isValidSerialization("9,#,#,1"));
 //        System.out.println(isValidSerialization("9,3,4,#,#,1,#,#,2,#,6,#,#"));
+//
 //        [344].反转字符串
 //        char[] res = new char[]{};
 //        reverseString(res);
@@ -2218,6 +2241,8 @@ public class Others {
 //        set.remove(2);
 //        System.out.println(set.getRandom());
 //
+//        [390].消除游戏
+        System.out.println(lastRemaining(10));
 //        [392].判断子序列
 //        System.out.println(isSubsequence("axc", "ahbgdc"));
 //        System.out.println(isSubsequence("abc", "ahbgdc"));
