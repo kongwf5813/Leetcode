@@ -539,6 +539,27 @@ public class DynamicProgramming {
         return dp[target];
     }
 
+
+    //[396].旋转函数
+    public static int maxRotateFunction(int[] A) {
+        //F(n) - F(n-1) = Sum - size * A[size -n]
+        int dp0 = 0;
+        int sum = 0;
+        int size = A.length;
+        for (int i = 0; i < size; i++) {
+            dp0 += i * A[i];
+            sum += A[i];
+        }
+        int dp1;
+        int max = dp0;
+        for (int i = 1; i < size; i++) {
+            dp1 = dp0 + sum - size * A[size - i];
+            max = dp1 > max ? dp1 : max;
+            dp0 = dp1;
+        }
+        return max;
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -628,6 +649,6 @@ public class DynamicProgramming {
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
 
-        System.out.println(combinationSum4(new int[] {1, 2, 3}, 4));
+        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
     }
 }

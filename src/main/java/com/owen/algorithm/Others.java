@@ -1809,6 +1809,102 @@ public class Others {
         return false;
     }
 
+    public static boolean validUtf8(int[] data) {
+        if (data.length > 4) return false;
+        if (data.length == 1) return data[0] < 0x80;
+
+        int x;
+        if (data.length == 4) {
+            x = 0xF0;
+        } else if (data.length == 3) {
+            x = 0xE0;
+        } else {
+            x = 0xC0;
+        }
+
+        for (int i = 0; i < data.length; i++) {
+            if (i == 0) {
+                if ((x & data[i]) != x) {
+                    return false;
+                }
+            } else {
+                if ((0x80 & data[i]) != 0x80) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //[394].字符串解码
+    public static String decodeString(String s) {
+        char[] chars = s.toCharArray();
+        Stack<String> strings = new Stack<>();
+        Stack<Integer> numbers = new Stack<>();
+        int curNum = 0;
+        StringBuilder curSB = new StringBuilder();
+        for (char ch : chars) {
+            if (ch >= '0' && ch <= '9') {
+                //继续拼接数字
+                curNum = curNum * 10 + ch - '0';
+                continue;
+            } else if (ch == ']') {
+                //出栈操作，计算数字和字符串
+                int prevNum = numbers.pop();
+                String prevStr = strings.pop();
+                StringBuilder temp = new StringBuilder();
+                for (int i = 0; i < prevNum; i++) {
+                    temp.append(curSB);
+                }
+                //新当前 = 上一个 + 当前*倍数
+                curSB = new StringBuilder(prevStr + temp);
+            } else if (ch == '[') {
+                //数字和字符都结束了
+                numbers.push(curNum);
+                strings.push(curSB.toString());
+
+                curNum = 0;
+                curSB = new StringBuilder();
+            } else {
+                //继续拼接字符
+                curSB.append(ch);
+            }
+        }
+        return curSB.toString();
+    }
+
+    //[397].整数替换
+    public static int integerReplacement(int n) {
+        if (n <= 1) return 0;
+        if (n % 2 == 0) {
+            return integerReplacement(n / 2) + 1;
+        } else {
+            //n-1 n+1取一半+2, 防止越界
+            // 7 - 7/2 = 4
+            // 7/2 = 3
+            return Math.min(integerReplacement(n - n / 2), integerReplacement(n / 2)) + 2;
+        }
+    }
+    //[398].随机数索引
+    public static class Solution {
+        private int[] arr;
+        public Solution(int[] nums) {
+            this.arr = nums;
+        }
+
+        public int pick(int target) {
+            List<Integer> index = new ArrayList<>();
+            for (int i = 0; i < arr.length; i++) {
+                if (target == arr[i]) {
+                    index.add(i);
+                }
+            }
+
+            Random random = new Random();
+            return index.get(random.nextInt(index.size()));
+        }
+    }
+
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
 //        System.out.println(lengthOfLongestSubstring("dvdf"));
@@ -2242,9 +2338,26 @@ public class Others {
 //        System.out.println(set.getRandom());
 //
 //        [390].消除游戏
-        System.out.println(lastRemaining(10));
+//        System.out.println(lastRemaining(10));
 //        [392].判断子序列
 //        System.out.println(isSubsequence("axc", "ahbgdc"));
 //        System.out.println(isSubsequence("abc", "ahbgdc"));
+
+//        System.out.println(validUtf8(new int[]{235, 140, 4}));
+//        System.out.println(validUtf8(new int[]{197, 130, 1}));
+//
+//        [394].字符串解码
+//        System.out.println(decodeString("abc"));
+//        System.out.println(decodeString("3[a]2[bc]"));
+//        System.out.println(decodeString("3[a2[c]]"));
+//        System.out.println(decodeString("2[abc]3[cd]ef"));
+//        System.out.println(decodeString("abc3[cd]xyz"));
+//
+//        [397].整数替换
+//        System.out.println(integerReplacement(7));
+//        System.out.println(integerReplacement(Integer.MAX_VALUE));
+//        [398].随机数索引
+//        Solution solution = new Solution(new int[] {1,2,3,3,3});
+//        System.out.println(solution.pick(3));
     }
 }
