@@ -560,6 +560,35 @@ public class DynamicProgramming {
         return max;
     }
 
+    //[416].分割等和子集
+    public static boolean canPartition(int[] nums) {
+        if (nums.length < 2) return false;
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+        }
+        if (sum % 2 != 0) return false;
+        sum = sum / 2;
+        //dp[i][j] [0,i]范围内选取若干个，是否存在被选取的正整数的和等于j
+        boolean[][] dp = new boolean[nums.length][sum + 1];
+        //base case
+        for (int i = 0; i < nums.length; i++) {
+            dp[i][0] = true;
+        }
+        for (int i = 1; i < nums.length; i++) {
+            for (int j = 1; j <= sum; j++) {
+                if (j < nums[i]) {
+                    //第i个不放入
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    //取决于第i个不放入 和 第i个放入两种情况
+                    dp[i][j] = dp[i - 1][j] | dp[i - 1][j - nums[i]];
+                }
+            }
+        }
+        return dp[nums.length - 1][sum];
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -649,6 +678,8 @@ public class DynamicProgramming {
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
 
-        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
+//        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
+
+        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
     }
 }
