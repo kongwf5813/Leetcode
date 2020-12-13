@@ -1809,31 +1809,31 @@ public class Others {
         return false;
     }
 
+    //[393].UTF-8编码验证
     public static boolean validUtf8(int[] data) {
-        if (data.length > 4) return false;
-        if (data.length == 1) return data[0] < 0x80;
-
-        int x;
-        if (data.length == 4) {
-            x = 0xF0;
-        } else if (data.length == 3) {
-            x = 0xE0;
-        } else {
-            x = 0xC0;
-        }
-
+        //还需要几个10xxxxxx
+        int count = 0;
         for (int i = 0; i < data.length; i++) {
-            if (i == 0) {
-                if ((x & data[i]) != x) {
+            if (count > 0) {
+                if (data[i] >> 6 != 0x02) {
                     return false;
                 }
+                count--;
+            } else if (data[i] >> 3 == 0x1E) {
+                count = 3;
+            } else if (data[i] >> 4 == 0x0E) {
+                count = 2;
+            } else if (data[i] >> 5 == 0x06) {
+                count = 1;
+            } else if (data[i] >> 7 == 0x00) {
+                count = 0;
             } else {
-                if ((0x80 & data[i]) != 0x80) {
-                    return false;
-                }
+                //如果count==0, 10x开头，则返回false
+                //如果开头不正确，则返回false
+                return false;
             }
         }
-        return true;
+        return count == 0;
     }
 
     //[394].字符串解码
@@ -1885,9 +1885,11 @@ public class Others {
             return Math.min(integerReplacement(n - n / 2), integerReplacement(n / 2)) + 2;
         }
     }
+
     //[398].随机数索引
     public static class Solution {
         private int[] arr;
+
         public Solution(int[] nums) {
             this.arr = nums;
         }
@@ -1903,6 +1905,22 @@ public class Others {
             Random random = new Random();
             return index.get(random.nextInt(index.size()));
         }
+    }
+
+    //[400].第N个数字
+    public static int findNthDigit(int n) {
+        if (n < 10) return n;
+        //i表示第几层索引，cnt表示每层个数9,90,900，length表示实际上一层的前缀总个数
+        long i = 1, cnt = 9, length = 0;
+        for (; length + cnt * i < n; i++) {
+            length += cnt * i;
+            cnt *= 10;
+        }
+        //实际的数字
+        long num = (long) Math.pow(10, i - 1) + (n - length - 1) / i;
+        //第几位
+        int index = (int)((n - length - 1) % i);
+        return String.valueOf(num).charAt(index) - '0';
     }
 
     public static void main(String[] args) {
@@ -2342,8 +2360,10 @@ public class Others {
 //        [392].判断子序列
 //        System.out.println(isSubsequence("axc", "ahbgdc"));
 //        System.out.println(isSubsequence("abc", "ahbgdc"));
-
+//
+//        [393].UTF-8编码验证
 //        System.out.println(validUtf8(new int[]{235, 140, 4}));
+//        System.out.println(validUtf8(new int[]{240, 162, 138, 147, 145}));
 //        System.out.println(validUtf8(new int[]{197, 130, 1}));
 //
 //        [394].字符串解码
@@ -2356,8 +2376,13 @@ public class Others {
 //        [397].整数替换
 //        System.out.println(integerReplacement(7));
 //        System.out.println(integerReplacement(Integer.MAX_VALUE));
+//
 //        [398].随机数索引
 //        Solution solution = new Solution(new int[] {1,2,3,3,3});
 //        System.out.println(solution.pick(3));
+
+//        System.out.println(findNthDigit(11));
+//        System.out.println(findNthDigit(193));
+        System.out.println(findNthDigit(Integer.MAX_VALUE));
     }
 }

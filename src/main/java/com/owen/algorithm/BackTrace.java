@@ -593,6 +593,34 @@ public class BackTrace {
         }
     }
 
+    //[401].二进制手表
+    public static List<String> readBinaryWatch(int num) {
+        List<String> res = new ArrayList<>();
+        dfsForReadBinaryWatch(res, num, 0, 0, 1, 1, new LinkedList<>(), new LinkedList<>());
+        return res;
+    }
+
+    private static void dfsForReadBinaryWatch(List<String> res, int num, int hour, int minute, int hstart, int mstart, LinkedList<Integer> hours, LinkedList<Integer> minutes) {
+        if (hours.size() + minutes.size() == num) {
+            if (hour < 12 && minute < 60) {
+                res.add(String.format("%d:%02d", hour, minute));
+            }
+            return;
+        }
+
+        for (int i = hstart; i <= 8; i <<= 1) {
+            hours.addLast(i);
+            dfsForReadBinaryWatch(res, num, hour + i, minute, i << 1, mstart, hours, minutes);
+            hours.removeLast();
+        }
+
+        for (int i = mstart; i <= 32; i <<= 1) {
+            minutes.addLast(i);
+            dfsForReadBinaryWatch(res, num, hour, minute + i, 16, i << 1, hours, minutes);
+            minutes.removeLast();
+        }
+    }
+
     public static void main(String[] args) {
 //        17.电话号码的字母组合
 //        letterCombinations("23");
@@ -668,8 +696,12 @@ public class BackTrace {
 //                Arrays.asList("ATL", "JFK"),
 //                Arrays.asList("ATL", "SFO"))));
 
-        System.out.println(lexicalOrder(9));
-        System.out.println(lexicalOrder(13));
-        System.out.println(lexicalOrder(2002));
+//        System.out.println(lexicalOrder(9));
+//        System.out.println(lexicalOrder(13));
+//        System.out.println(lexicalOrder(2002));
+
+        System.out.println(readBinaryWatch(2));
+        System.out.println(readBinaryWatch(7));
+
     }
 }
