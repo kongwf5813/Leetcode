@@ -138,6 +138,27 @@ public class Others {
         }
     }
 
+    //[42].接雨水
+    public static int trap(int[] height) {
+        if (height.length == 0) return 0;
+        int left = 0, right = height.length -1;
+        //l_max指[0...left]的最大左边界值, r_max指[right...n-1]的最大右边界值
+        int l_max = height[0], r_max = height[height.length -1];
+        int res = 0;
+        while (left <= right) {
+            l_max = Math.max(l_max, height[left]);
+            r_max = Math.max(r_max, height[right]);
+            if (l_max < r_max) {
+                res += l_max - height[left];
+                left++;
+            } else {
+                res += r_max - height[right];
+                right--;
+            }
+        }
+        return res;
+    }
+
     //[49] 字母异位分组
     public static List<List<String>> groupAnagrams(String[] strs) {
         Map<String, List<String>> groupMap = new HashMap<>();
@@ -1949,6 +1970,9 @@ public class Others {
 //        System.out.println(strStr("hello", "ll"));
 //        System.out.println(strStr("", "1"));
 //        System.out.println(strStr("aaaaaab", "aab"));
+//
+//        [42].接雨水
+//        System.out.println(trap(new int[]{4,2,0,3,2,5}));
 //
 //        49. 字母异位分组
 //        System.out.println(groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}));
