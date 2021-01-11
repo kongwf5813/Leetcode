@@ -1,5 +1,7 @@
 package com.owen.algorithm;
 
+import java.util.Arrays;
+
 /**
  * Created by OKONG on 2020/9/13.
  */
@@ -160,6 +162,59 @@ public class BinarySearch {
         return num >= k;
     }
 
+    //[875].爱吃香蕉的珂珂
+    public static int minEatingSpeed(int[] piles, int H) {
+        int left = 1, right = Arrays.stream(piles).max().getAsInt();
+        while (left < right) {
+            int mid = left + (right - left) /2;
+            if (eatingTime(piles, mid) <= H) {
+                right = mid;
+            } else {
+                left = mid +1;
+            }
+        }
+        return left;
+    }
+
+    //给定一次吃香蕉的个数，求得的时间
+    private static int eatingTime(int[] piles, int k) {
+        int res = 0;
+        for (int pile :piles) {
+            res += pile / k + (pile %k > 0 ? 1: 0);
+        }
+        return res;
+    }
+
+    //[1011]在D天内送达包裹的能力
+    public static int shipWithinDays(int[] weights, int D) {
+        int left = Arrays.stream(weights).max().getAsInt(), right = Arrays.stream(weights).sum();
+        while (left < right) {
+            int mid = left + (right-left)/2;
+            if (needDays(weights, mid) <= D) {
+                right = mid;
+            } else {
+                left = mid +1;
+            }
+        }
+        return left;
+    }
+
+    private static int needDays(int[] weights, int cap) {
+        int days = 0;
+        int temp = 0;
+        for (int weight : weights) {
+            temp += weight;
+            if (temp > cap) {
+                days++;
+                temp = weight;
+            }
+        }
+        if (temp <= cap) {
+            days++;
+        }
+        return days;
+    }
+
     public static void main(String[] args) {
 //        34. 在排序数组中查找元素的第一个和最后一个的位置
 //        int[] result2 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 6);
@@ -172,6 +227,11 @@ public class BinarySearch {
 //        System.out.println(myPow(2.10000d, 3));
 //        System.out.println(myPow(2.00000d, -2));
 
+//        System.out.println(minEatingSpeed(new int[]{3,6,7,11}, 8));
+
+        System.out.println(shipWithinDays(new int[] {1,2,3,4,5,6,7,8,9,10}, 5));
+        System.out.println(shipWithinDays(new int[] {3,2,2,4,1,4}, 3));
+        System.out.println(shipWithinDays(new int[] {337,399,204,451,273,471,37,211,67,224,126,123,294,295,498,69,264,307,419,232,361,301,116,216,227,203,456,195,444,302,58,496,84,280,58,107,300,334,418,241}, 20));
     }
 
 }

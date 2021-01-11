@@ -141,9 +141,9 @@ public class Others {
     //[42].接雨水
     public static int trap(int[] height) {
         if (height.length == 0) return 0;
-        int left = 0, right = height.length -1;
+        int left = 0, right = height.length - 1;
         //l_max指[0...left]的最大左边界值, r_max指[right...n-1]的最大右边界值
-        int l_max = height[0], r_max = height[height.length -1];
+        int l_max = height[0], r_max = height[height.length - 1];
         int res = 0;
         while (left <= right) {
             l_max = Math.max(l_max, height[left]);
@@ -157,6 +157,24 @@ public class Others {
             }
         }
         return res;
+    }
+
+    //[43].字符串相乘
+    public static String multiply(String num1, String num2) {
+        char[] c1 = num1.toCharArray();
+        char[] c2 = num2.toCharArray();
+        int outLevel = 1;
+        int res = 0;
+        for (int i = c2.length - 1; i >= 0; i--) {
+            int cur = 0, innerLevel = 1;
+            for (int j = c1.length - 1; j >= 0; j--) {
+                cur += (c2[i] - '0') * (c1[j] - '0') * innerLevel;
+                innerLevel *= 10;
+            }
+            res += cur * outLevel;
+            outLevel *= 10;
+        }
+        return "" + res;
     }
 
     //[49] 字母异位分组
@@ -1940,7 +1958,7 @@ public class Others {
         //实际的数字
         long num = (long) Math.pow(10, i - 1) + (n - length - 1) / i;
         //第几位
-        int index = (int)((n - length - 1) % i);
+        int index = (int) ((n - length - 1) % i);
         return String.valueOf(num).charAt(index) - '0';
     }
 
@@ -1974,7 +1992,12 @@ public class Others {
 //        [42].接雨水
 //        System.out.println(trap(new int[]{4,2,0,3,2,5}));
 //
-//        49. 字母异位分组
+//        [43].字符串相乘
+//        System.out.println(multiply("123", "456"));
+//        System.out.println(multiply("2", "3"));
+//        System.out.println(multiply("123", "89"));
+//
+//        [49].字母异位分组
 //        System.out.println(groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}));
 //        System.out.println(groupAnagrams(new String[]{}));
 //
@@ -2404,9 +2427,10 @@ public class Others {
 //        [398].随机数索引
 //        Solution solution = new Solution(new int[] {1,2,3,3,3});
 //        System.out.println(solution.pick(3));
-
+//
+//        [400].第N个数字
 //        System.out.println(findNthDigit(11));
 //        System.out.println(findNthDigit(193));
-        System.out.println(findNthDigit(Integer.MAX_VALUE));
+//        System.out.println(findNthDigit(Integer.MAX_VALUE));
     }
 }
