@@ -495,7 +495,6 @@ public class DynamicProgramming {
         return dp[1][n];
     }
 
-
     //[376].摆动序列
     public static int wiggleMaxLength(int[] nums) {
         if (nums.length < 2) return nums.length;
@@ -523,6 +522,7 @@ public class DynamicProgramming {
         return Math.max(up[nums.length - 1], down[nums.length - 1]);
     }
 
+    //[377].组合总和IV
     public static int combinationSum4(int[] nums, int target) {
 
         //和为i的组合总数
@@ -538,7 +538,6 @@ public class DynamicProgramming {
         }
         return dp[target];
     }
-
 
     //[396].旋转函数
     public static int maxRotateFunction(int[] A) {
@@ -559,6 +558,7 @@ public class DynamicProgramming {
         }
         return max;
     }
+
 
     //[416].分割等和子集
     public static boolean canPartition(int[] nums) {
@@ -587,6 +587,38 @@ public class DynamicProgramming {
             }
         }
         return dp[nums.length - 1][sum];
+    }
+
+    //[518].兑换零钱II
+    public static int change(int amount, int[] coins) {
+        int size = coins.length;
+        if (size == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        //前i种硬币中，凑成j的总数
+        int[][] dp = new int[size][amount + 1];
+        for (int i = 0; i < size; i++) {
+            dp[i][0] = 1;
+        }
+
+        for (int j = 1; j <= amount; j++) {
+            dp[0][j] = j % coins[0] == 0 ? 1 : 0;
+        }
+
+        for (int i = 1; i < size; i++) {
+            for (int j = 1; j <= amount; j++) {
+                if (j >= coins[i]) {
+                    dp[i][j] = dp[i][j - coins[i]] + dp[i - 1][j];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[size - 1][amount];
     }
 
     public static void main(String[] args) {
@@ -677,9 +709,16 @@ public class DynamicProgramming {
 //        [376].摆动序列
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
-
+//        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
-
-        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
+//        [416].分割等和子集
+//        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
+//        [377].组合总和IV
+//        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
+//        [518].兑换零钱II
+//        System.out.println(change(5, new int[]{1, 2, 5}));
+//        System.out.println(change(3, new int[]{2}));
+//        System.out.println(change(0, new int[]{}));
+//        System.out.println(change(7, new int[]{}));
     }
 }
