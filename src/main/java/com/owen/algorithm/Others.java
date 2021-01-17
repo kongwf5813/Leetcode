@@ -1095,6 +1095,97 @@ public class Others {
                 || ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U';
     }
 
+
+    //[355].设计推特
+    public static class Twitter {
+
+        private class Tweet {
+            private int tweetId;
+            private long timestamp;
+            private Tweet next;
+
+            public Tweet(int tweetId, long timestamp) {
+                this.tweetId = tweetId;
+                this.timestamp = timestamp;
+            }
+
+            public void setNext(Tweet next) {
+                this.next = next;
+            }
+        }
+        Map<Integer, Tweet> userTweets = new HashMap<>();
+        Map<Integer, Set<Integer>> followers = new HashMap<>();
+        long timestamp = 0;
+
+        /** Initialize your data structure here. */
+        public Twitter() {
+        }
+
+        /** Compose a new tweet. */
+        public void postTweet(int userId, int tweetId) {
+            if (userTweets.containsKey(userId)) {
+                Tweet head = userTweets.get(userId);
+                Tweet latest = new Tweet(tweetId, timestamp++);
+                latest.next = head;
+                userTweets.put(userId, latest);
+            } else {
+                userTweets.put(userId, new Tweet(tweetId, timestamp++));
+            }
+        }
+
+        /** Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent. */
+        public List<Integer> getNewsFeed(int userId) {
+            Set<Integer> users = new HashSet<>();
+            users.add(userId);
+            Set<Integer> followees = followers.get(userId);
+            if (followees != null) {
+                users.addAll(followees);
+            }
+
+            List<Integer> res = new ArrayList<>();
+            if (users.isEmpty()) {
+                return res;
+            }
+
+            PriorityQueue<Tweet> queue = new PriorityQueue<>((a, b) -> (int) (b.timestamp - a.timestamp));
+            for (int id : users) {
+                if (!userTweets.containsKey(id)) {
+                    continue;
+                }
+                queue.add(userTweets.get(id));
+            }
+
+            while (!queue.isEmpty()) {
+                Tweet tweet = queue.poll();
+                res.add(tweet.tweetId);
+                if (res.size() == 10) {
+                    return res;
+                }
+
+                if (tweet.next != null) {
+                    queue.add(tweet.next);
+                }
+            }
+
+            return res;
+        }
+
+        /** Follower follows a followee. If the operation is invalid, it should be a no-op. */
+        public void follow(int followerId, int followeeId) {
+            followers.putIfAbsent(followerId, new HashSet<>());
+            Set<Integer> followees = followers.get(followerId);
+            followees.add(followeeId);
+        }
+
+        /** Follower unfollows a followee. If the operation is invalid, it should be a no-op. */
+        public void unfollow(int followerId, int followeeId) {
+            Set<Integer> followees = followers.get(followerId);
+            if (followees != null) {
+                followees.remove(followeeId);
+            }
+        }
+    }
+
     //[371].两整数之和
     public static int getSum(int a, int b) {
         while (b != 0) {
@@ -1558,6 +1649,23 @@ public class Others {
 //        [345].反转字符串中的元音字母
 //        System.out.println(reverseVowels("leetcodo"));
 //
+//
+//        [355].设计推特
+//        Twitter twitter = new Twitter();
+//        // 用户1发送了一条新推文 (用户id = 1, 推文id = 5).
+//        twitter.postTweet(1, 5);
+//        // 用户1的获取推文应当返回一个列表，其中包含一个id为5的推文.
+//        System.out.println(twitter.getNewsFeed(1));
+//        // 用户1关注了用户2.
+//        twitter.follow(1, 2);
+//        // 用户2发送了一个新推文 (推文id = 6).
+//        twitter.postTweet(2, 6);
+//        // 用户1的获取推文应当返回一个列表，其中包含两个推文，id分别为 -> [6, 5].
+//        System.out.println(twitter.getNewsFeed(1));
+//        twitter.unfollow(1, 2);
+//        // 用户1的获取推文应当返回一个列表，其中包含一个id为5的推文.
+//        System.out.println(twitter.getNewsFeed(1));
+//
 //        [371].两整数之和
 //        System.out.println(getSum(2, 3));
 //        System.out.println(getSum(-2, 3));
@@ -1607,6 +1715,7 @@ public class Others {
 //        System.out.println(findNthDigit(11));
 //        System.out.println(findNthDigit(193));
 //        System.out.println(findNthDigit(Integer.MAX_VALUE));
+//
 //        [895].最大频率栈
 //        FreqStack freqStack = new FreqStack();
 //        freqStack.push(5);
@@ -1619,6 +1728,5 @@ public class Others {
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
-
     }
 }
