@@ -689,7 +689,6 @@ public class Tree {
                 root.val = minNode.val;
                 root.right = deleteNode(root.right, minNode.val);
             }
-
         } else if (root.val < key) {
             root.right = deleteNode(root.right, key);
         } else {
@@ -702,6 +701,7 @@ public class Tree {
         while (root.left != null) root = root.left;
         return root;
     }
+
     //[700].二叉搜索树中的搜索
     public static TreeNode searchBST(TreeNode root, int val) {
         if (root == null) {

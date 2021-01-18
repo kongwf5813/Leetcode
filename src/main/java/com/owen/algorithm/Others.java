@@ -203,7 +203,6 @@ public class Others {
         return res;
     }
 
-
     //[116].填充每个节点的下一个右侧节点指针
     public static Node connect(Node root) {
         if (root == null) return null;
@@ -293,7 +292,6 @@ public class Others {
         }
         return difCount == 1;
     }
-
 
     //[136]只出现一次的数字
     public static int singleNumber(int[] nums) {
@@ -1426,6 +1424,28 @@ public class Others {
         return String.valueOf(num).charAt(index) - '0';
     }
 
+
+    //[402].移掉K位数字
+    public static String removeKdigits(String num, int k) {
+
+    }
+
+    //[503].下一个更大的数II
+    public static int[] nextGreaterElements(int[] nums) {
+        int size = nums.length;
+        int[] res = new int[size];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 2 * size - 1; i >= 0; i--) {
+            while (!stack.empty() && stack.peek() <= nums[i % size]) {
+                stack.pop();
+            }
+            res[i % size] = stack.empty() ? -1 : stack.peek();
+
+            stack.push(nums[i % size]);
+        }
+        return res;
+    }
+
     //[895].最大频率栈
     static class FreqStack {
         private int maxFreq = 0;
@@ -1716,6 +1736,8 @@ public class Others {
 //        System.out.println(findNthDigit(193));
 //        System.out.println(findNthDigit(Integer.MAX_VALUE));
 //
+//        [503].下一个更大元素II
+//        System.out.println(Arrays.toString(nextGreaterElements(new int[]{1,2,1})));
 //        [895].最大频率栈
 //        FreqStack freqStack = new FreqStack();
 //        freqStack.push(5);
