@@ -729,6 +729,42 @@ public class Tree {
         return root;
     }
 
+    //[1373].二叉搜索子树的最大健和值
+    public static int maxSumBST(TreeNode root) {
+        AtomicInteger res = new AtomicInteger();
+        traverse(root, res);
+        return res.get();
+    }
+
+    private static int[] traverse(TreeNode root, AtomicInteger maxSum) {
+        //是否为BST 最小值 最大值 健和值
+        if (root == null) {
+            return new int[]{1, Integer.MAX_VALUE, Integer.MIN_VALUE, 0};
+        }
+
+        int[] left = traverse(root.left, maxSum);
+        int[] right = traverse(root.right, maxSum);
+
+        int[] res = new int[4];
+        //可能是BST树， 根节点 > 左子树的最大值 且 根节点 < 右子树的最小值
+        if (left[0] == 1 && right[0] == 1
+                && left[2] < root.val
+                && root.val < right[1]) {
+
+            res[0] = 1;
+            // 左子树的最小值 根节点 取最小
+            res[1] = Math.min(root.val, left[1]);
+            // 右子树的最大值 根节点 取最大
+            res[2] = Math.max(root.val, right[2]);
+
+            res[3] = left[3] + right[3] + root.val;
+            maxSum.set(Math.max(maxSum.get(), res[3]));
+        } else {
+            res[0] = 0;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        [94] 二叉树的中序遍历
 //        TreeNode root = new TreeNode(1);
