@@ -1427,7 +1427,33 @@ public class Others {
 
     //[402].移掉K位数字
     public static String removeKdigits(String num, int k) {
+        if (k == num.length()) return "0";
+        Stack<Character> stack = new Stack<>();
+        for (char ch : num.toCharArray()) {
+            while (!stack.isEmpty() && stack.peek() > ch && k > 0) {
+                stack.pop();
+                k--;
+            }
+            //前导0，不添加到栈中
+            if (stack.isEmpty() && ch == '0') {
+                continue;
+            }
+            stack.push(ch);
+        }
+        while (k > 0) {
+            stack.pop();
+            k--;
+        }
 
+        if (stack.isEmpty()) {
+            return "0";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.append(stack.pop());
+        }
+        return sb.reverse().toString();
     }
 
     //[503].下一个更大的数II
@@ -1736,8 +1762,15 @@ public class Others {
 //        System.out.println(findNthDigit(193));
 //        System.out.println(findNthDigit(Integer.MAX_VALUE));
 //
+//        [402].移掉K位数字
+//        System.out.println(removeKdigits("10200", 1));
+//        System.out.println(removeKdigits("1432219", 3));
+//        System.out.println(removeKdigits("10", 2));
+//        System.out.println(removeKdigits("10016042692165669282207674747", 9));
+//
 //        [503].下一个更大元素II
 //        System.out.println(Arrays.toString(nextGreaterElements(new int[]{1,2,1})));
+//
 //        [895].最大频率栈
 //        FreqStack freqStack = new FreqStack();
 //        freqStack.push(5);
