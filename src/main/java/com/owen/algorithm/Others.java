@@ -1472,6 +1472,22 @@ public class Others {
         return res;
     }
 
+
+    //[739].每日温度
+    public static int[] dailyTemperatures(int[] T) {
+        int size = T.length;
+        int[] res = new int[size];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = size - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && T[stack.peek()] <= T[i]) {
+                stack.pop();
+            }
+            res[i] = stack.isEmpty() ? 0 : stack.peek() - i;
+            stack.push(i);
+        }
+        return res;
+    }
+
     //[895].最大频率栈
     static class FreqStack {
         private int maxFreq = 0;
@@ -1771,6 +1787,9 @@ public class Others {
 //        [503].下一个更大元素II
 //        System.out.println(Arrays.toString(nextGreaterElements(new int[]{1,2,1})));
 //
+//        [739].每日温度
+//        System.out.println(Arrays.toString(dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
+//
 //        [895].最大频率栈
 //        FreqStack freqStack = new FreqStack();
 //        freqStack.push(5);
@@ -1783,5 +1802,6 @@ public class Others {
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
+
     }
 }
