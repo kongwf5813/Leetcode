@@ -1558,25 +1558,22 @@ public class Others {
         }
     }
 
-
+    //[1019].链表中的下一个更大节点
     public static int[] nextLargerNodes(ListNode head) {
-        //2 1 5
-        Stack<Integer> stack = new Stack<>();
-        Map<Integer, Integer> map = new TreeMap<>();
+        List<Integer> list = new ArrayList<>();
         while (head != null) {
-            map.put(head.val, 0);
-            //只保留大的
-            while (!stack.isEmpty() && stack.peek() < head.val) {
-                map.put(stack.pop(), head.val);
-            }
-            stack.push(head.val);
+            list.add(head.val);
             head = head.next;
         }
 
-        int[] res = new int[map.size()];
-        int index = 0;
-        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            res[index++] = entry.getValue();
+        int[] res = new int[list.size()];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i< list.size();i++) {
+            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
+                int index = stack.pop();
+                res[index] = list.get(i);
+            }
+            stack.push(i);
         }
         return res;
     }
@@ -1869,16 +1866,17 @@ public class Others {
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
-        ListNode head = new ListNode(2);
-        ListNode f = new ListNode(7);
-        ListNode t = new ListNode(4);
-        ListNode x = new ListNode(3);
-        ListNode y = new ListNode(5);
-        head.next = f;
-        f.next = t;
-        t.next = x;
-        x.next = y;
-
-        System.out.println(Arrays.toString(nextLargerNodes(head)));
+//
+//        [1019].链表中的下一个更大节点
+//        ListNode head = new ListNode(2);
+//        ListNode f = new ListNode(7);
+//        ListNode t = new ListNode(4);
+//        ListNode x = new ListNode(3);
+//        ListNode y = new ListNode(5);
+//        head.next = f;
+//        f.next = t;
+//        t.next = x;
+//        x.next = y;
+//        System.out.println(Arrays.toString(nextLargerNodes(head)));
     }
 }
