@@ -1456,6 +1456,27 @@ public class Others {
         return sb.reverse().toString();
     }
 
+    //[496].下一个更大元素I
+    public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        //nums1 = [4,1,2], nums2 = [1,3,4,2].
+        //输出: [-1,3,-1]
+        Map<Integer, Integer> map = new HashMap<>();
+        Stack<Integer> stack = new Stack<>();
+        for (int i = nums2.length-1; i >=0; i--) {
+            //从右到左放入最大值
+            while (!stack.isEmpty() && nums2[i] >= stack.peek()) {
+                stack.pop();
+            }
+            map.put(nums2[i], stack.isEmpty() ? -1 : stack.peek());
+            stack.push(nums2[i]);
+        }
+        int[] res = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++) {
+            res[i] = map.get(nums1[i]);
+        }
+        return res;
+    }
+
     //[503].下一个更大的数II
     public static int[] nextGreaterElements(int[] nums) {
         int size = nums.length;
@@ -1472,7 +1493,6 @@ public class Others {
         return res;
     }
 
-
     //[739].每日温度
     public static int[] dailyTemperatures(int[] T) {
         int size = T.length;
@@ -1486,6 +1506,21 @@ public class Others {
             stack.push(i);
         }
         return res;
+    }
+
+    //[804].唯一摩斯密码词
+    public static int uniqueMorseRepresentations(String[] words) {
+        String[] morse = new String[]{".-","-...","-.-.","-..",".","..-.","--.","....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-","..-","...-",".--","-..-","-.--","--.."};
+        HashSet<String> set = new HashSet<>();
+        for (String word : words) {
+            char[] each = word.toCharArray();
+            StringBuilder sb = new StringBuilder();
+            for (char ch : each) {
+                sb.append(morse[ch - 'a']);
+            }
+            set.add(sb.toString());
+        }
+        return set.size();
     }
 
     //[895].最大频率栈
@@ -1784,11 +1819,19 @@ public class Others {
 //        System.out.println(removeKdigits("10", 2));
 //        System.out.println(removeKdigits("10016042692165669282207674747", 9));
 //
+//        [496].下一个更大元素I
+//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,4,2})));
+//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,2,4,2})));
+//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{2,4}, new int[]{1,2,3,4})));
+//
 //        [503].下一个更大元素II
 //        System.out.println(Arrays.toString(nextGreaterElements(new int[]{1,2,1})));
 //
 //        [739].每日温度
 //        System.out.println(Arrays.toString(dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
+//
+//        [804].唯一摩斯密码词
+//        System.out.println(uniqueMorseRepresentations(new String[]{"gin", "zen", "gig", "msg"}));
 //
 //        [895].最大频率栈
 //        FreqStack freqStack = new FreqStack();
