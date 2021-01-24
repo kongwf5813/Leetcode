@@ -6,7 +6,7 @@ import java.util.*;
  * Created by OKONG on 2020/9/13.
  */
 public class ArrayProgramming {
-    //[1]两数之和变种(双指针)
+    //[1].两数之和变种(双指针)
     public static List<List<Integer>> twoSum(int[] nums, int start, int target) {
         List<List<Integer>> result = new ArrayList<>();
         int lo = start;
@@ -31,7 +31,7 @@ public class ArrayProgramming {
         return result;
     }
 
-    //[15]三数之和 (双指针)
+    //[15].三数之和 (双指针)
     public static List<List<Integer>> threeSum(int[] nums) {
         Arrays.sort(nums);
         List<List<Integer>> total = new ArrayList<>();
@@ -112,7 +112,7 @@ public class ArrayProgramming {
         return -1;
     }
 
-    //54.螺旋矩阵
+    //[54].螺旋矩阵
     public static List<Integer> spiralOrder(int[][] matrix) {
         List<Integer> result = new ArrayList<>();
         int left = 0, right = matrix[0].length - 1, top = 0, down = matrix.length - 1;
@@ -157,7 +157,7 @@ public class ArrayProgramming {
         return true;
     }
 
-    //56.合并区间(贪心)
+    //[56].合并区间(贪心)
     public static int[][] merge(int[][] intervals) {
         List<int[]> res = new ArrayList<>();
         int size;
@@ -207,7 +207,7 @@ public class ArrayProgramming {
         return res.toArray(new int[][]{});
     }
 
-    //59.螺旋矩阵II
+    //[59].螺旋矩阵II
     public static int[][] generateMatrix(int n) {
         if (n == 0) return null;
         if (n == 1) return new int[][]{{1}};
@@ -239,7 +239,7 @@ public class ArrayProgramming {
         return result;
     }
 
-    //68.旋转图像
+    //[68].旋转图像
     public static void rotateMatrix(int[][] matrix) {
         int n = matrix.length;
         if (n == 1) {
@@ -337,6 +337,33 @@ public class ArrayProgramming {
                 cur++;
             }
         }
+    }
+
+    //[80].删除排序数组中的重复项II
+    public static int removeDuplicates(int[] nums) {
+        int n = nums.length;
+        int slow = 0, fast = 1;
+        //表示多了几个，== 1，表示有两个重复项
+        int count = 0;
+        while (fast < n) {
+            if (nums[slow] == nums[fast]) {
+                count++;
+            } else {
+                count = 0;
+            }
+
+            if (count < 2) {
+                //有新的合法值，slow + 1 ，拷贝完，fast + 1
+                slow++;
+                nums[slow] = nums[fast];
+                fast++;
+            } else {
+                //有重复项，不操作，fast + 1
+                fast++;
+            }
+        }
+        //返回的是个数，== index + 1
+        return slow + 1;
     }
 
     //[81].搜索旋转排序数组II
@@ -486,7 +513,6 @@ public class ArrayProgramming {
             return quickSort(nums, l + 1, right, index);
         }
     }
-
 
     //[163].多数元素
     public static int majorityElement(int[] nums) {
@@ -923,7 +949,7 @@ public class ArrayProgramming {
     }
 
     public static void main(String[] args) {
-//        [15]三数之和
+//        [15].三数之和
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
 //        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
 //
@@ -933,18 +959,18 @@ public class ArrayProgramming {
 //        System.out.println(searchV2(new int[]{4, 5, 6, 7, 0, 1, 2}, 0));
 //        System.out.println(searchV2(new int[]{4, 5, 6, 7, 0, 1, 2}, 3));
 //
-//        56.合并区间
+//        [56].合并区间
 //        int[][] fi = new int[][]{{1, 3}, {2, 6}, {4, 5}, {7, 8}};
 //        int[][] se = new int[][]{{1, 3}, {2, 6}, {8, 10}, {15, 18}};
 //        int[][] one = new int[][]{{1, 3}};
 //        merge(se);
 //
-//        54.螺旋矩阵
+//        [54].螺旋矩阵
 //        int[][] matrix = new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}};
 //        int[][] matrix = new int[][]{{1, 2}};
 //        System.out.println(spiralOrder(matrix));
 //
-//        55. 跳跃游戏
+//        [55].跳跃游戏
 //        System.out.println(canJump(new int[]{3, 2, 1, 0, 4}));
 //
 //        [57].插入区间
@@ -955,10 +981,10 @@ public class ArrayProgramming {
 //        int[][] res5 = insert(new int[][]{{1, 1}}, new int[]{});
 //        int[][] res6 = insert(new int[][]{{2, 5}, {6, 7}, {8, 9}}, new int[]{0, 1});
 //
-//        59. 螺旋矩阵II
+//        [59].螺旋矩阵II
 //        int[][] result = generateMatrix(3);
 //
-//        68. 旋转图像
+//        [68].旋转图像
 //        int[][] one = new int[][]{{1}};
 //        int[][] se = new int[][]{{1, 2}, {3, 4}};
 //        int[][] th = new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
@@ -966,7 +992,7 @@ public class ArrayProgramming {
 //        int[][] fi = new int[][]{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}, {11, 12, 13, 14, 15}, {16, 17, 18, 19, 20}, {21, 22, 23, 24, 25}};
 //        rotateMatrix(fi);
 //
-//        73. 矩阵置零
+//        [73].矩阵置零
 //        int[][] a = new int[][]{{1, 1, 1}, {1, 0, 1}, {1, 1, 1}};
 //        int[][] b = new int[][]{{0, 1, 2, 0}, {3, 4, 5, 2}, {1, 3, 1, 5}};
 //        int[][] c = new int[][]{{1, 0, 1, 1}, {1, 1, 1, 1}, {0, 1, 1, 1}, {1, 1, 0, 1}};
@@ -976,13 +1002,17 @@ public class ArrayProgramming {
 //        setZeroes(c);
 //        setZeroes(d);
 //
-//        74. 搜索二维矩阵
+//        [74].搜索二维矩阵
 //        int[][] matrix = new int[][]{{1, 3, 5, 7}, {10, 11, 16, 20}, {23, 30, 34, 50}};
 //        System.out.println(searchMatrix(matrix, 13));
 //
-//        75. 颜色分类
+//        [75].颜色分类
 //        int[] sort = new int[]{};
 //        sortColors(sort);
+//
+//        [80].删除排序数组中的重复项II
+//        System.out.println(removeDuplicates(new int[]{0,0,1,1,1,1,2,3,3}));
+//        System.out.println(removeDuplicates(new int[]{1,1,1,2,2,3}));
 //
 //        [81].搜索旋转排序数组II
 //        System.out.println(searchII(new int[]{2, 5, 6, 0, 0, 1, 2}, 0));

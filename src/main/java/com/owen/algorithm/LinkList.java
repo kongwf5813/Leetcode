@@ -1,6 +1,8 @@
 package com.owen.algorithm;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 /**
@@ -49,7 +51,7 @@ public class LinkList {
         return output.next;
     }
 
-    //19.删除链表的倒数第N个节点（双指针）
+    //[19].删除链表的倒数第N个节点（双指针）
     public static ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode fast = head, slow = head, pre = null;
         int i = 0;
@@ -71,7 +73,7 @@ public class LinkList {
         }
     }
 
-    //21.合并两个有序列表
+    //[21].合并两个有序列表
     public static ListNode mergeTwoLists(ListNode l1, ListNode l2) {
         ListNode prehead = new ListNode(-1);
         ListNode pre = prehead;
@@ -89,6 +91,29 @@ public class LinkList {
         return prehead.next;
     }
 
+    //[23].合并K个升序链表
+    public static ListNode mergeKLists(ListNode[] lists) {
+        PriorityQueue<ListNode> queue = new PriorityQueue<>(Comparator.comparingInt(o -> o.val));
+        for (int i = 0; i < lists.length; i++) {
+            if (lists[i] != null) {
+                queue.offer(lists[i]);
+            }
+        }
+
+        ListNode dummyHead = new ListNode(-1);
+        ListNode p = dummyHead;
+        while (!queue.isEmpty()) {
+            ListNode min = queue.poll();
+            p.next = min;
+
+            p = p.next;
+            if (min.next != null) {
+                queue.offer(min.next);
+            }
+        }
+        return dummyHead.next;
+    }
+
     //[24].两两交换链表中的节点
     public static ListNode swapPairs(ListNode head) {
         if (head == null || head.next == null) {
@@ -102,7 +127,7 @@ public class LinkList {
         return next;
     }
 
-    //25.K个一组翻转链表
+    //[25].K个一组翻转链表
     public static ListNode reverseKGroup(ListNode head, int k) {
         if (head == null) return null;
         ListNode start = head, end = head;
@@ -117,7 +142,7 @@ public class LinkList {
         return newHead;
     }
 
-    //61.旋转链表（双指针）
+    //[61].旋转链表（双指针）
     public static ListNode rotateRight(ListNode head, int k) {
         ListNode cur = head, last = null;
         int n = 0;
@@ -146,6 +171,25 @@ public class LinkList {
         start.next = null;
         last.next = head;
         return slow;
+    }
+
+    //[82].删除排序链表中的重复元素II
+    public static ListNode deleteDuplicates(ListNode head) {
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = head;
+        ListNode cur = dummyHead;
+        while (cur.next != null && cur.next.next != null) {
+           if (cur.next.val == cur.next.next.val) {
+               ListNode temp = cur.next;
+               while (temp != null && temp.next != null && temp.val == temp.next.val) {
+                   temp = temp.next;
+               }
+               cur.next = temp.next;
+           } else {
+               cur = cur.next;
+           }
+        }
+        return dummyHead.next;
     }
 
     //[86].分隔链表
@@ -186,7 +230,7 @@ public class LinkList {
     }
 
     //[92].反转链表II
-    public static ListNode reverseBetween(ListNode head, int m, int n) { 
+    public static ListNode reverseBetween(ListNode head, int m, int n) {
         ListNode dummyHead = new ListNode(0);
         dummyHead.next = head;
         ListNode s = dummyHead, e = dummyHead.next;
@@ -339,7 +383,7 @@ public class LinkList {
         }
     }
 
-    //206. 反转链表迭代
+    //[206]. 反转链表迭代
     public static ListNode reverse(ListNode start, ListNode end) {
         //注意一定要三个节点，否则可能死循环
         ListNode pre = null, cur = start, next;
@@ -353,7 +397,7 @@ public class LinkList {
         return pre;
     }
 
-    //206.反转链表递归
+    //[206].反转链表递归
     public static ListNode reverseList(ListNode head) {
         if (head == null || head.next == null) {
             return head;
@@ -408,13 +452,18 @@ public class LinkList {
     class Solution {
 
         ListNode head;
-        /** @param head The linked list's head.
-        Note that the head is guaranteed to be not null, so it contains at least one node. */
+
+        /**
+         * @param head The linked list's head.
+         *             Note that the head is guaranteed to be not null, so it contains at least one node.
+         */
         public Solution(ListNode head) {
             this.head = head;
         }
 
-        /** Returns a random node's value. */
+        /**
+         * Returns a random node's value.
+         */
         public int getRandom() {
             if (head == null) return -1;
 
@@ -447,130 +496,111 @@ public class LinkList {
         }
         return slow;
     }
+
     public static void main(String[] args) {
 //        [2]两数相加
 //        ListNode f = new ListNode(2);
-//        ListNode s = new ListNode(4);
-//        ListNode t = new ListNode(3);
-//        f.next = s;
-//        s.next = t;
+//        f.next = new ListNode(4);
+//        f.next.next = new ListNode(3);
+//
 //        ListNode f1 = new ListNode(5);
-//        ListNode s1 = new ListNode(6);
-//        ListNode t1 = new ListNode(4);
-//        f1.next = s1;
-//        s1.next = t1;
+//        f1.next = new ListNode(6);
+//        f1.next.next = new ListNode(4);
 //        ListNode result = addTwoNumbers(f, f1);
-
-//        ListNode z = new ListNode(0);
+//
 //        ListNode f = new ListNode(1);
-//        ListNode s = new ListNode(2);
-//        ListNode t = new ListNode(3);
-//        ListNode four = new ListNode(4);
-//        ListNode five = new ListNode(5);
-//        ListNode six = new ListNode(6);
-//        ListNode seven = new ListNode(7);
-//        ListNode eight = new ListNode(8);
-//        ListNode nine = new ListNode(9);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
+//        f.next.next.next.next.next = new ListNode(6);
+//        f.next.next.next.next.next.next = new ListNode(7);
+//        f.next.next.next.next.next.next.next = new ListNode(8);
+//        f.next.next.next.next.next.next.next.next = new ListNode(9);
 //
-//        z.next = f;
-//        f.next = s;
-//        f.next = s;
-//        s.next = t;
-//        t.next = four;
-//        four.next = five;
-//        five.next = six;
-//        six.next = seven;
-//        seven.next = eight;
-//        eight.next = nine;
-//
-
-//        19.删除链表的倒数第N个节点
+//        [19].删除链表的倒数第N个节点
 //        ListNode result = removeNthFromEnd(f, 1);
 //
-//        25.K个一组翻转链表
+//        [25].K个一组翻转链表
 //        ListNode result = reverseKGroup(f, 3);
 //
-//        61.旋转链表
+//        [61].旋转链表
 //        ListNode result = rotateRight(null, 4);
 //
-//        206.反转链表递归
+//        [206].反转链表递归
 //        ListNode result = reverseList(f);
 //
-//        21.合并两个有序列表
+//        [21].合并两个有序列表
 //        ListNode f = new ListNode(1);
-//        ListNode s = new ListNode(2);
-//        ListNode t = new ListNode(4);
-//        f.next = s;
-//        s.next = t;
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(4);
 //        ListNode f1 = new ListNode(1);
-//        ListNode s1 = new ListNode(3);
-//        ListNode t1 = new ListNode(4);
-//        f1.next = s1;
-//        s1.next = t1;
+//        f1.next = new ListNode(3);
+//        f1.next.next = new ListNode(4);
 //        ListNode result = mergeTwoLists(f, f1);
 //
-//        24.两两交换链表中的节点
+//        [23].合并K个升序链表
 //        ListNode f = new ListNode(1);
-//        ListNode s = new ListNode(2);
-//        ListNode t = new ListNode(3);
-//        ListNode four = new ListNode(4);
-//        ListNode five = new ListNode(5);
-//        f.next = s;
-//        s.next = t;
-//        t.next = four;
-//        four.next = five;
+//        f.next = new ListNode(4);
+//        f.next.next = new ListNode(5);
+//        ListNode s = new ListNode(1);
+//        s.next = new ListNode(3);
+//        s.next.next = new ListNode(4);
+//        ListNode t = new ListNode(2);
+//        t.next = new ListNode(6);
+//        ListNode res = mergeKLists(new ListNode[]{f, s, t});
+//        ListNode res2 = mergeKLists(new ListNode[] {null});
+//
+//        [24].两两交换链表中的节点
+//        ListNode f = new ListNode(1);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
 //        ListNode result = swapPairs(f);
+//
+//        [82].删除排序链表中的重复元素II
+//        ListNode n1 = new ListNode(1);
+//        n1.next= new ListNode(2);
+//        n1.next.next = new ListNode(3);
+//        n1.next.next.next = new ListNode(3);
+//        n1.next.next.next.next = new ListNode(4);
+//        n1.next.next.next.next.next = new ListNode(4);
+//        n1.next.next.next.next.next.next = new ListNode(5);
+//        ListNode res = deleteDuplicates(n1);
 //
 //        [86].分隔链表
 //        ListNode n1 = new ListNode(1);
-//        ListNode n2= new ListNode(4);
-//        ListNode n3 = new ListNode(3);
-//        ListNode n4 = new ListNode(2);
-//        ListNode n5 = new ListNode(5);
-//        ListNode n6 = new ListNode(2);
-//        n1.next = n2;
-//        n2.next = n3;
-//        n3.next = n4;
-//        n4.next = n5;
-//        n5.next = n6;
+//        n1.next= new ListNode(4);
+//        n1.next.next = new ListNode(3);
+//        n1.next.next.next = new ListNode(2);
+//        n1.next.next.next.next = new ListNode(5);
+//        n1.next.next.next.next.next = new ListNode(2);
 //        partition(n1, 3);
 //        ListNode n1 = new ListNode(1);
-//        ListNode n2 = new ListNode(2);
-//        ListNode n3 = new ListNode(4);
-//        ListNode n4 = new ListNode(5);
-//        ListNode n5 = new ListNode(6);
-//        ListNode n6 = new ListNode(7);
-//        n1.next = n2;
-//        n2.next = n3;
-//        n3.next = n4;
-//        n4.next = n5;
-//        n5.next = n6;
+//        n1.next= new ListNode(2);
+//        n1.next.next = new ListNode(4);
+//        n1.next.next.next = new ListNode(5);
+//        n1.next.next.next.next = new ListNode(6);
+//        n1.next.next.next.next.next = new ListNode(7);
 //        partition(n6, 8);
-
-//        92.反转列表
+//
+//        [92].反转列表
 //        ListNode f = new ListNode(1);
-//        ListNode s = new ListNode(2);
-//        ListNode t = new ListNode(3);
-//        ListNode four = new ListNode(4);
-//        ListNode five = new ListNode(5);
-//        f.next = s;
-//        s.next = t;
-//        t.next = four;
-//        four.next = five;
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
 //
 //        ListNode a = reverseBetween(f, 1, 1);
 //        ListNode b = reverseBetween(f, 2, 4);
 
 //        [143].重排链表
 //        ListNode f = new ListNode(1);
-//        ListNode s = new ListNode(2);
-//        ListNode t = new ListNode(3);
-//        ListNode four = new ListNode(4);
-//        ListNode five = new ListNode(5);
-//        f.next = s;
-//        s.next = t;
-//        t.next = four;
-//        four.next = five;
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
 //        reorderList(f);
 //
 //        [142]环形链表II
@@ -579,44 +609,29 @@ public class LinkList {
 //        [147].对链表进行插入排序
 //        -1->5->3->4->0
 //        ListNode f = new ListNode(-1);
-//        ListNode s = new ListNode(5);
-//        ListNode t = new ListNode(3);
-//        ListNode four = new ListNode(4);
-//        ListNode fiv = new ListNode(0);
-//        f.next = s;
-//        s.next = t;
-//        t.next = four;
-//        four.next = fiv;
+//        f.next = new ListNode(5);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(0);
 //        ListNode result = insertionSortList(f);
 
 //        [148].排序链表
 //        ListNode f = new ListNode(-1);
-//        ListNode f1 = new ListNode(5);
-//        ListNode f2 = new ListNode(3);
-//        ListNode f3 = new ListNode(4);
-//        ListNode f4 = new ListNode(0);
-//        ListNode f5 = new ListNode(7);
-//        f.next = f1;
-//        f1.next = f2;
-//        f2.next = f3;
-//        f3.next = f4;
-//        f4.next = f5;
+//        f.next = new ListNode(5);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(0);
+//        f.next.next.next.next.next = new ListNode(7);
 //        ListNode result = sortList(f);
 
 //        [328].奇偶链表
 //        ListNode head = new ListNode(2);
-//        ListNode one = new ListNode(1);
-//        ListNode tr = new ListNode(3);
-//        ListNode fi = new ListNode(5);
-//        ListNode si = new ListNode(6);
-//        ListNode fo = new ListNode(4);
-//        ListNode se = new ListNode(7);
-//        head.next = one;
-//        one.next = tr;
-//        tr.next = fi;
-//        fi.next = si;
-//        si.next = fo;
-//        fo.next = se;
+//        head.next = new ListNode(1);
+//        head.next.next = new ListNode(3);
+//        head.next.next.next = new ListNode(5);
+//        head.next.next.next.next = new ListNode(6);
+//        head.next.next.next.next.next = new ListNode(4);
+//        head.next.next.next.next.next.next = new ListNode(7);
 //        ListNode res = oddEvenList(head);
     }
 }

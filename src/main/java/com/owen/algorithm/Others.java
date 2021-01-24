@@ -2,6 +2,7 @@ package com.owen.algorithm;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import com.owen.algorithm.LinkList.ListNode;
 
 public class Others {
@@ -85,7 +86,7 @@ public class Others {
         //Math.min(height[j], height[i]) * (j-i)
         //移动最长木板导致面积减小或不变
         //移动最短木板导致面积可能会变大
-        int left = 0, right = height.length-1;
+        int left = 0, right = height.length - 1;
         int res = 0;
         while (left < right) {
             int area = Math.min(height[left], height[right]) * (right - left);
@@ -183,25 +184,6 @@ public class Others {
             result.add(val);
         }
         return result;
-    }
-
-    //单调栈
-    public static int[] nextGreaterNumber(int[] data) {
-        int[] res = new int[data.length];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = data.length - 1; i >= 0; i--) {
-            while (!stack.empty() && data[i] >= stack.peek()) {
-                //不断地剔除最小值，保留栈顶最大值
-                stack.pop();
-            }
-
-            int max = stack.empty() ? -1 : stack.peek();
-            res[i] = max;
-
-            //放入每个值
-            stack.push(data[i]);
-        }
-        return res;
     }
 
     //[116].填充每个节点的下一个右侧节点指针
@@ -1112,15 +1094,20 @@ public class Others {
                 this.next = next;
             }
         }
+
         Map<Integer, Tweet> userTweets = new HashMap<>();
         Map<Integer, Set<Integer>> followers = new HashMap<>();
         long timestamp = 0;
 
-        /** Initialize your data structure here. */
+        /**
+         * Initialize your data structure here.
+         */
         public Twitter() {
         }
 
-        /** Compose a new tweet. */
+        /**
+         * Compose a new tweet.
+         */
         public void postTweet(int userId, int tweetId) {
             if (userTweets.containsKey(userId)) {
                 Tweet head = userTweets.get(userId);
@@ -1132,7 +1119,9 @@ public class Others {
             }
         }
 
-        /** Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent. */
+        /**
+         * Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent.
+         */
         public List<Integer> getNewsFeed(int userId) {
             Set<Integer> users = new HashSet<>();
             users.add(userId);
@@ -1169,14 +1158,18 @@ public class Others {
             return res;
         }
 
-        /** Follower follows a followee. If the operation is invalid, it should be a no-op. */
+        /**
+         * Follower follows a followee. If the operation is invalid, it should be a no-op.
+         */
         public void follow(int followerId, int followeeId) {
             followers.putIfAbsent(followerId, new HashSet<>());
             Set<Integer> followees = followers.get(followerId);
             followees.add(followeeId);
         }
 
-        /** Follower unfollows a followee. If the operation is invalid, it should be a no-op. */
+        /**
+         * Follower unfollows a followee. If the operation is invalid, it should be a no-op.
+         */
         public void unfollow(int followerId, int followeeId) {
             Set<Integer> followees = followers.get(followerId);
             if (followees != null) {
@@ -1217,6 +1210,29 @@ public class Others {
             int half = myPow(a, b / 2);
             return (half * half) % base;
         }
+    }
+
+    //[373].查找和最小的K对数字
+    public static List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<List<Integer>> res = new LinkedList<>();
+        if (nums1.length == 0 || nums2.length == 0) return res;
+        //二元组中放的是坐标,小顶堆
+        PriorityQueue<int[]> queue = new PriorityQueue<>(Comparator.comparingInt(o -> nums1[o[0]] + nums2[o[1]]));
+        for (int i = 0; i < Math.min(nums1.length, k); i++) {
+            queue.add(new int[]{i, 0});
+        }
+
+        while (k > 0 && !queue.isEmpty()) {
+            int[] pair = queue.poll();
+            res.add(Arrays.asList(nums1[pair[0]], nums2[pair[1]]));
+
+            //等于就不需要添加了
+            if (pair[1] + 1 < nums2.length) {
+                queue.add(new int[]{pair[0], pair[1] + 1});
+            }
+            k--;
+        }
+        return res;
     }
 
     //[380].常数时间插入、删除和获取随机元素
@@ -1425,7 +1441,6 @@ public class Others {
         return String.valueOf(num).charAt(index) - '0';
     }
 
-
     //[402].移掉K位数字
     public static String removeKdigits(String num, int k) {
         if (k == num.length()) return "0";
@@ -1457,13 +1472,36 @@ public class Others {
         return sb.reverse().toString();
     }
 
+    //[451].根据字符出现频率排序
+    public static String frequencySort(String s) {
+        Map<Character, Integer> map = new HashMap<>();
+        char[] chs = s.toCharArray();
+        for (char ch : chs) {
+            int count = map.getOrDefault(ch, 0);
+            map.put(ch, ++count);
+        }
+
+        PriorityQueue<Character> queue = new PriorityQueue<>((o1, o2) -> map.get(o2) - map.get(o1));
+        map.forEach((key, value) -> queue.add(key));
+
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            char ch = queue.poll();
+            int feq = map.get(ch);
+            for (int i = 0; i < feq; i++) {
+                sb.append(ch);
+            }
+        }
+        return sb.toString();
+    }
+
     //[496].下一个更大元素I
     public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
         //nums1 = [4,1,2], nums2 = [1,3,4,2].
         //输出: [-1,3,-1]
         Map<Integer, Integer> map = new HashMap<>();
         Stack<Integer> stack = new Stack<>();
-        for (int i = nums2.length-1; i >=0; i--) {
+        for (int i = nums2.length - 1; i >= 0; i--) {
             //从右到左放入最大值
             while (!stack.isEmpty() && nums2[i] >= stack.peek()) {
                 stack.pop();
@@ -1511,7 +1549,7 @@ public class Others {
 
     //[804].唯一摩斯密码词
     public static int uniqueMorseRepresentations(String[] words) {
-        String[] morse = new String[]{".-","-...","-.-.","-..",".","..-.","--.","....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-","..-","...-",".--","-..-","-.--","--.."};
+        String[] morse = new String[]{".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."};
         HashSet<String> set = new HashSet<>();
         for (String word : words) {
             char[] each = word.toCharArray();
@@ -1568,7 +1606,7 @@ public class Others {
 
         int[] res = new int[list.size()];
         Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i< list.size();i++) {
+        for (int i = 0; i < list.size(); i++) {
             while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
                 int index = stack.pop();
                 res[index] = list.get(i);
@@ -1767,7 +1805,6 @@ public class Others {
 //        [345].反转字符串中的元音字母
 //        System.out.println(reverseVowels("leetcodo"));
 //
-//
 //        [355].设计推特
 //        Twitter twitter = new Twitter();
 //        // 用户1发送了一条新推文 (用户id = 1, 推文id = 5).
@@ -1840,6 +1877,14 @@ public class Others {
 //        System.out.println(removeKdigits("10", 2));
 //        System.out.println(removeKdigits("10016042692165669282207674747", 9));
 //
+//        [373].查找和最小的K对数字
+//        System.out.println(kSmallestPairs(new int[]{1,1,2}, new int[]{1,2,3}, 2));
+//        System.out.println(kSmallestPairs(new int[]{1, 7, 11}, new int[]{2, 4, 6}, 10));
+
+//        [451].根据字符出现频率排序
+//        System.out.println(frequencySort("Aabb"));
+//        System.out.println(frequencySort("tree"));
+//        System.out.println(frequencySort("cccaaa"));
 //        [496].下一个更大元素I
 //        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,4,2})));
 //        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,2,4,2})));

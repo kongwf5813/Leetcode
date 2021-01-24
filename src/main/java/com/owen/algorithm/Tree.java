@@ -4,7 +4,9 @@ import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
 import com.owen.algorithm.LinkList.ListNode;
+
 public class Tree {
 
     public static class TreeNode {
@@ -281,6 +283,8 @@ public class Tree {
     }
 
     private static TreeNode dfsForBuildTree(int[] preorder, int ps, int pe, int[] indorder, int is, int ie, Map<Integer, Integer> indexMap) {
+        //根 左 右
+        //左 根 右
         if (ps > pe || is > ie) {
             return null;
         }
@@ -678,6 +682,53 @@ public class Tree {
         traverseBST(root.left, sum);
     }
 
+    //[449].序列化和反序列化二叉搜索树
+    public static class Codec {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "";
+            StringBuilder res = new StringBuilder();
+            helper(root, res);
+            return res.substring(0, res.length() - 1);
+        }
+
+        private void helper(TreeNode root, StringBuilder sb) {
+            if (root == null) {
+                return;
+            }
+            sb.append(root.val).append(',');
+            helper(root.left, sb);
+            helper(root.right, sb);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data == null || data.length() == 0) return null;
+            String[] arr = data.split(",");
+            return helper(arr, 0, arr.length -1);
+        }
+
+        private TreeNode helper(String[] data, int low, int high) {
+            if (low > high) return null;
+            //根左右
+            //4,3,2,5
+            TreeNode root = new TreeNode(Integer.parseInt(data[low]));
+            //找到比当前根节点大的节点，就是左右分界点
+            int index = high + 1;
+            for (int i = low + 1; i <= high; i++) {
+                if (Integer.parseInt(data[i]) > root.val) {
+                    index = i;
+                    break;
+                }
+            }
+
+            root.left = helper(data, low + 1, index -1);
+            root.right = helper(data, index, high);
+            return root;
+        }
+    }
+
     //[450]删除二叉搜索树中的节点
     public static TreeNode deleteNode(TreeNode root, int key) {
         if (root == null) return null;
@@ -1003,5 +1054,18 @@ public class Tree {
 //        l1.right = l2;
 //        root.right = r1;
 //        System.out.println(binaryTreePaths(root));
+//
+//        [449].序列化和反序列化二叉搜索树
+//        Codec codec = new Codec();
+//        TreeNode root = new TreeNode(3);
+//        root.left = new TreeNode(1);
+//        root.left.right = new TreeNode(2);
+//        root.right = new TreeNode(4);
+//
+//        String serialize = codec.serialize(root);
+//        System.out.println(serialize);
+//        TreeNode res = codec.deserialize(serialize);
+//        System.out.println();
+
     }
 }
