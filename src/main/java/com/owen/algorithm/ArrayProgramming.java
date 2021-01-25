@@ -948,6 +948,61 @@ public class ArrayProgramming {
         }
     }
 
+    //[406].根据身高重建队列
+    public static int[][] reconstructQueue(int[][] people) {
+        //[7,0] [7,1] [6,1] [5,0] [5,2] [4,4]
+        //[7,0] [7,1]
+        //[7,0] [6,1] [7,1]
+        //[5,0] [7,0] [6,1] [7,1]
+        //[5,0] [7,0] [5,2] [6,1] [7,1]
+        //[5,0] [7,0] [5,2] [6,1] [4,4] [7,1]
+        Arrays.sort(people, (p1, p2) -> p1[0] == p2[0] ? p1[1] - p2[1] : p2[0] - p1[0]);
+        LinkedList<int[]> res = new LinkedList<>();
+        for (int[] each : people) {
+            res.add(each[1], each);
+        }
+        return res.toArray(new int[res.size()][2]);
+    }
+
+    //[735].行星碰撞
+    public static int[] asteroidCollision(int[] asteroids) {
+        //[-2, -1, 1, 2]
+        //[10, 2, -5]
+        //[5, 10, -5]
+        Stack<Integer> stack = new Stack<>();
+        for (int asteroid : asteroids) {
+            boolean needAdd = true;
+            while (!stack.isEmpty()) {
+                //只有这种情况会爆炸
+                if (stack.peek() > 0 && asteroid < 0) {
+                    //相消
+                    if (stack.peek() < -asteroid) {
+                        stack.pop();
+                    } else if (stack.peek() == -asteroid) {
+                        stack.pop();
+                        needAdd = false;
+                        break;
+                    } else {
+                        needAdd = false;
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (needAdd) {
+                stack.push(asteroid);
+            }
+        }
+
+        int[] res = new int[stack.size()];
+        int index = res.length -1;
+        while (!stack.isEmpty()) {
+            res[index--] = stack.pop();
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        [15].三数之和
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
@@ -1128,5 +1183,13 @@ public class ArrayProgramming {
 //        System.out.println(Arrays.toString(res.shuffle()));
 //        res.reset();
 //        System.out.println(Arrays.toString(res.shuffle()));
+//
+//        [406].根据身高重建队列
+//        int[][] res = reconstructQueue(new int[][]{{7,0},{4,4},{7,1},{5,0},{6,1},{5,2}});
+//
+//        [735].行星碰撞
+//        System.out.println(Arrays.toString(asteroidCollision(new int[]{-2, -1, 1, 2})));
+//        System.out.println(Arrays.toString(asteroidCollision(new int[]{10, 2, -5})));
+//        System.out.println(Arrays.toString(asteroidCollision(new int[]{5, 10, -5})));
     }
 }

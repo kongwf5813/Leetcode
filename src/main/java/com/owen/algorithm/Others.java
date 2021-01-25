@@ -1596,26 +1596,6 @@ public class Others {
         }
     }
 
-    //[1019].链表中的下一个更大节点
-    public static int[] nextLargerNodes(ListNode head) {
-        List<Integer> list = new ArrayList<>();
-        while (head != null) {
-            list.add(head.val);
-            head = head.next;
-        }
-
-        int[] res = new int[list.size()];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < list.size(); i++) {
-            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
-                int index = stack.pop();
-                res[index] = list.get(i);
-            }
-            stack.push(i);
-        }
-        return res;
-    }
-
     public static void main(String[] args) {
 //        [3]无重复子串的最长子串
 //        System.out.println(lengthOfLongestSubstring("dvdf"));
@@ -1911,17 +1891,5 @@ public class Others {
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
-//
-//        [1019].链表中的下一个更大节点
-//        ListNode head = new ListNode(2);
-//        ListNode f = new ListNode(7);
-//        ListNode t = new ListNode(4);
-//        ListNode x = new ListNode(3);
-//        ListNode y = new ListNode(5);
-//        head.next = f;
-//        f.next = t;
-//        t.next = x;
-//        x.next = y;
-//        System.out.println(Arrays.toString(nextLargerNodes(head)));
     }
 }

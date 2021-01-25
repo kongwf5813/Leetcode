@@ -2,8 +2,10 @@ package com.owen.algorithm;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Stack;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -497,6 +499,26 @@ public class LinkList {
         return slow;
     }
 
+    //[1019].链表中的下一个更大节点
+    public static int[] nextLargerNodes(ListNode head) {
+        List<Integer> list = new ArrayList<>();
+        while (head != null) {
+            list.add(head.val);
+            head = head.next;
+        }
+
+        int[] res = new int[list.size()];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < list.size(); i++) {
+            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
+                int index = stack.pop();
+                res[index] = list.get(i);
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        [2]两数相加
 //        ListNode f = new ListNode(2);
@@ -633,5 +655,13 @@ public class LinkList {
 //        head.next.next.next.next.next = new ListNode(4);
 //        head.next.next.next.next.next.next = new ListNode(7);
 //        ListNode res = oddEvenList(head);
+//
+//        [1019].链表中的下一个更大节点
+//        ListNode head = new ListNode(2);
+//        head.next = new ListNode(7);
+//        head.next.next = new ListNode(4);
+//        head.next.next.next = new ListNode(3);
+//        head.next.next.next.next = new ListNode(5);
+//        System.out.println(Arrays.toString(nextLargerNodes(head)));
     }
 }
