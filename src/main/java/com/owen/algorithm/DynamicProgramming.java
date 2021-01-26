@@ -2,7 +2,9 @@ package com.owen.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -282,6 +284,24 @@ public class DynamicProgramming {
         return dp[0];
     }
 
+    //[213].打家劫舍II
+    public static int rob2(int[] nums) {
+        if (nums.length == 0) return 0;
+        if (nums.length == 1) return nums[0];
+        int res = Math.max(rob2(nums, 0, nums.length - 2), rob2(nums, 1, nums.length - 1));
+        return res;
+    }
+
+    private static int rob2(int[] nums, int start, int end) {
+        int dp_i_2 = 0, dp_i_1 = 0, dp_i = 0;
+        for (int i = end; i >= start; i--) {
+            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
+    }
+
     //[221].最大正方形
     public static int maximalSquare(char[][] matrix) {
         int row = matrix.length;
@@ -384,6 +404,21 @@ public class DynamicProgramming {
             }
         }
         return dp[amount] == amount + 1 ? -1 : dp[amount];
+    }
+
+    //[337].打家劫舍III
+    private static Map<Tree.TreeNode, Integer> robMap = new HashMap<>();
+    public static int rob(Tree.TreeNode root) {
+        if (root == null) return 0;
+        if (robMap.containsKey(root)) return robMap.get(root);
+        int rob_it = root.val +
+                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
+                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
+
+        int rob_not = rob(root.left) + rob(root.right);
+        int res = Math.max(rob_it, rob_not);
+        robMap.put(root, res);
+        return res;
     }
 
     //[338].比特位计数
@@ -674,6 +709,10 @@ public class DynamicProgramming {
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
 //        System.out.println(rob(new int[]{2, 2, 1}));
 //        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
+//
+//        [213].打家劫舍II
+//        System.out.println(rob2(new int[]{1, 2, 3, 4}));
+//        System.out.println(rob2(new int[]{2, 3, 2}));
 //
 //        [221].最大正方形
 //        char[][] area = new char[][]{{'1', '0', '1', '0', '0'}, {'1', '0', '1', '1', '1'}, {'1', '1', '1', '1', '1'}, {'1', '0', '0', '1', '0'}};
