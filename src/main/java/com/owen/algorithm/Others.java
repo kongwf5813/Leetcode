@@ -1495,6 +1495,29 @@ public class Others {
         return sb.toString();
     }
 
+    //[456].132模式
+    public static boolean find132pattern(int[] nums) {
+        //1 3 2 4
+        if (nums.length < 3) return false;
+        Stack<Integer> stack = new Stack<>();
+        int aj = Integer.MIN_VALUE;
+        for (int i = nums.length -1; i>= 0; i--) {
+            int num = nums[i];
+
+            //此处的num为ak
+            if (num < aj) {
+                return true;
+            }
+
+            //只要发现栈顶比较小，保证了 ak > aj，然后尽量取最大值
+            while(!stack.isEmpty() && stack.peek() < num) {
+                aj = Math.max(stack.pop(), aj);
+            }
+            stack.push(num);
+        }
+        return false;
+    }
+
     //[496].下一个更大元素I
     public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
         //nums1 = [4,1,2], nums2 = [1,3,4,2].
@@ -1860,11 +1883,15 @@ public class Others {
 //        [373].查找和最小的K对数字
 //        System.out.println(kSmallestPairs(new int[]{1,1,2}, new int[]{1,2,3}, 2));
 //        System.out.println(kSmallestPairs(new int[]{1, 7, 11}, new int[]{2, 4, 6}, 10));
-
+//
 //        [451].根据字符出现频率排序
 //        System.out.println(frequencySort("Aabb"));
 //        System.out.println(frequencySort("tree"));
 //        System.out.println(frequencySort("cccaaa"));
+//
+//        [456].132模式
+//        System.out.println(find132pattern(new int[]{3,4,5,4}));
+//
 //        [496].下一个更大元素I
 //        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,4,2})));
 //        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,2,4,2})));
