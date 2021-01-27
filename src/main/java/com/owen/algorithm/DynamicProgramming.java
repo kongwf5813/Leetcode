@@ -230,6 +230,22 @@ public class DynamicProgramming {
         return dp[n - 1][0];
     }
 
+    //[122].买卖股票的最佳时机II
+    public static int maxProfit2(int[] prices) {
+        // 第i天最多交易k次没有股票 dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+        // 第i天最多交易k次持有股票 dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+        int n = prices.length;
+        if (n == 0) return 0;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
     //[139].单词拆分
     public static boolean wordBreak(String s, List<String> wordDict) {
         //dp[i] 前i个是否能拆分
@@ -389,6 +405,22 @@ public class DynamicProgramming {
             int leftTop = col1 != 0 && row1 != 0 ? dp[row1 - 1][col1 - 1] : 0;
             return dp[row2][col2] - left - top + leftTop;
         }
+    }
+
+    //[309].最佳买卖股票时机含冷冻期
+    public static int maxProfit3(int[] prices) {
+        int n = prices.length;
+        if (n <= 1) return 0;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        dp[1][0] = Math.max(dp[0][0], dp[0][1] + prices[1]);
+        dp[1][1] = Math.max(dp[0][1], -prices[1]);
+        for (int i = 2; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 2][0] - prices[i]);
+        }
+        return dp[n - 1][0];
     }
 
     //[322].兑换零钱
@@ -594,7 +626,6 @@ public class DynamicProgramming {
         return max;
     }
 
-
     //[416].分割等和子集
     public static boolean canPartition(int[] nums) {
         if (nums.length < 2) return false;
@@ -656,6 +687,21 @@ public class DynamicProgramming {
         return dp[size - 1][amount];
     }
 
+    //[714].买卖股票的最佳时机含手续费
+    public static int maxProfit(int[] prices, int fee) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //没有股票
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee);
+            //有股票
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
     public static void main(String[] args) {
 //        [5]最长回文子串
 //        System.out.println(longestPalindrome("a"));
@@ -697,6 +743,11 @@ public class DynamicProgramming {
 //        System.out.println(maxProfit(new int[]{7, 4, 3, 1}));
 //        System.out.println(maxProfit(new int[]{7, 1, 5, 3, 6, 4}));
 //
+//        [122].买卖股票的最佳时机II
+//        System.out.println(maxProfit2(new int[]{7,1,5,3,6,4}));
+//        System.out.println(maxProfit2(new int[]{1,2,3,4,5}));
+//        System.out.println(maxProfit2(new int[]{7,6,4,3,1}));
+//
 //        [139].单词拆分
 //        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
 //
@@ -730,6 +781,9 @@ public class DynamicProgramming {
 //        System.out.println(numMatrix.sumRegion(1, 1, 2, 2));// -> 11
 //        System.out.println(numMatrix.sumRegion(1, 2, 2, 4));//-> 12
 //
+//        [309].最佳买卖股票时机含冷冻期
+//        System.out.println(maxProfit(new int[] {1,2,3,0,2}));
+//
 //        [322].兑换零钱
 //        System.out.println(coinChange(new int[] {2}, 3));
 //        System.out.println(coinChange(new int[] {1}, 0));
@@ -748,16 +802,23 @@ public class DynamicProgramming {
 //        [376].摆动序列
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
+
 //        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
+
 //        [416].分割等和子集
 //        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
+
 //        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
+
 //        [518].兑换零钱II
 //        System.out.println(change(5, new int[]{1, 2, 5}));
 //        System.out.println(change(3, new int[]{2}));
 //        System.out.println(change(0, new int[]{}));
 //        System.out.println(change(7, new int[]{}));
+//
+//        [714].买卖股票的最佳时机含手续费
+//        System.out.println(maxProfit(new int[]{1, 3, 2, 8, 4, 9}, 2));
     }
 }
