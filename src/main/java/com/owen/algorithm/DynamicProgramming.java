@@ -245,6 +245,21 @@ public class DynamicProgramming {
         }
         return dp[n - 1][0];
     }
+    //[123].买卖股票的最佳时机III
+    public static int maxProfit3(int[] prices) {
+        int dp_i10 = 0, dp_i11 = Integer.MIN_VALUE;
+        int dp_i20 = 0, dp_i21 = Integer.MIN_VALUE;
+
+        for (int num : prices) {
+            dp_i20 = Math.max(dp_i20, dp_i21 + num);
+            dp_i21 = Math.max(dp_i21, dp_i10 - num);
+
+            dp_i10 = Math.max(dp_i10, dp_i11 + num);
+            dp_i11 = Math.max(dp_i11, -num);
+        }
+
+        return dp_i20;
+    }
 
     //[139].单词拆分
     public static boolean wordBreak(String s, List<String> wordDict) {
@@ -408,7 +423,7 @@ public class DynamicProgramming {
     }
 
     //[309].最佳买卖股票时机含冷冻期
-    public static int maxProfit3(int[] prices) {
+    public static int maxProfit4(int[] prices) {
         int n = prices.length;
         if (n <= 1) return 0;
         int[][] dp = new int[n][2];
@@ -703,23 +718,23 @@ public class DynamicProgramming {
     }
 
     public static void main(String[] args) {
-//        [5]最长回文子串
+//        [5].最长回文子串
 //        System.out.println(longestPalindrome("a"));
 //        System.out.println(longestPalindromeV2("a"));
 //
-//        [53]最大子序列和
+//        [53].最大子序列和
 //        System.out.println(maxSubArray(new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4}));
 //
-//        62.不同路径 动态规划
+//        [62].不同路径 动态规划
 //        System.out.println(uniquePaths(7, 3));
 //
-//        63.不同路径II
+//        [63].不同路径II
 //        System.out.println(uniquePathsWithObstacles(new int[][]{{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}));
 //
-//        64.最小路径和
+//        [64].最小路径和
 //        System.out.println(minPathSum(new int[][]{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}}));
 //
-//        [91]解码方法
+//        [91].解码方法
 //        System.out.println(numDecodings("2010"));
 //        System.out.println(numDecodings("226"));
 //        System.out.println(numDecodings("2360"));
@@ -737,8 +752,8 @@ public class DynamicProgramming {
 //        triangle.add(Arrays.asList(6, 5, 7));
 //        triangle.add(Arrays.asList(4, 1, 8, 3));
 //        System.out.println(minimumTotal(triangle));
-
-//        121.买卖股票的最佳时机
+//
+//        [121].买卖股票的最佳时机
 //        System.out.println(maxProfit(new int[]{2, 1, 4, 9}));
 //        System.out.println(maxProfit(new int[]{7, 4, 3, 1}));
 //        System.out.println(maxProfit(new int[]{7, 1, 5, 3, 6, 4}));
@@ -747,6 +762,9 @@ public class DynamicProgramming {
 //        System.out.println(maxProfit2(new int[]{7,1,5,3,6,4}));
 //        System.out.println(maxProfit2(new int[]{1,2,3,4,5}));
 //        System.out.println(maxProfit2(new int[]{7,6,4,3,1}));
+//
+//        [123].买卖股票的最佳时机III
+//        System.out.println(maxProfit3(new int[]{1, 2, 3, 4, 5}));
 //
 //        [139].单词拆分
 //        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
@@ -799,19 +817,20 @@ public class DynamicProgramming {
 //        [375].猜数字大小 II
 //        System.out.println(getMoneyAmount(8));
 //        System.out.println(getMoneyAmount(1));
+//
 //        [376].摆动序列
 //        System.out.println(wiggleMaxLength(new int[] {1,7,4,9,2,5}));
 //        System.out.println(wiggleMaxLength(new int[] {1,2,1,0,-1,1}));
-
+//
 //        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
-
+//
 //        [416].分割等和子集
 //        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
-
+//
 //        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
-
+//
 //        [518].兑换零钱II
 //        System.out.println(change(5, new int[]{1, 2, 5}));
 //        System.out.println(change(3, new int[]{2}));

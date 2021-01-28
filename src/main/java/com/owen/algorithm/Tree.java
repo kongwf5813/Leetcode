@@ -665,6 +665,32 @@ public class Tree {
         dfsForBinaryTreePaths(res, path, root.right);
     }
 
+    public static class Codec {
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "#";
+            return root.val + "," + serialize(root.left) + "," + serialize(root.right);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data.equals("#")) return null;
+            LinkedList<String> queue = new LinkedList(Arrays.asList(data.split(",")));
+            return myDes(queue);
+        }
+
+        private TreeNode myDes(LinkedList<String> queue) {
+            String top = queue.pop();
+            if(top.equals("#")) {
+                return null;
+            }
+            TreeNode root = new TreeNode(Integer.parseInt(top));
+            root.left = myDes(queue);
+            root.right = myDes(queue);
+            return root;
+        }
+    }
+
     //[538].把二叉搜索树转换为累加树
     public static TreeNode convertBST(TreeNode root) {
         traverseBST(root, new AtomicInteger(0));
@@ -683,7 +709,7 @@ public class Tree {
     }
 
     //[449].序列化和反序列化二叉搜索树
-    public static class Codec {
+    public static class Codec2 {
 
         // Encodes a tree to a single string.
         public String serialize(TreeNode root) {
@@ -1055,8 +1081,18 @@ public class Tree {
 //        root.right = r1;
 //        System.out.println(binaryTreePaths(root));
 //
+//        [297].二叉树的序列化和反序列化
+//        Codec code =  new Codec();
+//        TreeNode root = new TreeNode(1);
+//        root.left = new TreeNode(2);
+//        root.right = new TreeNode(3);
+//        root.right.left = new TreeNode(4);
+//        String a = code.serialize(root);
+//        System.out.println(a);
+//        TreeNode res = code.deserialize(a);
+//
 //        [449].序列化和反序列化二叉搜索树
-//        Codec codec = new Codec();
+//        Codec2 codec = new Codec2();
 //        TreeNode root = new TreeNode(3);
 //        root.left = new TreeNode(1);
 //        root.left.right = new TreeNode(2);
