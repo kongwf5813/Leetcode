@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.owen.algorithm.LinkList.ListNode;
+import com.owen.util.CommonUtil;
 
 public class Tree {
 
@@ -16,6 +17,22 @@ public class Tree {
 
         public TreeNode(int x) {
             val = x;
+        }
+    }
+
+    public static class Node {
+        public int val;
+        public List<Node> children;
+
+        public Node() {}
+
+        public Node(int _val) {
+            val = _val;
+        }
+
+        public Node(int _val, List<Node> _children) {
+            val = _val;
+            children = _children;
         }
     }
 
@@ -706,6 +723,30 @@ public class Tree {
         root.val = sum.get();
 
         traverseBST(root.left, sum);
+    }
+
+    //[429]. N叉树的层序遍历
+    public List<List<Integer>> levelOrder(Node root) {
+        if (root == null) return new ArrayList<>();
+        LinkedList<Node> queue = new LinkedList<>();
+        queue.add(root);
+
+        List<List<Integer>> res = new ArrayList<>();
+        while(!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> arr = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                Node cur = queue.poll();
+                arr.add(cur.val);
+                if (!cur.children.isEmpty()) {
+                    for (Node child : cur.children) {
+                        queue.add(child);
+                    }
+                }
+            }
+            res.add(arr);
+        }
+        return res;
     }
 
     //[449].序列化和反序列化二叉搜索树
