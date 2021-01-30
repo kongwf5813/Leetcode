@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.owen.algorithm.LinkList.ListNode;
-import com.owen.util.CommonUtil;
 
 public class Tree {
 
@@ -24,7 +23,8 @@ public class Tree {
         public int val;
         public List<Node> children;
 
-        public Node() {}
+        public Node() {
+        }
 
         public Node(int _val) {
             val = _val;
@@ -682,6 +682,7 @@ public class Tree {
         dfsForBinaryTreePaths(res, path, root.right);
     }
 
+    //[297].二叉树的序列化与反序列化
     public static class Codec {
         // Encodes a tree to a single string.
         public String serialize(TreeNode root) {
@@ -698,7 +699,7 @@ public class Tree {
 
         private TreeNode myDes(LinkedList<String> queue) {
             String top = queue.pop();
-            if(top.equals("#")) {
+            if (top.equals("#")) {
                 return null;
             }
             TreeNode root = new TreeNode(Integer.parseInt(top));
@@ -708,21 +709,66 @@ public class Tree {
         }
     }
 
-    //[538].把二叉搜索树转换为累加树
-    public static TreeNode convertBST(TreeNode root) {
-        traverseBST(root, new AtomicInteger(0));
-        return root;
-    }
 
-    private static void traverseBST(TreeNode root, AtomicInteger sum) {
-        if (root == null)
-            return;
-        traverseBST(root.right, sum);
+    //[427].建立四叉树
+    public static class Solution427 {
+        class Node {
+            public boolean val;
+            public boolean isLeaf;
+            public Node topLeft;
+            public Node topRight;
+            public Node bottomLeft;
+            public Node bottomRight;
 
-        sum.addAndGet(root.val);
-        root.val = sum.get();
 
-        traverseBST(root.left, sum);
+            public Node() {
+                this.val = false;
+                this.isLeaf = false;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf, Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = topLeft;
+                this.topRight = topRight;
+                this.bottomLeft = bottomLeft;
+                this.bottomRight = bottomRight;
+            }
+        }
+
+        public Node construct(int[][] grid) {
+            return helper(grid, 0, 0, grid.length);
+        }
+
+        private Node helper(int[][] grid, int i, int j, int len) {
+            if (len == 1) {
+                return new Node(grid[i][j] == 1, true);
+            }
+
+            int k = len / 2;
+            Node tl = helper(grid, i, j, k);
+            Node tr = helper(grid, i, j + k, k);
+            Node bl = helper(grid, i + k, j, k);
+            Node br = helper(grid, i + k, j + k, k);
+            if (tl.val == tr.val && tr.val == bl.val && bl.val == br.val && tl.isLeaf && tr.isLeaf && bl.isLeaf && br.isLeaf) {
+                return new Node(tl.val, true);
+            } else {
+                return new Node(true, false, tl, tr, bl, br);
+            }
+        }
     }
 
     //[429]. N叉树的层序遍历
@@ -732,7 +778,7 @@ public class Tree {
         queue.add(root);
 
         List<List<Integer>> res = new ArrayList<>();
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             int size = queue.size();
             List<Integer> arr = new ArrayList<>();
             for (int i = 0; i < size; i++) {
@@ -773,7 +819,7 @@ public class Tree {
         public TreeNode deserialize(String data) {
             if (data == null || data.length() == 0) return null;
             String[] arr = data.split(",");
-            return helper(arr, 0, arr.length -1);
+            return helper(arr, 0, arr.length - 1);
         }
 
         private TreeNode helper(String[] data, int low, int high) {
@@ -790,7 +836,7 @@ public class Tree {
                 }
             }
 
-            root.left = helper(data, low + 1, index -1);
+            root.left = helper(data, low + 1, index - 1);
             root.right = helper(data, index, high);
             return root;
         }
@@ -818,6 +864,23 @@ public class Tree {
     private static TreeNode getMin(TreeNode root) {
         while (root.left != null) root = root.left;
         return root;
+    }
+
+    //[538].把二叉搜索树转换为累加树
+    public static TreeNode convertBST(TreeNode root) {
+        traverseBST(root, new AtomicInteger(0));
+        return root;
+    }
+
+    private static void traverseBST(TreeNode root, AtomicInteger sum) {
+        if (root == null)
+            return;
+        traverseBST(root.right, sum);
+
+        sum.addAndGet(root.val);
+        root.val = sum.get();
+
+        traverseBST(root.left, sum);
     }
 
     //[700].二叉搜索树中的搜索
@@ -1131,6 +1194,10 @@ public class Tree {
 //        String a = code.serialize(root);
 //        System.out.println(a);
 //        TreeNode res = code.deserialize(a);
+//
+//        [427].建立四叉树
+//        Solution427.Node node  = new Solution427().construct(new int[][]{{1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}});
+//        System.out.println();
 //
 //        [449].序列化和反序列化二叉搜索树
 //        Codec2 codec = new Codec2();

@@ -1076,7 +1076,6 @@ public class Others {
                 || ch == 'A' || ch == 'E' || ch == 'I' || ch == 'O' || ch == 'U';
     }
 
-
     //[355].设计推特
     public static class Twitter {
 
@@ -1472,6 +1471,39 @@ public class Others {
         return sb.reverse().toString();
     }
 
+    //[423].从英文中重建数字
+    public static String originalDigits(String s) {
+        //zero two four six eight three five seven nine one
+        // z   w    u    x   g      h     f    s    i    n
+
+        int[] count = new int[26];
+        for (int i = 0; i < s.length(); i ++) {
+            char ch = s.charAt(i);
+            count[ch - 'a']++;
+        }
+
+        int[] output = new int[10];
+        output[0] = count['z' - 'a'];
+        output[2] = count['w' - 'a'];
+        output[4] = count['u' - 'a'];
+        output[6] = count['x' - 'a'];
+        output[8] = count['g' - 'a'];
+
+        output[3] = count['h' - 'a'] - output[8];
+        output[5] = count['f' - 'a'] - output[4];
+        output[7] = count['s' - 'a'] - output[6];
+        output[9] = count['i' - 'a'] - output[5] - output[8] - output[6];
+        output[1] = count['n' - 'a'] - 2 * output[9] - output[7];
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i <= 9 ; i++) {
+            for(int j =0; j< output[i]; j++) {
+                sb.append(i);
+            }
+        }
+        return sb.toString();
+    }
+
     //[451].根据字符出现频率排序
     public static String frequencySort(String s) {
         Map<Character, Integer> map = new HashMap<>();
@@ -1617,6 +1649,26 @@ public class Others {
             }
             return res;
         }
+    }
+
+    //[1019].链表中的下一个更大节点
+    public static int[] nextLargerNodes(ListNode head) {
+        List<Integer> list = new ArrayList<>();
+        while (head != null) {
+            list.add(head.val);
+            head = head.next;
+        }
+
+        int[] res = new int[list.size()];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < list.size(); i++) {
+            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
+                int index = stack.pop();
+                res[index] = list.get(i);
+            }
+            stack.push(i);
+        }
+        return res;
     }
 
     public static void main(String[] args) {
@@ -1834,6 +1886,10 @@ public class Others {
 //        System.out.println(superPow(2, new int[]{3}));
 //        System.out.println(superPow(2, new int[]{1, 0}));
 //
+//        [373].查找和最小的K对数字
+//        System.out.println(kSmallestPairs(new int[]{1,1,2}, new int[]{1,2,3}, 2));
+//        System.out.println(kSmallestPairs(new int[]{1, 7, 11}, new int[]{2, 4, 6}, 10));
+//
 //        [380].常数时间插入、删除和获取随机元素
 //        RandomizedSet set = new RandomizedSet();
 //        set.insert(1);
@@ -1880,9 +1936,8 @@ public class Others {
 //        System.out.println(removeKdigits("10", 2));
 //        System.out.println(removeKdigits("10016042692165669282207674747", 9));
 //
-//        [373].查找和最小的K对数字
-//        System.out.println(kSmallestPairs(new int[]{1,1,2}, new int[]{1,2,3}, 2));
-//        System.out.println(kSmallestPairs(new int[]{1, 7, 11}, new int[]{2, 4, 6}, 10));
+//        [423].从英文中重建数字
+//        System.out.println(originalDigits("onetwothreethreefivefour"));
 //
 //        [451].根据字符出现频率排序
 //        System.out.println(frequencySort("Aabb"));
@@ -1918,5 +1973,17 @@ public class Others {
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
 //        System.out.println(freqStack.pop());
+//
+//        [1019].链表中的下一个更大节点
+//        ListNode head = new ListNode(2);
+//        ListNode f = new ListNode(7);
+//        ListNode t = new ListNode(4);
+//        ListNode x = new ListNode(3);
+//        ListNode y = new ListNode(5);
+//        head.next = f;
+//        f.next = t;
+//        t.next = x;
+//        x.next = y;
+//        System.out.println(Arrays.toString(nextLargerNodes(head)));
     }
 }

@@ -257,8 +257,24 @@ public class DynamicProgramming {
             dp_i10 = Math.max(dp_i10, dp_i11 + num);
             dp_i11 = Math.max(dp_i11, -num);
         }
-
         return dp_i20;
+        /*
+        写法二
+        int n = prices.length;
+        int maxK = 2;
+        int[][][] dp = new int[n][maxK + 1][2];
+        dp[0][1][0] = 0;
+        dp[0][1][1] = -prices[0];
+        dp[0][2][0] = 0;
+        dp[0][2][1] = -prices[0];
+        for (int i = 1; i< n;i++) {
+            for (int k = 1; k <= maxK; k++) {
+                dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+                dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+            }
+        }
+        return dp[n-1][maxK][0];
+        */
     }
 
     //[139].单词拆分
@@ -641,6 +657,27 @@ public class DynamicProgramming {
         return max;
     }
 
+    //[413].等差数列划分
+    public static int numberOfArithmeticSlices(int[] A) {
+        //dp[i] 0~i 等差数列新增的个数
+        // 1 2 3 4 5
+        //dp[2] = 1
+        //dp[3] = 2
+        //dp[4] = 3
+        //sum  = 6个
+
+        int size = A.length;
+        int[] dp = new int[size];
+        int sum = 0;
+        for (int i = 2; i< size; i++) {
+            if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
+                dp[i] = dp[i-1] + 1;
+                sum += dp[i];
+            }
+        }
+        return sum;
+    }
+
     //[416].分割等和子集
     public static boolean canPartition(int[] nums) {
         if (nums.length < 2) return false;
@@ -825,11 +862,12 @@ public class DynamicProgramming {
 //        [377].组合总和IV
 //        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
 //
+//        [413].等差数列划分
+//        System.out.println(numberOfArithmeticSlices(new int[] {1,2,3, 4}));
+//        System.out.println(numberOfArithmeticSlices(new int[] {1,2,3,4,5}));
+//
 //        [416].分割等和子集
 //        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
-//
-//        [377].组合总和IV
-//        System.out.println(combinationSum4(new int[]{1, 2, 3}, 4));
 //
 //        [518].兑换零钱II
 //        System.out.println(change(5, new int[]{1, 2, 5}));

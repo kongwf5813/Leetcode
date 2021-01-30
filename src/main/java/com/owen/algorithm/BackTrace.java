@@ -621,6 +621,72 @@ public class BackTrace {
         }
     }
 
+    //[417].太平洋大西洋水流问题
+    public static List<List<Integer>> pacificAtlantic(int[][] matrix) {
+
+        List<List<Integer>> res = new ArrayList<>();
+        if (matrix == null || matrix.length == 0) return res;
+        int row = matrix.length;
+        int col = matrix[0].length;
+        boolean[][] visited = new boolean[row][col];
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (dfsPacific(matrix, i, j, visited, Integer.MAX_VALUE)
+                        && dfsAtlantic(matrix, i, j, visited, Integer.MAX_VALUE)) {
+                    res.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        return res;
+    }
+
+    private static boolean dfsPacific(int[][] matrix, int i, int j, boolean[][] visited, int pre) {
+        int row = matrix.length;
+        int col = matrix[0].length;
+        if (i > row - 1 || j > col - 1 || visited[i][j] || matrix[i][j] > pre) {
+            return false;
+        }
+
+        if (i <= 0 || j <= 0) {
+            return true;
+        }
+
+        visited[i][j] = true;
+
+        int cur = matrix[i][j];
+        boolean result = dfsPacific(matrix, i - 1, j, visited, cur)
+                || dfsPacific(matrix, i, j + 1, visited, cur)
+                || dfsPacific(matrix, i + 1, j, visited, cur)
+                || dfsPacific(matrix, i, j - 1, visited, cur);
+
+        visited[i][j] = false;
+        return result;
+    }
+
+    private static boolean dfsAtlantic(int[][] matrix, int i, int j, boolean[][] visited, int pre) {
+
+        int row = matrix.length;
+        int col = matrix[0].length;
+        if (i < 0 || j < 0 || visited[i][j] || matrix[i][j] > pre) {
+            return false;
+        }
+
+        if (i >= row - 1 || j >= col - 1) {
+            return true;
+        }
+
+        visited[i][j] = true;
+
+        int cur = matrix[i][j];
+        boolean result = dfsAtlantic(matrix, i - 1, j, visited, cur)
+                || dfsAtlantic(matrix, i, j + 1, visited, cur)
+                || dfsAtlantic(matrix, i + 1, j, visited, cur)
+                || dfsAtlantic(matrix, i, j - 1, visited, cur);
+
+        visited[i][j] = false;
+        return result;
+    }
+
     public static void main(String[] args) {
 //        17.电话号码的字母组合
 //        letterCombinations("23");
@@ -699,9 +765,12 @@ public class BackTrace {
 //        System.out.println(lexicalOrder(9));
 //        System.out.println(lexicalOrder(13));
 //        System.out.println(lexicalOrder(2002));
+//
+//        [401].二进制手表
+//        System.out.println(readBinaryWatch(2));
+//        System.out.println(readBinaryWatch(7));
 
-        System.out.println(readBinaryWatch(2));
-        System.out.println(readBinaryWatch(7));
-
+//        [417].太平洋大西洋水流问题
+//        System.out.println(pacificAtlantic(new int[][]{{1,2,2,3,5},{3,2,3,4,4},{2,4,5,3,1},{6,7,1,4,5},{5,1,1,2,4}}));
     }
 }

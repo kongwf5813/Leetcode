@@ -489,6 +489,85 @@ public class LinkList {
         }
     }
 
+    //[430].扁平化多级双向链表
+    class Solution430 {
+        class Node {
+            public int val;
+            public Node prev;
+            public Node next;
+            public Node child;
+        }
+
+        public Node flatten(Node head) {
+            helper(head);
+            return head;
+        }
+
+        //返回的是最后一个节点
+        public Node helper(Node head) {
+            if (head == null) return null;
+
+            Node finalNode = null;
+            while (head != null) {
+                //遍历父亲节点， 发现有child不为空，进入详细递归，拼接好，需要返回最后一个节点，所以用finalNode表示。
+                if (head.child != null) {
+                    Node currentParent = head;
+                    Node next = currentParent.next;
+
+                    //child转变成下一个next节点
+                    head.next = head.child;
+                    head.child.prev = head;
+
+                    //返回最后一个节点用于拼接
+                    Node lastNode = helper(head.child);
+                    head.child = null;
+
+                    //把拉平的节点拼接的原来的next节点
+                    if (next != null) {
+                        lastNode.next = next;
+                        next.prev  = lastNode;
+                    }
+                }
+
+                finalNode = head;
+                head = head.next;
+            }
+            return finalNode;
+        }
+    }
+
+    //[445].两数相加II
+    public static ListNode addTwoNumbers2(ListNode l1, ListNode l2) {
+
+        Stack<Integer> stack1 = new Stack<>();
+        Stack<Integer> stack2 = new Stack<>();
+
+        while(l1 != null) {
+            stack1.push(l1.val);
+            l1 = l1.next;
+        }
+
+        while(l2 != null) {
+            stack2.push(l2.val);
+            l2 = l2.next;
+        }
+
+        int carry = 0;
+        ListNode res = null;
+        while(!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
+            int a = stack1.isEmpty()  ? 0 : stack1.pop();
+            int b = stack2.isEmpty() ? 0: stack2.pop();
+            int cur = a + b + carry;
+            carry = cur / 10;
+            cur %= 10;
+            ListNode currNode = new ListNode(cur);
+            currNode.next = res;
+            res = currNode;
+        }
+
+        return res;
+    }
+
     //[876].链表的中间结点
     public static ListNode middleNode(ListNode head) {
         ListNode slow = head, fast = head;
@@ -655,6 +734,17 @@ public class LinkList {
 //        head.next.next.next.next.next = new ListNode(4);
 //        head.next.next.next.next.next.next = new ListNode(7);
 //        ListNode res = oddEvenList(head);
+//
+//        [445].两数相加II
+//        ListNode f = new ListNode(7);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(4);
+//        f.next.next.next = new ListNode(3);
+//
+//        ListNode f1 = new ListNode(5);
+//        f1.next = new ListNode(6);
+//        f1.next.next = new ListNode(4);
+//        ListNode result = addTwoNumbers2(f, f1);
 //
 //        [1019].链表中的下一个更大节点
 //        ListNode head = new ListNode(2);
