@@ -1,6 +1,8 @@
 package com.owen.algorithm;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -106,7 +108,6 @@ public class BinarySearch {
         return half * half * rest;
     }
 
-
     //[374].猜数字大小
     public class Solution {
         public int guessNumber(int n) {
@@ -162,15 +163,44 @@ public class BinarySearch {
         return num >= k;
     }
 
+    //[436].寻找右区间
+    public static int[] findRightInterval(int[][] intervals) {
+        int n = intervals.length;
+        int[][] sorted = new int[n][2];
+        for (int i = 0; i < n; i++) {
+            sorted[i] = new int[]{intervals[i][0], i};
+        }
+        Arrays.sort(sorted, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            int l = 0, r = n - 1;
+
+            while (l < r) {
+                int mid = l + (r - l) / 2;
+                if (sorted[mid][0] < intervals[i][1]) {
+                    l = mid + 1;
+                } else if (sorted[mid][0] > intervals[i][1]) {
+                    r = mid;
+                } else {
+                    r = mid;
+                }
+            }
+            //确实大于，返回坐标，否则返回-1
+            res[i] = sorted[l][0] >= intervals[i][1] ? sorted[l][1] : -1;
+        }
+        return res;
+    }
+
     //[875].爱吃香蕉的珂珂
     public static int minEatingSpeed(int[] piles, int H) {
         int left = 1, right = Arrays.stream(piles).max().getAsInt();
         while (left < right) {
-            int mid = left + (right - left) /2;
+            int mid = left + (right - left) / 2;
             if (eatingTime(piles, mid) <= H) {
                 right = mid;
             } else {
-                left = mid +1;
+                left = mid + 1;
             }
         }
         return left;
@@ -179,21 +209,21 @@ public class BinarySearch {
     //给定一次吃香蕉的个数，求得的时间
     private static int eatingTime(int[] piles, int k) {
         int res = 0;
-        for (int pile :piles) {
-            res += pile / k + (pile %k > 0 ? 1: 0);
+        for (int pile : piles) {
+            res += pile / k + (pile % k > 0 ? 1 : 0);
         }
         return res;
     }
 
-    //[1011]在D天内送达包裹的能力
+    //[1011].在D天内送达包裹的能力
     public static int shipWithinDays(int[] weights, int D) {
         int left = Arrays.stream(weights).max().getAsInt(), right = Arrays.stream(weights).sum();
         while (left < right) {
-            int mid = left + (right-left)/2;
+            int mid = left + (right - left) / 2;
             if (needDays(weights, mid) <= D) {
                 right = mid;
             } else {
-                left = mid +1;
+                left = mid + 1;
             }
         }
         return left;
@@ -228,10 +258,14 @@ public class BinarySearch {
 //        System.out.println(myPow(2.00000d, -2));
 
 //        System.out.println(minEatingSpeed(new int[]{3,6,7,11}, 8));
-
-        System.out.println(shipWithinDays(new int[] {1,2,3,4,5,6,7,8,9,10}, 5));
-        System.out.println(shipWithinDays(new int[] {3,2,2,4,1,4}, 3));
-        System.out.println(shipWithinDays(new int[] {337,399,204,451,273,471,37,211,67,224,126,123,294,295,498,69,264,307,419,232,361,301,116,216,227,203,456,195,444,302,58,496,84,280,58,107,300,334,418,241}, 20));
+//
+//        [436].寻找右区间
+//        System.out.println(Arrays.toString(findRightInterval(new int[][]{{3,4},{2,3},{1,2}})));
+//
+//        [1011]在D天内送达包裹的能力
+//        System.out.println(shipWithinDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5));
+//        System.out.println(shipWithinDays(new int[]{3, 2, 2, 4, 1, 4}, 3));
+//        System.out.println(shipWithinDays(new int[]{337, 399, 204, 451, 273, 471, 37, 211, 67, 224, 126, 123, 294, 295, 498, 69, 264, 307, 419, 232, 361, 301, 116, 216, 227, 203, 456, 195, 444, 302, 58, 496, 84, 280, 58, 107, 300, 334, 418, 241}, 20));
     }
 
 }

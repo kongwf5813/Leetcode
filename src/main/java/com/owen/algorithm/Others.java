@@ -1034,6 +1034,53 @@ public class Others {
         return stack.size() == 1 && stack.peek().equals("#");
     }
 
+    public class NestedIterator implements Iterator<Integer> {
+
+        public class NestedInteger {
+
+            // @return true if this NestedInteger holds a single integer, rather than a nested list.
+            public boolean isInteger() {return true;};
+
+            // @return the single integer that this NestedInteger holds, if it holds a single integer
+            // Return null if this NestedInteger holds a nested list
+            public Integer getInteger() {return 1;};
+
+            // @return the nested list that this NestedInteger holds, if it holds a nested list
+            // Return null if this NestedInteger holds a single integer
+            public List<NestedInteger> getList() {return null;};
+        }
+
+        Deque<NestedInteger> stack = new ArrayDeque<>();
+        public NestedIterator(List<NestedInteger> nestedList) {
+            for (int i = nestedList.size() -1; i>=0;i--) {
+                stack.push(nestedList.get(i));
+            }
+        }
+
+        @Override
+        public Integer next() {
+            return stack.poll().getInteger();
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (stack.isEmpty()) {
+                return false;
+            } else {
+                if (!stack.peek().isInteger()) {
+                    List<NestedInteger> list = stack.poll().getList();
+                    for (int i = list.size()-1; i >=0; i--) {
+                        stack.push(list.get(i));
+                    }
+                    //有可能还是一个嵌套，递归求解
+                    return hasNext();
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+
     //[344].反转字符串
     public static void reverseString(char[] s) {
         if (s == null) return;
@@ -1477,7 +1524,7 @@ public class Others {
         // z   w    u    x   g      h     f    s    i    n
 
         int[] count = new int[26];
-        for (int i = 0; i < s.length(); i ++) {
+        for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
             count[ch - 'a']++;
         }
@@ -1496,8 +1543,8 @@ public class Others {
         output[1] = count['n' - 'a'] - 2 * output[9] - output[7];
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i <= 9 ; i++) {
-            for(int j =0; j< output[i]; j++) {
+        for (int i = 0; i <= 9; i++) {
+            for (int j = 0; j < output[i]; j++) {
                 sb.append(i);
             }
         }
@@ -1533,7 +1580,7 @@ public class Others {
         if (nums.length < 3) return false;
         Stack<Integer> stack = new Stack<>();
         int aj = Integer.MIN_VALUE;
-        for (int i = nums.length -1; i>= 0; i--) {
+        for (int i = nums.length - 1; i >= 0; i--) {
             int num = nums[i];
 
             //此处的num为ak
@@ -1542,7 +1589,7 @@ public class Others {
             }
 
             //只要发现栈顶比较小，保证了 ak > aj，然后尽量取最大值
-            while(!stack.isEmpty() && stack.peek() < num) {
+            while (!stack.isEmpty() && stack.peek() < num) {
                 aj = Math.max(stack.pop(), aj);
             }
             stack.push(num);

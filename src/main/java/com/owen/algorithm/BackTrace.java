@@ -1,11 +1,7 @@
 package com.owen.algorithm;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -687,12 +683,46 @@ public class BackTrace {
         return result;
     }
 
+    //[433].最小基因变化
+    public static int minMutation(String start, String end, String[] bank) {
+        AtomicInteger res = new AtomicInteger(Integer.MAX_VALUE);
+        dfsForMinMutation(new HashSet<>(), start, end, bank, new AtomicInteger(), res);
+        return (res.get() == Integer.MAX_VALUE) ? -1 : res.get();
+    }
+
+    private static void dfsForMinMutation(Set<String> steps, String current, String end, String[] bank, AtomicInteger stepCount, AtomicInteger minCount) {
+        //结束条件
+        if (end.equals(current)) {
+            minCount.set(Math.min(stepCount.get(), minCount.get()));
+        }
+
+        for (String next : bank) {
+            //准备选择
+            int diff = 0;
+            for (int i = 0; i < next.length(); i++) {
+                if (next.charAt(i) != current.charAt(i)) {
+                    if (++diff > 1) {
+                        break;
+                    }
+                }
+            }
+            //做选择，没有遍历过，并且字符相差1
+            if (diff == 1 && !steps.contains(next)) {
+                steps.add(next);
+                stepCount.incrementAndGet();
+                dfsForMinMutation(steps, next, end, bank, stepCount, minCount);
+                stepCount.decrementAndGet();
+                steps.remove(next);
+            }
+        }
+    }
+
     public static void main(String[] args) {
-//        17.电话号码的字母组合
+//        [17].电话号码的字母组合
 //        letterCombinations("23");
 //        letterCombinations("");
 //
-//        22. 括号生成
+//        [22].括号生成
 //        System.out.println(generateParenthesis(0));
 //
 //        [39].组合总和
@@ -702,24 +732,24 @@ public class BackTrace {
 //        combinationSum2(new int[]{10,1,2,7,6,1,5}, 8);
 //        combinationSum2(new int[]{2,5,2,1,2}, 5);
 //
-//        [46]全排列
+//        [46].全排列
 //        System.out.println(permute(new int[]{1, 2, 3}));
 //
-//        47. 全排列II
+//        [47].全排列II
 //        permuteUnique(new int[]{1, 1, 2});
 //        permuteUnique(new int[]{3, 3, 0, 3});
 //
-//        51. N皇后
+//        [51].N皇后
 //        System.out.println(solveNQueens(8));
 //
-//        77. 组合
+//        [77].组合
 //        System.out.println(combine(4, 2));
 //        System.out.println(combine(2, 2));
 //
-//        78. 子集
+//        [78].子集
 //        System.out.println(subsets(new int[]{1, 2, 3}));
 //
-//        79. 单词搜索
+//        [79].单词搜索
 //        char[][] board = new char[][]{{'A', 'B', 'C', 'E'}, {'S', 'F', 'C', 'S'}, {'A', 'D', 'E', 'E'}};
 //        System.out.println(exist(board, "ABCCED"));
 //        System.out.println(exist(board, "ABCB"));
@@ -732,7 +762,7 @@ public class BackTrace {
 //        System.out.println(grayCode(3));
 //        System.out.println(grayCode(0));
 //
-//        90. 子集II
+//        [90].子集II
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
 //        System.out.println(subsetsWithDup(new int[]{}));
@@ -769,8 +799,12 @@ public class BackTrace {
 //        [401].二进制手表
 //        System.out.println(readBinaryWatch(2));
 //        System.out.println(readBinaryWatch(7));
-
+//
 //        [417].太平洋大西洋水流问题
 //        System.out.println(pacificAtlantic(new int[][]{{1,2,2,3,5},{3,2,3,4,4},{2,4,5,3,1},{6,7,1,4,5},{5,1,1,2,4}}));
+//
+//        [433].最小基因变化
+//        System.out.println(minMutation("AAAAACCC", "AACCCCCC", new String[]{"AAAACCCC", "AAACCCCC", "AACCCCCC"}));
+//        System.out.println(minMutation("AACCGGTT", "AAACGGTA", new String[]{"AACCGGTA", "AACCGCTA", "AAACGGTA"}));
     }
 }

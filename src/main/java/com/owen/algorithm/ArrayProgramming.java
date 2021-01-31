@@ -964,6 +964,26 @@ public class ArrayProgramming {
         return res.toArray(new int[res.size()][2]);
     }
 
+    //[435].无重叠区间
+    public static int eraseOverlapIntervals(int[][] intervals) {
+        if (intervals.length == 0) return 0;
+
+        Arrays.sort(intervals, Comparator.comparingInt(a -> a[0]));
+
+        int end = intervals[0][1];
+        int res = 0;
+        for (int i = 1; i < intervals.length; i++) {
+            if (intervals[i][0] < end) {
+                res++;
+
+                end = Math.min(end, intervals[i][1]);
+            } else {
+                end = intervals[i][1];
+            }
+        }
+        return res;
+    }
+
     //[735].行星碰撞
     public static int[] asteroidCollision(int[] asteroids) {
         //[-2, -1, 1, 2]
@@ -996,11 +1016,43 @@ public class ArrayProgramming {
         }
 
         int[] res = new int[stack.size()];
-        int index = res.length -1;
+        int index = res.length - 1;
         while (!stack.isEmpty()) {
             res[index--] = stack.pop();
         }
         return res;
+    }
+
+    //[1288].删除被覆盖区间
+    public static int removeCoveredIntervals(int[][] intervals) {
+        if (intervals.length == 0) return 0;
+        Arrays.sort(intervals, (a, b) ->
+            a[0] == b[0] ? b[1] - a[1] : a[0] -b[0]
+        );
+
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+        int covered = 0;
+        for (int i = 1; i < intervals.length; i++) {
+            int startNew = intervals[i][0];
+            int endNew = intervals[i][1];
+            //覆盖
+            if (start <= startNew && endNew <= end) {
+                covered++;
+            }
+            //相交
+            if (end >= startNew && end <= endNew) {
+                start = startNew;
+                end = endNew;
+            }
+
+            //相离
+            if (end < startNew) {
+                start = startNew;
+                end = endNew;
+            }
+        }
+        return intervals.length - covered;
     }
 
     public static void main(String[] args) {
@@ -1178,6 +1230,7 @@ public class ArrayProgramming {
 //        [383].赎金信
 //        System.out.println(canConstruct("aa", "ab"));
 //        System.out.println(canConstruct("aa", "aab"));
+//
 //        [384].打乱数组
 //        Solution res = new Solution(new int[]{1, 2, 3});
 //        System.out.println(Arrays.toString(res.shuffle()));
@@ -1187,9 +1240,18 @@ public class ArrayProgramming {
 //        [406].根据身高重建队列
 //        int[][] res = reconstructQueue(new int[][]{{7,0},{4,4},{7,1},{5,0},{6,1},{5,2}});
 //
+//        [435].无重叠区间
+//        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3}, {3, 4}, {1, 3}}));
+//        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {1, 2}, {1, 2}}));
+//        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3}}));
+//        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3},{3,4},{-100,-2},{5,7}}));
+//
 //        [735].行星碰撞
 //        System.out.println(Arrays.toString(asteroidCollision(new int[]{-2, -1, 1, 2})));
 //        System.out.println(Arrays.toString(asteroidCollision(new int[]{10, 2, -5})));
 //        System.out.println(Arrays.toString(asteroidCollision(new int[]{5, 10, -5})));
+//
+//        [1288].删除被覆盖区间
+//        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));
     }
 }

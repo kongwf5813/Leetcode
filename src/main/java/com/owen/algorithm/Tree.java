@@ -709,7 +709,6 @@ public class Tree {
         }
     }
 
-
     //[427].建立四叉树
     public static class Solution427 {
         class Node {
@@ -793,6 +792,26 @@ public class Tree {
             res.add(arr);
         }
         return res;
+    }
+
+    //[437].路径总和III
+    public static int pathSum3(TreeNode root, int sum) {
+        if (root == null) return 0;
+        int result = countPath(root, sum);
+        int left = pathSum3(root.left, sum);
+        int right = pathSum3(root.right, sum);
+        return result + left + right;
+    }
+
+    private static int countPath(TreeNode root, int sum) {
+        if (root == null) return 0;
+
+        sum = sum - root.val;
+        int rootNum = sum == 0 ? 1 : 0;
+        int leftNum = countPath(root.left, sum);
+        int rightNum = countPath(root.right, sum);
+
+        return rootNum + leftNum + rightNum;
     }
 
     //[449].序列化和反序列化二叉搜索树
