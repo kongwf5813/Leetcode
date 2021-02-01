@@ -739,6 +739,33 @@ public class DynamicProgramming {
         return dp[size - 1][amount];
     }
 
+    //[581].两个字符串的删除操作
+    public static int minDistance(String word1, String word2) {
+        int m = word1.length(), n = word2.length();
+        int lcs = longestCommonSubsequence(word1, word2);
+        return m - lcs + n - lcs;
+    }
+
+    //[712].两个字符串的最小ASCII删除和
+    public static int minimumDeleteSum(String s1, String s2) {
+        int m = s1.length(), n = s2.length();
+
+        int sum = 0;
+        for (int i = 0; i < m; i++) sum += s1.charAt(i);
+        for (int i = 0; i < n; i++) sum += s2.charAt(i);
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + (int) (s1.charAt(i - 1));
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return sum - (dp[m][n] * 2);
+    }
+
     //[714].买卖股票的最佳时机含手续费
     public static int maxProfit(int[] prices, int fee) {
         int n = prices.length;
@@ -752,6 +779,24 @@ public class DynamicProgramming {
             dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
         }
         return dp[n - 1][0];
+    }
+
+    //[1143].最长公共子序列
+    public static int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(), n = text2.length();
+        if (m == 0 || n == 0) return 0;
+        //dp[i][j]定义, 从text1[..i] text2[..j]的公共子序列最大长度
+        int[][] dp = new int[m+1][n+1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1.charAt(i -1) == text2.charAt(j -1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m][n];
     }
 
     public static void main(String[] args) {
@@ -875,7 +920,17 @@ public class DynamicProgramming {
 //        System.out.println(change(0, new int[]{}));
 //        System.out.println(change(7, new int[]{}));
 //
+//        [581].两个字符串的删除操作
+//        System.out.println(minDistance("sea", "eat"));
+//
+//        [712].两个字符串的最小ASCII删除和
+//        System.out.println(minimumDeleteSum("delete", "leet"));
+//
 //        [714].买卖股票的最佳时机含手续费
 //        System.out.println(maxProfit(new int[]{1, 3, 2, 8, 4, 9}, 2));
+//
+//        [1143].最长公共子序列
+//        System.out.println(longestCommonSubsequence("abcde", "ace"));
+
     }
 }
