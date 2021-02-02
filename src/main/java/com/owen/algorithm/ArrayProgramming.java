@@ -1055,6 +1055,48 @@ public class ArrayProgramming {
         return intervals.length - covered;
     }
 
+    //[1109].航班预定统计
+    public static class Soultion1109 {
+        public int[] diffSum;
+
+        public void createDiffSum(int[] nums) {
+            int n = nums.length;
+            diffSum = new int[n];
+            int temp = 0;
+            for (int i = 0; i < n; i++) {
+                diffSum[i] = nums[i] - temp;
+                temp = nums[i];
+            }
+        }
+
+        public void insert(int start, int end, int num) {
+            diffSum[start] += num;
+            if (end + 1 < diffSum.length) {
+                diffSum[end + 1] -= num;
+            }
+        }
+
+        public int[] result() {
+            int n = diffSum.length;
+            int[] nums = new int[n];
+            int temp = 0;
+            for (int i = 0; i < diffSum.length; i++) {
+                nums[i] = temp + diffSum[i];
+                temp = nums[i];
+            }
+            return nums;
+        }
+
+        public int[] corpFlightBookings(int[][] bookings, int n) {
+            int[] nums = new int[n];
+            Arrays.fill(nums, 0);
+            createDiffSum(nums);
+            for (int[] book : bookings) {
+                insert(book[0] - 1, book[1] - 1, book[2]);
+            }
+            return result();
+        }
+    }
     public static void main(String[] args) {
 //        [15].三数之和
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
@@ -1253,5 +1295,9 @@ public class ArrayProgramming {
 //
 //        [1288].删除被覆盖区间
 //        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));
+//
+//        [1109].航班预定统计
+//        Soultion1109 test = new Soultion1109();
+//        System.out.println(Arrays.toString(test.corpFlightBookings(new int[][]{{1,2,10},{2,3,20},{2,5,25}}, 5)));
     }
 }

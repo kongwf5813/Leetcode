@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class DynamicProgramming {
 
-    //[5]最长回文子串
+    //[5].最长回文子串
     public static String longestPalindrome(String s) {
         int size = s.length();
         //如果求子串，那么boolean dp[i][j]的定义: i到j是否是回文子串
@@ -55,7 +55,7 @@ public class DynamicProgramming {
         return s.substring(l + 1, r);
     }
 
-    //[53]最大子序列和
+    //[53].最大子序列和
     public static int maxSubArray(int[] nums) {
         int size = nums.length;
         if (size == 0) return 0;
@@ -74,7 +74,7 @@ public class DynamicProgramming {
         return res;
     }
 
-    //62.不同路径 动态规划
+    //[62].不同路径 动态规划
     public static int uniquePaths(int m, int n) {
         if (m == 0 || n == 0) return 0;
         int[][] dp = new int[m][n];
@@ -92,7 +92,7 @@ public class DynamicProgramming {
         return dp[m - 1][n - 1];
     }
 
-    //63.不同路径II
+    //[63].不同路径II
     public static int uniquePathsWithObstacles(int[][] obstacleGrid) {
         int m, n;
         if ((m = obstacleGrid.length) == 0 || (n = obstacleGrid[0].length) == 0) return 0;
@@ -125,7 +125,7 @@ public class DynamicProgramming {
         return dp[m - 1][n - 1];
     }
 
-    //64. 最小路径和
+    //[64].最小路径和
     public static int minPathSum(int[][] grid) {
         int m;
         if ((m = grid.length) == 0) {
@@ -148,7 +148,34 @@ public class DynamicProgramming {
         return dp[m - 1][n - 1];
     }
 
-    //[91]解码方法
+    //[72].编辑距离
+    public static int minDistance(String word1, String word2) {
+
+        int m = word1.length();
+        int n = word2.length();
+        //最小编辑距离
+        int[][] dp = new int[m +1][n+1];
+
+        for (int i = 1; i<= m ; i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 1; j<= n ; j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (word1.charAt(i -1) == word2.charAt(j-1)) {
+                    dp[i][j] = dp[i-1][j-1];
+                } else {
+                    dp[i][j] = Math.min(Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1), dp[i-1][j-1] + 1);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
+    //[91].解码方法
     public static int numDecodings(String s) {
         if (s.length() == 0 || s.charAt(0) == '0') return 0;
         int dp[] = new int[s.length()];
@@ -245,6 +272,7 @@ public class DynamicProgramming {
         }
         return dp[n - 1][0];
     }
+
     //[123].买卖股票的最佳时机III
     public static int maxProfit3(int[] prices) {
         int dp_i10 = 0, dp_i11 = Integer.MIN_VALUE;
@@ -275,6 +303,35 @@ public class DynamicProgramming {
         }
         return dp[n-1][maxK][0];
         */
+    }
+
+    //[188].买卖股票的最佳时机IV
+    public static int maxProfit4(int k, int[] prices) {
+        int n = prices.length;
+        if (n == 0) return 0;
+        if (k > n / 2) {
+            int[][] dp1 = new int[n][2];
+            dp1[0][0] = 0;
+            dp1[0][1] = -prices[0];
+            for (int i = 1; i < n; i++) {
+                dp1[i][0] = Math.max(dp1[i - 1][0], dp1[i - 1][1] + prices[i]);
+                dp1[i][1] = Math.max(dp1[i - 1][1], dp1[i - 1][0] - prices[i]);
+            }
+            return dp1[n - 1][0];
+        }
+
+        int[][][] dp = new int[n][k + 1][2];
+        for (int i = 1; i <= k; i++) {
+            dp[0][i][0] = 0;
+            dp[0][i][1] = -prices[0];
+        }
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j <= k; j++) {
+                dp[i][j][0] = Math.max(dp[i - 1][j][0], dp[i - 1][j][1] + prices[i]);
+                dp[i][j][1] = Math.max(dp[i - 1][j][1], dp[i - 1][j - 1][0] - prices[i]);
+            }
+        }
+        return dp[n - 1][k][0];
     }
 
     //[139].单词拆分
@@ -740,7 +797,7 @@ public class DynamicProgramming {
     }
 
     //[581].两个字符串的删除操作
-    public static int minDistance(String word1, String word2) {
+    public static int minDistance2(String word1, String word2) {
         int m = word1.length(), n = word2.length();
         int lcs = longestCommonSubsequence(word1, word2);
         return m - lcs + n - lcs;
@@ -816,6 +873,9 @@ public class DynamicProgramming {
 //        [64].最小路径和
 //        System.out.println(minPathSum(new int[][]{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}}));
 //
+//        [72].编辑距离
+//        System.out.println(minDistance("", "1"));
+//
 //        [91].解码方法
 //        System.out.println(numDecodings("2010"));
 //        System.out.println(numDecodings("226"));
@@ -854,6 +914,13 @@ public class DynamicProgramming {
 //        [152].乘积最大子数组
 //        System.out.println(maxProduct(new int[]{2,3,-2,4}));
 //        System.out.println(maxProduct(new int[]{2,3,0,4}));
+//
+//        [188].买卖股票的最佳时机IV
+//        System.out.println(maxProfit4(2, new int[]{3,2,6,5,0,3}));
+//        System.out.println(maxProfit4(1, new int[]{1,2}));
+//        System.out.println(maxProfit4(2, new int[]{2,4,1}));
+//        System.out.println(maxProfit4(4, new int[]{1,2,4,2,5,7,2,4,9,0}));
+//        System.out.println(maxProfit4(4, new int[]{5,7,2,7,3,3,5,3,0}));
 //
 //        [198].打家劫舍
 //        System.out.println(rob(new int[]{1, 2, 3, 1}));
@@ -921,7 +988,7 @@ public class DynamicProgramming {
 //        System.out.println(change(7, new int[]{}));
 //
 //        [581].两个字符串的删除操作
-//        System.out.println(minDistance("sea", "eat"));
+//        System.out.println(minDistance2("sea", "eat"));
 //
 //        [712].两个字符串的最小ASCII删除和
 //        System.out.println(minimumDeleteSum("delete", "leet"));
