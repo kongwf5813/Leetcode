@@ -984,6 +984,43 @@ public class ArrayProgramming {
         return res;
     }
 
+    //[442].数组中重复的数据
+    public static List<Integer> findDuplicates(int[] nums) {
+        List<Integer> res = new ArrayList<>();
+        int n = nums.length;
+        for (int i = n - 1; i >= 0; i--) {
+            int index = Math.abs(nums[i]) - 1;
+            if (nums[index] < 0) {
+                res.add(index + 1);
+            }
+
+            nums[index] = -nums[index];
+
+        }
+        return res;
+    }
+
+    //[443].压缩字符串
+    public static int compress(char[] chars) {
+        int n = chars.length;
+        int left = 0;
+        int right = 0;
+        int write = 0;
+        for (; right <= n; right++) {
+            if (right == n || chars[left] != chars[right]) {
+                chars[write++] = chars[left];
+                if (right - left > 1) {
+                    char[] all = String.valueOf(right - left).toCharArray();
+                    for (char ch : all) {
+                        chars[write++] = ch;
+                    }
+                }
+                left = right;
+            }
+        }
+        return write;
+    }
+
     //[735].行星碰撞
     public static int[] asteroidCollision(int[] asteroids) {
         //[-2, -1, 1, 2]
@@ -1056,7 +1093,7 @@ public class ArrayProgramming {
     }
 
     //[1109].航班预定统计
-    public static class Soultion1109 {
+    public static class Solution1109 {
         public int[] diffSum;
 
         public void createDiffSum(int[] nums) {
@@ -1287,6 +1324,15 @@ public class ArrayProgramming {
 //        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {1, 2}, {1, 2}}));
 //        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3}}));
 //        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3},{3,4},{-100,-2},{5,7}}));
+//
+//        [442].数组中重复的数据
+//        System.out.println(findDuplicates(new int[]{2, 3, 4, 3}));
+//
+//        [443].压缩字符串
+//        System.out.println(compress(new char[]{'a', 'a', 'b', 'b', 'c', 'c', 'c'}));
+//        System.out.println(compress(new char[]{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'}));
+//        System.out.println(compress(new char[]{'a'}));
+//        System.out.println(compress(new char[]{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'}));
 //
 //        [735].行星碰撞
 //        System.out.println(Arrays.toString(asteroidCollision(new int[]{-2, -1, 1, 2})));

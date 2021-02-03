@@ -511,6 +511,37 @@ public class DynamicProgramming {
         return dp[n - 1][0];
     }
 
+    //[313].超级丑数
+    public static int nthSuperUglyNumber(int n, int[] primes) {
+        int k = primes.length;
+        int[] pointer = new int[k];
+
+        int[] dp = new int[n];
+        dp[0] = 1;
+
+        for (int i = 1; i < n; i++) {
+            int min = Integer.MAX_VALUE;
+            //找到min值
+            for (int j = 0; j < k; j++) {
+                int val = dp[pointer[j]] * primes[j];
+                if (val < min) {
+                    min = val;
+                }
+            }
+
+            dp[i] = min;
+
+            //更新指针
+            for (int j = 0; j < k; j++) {
+                //可能不止一个
+                if (min == dp[pointer[j]] * primes[j]) {
+                    pointer[j]++;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
+
     //[322].兑换零钱
     public static int coinChange(int[] coins, int amount) {
         //总金额为i最少需要多少硬币
@@ -950,6 +981,9 @@ public class DynamicProgramming {
 //
 //        [309].最佳买卖股票时机含冷冻期
 //        System.out.println(maxProfit(new int[] {1,2,3,0,2}));
+//
+//        [313].超级丑数
+//        System.out.println(nthSuperUglyNumber(12, new int[]{2, 7, 13, 19}));
 //
 //        [322].兑换零钱
 //        System.out.println(coinChange(new int[] {2}, 3));
