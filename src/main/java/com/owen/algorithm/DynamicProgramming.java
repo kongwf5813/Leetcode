@@ -154,21 +154,21 @@ public class DynamicProgramming {
         int m = word1.length();
         int n = word2.length();
         //最小编辑距离
-        int[][] dp = new int[m +1][n+1];
+        int[][] dp = new int[m + 1][n + 1];
 
-        for (int i = 1; i<= m ; i++) {
+        for (int i = 1; i <= m; i++) {
             dp[i][0] = i;
         }
-        for (int j = 1; j<= n ; j++) {
+        for (int j = 1; j <= n; j++) {
             dp[0][j] = j;
         }
 
         for (int i = 1; i <= m; i++) {
             for (int j = 1; j <= n; j++) {
-                if (word1.charAt(i -1) == word2.charAt(j-1)) {
-                    dp[i][j] = dp[i-1][j-1];
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
                 } else {
-                    dp[i][j] = Math.min(Math.min(dp[i-1][j] + 1, dp[i][j-1] + 1), dp[i-1][j-1] + 1);
+                    dp[i][j] = Math.min(Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), dp[i - 1][j - 1] + 1);
                 }
             }
         }
@@ -559,6 +559,7 @@ public class DynamicProgramming {
 
     //[337].打家劫舍III
     private static Map<Tree.TreeNode, Integer> robMap = new HashMap<>();
+
     public static int rob(Tree.TreeNode root) {
         if (root == null) return 0;
         if (robMap.containsKey(root)) return robMap.get(root);
@@ -757,9 +758,9 @@ public class DynamicProgramming {
         int size = A.length;
         int[] dp = new int[size];
         int sum = 0;
-        for (int i = 2; i< size; i++) {
-            if (A[i] - A[i-1] == A[i-1] - A[i-2]) {
-                dp[i] = dp[i-1] + 1;
+        for (int i = 2; i < size; i++) {
+            if (A[i] - A[i - 1] == A[i - 1] - A[i - 2]) {
+                dp[i] = dp[i - 1] + 1;
                 sum += dp[i];
             }
         }
@@ -793,6 +794,24 @@ public class DynamicProgramming {
             }
         }
         return dp[nums.length - 1][sum];
+    }
+
+    //[474].一和零
+    public static int findMaxForm(String[] strs, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        for (String str : strs) {
+            int zeros = 0, ones = 0;
+            for (char ch : str.toCharArray()) {
+                if (ch == '0') zeros++;
+                else ones++;
+            }
+            for (int i = m; i >= zeros; i--) {
+                for (int j = n; j >= ones; j--) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - zeros][j - ones] + 1);
+                }
+            }
+        }
+        return dp[m][n];
     }
 
     //[518].兑换零钱II
@@ -874,10 +893,10 @@ public class DynamicProgramming {
         int m = text1.length(), n = text2.length();
         if (m == 0 || n == 0) return 0;
         //dp[i][j]定义, 从text1[..i] text2[..j]的公共子序列最大长度
-        int[][] dp = new int[m+1][n+1];
+        int[][] dp = new int[m + 1][n + 1];
         for (int i = 1; i <= m; i++) {
             for (int j = 1; j <= n; j++) {
-                if (text1.charAt(i -1) == text2.charAt(j -1)) {
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
                     dp[i][j] = dp[i - 1][j - 1] + 1;
                 } else {
                     dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
@@ -1032,6 +1051,9 @@ public class DynamicProgramming {
 //
 //        [1143].最长公共子序列
 //        System.out.println(longestCommonSubsequence("abcde", "ace"));
-
+//
+//        [474].一和零
+//        System.out.println(findMaxForm(new String[]{"10", "0001", "111001", "1", "0"}, 5, 3));
+//        System.out.println(findMaxForm(new String[]{"10", "0", "1"}, 1, 1));
     }
 }

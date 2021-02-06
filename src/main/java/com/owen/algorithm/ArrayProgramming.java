@@ -1,5 +1,7 @@
 package com.owen.algorithm;
 
+import org.omg.PortableInterceptor.DISCARDING;
+
 import java.util.*;
 
 /**
@@ -1021,6 +1023,87 @@ public class ArrayProgramming {
         return write;
     }
 
+    //[447].回旋镖的数量
+    public static int numberOfBoomerangs(int[][] points) {
+        int res = 0;
+        for (int i = 0; i < points.length; i++) {
+            Map<Integer, Integer> distanceCount = new HashMap<>();
+            for (int j = 0; j < points.length; j++) {
+                if (i != j) {
+                    int distance = (points[i][0] - points[j][0]) * (points[i][0] - points[j][0]) +
+                            (points[i][1] - points[j][1]) * (points[i][1] - points[j][1]);
+                    int count = distanceCount.getOrDefault(distance, 0);
+                    distanceCount.put(distance, count + 1);
+                }
+            }
+            for (int count : distanceCount.values()) {
+                if (count > 1) {
+                    res += count * (count - 1);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[477].汉明距离总和
+    public static int totalHammingDistance(int[] nums) {
+        //题目是求两两之间的距离
+        //转化为计算每一位的汉明距离 == 每一位 1的个数 * 0的个数
+        int res = 0;
+        for (int i = 0; i < 32; i++) {
+            int ones = 0;
+            for (int num : nums) {
+                if ((num >> i & 1) == 1) {
+                    ones++;
+                }
+            }
+
+            res += ones * (nums.length - ones);
+        }
+        return res;
+    }
+
+    //[498].对角线遍历
+    public static int[] findDiagonalOrder(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {
+            return new int[0];
+        }
+
+        int m = matrix.length;
+        int n = matrix[0].length;
+
+        int[] res = new int[m * n];
+        int direct = 1;
+        int row = 0, col = 0, index = 0;
+
+        while (row < m && col < n) {
+            res[index++] = matrix[row][col];
+
+            int x = row + (direct == 1 ? -1 : 1);
+            int y = col + (direct == 1 ? 1 : -1);
+
+            if (x < 0 || x == m || y < 0 || y == n) {
+                if (direct == 1) {
+                    //触碰上边界，达到最后一列，往下
+                    row += (col == n - 1) ? 1 : 0;
+                    //触碰上边界，还没有达到最后一列，往右
+                    col += (col < n - 1) ? 1 : 0;
+                } else {
+                    //触碰左边界，达到最后一行，往右
+                    col += (row == m - 1) ? 1 : 0;
+
+                    //触碰左边界，还没有达到最后一行，往下
+                    row += (row < m - 1) ? 1 : 0;
+                }
+                direct = -1 * direct;
+            } else {
+                row = x;
+                col = y;
+            }
+        }
+        return res;
+    }
+
     //[735].行星碰撞
     public static int[] asteroidCollision(int[] asteroids) {
         //[-2, -1, 1, 2]
@@ -1064,7 +1147,7 @@ public class ArrayProgramming {
     public static int removeCoveredIntervals(int[][] intervals) {
         if (intervals.length == 0) return 0;
         Arrays.sort(intervals, (a, b) ->
-            a[0] == b[0] ? b[1] - a[1] : a[0] -b[0]
+                a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]
         );
 
         int start = intervals[0][0];
@@ -1134,6 +1217,7 @@ public class ArrayProgramming {
             return result();
         }
     }
+
     public static void main(String[] args) {
 //        [15].三数之和
 //        System.out.println(threeSum(new int[]{-1, 1, 2, 11, 0, 1, -2}));
@@ -1345,5 +1429,15 @@ public class ArrayProgramming {
 //        [1109].航班预定统计
 //        Soultion1109 test = new Soultion1109();
 //        System.out.println(Arrays.toString(test.corpFlightBookings(new int[][]{{1,2,10},{2,3,20},{2,5,25}}, 5)));
+
+//        [447].回旋镖的数量
+//        System.out.println(numberOfBoomerangs(new int[][]{{0,0},{1,1},{2,2}}));
+//        System.out.println(numberOfBoomerangs(new int[][]{{0,0}}));
+//        System.out.println(numberOfBoomerangs(new int[][]{{0,0}, {1,1}}));
+
+//        [477].汉明距离总和
+//        System.out.println(totalHammingDistance(new int[]{4, 14, 2}));
+
+        System.out.println(Arrays.toString(findDiagonalOrder(new int[][]{{1, 2, 3}, { 4, 5, 6}, {7, 8, 9}})));
     }
 }

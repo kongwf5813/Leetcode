@@ -1039,20 +1039,33 @@ public class Others {
         public class NestedInteger {
 
             // @return true if this NestedInteger holds a single integer, rather than a nested list.
-            public boolean isInteger() {return true;};
+            public boolean isInteger() {
+                return true;
+            }
+
+            ;
 
             // @return the single integer that this NestedInteger holds, if it holds a single integer
             // Return null if this NestedInteger holds a nested list
-            public Integer getInteger() {return 1;};
+            public Integer getInteger() {
+                return 1;
+            }
+
+            ;
 
             // @return the nested list that this NestedInteger holds, if it holds a nested list
             // Return null if this NestedInteger holds a single integer
-            public List<NestedInteger> getList() {return null;};
+            public List<NestedInteger> getList() {
+                return null;
+            }
+
+            ;
         }
 
         Deque<NestedInteger> stack = new ArrayDeque<>();
+
         public NestedIterator(List<NestedInteger> nestedList) {
-            for (int i = nestedList.size() -1; i>=0;i--) {
+            for (int i = nestedList.size() - 1; i >= 0; i--) {
                 stack.push(nestedList.get(i));
             }
         }
@@ -1069,7 +1082,7 @@ public class Others {
             } else {
                 if (!stack.peek().isInteger()) {
                     List<NestedInteger> list = stack.poll().getList();
-                    for (int i = list.size()-1; i >=0; i--) {
+                    for (int i = list.size() - 1; i >= 0; i--) {
                         stack.push(list.get(i));
                     }
                     //有可能还是一个嵌套，递归求解
@@ -1597,6 +1610,137 @@ public class Others {
         return false;
     }
 
+    //[460].LFU缓存
+    public static class LFUCache {
+        private Map<Integer, Integer> keyToVal;
+        private Map<Integer, Integer> keyToFre;
+        private Map<Integer, LinkedHashSet<Integer>> freToKeys;
+        private int cap;
+        private int minFre;
+
+        public LFUCache(int capacity) {
+            keyToVal = new HashMap<>();
+            keyToFre = new HashMap<>();
+            freToKeys = new HashMap<>();
+            cap = capacity;
+            minFre = 0;
+        }
+
+        public int get(int key) {
+            if (!keyToVal.containsKey(key)) return -1;
+            increaseFre(key);
+            return keyToVal.get(key);
+        }
+
+        public void put(int key, int value) {
+            if (cap <= 0) return;
+            if (keyToVal.containsKey(key)) {
+                increaseFre(key);
+                keyToVal.put(key, value);
+                return;
+            }
+
+            //容量超了淘汰
+            if (this.cap <= keyToVal.size()) {
+                LinkedHashSet<Integer> list = freToKeys.get(minFre);
+                int deleteKey = list.iterator().next();
+                list.remove(deleteKey);
+                if (list.isEmpty()) {
+                    //不需要便跟minFre
+                    freToKeys.remove(minFre);
+                }
+                keyToVal.remove(deleteKey);
+                keyToFre.remove(deleteKey);
+            }
+
+            keyToVal.put(key, value);
+            keyToFre.put(key, 1);
+            freToKeys.putIfAbsent(1, new LinkedHashSet<>());
+            freToKeys.get(1).add(key);
+            minFre = 1;
+        }
+
+        private void increaseFre(int key) {
+            int fre = keyToFre.get(key);
+            keyToFre.put(key, fre + 1);
+            freToKeys.putIfAbsent(fre + 1, new LinkedHashSet<>());
+            freToKeys.get(fre + 1).add(key);
+
+            LinkedHashSet<Integer> list = freToKeys.get(fre);
+            list.remove(key);
+            if (list.isEmpty()) {
+                freToKeys.remove(fre);
+                if (fre == minFre) {
+                    minFre++;
+                }
+            }
+        }
+    }
+
+    //[468].验证IP地址
+    public static String validIPAddress(String IP) {
+        if (IP.contains(".")) {
+            String[] ipv4 = IP.split("\\.", -1);
+            if (ipv4.length != 4) {
+                return "Neither";
+            }
+            for (String ip : ipv4) {
+                if(ip.length() > 3 || ip.length() <= 0){
+                    return "Neither";
+                }
+
+                for (char ch : ip.toCharArray()) {
+                    if (!Character.isDigit(ch)) {
+                        return "Neither";
+                    }
+                }
+                int num = Integer.parseInt(ip);
+                if (num < 0 || num > 255 || String.valueOf(num).length() != ip.length()) {
+                    return "Neither";
+                }
+            }
+            return "IPv4";
+        } else if (IP.contains(":")) {
+            String[] ipv6 = IP.split(":", -1);
+            if (ipv6.length != 8) {
+                return "Neither";
+            }
+
+            for (String ip : ipv6) {
+                if (ip.length() > 4 || ip.length() <= 0) {
+                    return "Neither";
+                }
+                for (char ch : ip.toCharArray()) {
+                    if (!Character.isDigit(ch) && !('a' <= ch && ch <= 'f') && !('A' <= ch && ch <= 'F')) {
+                        return "Neither";
+                    }
+                }
+            }
+            return "IPv6";
+        } else {
+            return "Neither";
+        }
+    }
+
+    //[478].在圆内随机生成点
+    public class Solution478 {
+
+        private double radius;
+        private double xCenter;
+        private double yCenter;
+
+        public Solution478(double radius, double x_center, double y_center) {
+            this.radius = radius;
+            this.xCenter = x_center;
+            this.yCenter = y_center;
+        }
+
+        public double[] randPoint() {
+            double r = radius * Math.sqrt(Math.random());
+            double angle = Math.random() * 2 * Math.PI;
+            return new double[] {r * Math.cos(angle) + xCenter, r * Math.sin(angle) + yCenter};
+        }
+    }
     //[496].下一个更大元素I
     public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
         //nums1 = [4,1,2], nums2 = [1,3,4,2].
@@ -2032,5 +2176,32 @@ public class Others {
 //        t.next = x;
 //        x.next = y;
 //        System.out.println(Arrays.toString(nextLargerNodes(head)));
+//
+//        [460].LFU缓存
+//        LFUCache lFUCache = new LFUCache(2);
+//        lFUCache.put(1, 1);   // cache=[1,_], cnt(1)=1
+//        lFUCache.put(2, 2);   // cache=[2,1], cnt(2)=1, cnt(1)=1
+//        System.out.println(lFUCache.get(1));      // 返回 1
+//        // cache=[1,2], cnt(2)=1, cnt(1)=2
+//        lFUCache.put(3, 3);   // 去除键 2 ，因为 cnt(2)=1 ，使用计数最小
+//        // cache=[3,1], cnt(3)=1, cnt(1)=2
+//        System.out.println(lFUCache.get(2));      // 返回 -1（未找到）
+//        System.out.println(lFUCache.get(3));    // 返回 3
+//        // cache=[3,1], cnt(3)=2, cnt(1)=2
+//        lFUCache.put(4, 4);   // 去除键 1 ，1 和 3 的 cnt 相同，但 1 最久未使用
+//        // cache=[4,3], cnt(4)=1, cnt(3)=2
+//        System.out.println(lFUCache.get(1));      // 返回 -1（未找到）
+//        System.out.println(lFUCache.get(3));      // 返回 3
+//        // cache=[3,4], cnt(4)=1, cnt(3)=3
+//        System.out.println(lFUCache.get(4));      // 返回 4
+
+//        [468].验证IP地址
+//        System.out.println(validIPAddress("2001:0db8:85a3:0:0:8A2E:0370:7334"));
+//        System.out.println(validIPAddress("2001:0db8:85a3:0:0:8A2E:0370:7334:"));
+//        System.out.println(validIPAddress("1e1.4.5.6"));
+//        System.out.println(validIPAddress("172.16.254.1"));
+//        System.out.println(validIPAddress("1.0.1."));
+        System.out.println(validIPAddress("2001:0db8:85a3:00000:0:8A2E:0370:7334"));
+
     }
 }
