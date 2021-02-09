@@ -1348,6 +1348,31 @@ public class Others {
         }
     }
 
+    //[388].文件的最长绝对路径
+    public static int lengthLongestPath(String input) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(0);
+        String[] dirs = input.split("\n");
+        int res = 0;
+        for (String dir : dirs) {
+            int level = dir.lastIndexOf("\t") + 1;
+
+            //需要回退到上一层
+            while (level + 1 < stack.size()) {
+                stack.pop();
+            }
+
+            //默认把/计数
+            int len = stack.peek() + dir.length() - level + 1;
+            stack.push(len);
+
+            if (dir.contains(".")) {
+                res = Math.max(res, len - 1);
+            }
+        }
+        return res;
+    }
+
     //[390].消除游戏
     public static int lastRemaining(int n) {
         return calForLastRemaining(n);
@@ -1685,7 +1710,7 @@ public class Others {
                 return "Neither";
             }
             for (String ip : ipv4) {
-                if(ip.length() > 3 || ip.length() <= 0){
+                if (ip.length() > 3 || ip.length() <= 0) {
                     return "Neither";
                 }
 
@@ -1738,9 +1763,39 @@ public class Others {
         public double[] randPoint() {
             double r = radius * Math.sqrt(Math.random());
             double angle = Math.random() * 2 * Math.PI;
-            return new double[] {r * Math.cos(angle) + xCenter, r * Math.sin(angle) + yCenter};
+            return new double[]{r * Math.cos(angle) + xCenter, r * Math.sin(angle) + yCenter};
         }
     }
+
+    //[481].神奇字符串
+    public static int magicalString(int n) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(1);
+        //频次指针
+        int index = 1;
+        while (sb.length() < n) {
+            //频次字符串不够，需要根据前一个字符进行生成
+            if (index == sb.length()) {
+                sb.append(sb.charAt(sb.length() - 1) == '1' ? 22 : 1);
+                index++;
+            } else {
+                //最后一个字符是1，下一个字符是2
+                if (sb.charAt(sb.length() - 1) == '1') {
+                    sb.append(sb.charAt(index++) == '1' ? 2 : 22);
+                } else {
+                    //最后一个字符是2，下一组字符是1
+                    sb.append(sb.charAt(index++) == '1' ? 1 : 11);
+                }
+            }
+        }
+
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            count += sb.charAt(i) == '1' ? 1 : 0;
+        }
+        return count;
+    }
+
     //[496].下一个更大元素I
     public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
         //nums1 = [4,1,2], nums2 = [1,3,4,2].
@@ -2203,5 +2258,9 @@ public class Others {
 //        System.out.println(validIPAddress("1.0.1."));
         System.out.println(validIPAddress("2001:0db8:85a3:00000:0:8A2E:0370:7334"));
 
+        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
+        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\tsubdir2\n\t\tfile.ext"));
+
+        System.out.println(magicalString(6));
     }
 }
