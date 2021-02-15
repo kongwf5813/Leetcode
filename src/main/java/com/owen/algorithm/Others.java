@@ -3,6 +3,7 @@ package com.owen.algorithm;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.owen.algorithm.LinkList.ListNode;
 
 public class Others {
@@ -28,28 +29,6 @@ public class Others {
             right = _right;
             next = _next;
         }
-    }
-
-    //[3]无重复子串的最长子串（双指针）
-    public static int lengthOfLongestSubstring(String s) {
-        //滑动窗口
-        int[] position = new int[128];
-        int start = 0, end = 0;
-        int result = 0;
-        char[] array = s.toCharArray();
-        while (end < array.length) {
-            char character = array[end];
-            int lastMaxIndex = position[character];
-            //滑动窗口缩小
-            start = Math.max(start, lastMaxIndex);
-            //更新最长子串的长度
-            result = Math.max(result, end - start + 1);
-            //更新字符的最大位置
-            position[character] = end + 1;
-            //滑动窗口扩大
-            end++;
-        }
-        return result;
     }
 
     //[6].Z字形变化
@@ -428,29 +407,6 @@ public class Others {
         return head;
     }
 
-    //[150].逆波兰表达式求值
-    public static int evalRPN(String[] tokens) {
-        Stack<String> stack = new Stack<>();
-        for (String token : tokens) {
-            if (token.equals("+") || token.equals("-") || token.equals("*") || token.equals("/")) {
-                Integer lastNumber = Integer.parseInt(stack.pop());
-                Integer firstNumber = Integer.parseInt(stack.pop());
-                if (token.equals("+")) {
-                    stack.push("" + (firstNumber + lastNumber));
-                } else if (token.equals("-")) {
-                    stack.push("" + (firstNumber - lastNumber));
-                } else if (token.equals("*")) {
-                    stack.push("" + (firstNumber * lastNumber));
-                } else {
-                    stack.push("" + (firstNumber / lastNumber));
-                }
-            } else {
-                stack.push(token);
-            }
-        }
-        return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
-    }
-
     //[151].翻转字符串里的单词
     public static String reverseWords(String s) {
         String words[] = s.trim().split("[\\s\\u00A0]+");
@@ -640,195 +596,6 @@ public class Others {
         return area1 + area2 - dupHeight * dupWidth;
     }
 
-    //[224].基本计算器
-    public static int calculate(String s) {
-        return dfsForCalculate(s.trim().toCharArray(), new AtomicInteger());
-    }
-
-    private static int dfsForCalculate(char[] chars, AtomicInteger index) {
-        Stack<Integer> stack = new Stack<>();
-        int num = 0;
-        char sign = '+';
-        for (; index.get() < chars.length; index.incrementAndGet()) {
-            char ch = chars[index.get()];
-            if (ch == ' ') {
-                continue;
-            }
-
-            boolean isDig = '0' <= ch && ch <= '9';
-            if (isDig) {
-                num = num * 10 + (ch - '0');
-            }
-
-            //递归计算
-            if (ch == '(') {
-                index.incrementAndGet();
-                num = dfsForCalculate(chars, index);
-            }
-
-            if (!isDig || index.get() == chars.length - 1) {
-                switch (sign) {
-                    case '+':
-                        stack.push(num);
-                        break;
-                    case '-':
-                        stack.push(-num);
-                        break;
-                }
-                sign = ch;
-                num = 0;
-            }
-
-            //递归结束计算
-            if (ch == ')') {
-                break;
-            }
-        }
-
-        int res = 0;
-        while (!stack.isEmpty()) {
-            res += stack.pop();
-        }
-        return res;
-    }
-
-    //[225].队列实现栈
-    class MyStack {
-
-        Queue<Integer> queue;
-
-        /**
-         * Initialize your data structure here.
-         */
-        public MyStack() {
-            queue = new LinkedList<>();
-        }
-
-        /**
-         * Push element x onto stack.
-         */
-        public void push(int x) {
-            int size = queue.size();
-            queue.offer(x);
-            for (int i = 0; i < size; i++) {
-                queue.offer(queue.poll());
-            }
-        }
-
-        /**
-         * Removes the element on top of the stack and returns that element.
-         */
-        public int pop() {
-            return queue.poll();
-        }
-
-        /**
-         * Get the top element.
-         */
-        public int top() {
-            return queue.peek();
-        }
-
-        /**
-         * Returns whether the stack is empty.
-         */
-        public boolean empty() {
-            return queue.isEmpty();
-        }
-    }
-
-    //[227].基本计算器II
-    public static int calculate2(String s) {
-        char[] arr = s.trim().toCharArray();
-        Stack<Integer> stack = new Stack<>();
-        int num = 0;
-        char preSign = '+';
-        for (int i = 0; i < arr.length; i++) {
-            char single = arr[i];
-            if (single == ' ') {
-                continue;
-            }
-            boolean isDig = '0' <= single && single <= '9';
-            if (isDig) {
-                num = num * 10 + (single - '0');
-            }
-
-            if (!isDig || i == arr.length - 1) {
-                switch (preSign) {
-                    case '+':
-                        stack.push(num);
-                        break;
-                    case '-':
-                        stack.push(-num);
-                        break;
-                    case '*':
-                        stack.push(stack.pop() * num);
-                        break;
-                    case '/':
-                        stack.push(stack.pop() / num);
-                        break;
-                }
-                preSign = single;
-                num = 0;
-            }
-        }
-
-        int res = 0;
-        while (!stack.isEmpty()) {
-            res += stack.pop();
-        }
-        return res;
-    }
-
-    //[232].用栈实现队列
-    class MyQueue {
-
-        Stack<Integer> s1;
-        Stack<Integer> s2;
-
-        /**
-         * Initialize your data structure here.
-         */
-        public MyQueue() {
-            s1 = new Stack<>();
-            s2 = new Stack<>();
-        }
-
-        /**
-         * Push element x to the back of queue.
-         */
-        public void push(int x) {
-            while (!s1.isEmpty()) {
-                s2.push(s1.pop());
-            }
-            s1.push(x);
-            while (!s2.isEmpty()) {
-                s1.push(s2.pop());
-            }
-        }
-
-        /**
-         * Removes the element from in front of queue and returns that element.
-         */
-        public int pop() {
-            return s1.pop();
-        }
-
-        /**
-         * Get the front element.
-         */
-        public int peek() {
-            return s1.peek();
-        }
-
-        /**
-         * Returns whether the queue is empty.
-         */
-        public boolean empty() {
-            return s1.isEmpty();
-        }
-    }
-
     //[241].为运算表达式设计优先级
     public static List<Integer> diffWaysToCompute(String input) {
         return dfsForDiffWaysToCompute(input, new HashMap<>());
@@ -924,6 +691,43 @@ public class Others {
         return dp[n - 1];
     }
 
+    //[295].数据流的中位数
+    public static class MedianFinder {
+
+        private PriorityQueue<Integer> small;
+        private PriorityQueue<Integer> large;
+
+        /**
+         * initialize your data structure here.
+         */
+        public MedianFinder() {
+            //大顶堆
+            small = new PriorityQueue<>((a, b) -> b - a);
+            //小顶堆
+            large = new PriorityQueue<>();
+        }
+
+        public void addNum(int num) {
+            if (small.size() <= large.size()) {
+                large.offer(num);
+                small.offer(large.poll());
+            } else {
+                small.offer(num);
+                large.offer(small.poll());
+            }
+        }
+
+        public double findMedian() {
+            if (small.size() > large.size()) {
+                return small.peek();
+            } else if (small.size() < large.size()) {
+                return large.peek();
+            } else {
+                return (small.peek() + large.peek()) / 2.0;
+            }
+        }
+    }
+
     //[299].猜数字游戏
     public static String getHint(String secret, String guess) {
         int[] cache = new int[10];
@@ -946,38 +750,6 @@ public class Others {
             }
         }
         return bullCount + "A" + cowCount + "B";
-    }
-
-    //[316].去除重复字母
-    public static String removeDuplicateLetters(String s) {
-        if (s == null) return null;
-        int[] count = new int[256];
-        for (char ch : s.toCharArray()) {
-            count[ch]++;
-        }
-        Stack<Character> stack = new Stack<>();
-        boolean[] inStack = new boolean[256];
-        for (char ch : s.toCharArray()) {
-            count[ch]--;
-            if (inStack[ch]) {
-                continue;
-            }
-            while (!stack.isEmpty() && stack.peek() > ch) {
-                if (count[stack.peek()] == 0) {
-                    break;
-                }
-                inStack[stack.pop()] = false;
-            }
-
-            stack.push(ch);
-            inStack[ch] = true;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        while (!stack.isEmpty()) {
-            sb.append(stack.pop());
-        }
-        return sb.reverse().toString();
     }
 
     //[318].最大单词长度乘积
@@ -1014,26 +786,6 @@ public class Others {
         return cnt;
     }
 
-    //[331].验证二叉树的前序序列化
-    public static boolean isValidSerialization(String preorder) {
-        String[] pre = preorder.split(",");
-        Stack<String> stack = new Stack<>();
-        for (String ch : pre) {
-            if (ch.equals("#")) {
-                while (!stack.isEmpty() && stack.peek().equals("#")) {
-                    stack.pop();
-                    //##， ###
-                    if (stack.isEmpty() || stack.pop().equals("#")) return false;
-                }
-                stack.push(ch);
-            } else {
-                stack.push(ch);
-            }
-        }
-        //#要比正常节点数多1，最后剩下的一定是#
-        return stack.size() == 1 && stack.peek().equals("#");
-    }
-
     public class NestedIterator implements Iterator<Integer> {
 
         public class NestedInteger {
@@ -1043,23 +795,17 @@ public class Others {
                 return true;
             }
 
-            ;
-
             // @return the single integer that this NestedInteger holds, if it holds a single integer
             // Return null if this NestedInteger holds a nested list
             public Integer getInteger() {
                 return 1;
             }
 
-            ;
-
             // @return the nested list that this NestedInteger holds, if it holds a nested list
             // Return null if this NestedInteger holds a single integer
             public List<NestedInteger> getList() {
                 return null;
             }
-
-            ;
         }
 
         Deque<NestedInteger> stack = new ArrayDeque<>();
@@ -1348,31 +1094,6 @@ public class Others {
         }
     }
 
-    //[388].文件的最长绝对路径
-    public static int lengthLongestPath(String input) {
-        Stack<Integer> stack = new Stack<>();
-        stack.push(0);
-        String[] dirs = input.split("\n");
-        int res = 0;
-        for (String dir : dirs) {
-            int level = dir.lastIndexOf("\t") + 1;
-
-            //需要回退到上一层
-            while (level + 1 < stack.size()) {
-                stack.pop();
-            }
-
-            //默认把/计数
-            int len = stack.peek() + dir.length() - level + 1;
-            stack.push(len);
-
-            if (dir.contains(".")) {
-                res = Math.max(res, len - 1);
-            }
-        }
-        return res;
-    }
-
     //[390].消除游戏
     public static int lastRemaining(int n) {
         return calForLastRemaining(n);
@@ -1392,6 +1113,59 @@ public class Others {
             // dp[8] = 2(1 + 4 - dp[4])
             return 2 * (1 + n / 2 - calForLastRemaining(n / 2));
         }
+    }
+
+    //[391].完美矩形
+    public static boolean isRectangleCover(int[][] rectangles) {
+        int X1 = Integer.MAX_VALUE, Y1 = Integer.MAX_VALUE, X2 = Integer.MIN_VALUE, Y2 = Integer.MIN_VALUE;
+        int totalArea = 0;
+        //只保留度为奇数的顶点，即为大矩形的顶点
+        Set<String> oddPoints = new HashSet<>();
+        for (int[] rectangle : rectangles) {
+            int x1 = rectangle[0], y1 = rectangle[1], x2 = rectangle[2], y2 = rectangle[3];
+
+            List<String> realPoints = new ArrayList<>();
+            realPoints.add(x1 + "," + y1);
+            realPoints.add(x1 + "," + y2);
+            realPoints.add(x2 + "," + y1);
+            realPoints.add(x2 + "," + y2);
+
+            for (String realPoint : realPoints) {
+                if (oddPoints.contains(realPoint)) {
+                    oddPoints.remove(realPoint);
+                } else {
+                    oddPoints.add(realPoint);
+                }
+            }
+
+            totalArea += (x2 - x1) * (y2 - y1);
+            X1 = Math.min(x1, X1);
+            Y1 = Math.min(y1, Y1);
+
+            X2 = Math.max(x2, X2);
+            Y2 = Math.max(y2, Y2);
+        }
+        if (totalArea != (X2 - X1) * (Y2 - Y1)) {
+            return false;
+        }
+        //比如有6个顶点，非矩形， 比如重叠，有多余的顶点，非矩形
+        if (oddPoints.size() != 4) {
+            return false;
+        }
+
+        if (!oddPoints.contains(X1 + "," + Y1)) {
+            return false;
+        }
+        if (!oddPoints.contains(X1 + "," + Y2)) {
+            return false;
+        }
+        if (!oddPoints.contains(X2 + "," + Y1)) {
+            return false;
+        }
+        if (!oddPoints.contains(X2 + "," + Y2)) {
+            return false;
+        }
+        return true;
     }
 
     //[392].判断子序列
@@ -1436,43 +1210,6 @@ public class Others {
             }
         }
         return count == 0;
-    }
-
-    //[394].字符串解码
-    public static String decodeString(String s) {
-        char[] chars = s.toCharArray();
-        Stack<String> strings = new Stack<>();
-        Stack<Integer> numbers = new Stack<>();
-        int curNum = 0;
-        StringBuilder curSB = new StringBuilder();
-        for (char ch : chars) {
-            if (ch >= '0' && ch <= '9') {
-                //继续拼接数字
-                curNum = curNum * 10 + ch - '0';
-                continue;
-            } else if (ch == ']') {
-                //出栈操作，计算数字和字符串
-                int prevNum = numbers.pop();
-                String prevStr = strings.pop();
-                StringBuilder temp = new StringBuilder();
-                for (int i = 0; i < prevNum; i++) {
-                    temp.append(curSB);
-                }
-                //新当前 = 上一个 + 当前*倍数
-                curSB = new StringBuilder(prevStr + temp);
-            } else if (ch == '[') {
-                //数字和字符都结束了
-                numbers.push(curNum);
-                strings.push(curSB.toString());
-
-                curNum = 0;
-                curSB = new StringBuilder();
-            } else {
-                //继续拼接字符
-                curSB.append(ch);
-            }
-        }
-        return curSB.toString();
     }
 
     //[397].整数替换
@@ -1523,37 +1260,6 @@ public class Others {
         //第几位
         int index = (int) ((n - length - 1) % i);
         return String.valueOf(num).charAt(index) - '0';
-    }
-
-    //[402].移掉K位数字
-    public static String removeKdigits(String num, int k) {
-        if (k == num.length()) return "0";
-        Stack<Character> stack = new Stack<>();
-        for (char ch : num.toCharArray()) {
-            while (!stack.isEmpty() && stack.peek() > ch && k > 0) {
-                stack.pop();
-                k--;
-            }
-            //前导0，不添加到栈中
-            if (stack.isEmpty() && ch == '0') {
-                continue;
-            }
-            stack.push(ch);
-        }
-        while (k > 0) {
-            stack.pop();
-            k--;
-        }
-
-        if (stack.isEmpty()) {
-            return "0";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        while (!stack.isEmpty()) {
-            sb.append(stack.pop());
-        }
-        return sb.reverse().toString();
     }
 
     //[423].从英文中重建数字
@@ -1610,29 +1316,6 @@ public class Others {
             }
         }
         return sb.toString();
-    }
-
-    //[456].132模式
-    public static boolean find132pattern(int[] nums) {
-        //1 3 2 4
-        if (nums.length < 3) return false;
-        Stack<Integer> stack = new Stack<>();
-        int aj = Integer.MIN_VALUE;
-        for (int i = nums.length - 1; i >= 0; i--) {
-            int num = nums[i];
-
-            //此处的num为ak
-            if (num < aj) {
-                return true;
-            }
-
-            //只要发现栈顶比较小，保证了 ak > aj，然后尽量取最大值
-            while (!stack.isEmpty() && stack.peek() < num) {
-                aj = Math.max(stack.pop(), aj);
-            }
-            stack.push(num);
-        }
-        return false;
     }
 
     //[460].LFU缓存
@@ -1796,56 +1479,238 @@ public class Others {
         return count;
     }
 
-    //[496].下一个更大元素I
-    public static int[] nextGreaterElement(int[] nums1, int[] nums2) {
-        //nums1 = [4,1,2], nums2 = [1,3,4,2].
-        //输出: [-1,3,-1]
-        Map<Integer, Integer> map = new HashMap<>();
-        Stack<Integer> stack = new Stack<>();
-        for (int i = nums2.length - 1; i >= 0; i--) {
-            //从右到左放入最大值
-            while (!stack.isEmpty() && nums2[i] >= stack.peek()) {
-                stack.pop();
+    //[497].非重叠矩形中的随机点
+    public static class Solution497 {
+
+        Random random = new Random();
+        int totalArea;
+        TreeMap<Integer, int[]> map = new TreeMap<>();
+
+        public Solution497(int[][] rects) {
+            for (int[] rect : rects) {
+                int area = (rect[2] - rect[0] + 1) * (rect[3] - rect[1] + 1);
+                totalArea += area;
+                map.put(totalArea, rect);
             }
-            map.put(nums2[i], stack.isEmpty() ? -1 : stack.peek());
-            stack.push(nums2[i]);
         }
-        int[] res = new int[nums1.length];
-        for (int i = 0; i < nums1.length; i++) {
-            res[i] = map.get(nums1[i]);
+
+        public int[] pick() {
+            int randomArea = random.nextInt(totalArea) + 1;
+            int ceilingArea = map.ceilingKey(randomArea);
+            int[] rect = map.get(ceilingArea);
+            int width = rect[2] - rect[0] + 1;
+            int offset = ceilingArea - randomArea;
+            return new int[]{rect[0] + offset % width, rect[1] + offset / width};
         }
-        return res;
     }
 
-    //[503].下一个更大的数II
-    public static int[] nextGreaterElements(int[] nums) {
-        int size = nums.length;
-        int[] res = new int[size];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 2 * size - 1; i >= 0; i--) {
-            while (!stack.empty() && stack.peek() <= nums[i % size]) {
-                stack.pop();
-            }
-            res[i % size] = stack.empty() ? -1 : stack.peek();
+    //[519].随机翻转矩阵
+    public static class Solution519 {
 
-            stack.push(nums[i % size]);
+        int row, col, n;
+        Map<Integer, Integer> map;
+        Random random;
+
+        public Solution519(int n_rows, int n_cols) {
+            row = n_rows;
+            col = n_cols;
+            n = row * col;
+            map = new HashMap<>();
+            random = new Random();
         }
-        return res;
+
+        public int[] flip() {
+            if (n < 0) return null;
+            int r = random.nextInt(n--);
+            int x = map.getOrDefault(r, r);
+            //保证取到重复位置的时候，实际位置是不一样的
+            map.put(r, map.getOrDefault(n, n));
+            return new int[]{x / col, x % col};
+        }
+
+        public void reset() {
+            map.clear();
+            n = row * col;
+        }
+
     }
 
-    //[739].每日温度
-    public static int[] dailyTemperatures(int[] T) {
-        int size = T.length;
-        int[] res = new int[size];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = size - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && T[stack.peek()] <= T[i]) {
-                stack.pop();
+    //[524].通过删除字母匹配到字典里最长单词
+    public static String findLongestWord(String s, List<String> d) {
+        Collections.sort(d, (a, b) -> a.length() == b.length() ? a.compareTo(b) : b.length() - a.length());
+        for (String dict : d) {
+            if (isSubSequence(dict, s)) {
+                return dict;
             }
-            res[i] = stack.isEmpty() ? 0 : stack.peek() - i;
-            stack.push(i);
         }
-        return res;
+        return "";
+    }
+
+    //x是否是y的子序列
+    private static boolean isSubSequence(String x, String y) {
+        int i = 0, j = 0;
+        for (; i < x.length() && j < y.length(); j++) {
+            if (x.charAt(i) == y.charAt(j)) {
+                i++;
+            }
+        }
+        return i == x.length();
+
+    }
+
+    //[528].按权重随机选择
+    public static class Solution528 {
+
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        Random random = new Random();
+        int sum = 0;
+
+        public Solution528(int[] w) {
+            for (int i = 0; i < w.length; i++) {
+                map.put(sum, i);
+                sum += w[i];
+            }
+        }
+
+        public int pickIndex() {
+            int r = random.nextInt(sum);
+            int floorKey = map.floorKey(r);
+            return map.get(floorKey);
+        }
+    }
+
+    //[535].TinyURL的加密与解密
+    public static class Codec535 {
+
+        String encode = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Map<String, String> shortToLong = new HashMap<>();
+        Random random = new Random();
+
+        // Encodes a URL to a shortened URL.
+        public String encode(String longUrl) {
+            String key = getKey();
+            while (shortToLong.containsKey(key)) {
+                key = getKey();
+            }
+
+            shortToLong.put(key, longUrl);
+            return "http://tinyurl.com/" + key;
+        }
+
+        // Decodes a shortened URL to its original URL.
+        public String decode(String shortUrl) {
+            String key = shortUrl.replace("http://tinyurl.com/", "");
+            return shortToLong.get(key);
+        }
+
+        private String getKey() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 6; i++) {
+                sb.append(encode.charAt(random.nextInt(encode.length())));
+            }
+            return sb.toString();
+        }
+    }
+
+    //[537].复数乘法
+    public static String complexNumberMultiply(String a, String b) {
+        String[] first = a.split("\\+");
+        String[] second = b.split("\\+");
+
+        int x = Integer.parseInt(first[0]);
+        int y = Integer.parseInt(second[0]);
+        int w = Integer.parseInt(first[1].replace("i", ""));
+        int z = Integer.parseInt(second[1].replaceAll("i", ""));
+
+        int real = x * y - w * z;
+        int complex = y * w + x * z;
+        return "" + real + "+" + complex + "i";
+    }
+
+    //[554].砖墙
+    public static int leastBricks(List<List<Integer>> wall) {
+        Map<Integer, Integer> positionCount = new HashMap<>();
+        int maxCount = 0;
+        for (List<Integer> bricks : wall) {
+            int sum = 0;
+            for (int i = 0; i < bricks.size() - 1; i++) {
+                sum += bricks.get(i);
+                positionCount.put(sum, positionCount.getOrDefault(sum, 0) + 1);
+                maxCount = Math.max(maxCount, positionCount.get(sum));
+            }
+        }
+        return wall.size() - maxCount;
+    }
+
+    //[553].最优除法
+    public static String optimalDivision(int[] nums) {
+        int n = nums.length;
+        if (n == 0) return "";
+        if (n == 1) return "" + nums[0];
+        if (n == 2) return nums[0] + "/" + nums[1];
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(nums[0]).append("/(").append(nums[1]);
+        for (int i = 2; i < n; i++) {
+            sb.append("/" + nums[i]);
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    //[592].分数加减运算
+    public static String fractionAddition(String expression) {
+        expression = expression.replaceAll("-", "+-");
+        String[] strs = expression.split("\\+");
+
+        int sumFenmu = 1;
+        for (String str : strs) {
+            if (str.length() == 0) {
+                continue;
+            }
+            int fenmu = Integer.parseInt(str.split("/")[1]);
+            sumFenmu *= fenmu;
+        }
+        int sumFenzi = 0;
+        for (String str : strs) {
+            if (str.length() == 0) {
+                continue;
+            }
+            int fenzi = Integer.parseInt(str.split("/")[0]);
+            int fenmu = Integer.parseInt(str.split("/")[1]);
+            sumFenzi += sumFenmu / fenmu * fenzi;
+        }
+        int yueshu = gcd(sumFenzi, sumFenmu);
+        return sumFenzi / yueshu + "/" + sumFenmu / yueshu;
+    }
+
+    //求两个数的最大公约数
+    public static int gcd(int m, int n) {
+        m = Math.abs(m);
+        n = Math.abs(n);
+        int result = 0;
+        while (n != 0) {
+            result = m % n;
+            m = n;
+            n = result;
+        }
+        return m;
+    }
+
+    //[593].有效的正方形
+    public static boolean validSquare(int[] p1, int[] p2, int[] p3, int[] p4) {
+        int[][] ps = new int[][]{p1, p2, p3, p4};
+        Arrays.sort(ps, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        //四边相等，且对角线相等
+        return calculateDistance(ps[0], ps[1]) != 0
+                && calculateDistance(ps[0], ps[1]) == calculateDistance(ps[1], ps[3])
+                && calculateDistance(ps[1], ps[3]) == calculateDistance(ps[3], ps[2])
+                && calculateDistance(ps[3], ps[2]) == calculateDistance(ps[2], ps[0])
+                && calculateDistance(ps[0], ps[3]) == calculateDistance(ps[1], ps[2]);
+    }
+
+    private static int calculateDistance(int[] p, int[] q) {
+        return (p[0] - q[0]) * (p[0] - q[0]) + (p[1] - q[1]) * (p[1] - q[1]);
     }
 
     //[804].唯一摩斯密码词
@@ -1863,77 +1728,8 @@ public class Others {
         return set.size();
     }
 
-    //[895].最大频率栈
-    static class FreqStack {
-        private int maxFreq = 0;
-        private Map<Integer, Stack<Integer>> freqNumbers = new HashMap<>();
-        private Map<Integer, Integer> numberFreqs = new HashMap<>();
-
-        public FreqStack() {
-        }
-
-        public void push(int x) {
-            int feq = numberFreqs.getOrDefault(x, 0);
-            feq++;
-            numberFreqs.put(x, feq);
-
-            freqNumbers.putIfAbsent(feq, new Stack<>());
-            Stack<Integer> stack = freqNumbers.get(feq);
-            stack.push(x);
-
-            maxFreq = Math.max(maxFreq, feq);
-        }
-
-        public int pop() {
-            Stack<Integer> stack = freqNumbers.get(maxFreq);
-            int res = stack.pop();
-            int freq = numberFreqs.get(res);
-            freq--;
-            numberFreqs.put(res, freq);
-            if (stack.isEmpty()) {
-                maxFreq--;
-            }
-            return res;
-        }
-    }
-
-    //[1019].链表中的下一个更大节点
-    public static int[] nextLargerNodes(ListNode head) {
-        List<Integer> list = new ArrayList<>();
-        while (head != null) {
-            list.add(head.val);
-            head = head.next;
-        }
-
-        int[] res = new int[list.size()];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < list.size(); i++) {
-            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
-                int index = stack.pop();
-                res[index] = list.get(i);
-            }
-            stack.push(i);
-        }
-        return res;
-    }
-
     public static void main(String[] args) {
-//        [3]无重复子串的最长子串
-//        System.out.println(lengthOfLongestSubstring("dvdf"));
-//        System.out.println(lengthOfLongestSubstring("pwwkew"));
-//        System.out.println(lengthOfLongestSubstring("tmmzuxt"));
-//        System.out.println(lengthOfLongestSubstring("tmmzzuxt"));
-//        System.out.println(lengthOfLongestSubstring("tmmzuuzt"));
-//        System.out.println(lengthOfLongestSubstring("tmmzutt"));
-//        System.out.println(lengthOfLongestSubstring("tmmzuzt"));
-//        System.out.println(lengthOfLongestSubstring("tmmzuzuzt"));
-//        System.out.println(lengthOfLongestSubstring("abcabcbb"));
-//        System.out.println(lengthOfLongestSubstring("bbbbb"));
-//        System.out.println(lengthOfLongestSubstring("abcabbcad"));
-//        System.out.println(lengthOfLongestSubstring("aa"));
-//        System.out.println(lengthOfLongestSubstring("pwwwwkeeew"));
-//
-//        [7]. z字形变换
+//        [7].z字形变换
 //        System.out.println(convert("LEETCODEISHIRING", 4));
 //        System.out.println(convert("", 4));
 //
@@ -1961,15 +1757,21 @@ public class Others {
 //        System.out.println(groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}));
 //        System.out.println(groupAnagrams(new String[]{}));
 //
-//        单调栈
-//        nextGreaterNumber(new int[]{1, 2, 3});
-//        nextGreaterNumber(new int[]{2, 1, 2, 4, 3});
-//
-
 //        [130].被围绕的区域
 //        char[][] board = new char[][]{{'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}};
 //        char[][] board2 = new char[][]{{'O'}};
 //        solve(board);
+//
+//        [133].克隆图
+//        Node f1 = new Node(1);
+//        Node f2 = new Node(2);
+//        Node f3 = new Node(3);
+//        Node f4 = new Node(4);
+//        f1.neighbors = Arrays.asList(f2, f4);
+//        f2.neighbors = Arrays.asList(f1, f3);
+//        f3.neighbors = Arrays.asList(f2, f4);
+//        f4.neighbors = Arrays.asList(f1, f3);
+//        Node res = cloneGraph(f1);
 //
 //        [137]只出现一次的数字II
 //        System.out.println(singleNumber2(new int[]{0,1,0,1,0,1,99}));
@@ -2021,17 +1823,6 @@ public class Others {
 //        System.out.println(findRepeatedDnaSequences("AAAAAAAAAAAA"));
 //        System.out.println(findRepeatedDnaSequences("AAAAAAAAAA"));
 //
-//        [133].克隆图
-//        Node f1 = new Node(1);
-//        Node f2 = new Node(2);
-//        Node f3 = new Node(3);
-//        Node f4 = new Node(4);
-//        f1.neighbors = Arrays.asList(f2, f4);
-//        f2.neighbors = Arrays.asList(f1, f3);
-//        f3.neighbors = Arrays.asList(f2, f4);
-//        f4.neighbors = Arrays.asList(f1, f3);
-//        Node res = cloneGraph(f1);
-//
 //        [200].岛屿数量
 //        char[][] islands = {{'1', '1', '0', '0', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '1', '0', '0'}, {'0', '0', '0', '1', '1'}};
 //        char[][] islands2 = {{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'}, {'0', '0', '0', '0', '0'}};
@@ -2042,24 +1833,12 @@ public class Others {
 //        System.out.println(rangeBitwiseAnd(7, 8));
 //        System.out.println(rangeBitwiseAnd(5,7));
 //
-//
 //        [210].课程表II
 //        System.out.println(Arrays.toString(findOrder(4, new int[][]{{1, 0}, {2, 0}, {3, 1}, {3, 2}})));
 //        System.out.println(Arrays.toString(findOrder(2, new int[][]{{1, 0}, {0, 1}})));
 //
 //        [223].矩形面积
 //        System.out.println(computeArea(-3, 0, 3, 4, 0, -1, 9, 2));
-//
-//        [224].基本计算器
-//        System.out.println(calculate("(1+(4+5+2)-3)"));
-//        System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));
-//        System.out.println(calculate("(1+2"));
-//
-//        [227]基本计算器II
-//        System.out.println(calculate2("3+2*2"));
-//        System.out.println(calculate2(" 3+5 / 2 "));
-//        System.out.println(calculate2(" 3/2 "));
-//        System.out.println(calculate2(" 1 "));
 //
 //        [241].为运算表达式设计优先级
 //        System.out.println(diffWaysToCompute("2*3-14*5"));
@@ -2078,14 +1857,17 @@ public class Others {
 //        [260].只出现一次的数字III
 //        singleNumber3(new int[]{1, 2, 1, 3, 2, 5});
 //
+//        [295].数据流的中位数
+//        MedianFinder finder = new MedianFinder();
+//        finder.addNum(1);
+//        finder.addNum(2);
+//        System.out.println(finder.findMedian());
+//        finder.addNum(3);
+//        System.out.println(finder.findMedian());
+//
 //        [299].猜数字游戏
 //        System.out.println(getHint("1807", "7810"));
 //        System.out.println(getHint("1123", "0111"));
-//
-//        [316].去除重复字母
-//        System.out.println(removeDuplicateLetters("cbacdcbc"));
-//        System.out.println(removeDuplicateLetters("bcabc"));
-//        System.out.println(removeDuplicateLetters(""));
 //
 //        [318].最大单词长度乘积
 //        System.out.println(maxProduct(new String[]{"abcw", "baz", "foo", "bar", "xtfn", "abcdef"}));
@@ -2094,10 +1876,6 @@ public class Others {
 //
 //        [319].灯泡开关
 //        System.out.println(bulbSwitch(12));
-//
-//        [331].验证二叉树的前序序列化
-//        System.out.println(isValidSerialization("9,#,#,1"));
-//        System.out.println(isValidSerialization("9,3,4,#,#,1,#,#,2,#,6,#,#"));
 //
 //        [344].反转字符串
 //        char[] res = new char[]{};
@@ -2147,6 +1925,12 @@ public class Others {
 //
 //        [390].消除游戏
 //        System.out.println(lastRemaining(10));
+//
+//        [391].完美矩形
+//        System.out.println(isRectangleCover(new int[][]{{1,1,3,3},{3,1,4,2},{3,2,4,4},{1,3,2,4},{2,3,3,4}}));
+//        System.out.println(isRectangleCover(new int[][]{{1,1,2,3},{1,3,2,4},{3,1,4,2},{3,2,4,4}}));
+//        System.out.println(isRectangleCover(new int[][]{{1,1,3,3},{3,1,4,2},{1,3,2,4},{3,2,4,4}}));
+//
 //        [392].判断子序列
 //        System.out.println(isSubsequence("axc", "ahbgdc"));
 //        System.out.println(isSubsequence("abc", "ahbgdc"));
@@ -2155,13 +1939,6 @@ public class Others {
 //        System.out.println(validUtf8(new int[]{235, 140, 4}));
 //        System.out.println(validUtf8(new int[]{240, 162, 138, 147, 145}));
 //        System.out.println(validUtf8(new int[]{197, 130, 1}));
-//
-//        [394].字符串解码
-//        System.out.println(decodeString("abc"));
-//        System.out.println(decodeString("3[a]2[bc]"));
-//        System.out.println(decodeString("3[a2[c]]"));
-//        System.out.println(decodeString("2[abc]3[cd]ef"));
-//        System.out.println(decodeString("abc3[cd]xyz"));
 //
 //        [397].整数替换
 //        System.out.println(integerReplacement(7));
@@ -2176,12 +1953,6 @@ public class Others {
 //        System.out.println(findNthDigit(193));
 //        System.out.println(findNthDigit(Integer.MAX_VALUE));
 //
-//        [402].移掉K位数字
-//        System.out.println(removeKdigits("10200", 1));
-//        System.out.println(removeKdigits("1432219", 3));
-//        System.out.println(removeKdigits("10", 2));
-//        System.out.println(removeKdigits("10016042692165669282207674747", 9));
-//
 //        [423].从英文中重建数字
 //        System.out.println(originalDigits("onetwothreethreefivefour"));
 //
@@ -2189,48 +1960,6 @@ public class Others {
 //        System.out.println(frequencySort("Aabb"));
 //        System.out.println(frequencySort("tree"));
 //        System.out.println(frequencySort("cccaaa"));
-//
-//        [456].132模式
-//        System.out.println(find132pattern(new int[]{3,4,5,4}));
-//
-//        [496].下一个更大元素I
-//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,4,2})));
-//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{4,1,2}, new int[]{1,3,2,4,2})));
-//        System.out.println(Arrays.toString(nextGreaterElement(new int[]{2,4}, new int[]{1,2,3,4})));
-//
-//        [503].下一个更大元素II
-//        System.out.println(Arrays.toString(nextGreaterElements(new int[]{1,2,1})));
-//
-//        [739].每日温度
-//        System.out.println(Arrays.toString(dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
-//
-//        [804].唯一摩斯密码词
-//        System.out.println(uniqueMorseRepresentations(new String[]{"gin", "zen", "gig", "msg"}));
-//
-//        [895].最大频率栈
-//        FreqStack freqStack = new FreqStack();
-//        freqStack.push(5);
-//        freqStack.push(7);
-//        freqStack.push(5);
-//        freqStack.push(7);
-//        freqStack.push(4);
-//        freqStack.push(5);
-//        System.out.println(freqStack.pop());
-//        System.out.println(freqStack.pop());
-//        System.out.println(freqStack.pop());
-//        System.out.println(freqStack.pop());
-//
-//        [1019].链表中的下一个更大节点
-//        ListNode head = new ListNode(2);
-//        ListNode f = new ListNode(7);
-//        ListNode t = new ListNode(4);
-//        ListNode x = new ListNode(3);
-//        ListNode y = new ListNode(5);
-//        head.next = f;
-//        f.next = t;
-//        t.next = x;
-//        x.next = y;
-//        System.out.println(Arrays.toString(nextLargerNodes(head)));
 //
 //        [460].LFU缓存
 //        LFUCache lFUCache = new LFUCache(2);
@@ -2249,18 +1978,59 @@ public class Others {
 //        System.out.println(lFUCache.get(3));      // 返回 3
 //        // cache=[3,4], cnt(4)=1, cnt(3)=3
 //        System.out.println(lFUCache.get(4));      // 返回 4
-
+//
 //        [468].验证IP地址
 //        System.out.println(validIPAddress("2001:0db8:85a3:0:0:8A2E:0370:7334"));
 //        System.out.println(validIPAddress("2001:0db8:85a3:0:0:8A2E:0370:7334:"));
 //        System.out.println(validIPAddress("1e1.4.5.6"));
 //        System.out.println(validIPAddress("172.16.254.1"));
 //        System.out.println(validIPAddress("1.0.1."));
-        System.out.println(validIPAddress("2001:0db8:85a3:00000:0:8A2E:0370:7334"));
-
-        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
-        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\tsubdir2\n\t\tfile.ext"));
-
-        System.out.println(magicalString(6));
+//
+//        [481].神奇字符串
+//        System.out.println(magicalString(6));
+//
+//        [519].随机翻转矩阵
+//        System.out.println(Arrays.toString(new Solution519(2, 3).flip()));
+//
+//        [524].通过删除字母匹配到字典里最长单词
+//        System.out.println(findLongestWord("abpcplea", Arrays.asList("ale", "apple", "monkey", "plea")));
+//        System.out.println(findLongestWord("abpcplea", Arrays.asList("a", "b", "c", "d")));
+//
+//        [528].按权重随机选择
+//        Solution528 solution528 = new Solution528(new int[]{1, 3});
+//        System.out.println(solution528.pickIndex());
+//        System.out.println(solution528.pickIndex());
+//        System.out.println(solution528.pickIndex());
+//        System.out.println(solution528.pickIndex());
+//        System.out.println(solution528.pickIndex());
+//
+//        [535].TinyURL的加密与解密
+//        Codec535 codec535 = new Codec535();
+//        String shortUrl = codec535.encode("https://leetcode.com/problems/535");
+//        System.out.println(shortUrl);
+//        System.out.println(codec535.decode(shortUrl));
+//
+//        [537].复数乘法
+//        System.out.println(complexNumberMultiply("1+1i", "1+1i"));
+//        System.out.println(complexNumberMultiply("1+-1i", "1+-1i"));
+//
+//        [553].最优除法
+//        System.out.println(optimalDivision(new int[]{1000,100,10,2}));
+//
+        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1, 2, 2, 1), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 2), Arrays.asList(2, 4), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 1, 1))));
+        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1), Arrays.asList(1), Arrays.asList(1))));
+//        [592].分数加减运算
+//        System.out.println(fractionAddition("-1/2+1/2"));
+//        System.out.println(fractionAddition("-1/2+1/2+1/3"));
+//        System.out.println(fractionAddition("1/3-1/2"));
+//        System.out.println(fractionAddition("5/3+1/3"));
+//        System.out.println(gcd(2, 3));
+//
+//        [593].有效的正方形
+//        System.out.println(validSquare(new int[]{0, 0}, new int[]{1, 1}, new int[]{1, 0}, new int[]{0, 1}));
+//
+//        [804].唯一摩斯密码词
+//        System.out.println(uniqueMorseRepresentations(new String[]{"gin", "zen", "gig", "msg"}));
     }
+
 }

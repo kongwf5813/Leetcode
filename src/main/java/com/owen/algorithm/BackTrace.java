@@ -717,6 +717,147 @@ public class BackTrace {
         }
     }
 
+    //[464].我能赢吗
+    public static boolean canIWin(int maxChoosableInteger, int desiredTotal) {
+        if (maxChoosableInteger >= desiredTotal) return true;
+        //累加和比所有和还要小，都赢不了
+        if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) return false;
+        int[] select = new int[maxChoosableInteger + 1];
+        return dfsForCanIWin(select, desiredTotal, new HashMap<>());
+    }
+
+    private static boolean dfsForCanIWin(int[] select, int desiredTotal, Map<String, Boolean> visited) {
+        String key = Arrays.toString(select);
+        if (visited.containsKey(key)) return visited.get(key);
+        //选择
+        for (int i = 1; i < select.length; i++) {
+            //还没有选择
+            if (select[i] == 0) {
+                select[i] = 1;
+
+                //当前的数字比期望值大(赢了) + 下个玩家从剩下的期望值不能获胜
+                if (desiredTotal <= i || !dfsForCanIWin(select, desiredTotal - i, visited)) {
+                    visited.put(key, true);
+                    select[i] = 0;
+                    return true;
+                }
+                select[i] = 0;
+            }
+        }
+        visited.put(key, false);
+        return false;
+    }
+
+    //[473].火柴拼正方形
+    public static boolean makesquare(int[] nums) {
+        if (null == nums || nums.length < 4) {
+            return false;
+        }
+        int sum = 0;
+        for (int num : nums) {
+            sum = sum + num;
+        }
+        if (sum % 4 != 0) {
+            return false;
+        }
+
+        return dfsForMakesquare(nums, 0, 0, 0, 0, 0, sum / 4);
+    }
+
+    private static boolean dfsForMakesquare(int[] nums, int index, int a, int b, int c, int d, int side) {
+        if (nums.length == index) {
+            return a == b && b == c && c == d && d == a;
+        }
+        if (a > side || b > side || c > side || d > side) {
+            return false;
+        }
+
+        int num = nums[index];
+        return dfsForMakesquare(nums, index + 1, a + num, b, c, d, side)
+                || dfsForMakesquare(nums, index + 1, a, b + num, c, d, side)
+                || dfsForMakesquare(nums, index + 1, a, b, c + num, d, side)
+                || dfsForMakesquare(nums, index + 1, a, b, c, d + num, side);
+    }
+
+    //[529].扫雷机器人
+    public static char[][] updateBoard(char[][] board, int[] click) {
+        int x = click[0], y = click[1];
+        int[][] directs = new int[][]{{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        if (board[x][y] == 'M') {
+            board[x][y] = 'X';
+        } else {
+            dfsForUpdateBoard(board, x, y, directs);
+        }
+        return board;
+    }
+
+    private static void dfsForUpdateBoard(char[][] board, int x, int y, int[][] directs) {
+        int bomb = 0;
+        for (int[] direct : directs) {
+            int newX = x + direct[0];
+            int newY = y + direct[1];
+            if (newX < 0 || newY < 0 || newX >= board.length || newY >= board[0].length) {
+                continue;
+            }
+            if (board[newX][newY] == 'M') {
+                bomb++;
+            }
+        }
+        board[x][y] = bomb > 0 ? (char) (bomb + '0') : 'B';
+        if (board[x][y] == 'B') {
+            for (int i = 0; i < directs.length; i++) {
+                int newX = x + directs[i][0];
+                int newY = y + directs[i][1];
+                if (newX < 0 || newY < 0 || newX >= board.length || newY >= board[0].length || board[newX][newY] != 'E') {
+                    continue;
+                }
+                dfsForUpdateBoard(board, newX, newY, directs);
+            }
+        }
+    }
+
+    //[542].01 矩阵
+    public static int[][] updateMatrix(int[][] matrix) {
+        int row = matrix.length;
+        int col = matrix[0].length;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                //设置周边都不是0的1的点，然后更改。
+                if (matrix[i][j] == 1 &&
+                        !((i > 0 && matrix[i - 1][j] == 0)
+                                || (j > 0 && matrix[i][j - 1] == 0)
+                                || (i < row - 1 && matrix[i + 1][j] == 0)
+                                || (j < col - 1 && matrix[i][j + 1] == 0))) {
+                    matrix[i][j] = Integer.MAX_VALUE;
+                }
+            }
+        }
+
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                //只需递归遍历为1的数字
+                if (matrix[i][j] == 1) {
+                    dfsForUpdateMatrix(matrix, i, j);
+                }
+            }
+        }
+        return matrix;
+    }
+
+    private static void dfsForUpdateMatrix(int[][] matrix, int x, int y) {
+        int[][] direct = new int[][]{{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+        for (int[] dir : direct) {
+            int newX = x + dir[0];
+            int newY = y + dir[1];
+            if (newX >= 0 && newX < matrix.length
+                    && newY >= 0 && newY < matrix[0].length
+                    && matrix[newX][newY] > matrix[x][y] + 1) {
+                matrix[newX][newY] = matrix[x][y] + 1;
+                dfsForUpdateMatrix(matrix, newX, newY);
+            }
+        }
+    }
+
     public static void main(String[] args) {
 //        [17].电话号码的字母组合
 //        letterCombinations("23");
@@ -806,5 +947,18 @@ public class BackTrace {
 //        [433].最小基因变化
 //        System.out.println(minMutation("AAAAACCC", "AACCCCCC", new String[]{"AAAACCCC", "AAACCCCC", "AACCCCCC"}));
 //        System.out.println(minMutation("AACCGGTT", "AAACGGTA", new String[]{"AACCGGTA", "AACCGCTA", "AAACGGTA"}));
+//
+//        [473].火柴拼正方形
+//        System.out.println(makesquare(new int[]{1, 1, 2, 2, 2}));
+//        System.out.println(makesquare(new int[]{3, 3, 3, 3, 4}));
+
+//        [529].扫雷机器人
+//        char[][] board = new char[][]{{'E', 'E', 'E', 'E', 'E'}, {'E', 'E', 'M', 'E', 'E'}, {'E', 'E', 'E', 'E', 'E'}, {'E', 'E', 'E', 'E', 'E'}};
+//        updateBoard(board, new int[]{3, 0});
+//        updateBoard(board, new int[]{1, 2});
+
+        int[][] res = updateMatrix(new int[][]{{0,0,0},{0,1,0},{1,1,1}});
+        System.out.println();
+
     }
 }

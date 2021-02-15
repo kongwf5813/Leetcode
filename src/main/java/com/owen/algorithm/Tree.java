@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.owen.algorithm.LinkList.ListNode;
 
+import chemaxon.jep.function.In;
+
 public class Tree {
 
     public static class TreeNode {
@@ -16,6 +18,12 @@ public class Tree {
 
         public TreeNode(int x) {
             val = x;
+        }
+
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
         }
     }
 
@@ -709,6 +717,54 @@ public class Tree {
         }
     }
 
+    //[421].数组中两个数的最大异或值
+    public static class Solution421 {
+        class TrieNode {
+            TrieNode[] son = new TrieNode[2];
+        }
+
+        TrieNode root = new TrieNode();
+
+        private void build(int[] nums) {
+            for (int num : nums) {
+                TrieNode cur = root;
+                for (int i = 30; i >= 0; i--) {
+                    int bit = num >> i & 1;
+                    if (cur.son[bit] == null) {
+                        cur.son[bit] = new TrieNode();
+                    }
+                    cur = cur.son[bit];
+                }
+            }
+        }
+
+        private int search(int num) {
+            TrieNode cur = root;
+            int res = 0;
+            for (int i = 30; i >= 0; i--) {
+                int bit = num >> i & 1;
+                //取相反的路径
+                if (cur.son[bit ^ 1] != null) {
+                    res += 1 << i;
+                    cur = cur.son[bit ^ 1];
+                } else {
+                    cur = cur.son[bit];
+                }
+            }
+            return res;
+        }
+
+        public int findMaximumXOR(int[] nums) {
+            if (nums.length == 0) return 0;
+            build(nums);
+            int max = 0;
+            for (int num : nums) {
+                max = Math.max(max, search(num));
+            }
+            return max;
+        }
+    }
+
     //[427].建立四叉树
     public static class Solution427 {
         class Node {
@@ -861,7 +917,7 @@ public class Tree {
         }
     }
 
-    //[450]删除二叉搜索树中的节点
+    //[450].删除二叉搜索树中的节点
     public static TreeNode deleteNode(TreeNode root, int key) {
         if (root == null) return null;
         if (root.val == key) {
@@ -885,6 +941,83 @@ public class Tree {
         return root;
     }
 
+    //[508].出现次数最多的子树元素和
+    public static int[] findFrequentTreeSum(TreeNode root) {
+        Map<Integer, Integer> countMap = new HashMap<>();
+        AtomicInteger maxCount = new AtomicInteger();
+        dfsForTreeSum(root, countMap, maxCount);
+
+        List<Integer> res = new ArrayList<>();
+        for (int num : countMap.keySet()) {
+            if (countMap.get(num).equals(maxCount.get())) {
+                res.add(num);
+            }
+        }
+        int[] result = new int[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            result[i] = res.get(i);
+        }
+        return result;
+    }
+
+    private static int dfsForTreeSum(TreeNode root, Map<Integer, Integer> res, AtomicInteger max) {
+        if (root == null) return 0;
+
+        int sum = root.val + dfsForTreeSum(root.left, res, max) + dfsForTreeSum(root.right, res, max);
+        res.put(sum, res.getOrDefault(sum, 0) + 1);
+
+        max.set(Math.max(max.get(), res.get(sum)));
+        return sum;
+    }
+
+    //[513].找树左下角的值
+    public static int findBottomLeftValue(TreeNode root) {
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        int res = root.val;
+        while (!queue.isEmpty()) {
+            res = queue.peek().val;
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[515].在每个树行中找最大值
+    public static List<Integer> largestValues(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            int max = Integer.MIN_VALUE;
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                max = Math.max(max, cur.val);
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(max);
+        }
+        return res;
+    }
+
     //[538].把二叉搜索树转换为累加树
     public static TreeNode convertBST(TreeNode root) {
         traverseBST(root, new AtomicInteger(0));
@@ -900,6 +1033,57 @@ public class Tree {
         root.val = sum.get();
 
         traverseBST(root.left, sum);
+    }
+
+    public static int maxDepth(Node root) {
+        if (root == null) return 0;
+        int childMaxDepth = 0;
+
+        if (root.children != null) {
+            for (Node child : root.children) {
+                childMaxDepth = Math.max(maxDepth(child), childMaxDepth);
+            }
+        }
+        return childMaxDepth + 1;
+    }
+
+    //[589].N叉树的前序遍历
+    public static List<Integer> preorder(Node root) {
+        List<Integer> res = new ArrayList<>();
+        preorderN(root, res);
+        return res;
+    }
+
+    private static void preorderN(Node root, List<Integer> res) {
+        if (root == null) {
+            return;
+        }
+        res.add(root.val);
+
+        if (root.children != null) {
+            for (Node child : root.children) {
+                preorderN(child, res);
+            }
+        }
+    }
+
+    //[590].N叉树的后序遍历
+    public List<Integer> postorder(Node root) {
+        List<Integer> res = new ArrayList<>();
+        postorderN(root, res);
+        return res;
+    }
+
+    private static void postorderN(Node root, List<Integer> res) {
+        if (root == null) return;
+
+        if (root.children != null) {
+            for (Node child : root.children) {
+                postorderN(child, res);
+            }
+        }
+
+        res.add(root.val);
     }
 
     //[700].二叉搜索树中的搜索
@@ -966,7 +1150,7 @@ public class Tree {
     }
 
     public static void main(String[] args) {
-//        [94] 二叉树的中序遍历
+//        [94]. 二叉树的中序遍历
 //        TreeNode root = new TreeNode(1);
 //        TreeNode r1 = new TreeNode(2);
 //        TreeNode r2 = new TreeNode(3);
@@ -985,15 +1169,6 @@ public class Tree {
 //        root.right = r1;
 //        r1.left = r2;
 //        r1.right = r3;
-//        System.out.println(isValidBST(root));
-//        TreeNode root = new TreeNode(4);
-//        TreeNode l1 = new TreeNode(1);
-//        TreeNode l2 = new TreeNode(5);
-//        TreeNode r1 = new TreeNode(6);
-//        root.left = l1;
-//        l1.right = l2;
-//        root.right = r1;
-//        System.out.println(isValidBST(root));
 //
 //        [100].相同的树
 //        TreeNode one = new TreeNode(1);
@@ -1010,18 +1185,12 @@ public class Tree {
 //
 //        [101].对称的二叉树
 //        TreeNode one = new TreeNode(1);
-//        TreeNode l1 = new TreeNode(2);
-//        TreeNode r1 = new TreeNode(2);
-//        TreeNode l2 = new TreeNode(3);
-//        TreeNode l3 = new TreeNode(4);
-//        TreeNode r2 = new TreeNode(4);
-//        TreeNode r3 = new TreeNode(3);
-//        one.left = l1;
-//        one.right = r1;
-//        l1.left = l2;
-//        l1.right = l3;
-//        r1.left = r2;
-//        r1.right = r3;
+//        one.left  = new TreeNode(2);
+//        one.left.left = new TreeNode(3);
+//        one.left.right = new TreeNode(4);
+//        one.right = new TreeNode(2);
+//        one.right.left = new TreeNode(4);
+//        one.right.right = new TreeNode(3);
 //        System.out.println(isSymmetric(one));
 //
 //        102.二叉树的层序遍历
@@ -1224,11 +1393,36 @@ public class Tree {
 //        root.left = new TreeNode(1);
 //        root.left.right = new TreeNode(2);
 //        root.right = new TreeNode(4);
-//
 //        String serialize = codec.serialize(root);
 //        System.out.println(serialize);
 //        TreeNode res = codec.deserialize(serialize);
 //        System.out.println();
-
+//
+//        [508].出现次数最多的子树元素和
+//        TreeNode root = new TreeNode(5);
+//        root.left = new TreeNode(2);
+//        root.right = new TreeNode(-5);
+//        System.out.println(Arrays.toString(findFrequentTreeSum(root)));;
+//        root.left = new TreeNode(2);
+//        root.right = new TreeNode(-3);
+//        System.out.println(Arrays.toString(findFrequentTreeSum(root)));;
+//
+//        [513].找树左下角的值
+//        TreeNode root = new TreeNode(1);
+//        root.left = new TreeNode(2);
+//        root.left.left = new TreeNode(4);
+//        root.right = new TreeNode(3, new TreeNode(5), new TreeNode(6));
+//        root.right.left.left = new TreeNode(7);
+//        System.out.println(findBottomLeftValue(root));
+//
+//        [515].在每个树行中找最大值
+//        TreeNode root = new TreeNode(1);
+//        root.left = new TreeNode(3);
+//        root.right = new TreeNode(2);
+//        root.left.left = new TreeNode(5);
+//        root.left.right = new TreeNode(3);
+//        root.right.right = new TreeNode(9);
+//        System.out.println(largestValues(root));
+        System.out.println(new Solution421().findMaximumXOR(new int[]{3, 10, 5, 25, 2, 8}));
     }
 }

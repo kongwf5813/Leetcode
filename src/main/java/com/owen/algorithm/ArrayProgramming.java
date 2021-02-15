@@ -1,6 +1,9 @@
 package com.owen.algorithm;
 
+import com.amazonaws.services.dynamodbv2.xspec.S;
+
 import org.omg.PortableInterceptor.DISCARDING;
+import org.xmlcml.euclid.Int;
 
 import java.util.*;
 
@@ -404,55 +407,6 @@ public class ArrayProgramming {
         return false;
     }
 
-    //[153].寻找旋转排序数组中的最小值
-    public static int findMin(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[right]) {
-                left = mid + 1;
-            } else {
-                //最小值，可能mid就是最小的，所以不能-1。
-                //例如3, 1, 2
-                right = mid;
-            }
-        }
-        return nums[left];
-    }
-
-    //[154].寻找旋转排序数组中的最小值II
-    public static int findMin2(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[right]) {
-                left = mid + 1;
-            } else if (nums[mid] < nums[right]) {
-                right = mid;
-            } else {
-                //砍掉右侧边界
-                //101111, 1110111
-                right--;
-            }
-        }
-        return nums[left];
-    }
-
-    //[162].寻找峰值
-    public static int findPeakElement(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[mid + 1]) {
-                right = mid;
-            } else {
-                //不存在nums[mid] = nums[mid + 1]，肯定是小于
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
     //[179].最大数
     public static String largestNumber(int[] nums) {
         String[] strings = new String[nums.length];
@@ -468,23 +422,6 @@ public class ArrayProgramming {
             sb.append(str);
         }
         return sb.toString();
-    }
-
-    //[209].长度最小的子数组
-    public static int minSubArrayLen(int s, int[] nums) {
-        int res = Integer.MAX_VALUE;
-        int sum = 0;
-        for (int p = 0, q = 0; q < nums.length; q++) {
-            sum += nums[q];
-
-            //一旦窗口满足，则移动起始节点，直到找到窗口不满足条件为止
-            while (sum >= s) {
-                res = Math.min(res, q - p + 1);
-                sum -= nums[p++];
-            }
-
-        }
-        return res == Integer.MAX_VALUE ? 0 : res;
     }
 
     //[215].数组中的第K个最大元素
@@ -714,41 +651,6 @@ public class ArrayProgramming {
         return res;
     }
 
-    //[239].滑动窗口最大值
-    public static int[] maxSlidingWindow(int[] nums, int k) {
-        List<Integer> res = new ArrayList<>();
-        LinkedList<Integer> monotonic = new LinkedList<>();
-        for (int i = 0; i < nums.length; i++) {
-            if (i < k - 1) {
-                //先填满k-1个数字
-                while (!monotonic.isEmpty() && monotonic.peekLast() < nums[i]) {
-                    monotonic.pollLast();
-                }
-                monotonic.add(nums[i]);
-            } else {
-                //添加新数字
-                while (!monotonic.isEmpty() && monotonic.peekLast() < nums[i]) {
-                    monotonic.pollLast();
-                }
-                monotonic.add(nums[i]);
-
-                //取最大值
-                res.add(monotonic.getFirst());
-
-                //移出旧数字
-                if (monotonic.getFirst() == nums[i - k + 1]) {
-                    monotonic.pollFirst();
-                }
-            }
-        }
-        int[] arr = new int[res.size()];
-        int i = 0;
-        for (Integer num : res) {
-            arr[i++] = num;
-        }
-        return arr;
-    }
-
     //[240].搜索二维矩阵II
     public static boolean searchMatrix2(int[][] matrix, int target) {
         if (matrix == null || matrix.length < 1 || matrix[0].length < 1) return false;
@@ -773,78 +675,6 @@ public class ArrayProgramming {
             count++;
         }
         return count;
-    }
-
-    //[275].H指数II
-    public static int hIndex2(int[] citations) {
-        int n = citations.length;
-        int left = 0, right = n - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (n - mid == citations[mid]) {
-                return n - mid;
-            } else if (n - mid < citations[mid]) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return n - left;
-    }
-
-    //[283].移动零
-    public static void moveZeroes(int[] nums) {
-        int slow = 0, fast = 0;
-        while (fast < nums.length) {
-            if (nums[fast] != 0) {
-                nums[slow] = nums[fast];
-                slow++;
-            }
-            fast++;
-        }
-        for (int i = slow; i < nums.length; i++) {
-            nums[i] = 0;
-        }
-    }
-
-    //[287].寻找重复数(二分搜索)
-    public static int findDuplicate(int[] nums) {
-        //题目是从1到n的数字,一共n+1个数
-        int n = nums.length - 1;
-        int left = 1, right = n;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            int count = 0;
-            for (int i = 0; i <= n; i++) {
-                if (nums[i] <= mid) {
-                    count++;
-                }
-            }
-
-            //1,3,4,2,2, mid = 2， count = 3， 说明重复数在区间[1,2]
-            if (count > mid) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
-    //[287].寻找重复数(双指针，判断链表有环)
-    public static int findDuplicateV2(int[] nums) {
-        int slow = 0, fast = 0;
-        do {
-            slow = nums[slow];
-            fast = nums[nums[fast]];
-        } while (slow != fast);
-        slow = 0;
-
-        while (slow != fast) {
-            slow = nums[slow];
-            fast = nums[fast];
-        }
-        return slow;
     }
 
     //[324].摆动排序II
@@ -950,6 +780,7 @@ public class ArrayProgramming {
         }
     }
 
+
     //[406].根据身高重建队列
     public static int[][] reconstructQueue(int[][] people) {
         //[7,0] [7,1] [6,1] [5,0] [5,2] [4,4]
@@ -965,6 +796,25 @@ public class ArrayProgramming {
         }
         return res.toArray(new int[res.size()][2]);
     }
+
+    //[419].甲板上的战舰
+    public static int countBattleships(char[][] board) {
+        int m = board.length, n = board[0].length;
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'X' && check(board, i, j)) {
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    private static boolean check(char[][] board, int i, int j) {
+        return !((i >= 1 && board[i - 1][j] == 'X') || (j >= 1 && board[i][j - 1] == 'X'));
+    }
+
 
     //[435].无重叠区间
     public static int eraseOverlapIntervals(int[][] intervals) {
@@ -986,6 +836,7 @@ public class ArrayProgramming {
         return res;
     }
 
+
     //[442].数组中重复的数据
     public static List<Integer> findDuplicates(int[] nums) {
         List<Integer> res = new ArrayList<>();
@@ -1000,27 +851,6 @@ public class ArrayProgramming {
 
         }
         return res;
-    }
-
-    //[443].压缩字符串
-    public static int compress(char[] chars) {
-        int n = chars.length;
-        int left = 0;
-        int right = 0;
-        int write = 0;
-        for (; right <= n; right++) {
-            if (right == n || chars[left] != chars[right]) {
-                chars[write++] = chars[left];
-                if (right - left > 1) {
-                    char[] all = String.valueOf(right - left).toCharArray();
-                    for (char ch : all) {
-                        chars[write++] = ch;
-                    }
-                }
-                left = right;
-            }
-        }
-        return write;
     }
 
     //[447].回旋镖的数量
@@ -1045,6 +875,24 @@ public class ArrayProgramming {
         return res;
     }
 
+    //[452].用最少数量的箭引爆气球
+    public static int findMinArrowShots(int[][] points) {
+        Arrays.sort(points, (a, b) -> a[1] > b[1] ? 1 : -1);
+        if (points == null || points.length == 0) return 0;
+        int res = 1;
+        int q = points[0][1];
+        for (int i = 1; i < points.length; i++) {
+            int start = points[i][0];
+            int end = points[i][1];
+            if (q < start) {
+                q = end;
+                //此时更新
+                res++;
+            }
+        }
+        return res;
+    }
+
     //[477].汉明距离总和
     public static int totalHammingDistance(int[] nums) {
         //题目是求两两之间的距离
@@ -1059,6 +907,23 @@ public class ArrayProgramming {
             }
 
             res += ones * (nums.length - ones);
+        }
+        return res;
+    }
+
+    //[495].提莫攻击
+    public static int findPoisonedDuration(int[] timeSeries, int duration) {
+        int lastEnd = 0, res = 0;
+        for (int time : timeSeries) {
+            if (time < lastEnd) {
+                if (time + duration > lastEnd) {
+                    res += time + duration - lastEnd;
+                    lastEnd = time + duration;
+                }
+            } else {
+                res += duration;
+                lastEnd = time + duration;
+            }
         }
         return res;
     }
@@ -1104,43 +969,44 @@ public class ArrayProgramming {
         return res;
     }
 
-    //[735].行星碰撞
-    public static int[] asteroidCollision(int[] asteroids) {
-        //[-2, -1, 1, 2]
-        //[10, 2, -5]
-        //[5, 10, -5]
-        Stack<Integer> stack = new Stack<>();
-        for (int asteroid : asteroids) {
-            boolean needAdd = true;
-            while (!stack.isEmpty()) {
-                //只有这种情况会爆炸
-                if (stack.peek() > 0 && asteroid < 0) {
-                    //相消
-                    if (stack.peek() < -asteroid) {
-                        stack.pop();
-                    } else if (stack.peek() == -asteroid) {
-                        stack.pop();
-                        needAdd = false;
-                        break;
-                    } else {
-                        needAdd = false;
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-            if (needAdd) {
-                stack.push(asteroid);
+    //[539].最小时间差
+    public static int findMinDifference(List<String> timePoints) {
+        if (timePoints.size() >= 1440) return 0;
+        int[] minutes = new int[timePoints.size()];
+        for (int i = 0; i < timePoints.size(); i++) {
+            String[] times = timePoints.get(i).split(":");
+            int minute = Integer.parseInt(times[0]) * 60 + Integer.parseInt(times[1]);
+            minutes[i] = minute;
+        }
+        Arrays.sort(minutes);
+        int min = Integer.MAX_VALUE;
+        for (int i = 1; i < minutes.length; i++) {
+            min = Math.min(minutes[i] - minutes[i - 1], min);
+            if (min == 0) {
+                return 0;
             }
         }
 
-        int[] res = new int[stack.size()];
-        int index = res.length - 1;
-        while (!stack.isEmpty()) {
-            res[index--] = stack.pop();
+        min = Math.min(min, 1440 + minutes[0] - minutes[minutes.length - 1]);
+        return min;
+    }
+
+    //[540].有序数组中的单一元素
+    public static int singleNonDuplicate(int[] nums) {
+        int eor = 0;
+        for (int n : nums) {
+            eor ^= n;
         }
-        return res;
+        return eor;
+    }
+
+    //[575].分糖果
+    public static int distributeCandies(int[] candyType) {
+        Set<Integer> set = new HashSet<>();
+        for (int candy : candyType) {
+            set.add(candy);
+        }
+        return Math.min(set.size(), candyType.length / 2);
     }
 
     //[1288].删除被覆盖区间
@@ -1173,49 +1039,6 @@ public class ArrayProgramming {
             }
         }
         return intervals.length - covered;
-    }
-
-    //[1109].航班预定统计
-    public static class Solution1109 {
-        public int[] diffSum;
-
-        public void createDiffSum(int[] nums) {
-            int n = nums.length;
-            diffSum = new int[n];
-            int temp = 0;
-            for (int i = 0; i < n; i++) {
-                diffSum[i] = nums[i] - temp;
-                temp = nums[i];
-            }
-        }
-
-        public void insert(int start, int end, int num) {
-            diffSum[start] += num;
-            if (end + 1 < diffSum.length) {
-                diffSum[end + 1] -= num;
-            }
-        }
-
-        public int[] result() {
-            int n = diffSum.length;
-            int[] nums = new int[n];
-            int temp = 0;
-            for (int i = 0; i < diffSum.length; i++) {
-                nums[i] = temp + diffSum[i];
-                temp = nums[i];
-            }
-            return nums;
-        }
-
-        public int[] corpFlightBookings(int[][] bookings, int n) {
-            int[] nums = new int[n];
-            Arrays.fill(nums, 0);
-            createDiffSum(nums);
-            for (int[] book : bookings) {
-                insert(book[0] - 1, book[1] - 1, book[2]);
-            }
-            return result();
-        }
     }
 
     public static void main(String[] args) {
@@ -1289,23 +1112,6 @@ public class ArrayProgramming {
 //        System.out.println(searchII(new int[]{1, 0, 1}, 1));
 //        System.out.println(searchII(new int[]{1, 0, 1}, 0));
 //
-//        [153].寻找旋转排序数组中的最小值
-//        System.out.println(findMin(new int[]{4, 5, 6, 7, 0, 1, 2}));
-//        System.out.println(findMin(new int[]{3, 4, 5, 1, 2}));
-//        System.out.println(findMin(new int[]{0, 1, 2, 3, 4}));
-//        System.out.println(findMin(new int[]{3, 1, 2}));
-//        System.out.println(findMin(new int[]{4, 1, 2, 3}));
-//
-//        [154].寻找旋转排序数组中的最小值II
-//        System.out.println(findMin2(new int[]{2, 2, 0, 1, 2}));
-//        System.out.println(findMin2(new int[]{0, 1, 0}));
-//        System.out.println(findMin2(new int[]{1, 0, 1, 1, 1, 1}));
-//
-//        [162].寻找峰值
-//        System.out.println(findPeakElement(new int[]{1, 2, 3}));
-//        System.out.println(findPeakElement(new int[]{1,2,3,1}));
-//        System.out.println(findPeakElement(new int[]{1,2,1,3,5,6,4}));
-//
 //        [163].多数元素
 //        System.out.println(majorityElement(new int[]{1, 2, 1, 2, 3, 2}));
 //
@@ -1318,10 +1124,6 @@ public class ArrayProgramming {
 //
 //        [229].求众数II
 //        System.out.println(majorityElement2(new int[]{1}));
-//        [209].长度最小的子数组
-//        System.out.println(minSubArrayLen(7, new int[]{2, 3, 1, 2, 4, 3}));
-//        System.out.println(minSubArrayLen(7, new int[]{2, 3, 9, 2, 4, 3}));
-//        System.out.println(minSubArrayLen(7, new int[]{}));
 //
 //        [215].数组中的第K个最大元素
 //        System.out.println(findKthLargest(new int[]{3, 2, 1, 5, 6, 4}, 2));
@@ -1351,29 +1153,12 @@ public class ArrayProgramming {
 //        System.out.println(Arrays.toString(productExceptSelf(new int[]{1, 2, 3, 4})));
 //        System.out.println(Arrays.toString(productExceptSelf(new int[]{9, 7})));
 //
-//        [239].滑动窗口最大值
-//        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3)));
-//        System.out.println(Arrays.toString(maxSlidingWindow(new int[]{1}, 1)));
-//
 //        [240].搜索二维矩阵IIx
 //        int[][] res = new int[][]{{1, 4, 7, 11, 15}, {2, 5, 8, 12, 19}, {3, 6, 9, 16, 22}, {10, 13, 14, 17, 24}, {18, 21, 23, 26, 30}};
 //        System.out.println(searchMatrix2(res, 9));
 //
 //        [274].H指数
 //        System.out.println(hIndex(new int[]{3, 0, 6, 1, 5}));
-//
-//        [275].H指数II
-//        System.out.println(hIndex2(new int[]{0, 1, 3, 5, 6}));
-//        System.out.println(hIndex2(new int[]{0, 2, 4, 5, 6}));
-//
-//        [283].移动零
-//        moveZeroes(new int[]{0,1,2,3});
-//        moveZeroes(new int[]{0,1,0,3,12});
-//        moveZeroes(new int[]{1});
-//
-//        [287].寻找重复数
-//        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
-//        System.out.println(findDuplicateV2(new int[]{1, 3, 4, 2, 2}));
 //
 //        [324].摆动排序II
 //        int[] wiggle1 = new int[]{1,3,2,2,3,1};
@@ -1400,8 +1185,12 @@ public class ArrayProgramming {
 //        res.reset();
 //        System.out.println(Arrays.toString(res.shuffle()));
 //
+//
 //        [406].根据身高重建队列
 //        int[][] res = reconstructQueue(new int[][]{{7,0},{4,4},{7,1},{5,0},{6,1},{5,2}});
+//
+//        [419].甲板上的战舰
+//        System.out.println(countBattleships(new char[][]{{'X', '.', '.', 'X'}, {'.', '.', '.', 'X'}, {'.', '.', '.', 'X'}}));
 //
 //        [435].无重叠区间
 //        System.out.println(eraseOverlapIntervals(new int[][]{{1, 2}, {2, 3}, {3, 4}, {1, 3}}));
@@ -1412,32 +1201,37 @@ public class ArrayProgramming {
 //        [442].数组中重复的数据
 //        System.out.println(findDuplicates(new int[]{2, 3, 4, 3}));
 //
-//        [443].压缩字符串
-//        System.out.println(compress(new char[]{'a', 'a', 'b', 'b', 'c', 'c', 'c'}));
-//        System.out.println(compress(new char[]{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'}));
-//        System.out.println(compress(new char[]{'a'}));
-//        System.out.println(compress(new char[]{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'}));
-//
-//        [735].行星碰撞
-//        System.out.println(Arrays.toString(asteroidCollision(new int[]{-2, -1, 1, 2})));
-//        System.out.println(Arrays.toString(asteroidCollision(new int[]{10, 2, -5})));
-//        System.out.println(Arrays.toString(asteroidCollision(new int[]{5, 10, -5})));
-//
-//        [1288].删除被覆盖区间
-//        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));
-//
-//        [1109].航班预定统计
-//        Soultion1109 test = new Soultion1109();
-//        System.out.println(Arrays.toString(test.corpFlightBookings(new int[][]{{1,2,10},{2,3,20},{2,5,25}}, 5)));
-
 //        [447].回旋镖的数量
 //        System.out.println(numberOfBoomerangs(new int[][]{{0,0},{1,1},{2,2}}));
 //        System.out.println(numberOfBoomerangs(new int[][]{{0,0}}));
 //        System.out.println(numberOfBoomerangs(new int[][]{{0,0}, {1,1}}));
-
+//
+//        [452].用最少数量的箭引爆气球
+//        System.out.println(findMinArrowShots(new int[][]{{1, 2}, {2, 3}, {3, 4}, {4, 5}}));
+//        System.out.println(findMinArrowShots(new int[][]{{1,2},{3,4},{5,6},{7,8}}));
+//        System.out.println(findMinArrowShots(new int[][]{{-2147483646,-2147483645},{2147483646,2147483647}}));
+//
 //        [477].汉明距离总和
 //        System.out.println(totalHammingDistance(new int[]{4, 14, 2}));
+//
+//        [495].提莫攻击
+//        System.out.println(findPoisonedDuration(new int[]{1,2,3,4,5}, 5));
+//        System.out.println(findPoisonedDuration(new int[]{1,2,3,4}, 0));
+//
+//        [498].对角线遍历
+//        System.out.println(Arrays.toString(findDiagonalOrder(new int[][]{{1, 2, 3}, { 4, 5, 6}, {7, 8, 9}})));
+//
+//        [539].最小时间差
+//        System.out.println(findMinDifference(Arrays.asList("23:59","00:00")));
+//
+//        [540]. 有序数组中的单一元素
+//        System.out.println(singleNonDuplicate(new int[]{3,3,7,7,10,11,11}));
+//
+//        [575].分糖果
+//        System.out.println(distributeCandies(new int[]{1,1,2,3}));
+//
+//        [1288].删除被覆盖区间
+//        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));
 
-        System.out.println(Arrays.toString(findDiagonalOrder(new int[][]{{1, 2, 3}, { 4, 5, 6}, {7, 8, 9}})));
     }
 }

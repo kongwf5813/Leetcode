@@ -608,6 +608,18 @@ public class DynamicProgramming {
         return dp[n];
     }
 
+    //[354].俄罗斯套娃信封问题
+    public static int maxEnvelopes(int[][] envelopes) {
+        //宽度增序，高度降序
+        Arrays.sort(envelopes, (a,b)-> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
+
+        //求高度的递增子序列
+        int[] nums = new int[envelopes.length];
+        for (int i = 0; i< envelopes.length; i++) {
+            nums[i] = envelopes[i][1];
+        }
+        return lengthOfLIS(nums);
+    }
     //[357].计算各个位数不同的数字个数
     public static int countNumbersWithUniqueDigits(int n) {
         if (n == 0) return 1;
@@ -814,6 +826,59 @@ public class DynamicProgramming {
         return dp[m][n];
     }
 
+    //[486].预测赢家
+    public static boolean PredictTheWinner(int[] nums) {
+        if (nums == null || nums.length == 0) return false;
+        int n = nums.length;
+        //dp[i][j] 从i到j先手玩家比后手玩家多的最大分数
+        int[][] dp = new int[n][n];
+
+        //一个数字选择那么就是nums[i]
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = nums[i];
+        }
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                dp[i][j] = Math.max(nums[i] + (-dp[i + 1][j]), nums[j] + (-dp[i][j - 1]));
+            }
+        }
+        return dp[0][n - 1] >= 0;
+    }
+
+    //[509].斐波那契数
+    public static int fib(int n) {
+        if (n == 0) return 0;
+        if (n == 1) return 1;
+        int dp_i_1 = 1, dp_i_2 = 0, dp_i = 0;
+        for (int i = 1; i < n; i++) {
+            dp_i = dp_i_1 + dp_i_2;
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
+    }
+
+    //[516].最长回文子序列
+    public static int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+
     //[518].兑换零钱II
     public static int change(int amount, int[] coins) {
         int size = coins.length;
@@ -1012,6 +1077,8 @@ public class DynamicProgramming {
 //        [343].整数拆分
 //        System.out.println(integerBreak(10));
 //
+
+        System.out.println(maxEnvelopes(new int[][]{{5,4},{6,4},{6,7},{2,3}}));
 //        [368].最大整除子集
 //        System.out.println(largestDivisibleSubset(new int[]{1, 2, 3, 4, 8}));
 //        System.out.println(largestDivisibleSubset(new int[]{1}));
@@ -1034,6 +1101,24 @@ public class DynamicProgramming {
 //        [416].分割等和子集
 //        System.out.println(canPartition(new int[]{1, 5, 11, 5}));
 //
+//        [474].一和零
+//        System.out.println(findMaxForm(new String[]{"10", "0001", "111001", "1", "0"}, 5, 3));
+//        System.out.println(findMaxForm(new String[]{"10", "0", "1"}, 1, 1));
+//
+//        [486].预测赢家
+//        System.out.println(PredictTheWinner(new int[]{1, 5, 233, 7}));
+//        System.out.println(PredictTheWinner(new int[]{1, 5, 2}));
+//
+//        [509].斐波那契数
+//        System.out.println(fib(0));
+//        System.out.println(fib(1));
+//        System.out.println(fib(2));
+//        System.out.println(fib(3));
+//        System.out.println(fib(4));
+//
+//        [516].最长回文子序列
+//        System.out.println(longestPalindromeSubseq("bb"));
+//
 //        [518].兑换零钱II
 //        System.out.println(change(5, new int[]{1, 2, 5}));
 //        System.out.println(change(3, new int[]{2}));
@@ -1051,9 +1136,5 @@ public class DynamicProgramming {
 //
 //        [1143].最长公共子序列
 //        System.out.println(longestCommonSubsequence("abcde", "ace"));
-//
-//        [474].一和零
-//        System.out.println(findMaxForm(new String[]{"10", "0001", "111001", "1", "0"}, 5, 3));
-//        System.out.println(findMaxForm(new String[]{"10", "0", "1"}, 1, 1));
     }
 }

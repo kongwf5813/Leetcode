@@ -3,6 +3,9 @@ package com.owen.algorithm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import chemaxon.jep.function.In;
 
 /**
  * Created by OKONG on 2020/9/13.
@@ -108,6 +111,96 @@ public class BinarySearch {
         return half * half * rest;
     }
 
+    //[153].寻找旋转排序数组中的最小值
+    public static int findMin(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else {
+                //最小值，可能mid就是最小的，所以不能-1。
+                //例如3, 1, 2
+                right = mid;
+            }
+        }
+        return nums[left];
+    }
+
+    //[154].寻找旋转排序数组中的最小值II
+    public static int findMin2(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else if (nums[mid] < nums[right]) {
+                right = mid;
+            } else {
+                //砍掉右侧边界
+                //101111, 1110111
+                right--;
+            }
+        }
+        return nums[left];
+    }
+
+    //[162].寻找峰值
+    public static int findPeakElement(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[mid + 1]) {
+                right = mid;
+            } else {
+                //不存在nums[mid] = nums[mid + 1]，肯定是小于
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    //[275].H指数II
+    public static int hIndex2(int[] citations) {
+        int n = citations.length;
+        int left = 0, right = n - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (n - mid == citations[mid]) {
+                return n - mid;
+            } else if (n - mid < citations[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return n - left;
+    }
+
+    //[287].寻找重复数(二分搜索)
+    public static int findDuplicate(int[] nums) {
+        //题目是从1到n的数字,一共n+1个数
+        int n = nums.length - 1;
+        int left = 1, right = n;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            int count = 0;
+            for (int i = 0; i <= n; i++) {
+                if (nums[i] <= mid) {
+                    count++;
+                }
+            }
+
+            //1,3,4,2,2, mid = 2， count = 3， 说明重复数在区间[1,2]
+            if (count > mid) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
     //[374].猜数字大小
     public class Solution {
         public int guessNumber(int n) {
@@ -192,6 +285,39 @@ public class BinarySearch {
         return res;
     }
 
+    //[475].供暖器
+    public static int findRadius(int[] houses, int[] heaters) {
+        Arrays.sort(heaters);
+        int maxRadius = Integer.MIN_VALUE;
+        for (int house : houses) {
+            maxRadius = Math.max(searchHeater(heaters, house), maxRadius);
+        }
+        return maxRadius;
+    }
+
+    private static int searchHeater(int[] heaters, int house) {
+        int left = 0, right = heaters.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (heaters[mid] == house) {
+                return 0;
+            } else if (house < heaters[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        if (left > heaters.length - 1) {
+            return house - heaters[heaters.length - 1];
+        } else if (right < 0) {
+            return heaters[0] - house;
+        } else {
+            //后面left比right大
+            return Math.min(heaters[left] - house, house - heaters[right]);
+        }
+    }
+
     //[875].爱吃香蕉的珂珂
     public static int minEatingSpeed(int[] piles, int H) {
         int left = 1, right = Arrays.stream(piles).max().getAsInt();
@@ -246,23 +372,52 @@ public class BinarySearch {
     }
 
     public static void main(String[] args) {
-//        34. 在排序数组中查找元素的第一个和最后一个的位置
+//        [34].在排序数组中查找元素的第一个和最后一个的位置
 //        int[] result2 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 6);
 //        int[] result3 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 7);
 //        int[] result4 = searchRange(new int[]{5, 7, 7, 8, 8, 10}, 5);
 //        int[] result8 = searchRange(new int[]{}, 10);
 //
-//        50. Pow(x, n)
+//        [50].Pow(x, n)
 //        System.out.println(myPow(2.00000d, 10));
 //        System.out.println(myPow(2.10000d, 3));
 //        System.out.println(myPow(2.00000d, -2));
-
-//        System.out.println(minEatingSpeed(new int[]{3,6,7,11}, 8));
+//
+//        [153].寻找旋转排序数组中的最小值
+//        System.out.println(findMin(new int[]{4, 5, 6, 7, 0, 1, 2}));
+//        System.out.println(findMin(new int[]{3, 4, 5, 1, 2}));
+//        System.out.println(findMin(new int[]{0, 1, 2, 3, 4}));
+//        System.out.println(findMin(new int[]{3, 1, 2}));
+//        System.out.println(findMin(new int[]{4, 1, 2, 3}));
+//
+//        [154].寻找旋转排序数组中的最小值II
+//        System.out.println(findMin2(new int[]{2, 2, 0, 1, 2}));
+//        System.out.println(findMin2(new int[]{0, 1, 0}));
+//        System.out.println(findMin2(new int[]{1, 0, 1, 1, 1, 1}));
+//
+//        [162].寻找峰值
+//        System.out.println(findPeakElement(new int[]{1, 2, 3}));
+//        System.out.println(findPeakElement(new int[]{1,2,3,1}));
+//        System.out.println(findPeakElement(new int[]{1,2,1,3,5,6,4}));
+//
+//        [275].H指数II
+//        System.out.println(hIndex2(new int[]{0, 1, 3, 5, 6}));
+//        System.out.println(hIndex2(new int[]{0, 2, 4, 5, 6}));
+//
+//        [287].寻找重复数
+//        System.out.println(findDuplicate(new int[]{1, 3, 4, 2, 2}));
 //
 //        [436].寻找右区间
 //        System.out.println(Arrays.toString(findRightInterval(new int[][]{{3,4},{2,3},{1,2}})));
 //
-//        [1011]在D天内送达包裹的能力
+//        [475].供暖器
+//        System.out.println(findRadius(new int[]{1,5}, new int[]{2}));
+//        System.out.println(findRadius(new int[]{1,2,3,4}, new int[]{1,4}));
+//
+//        [875].爱吃香蕉的珂珂
+//        System.out.println(minEatingSpeed(new int[]{3,6,7,11}, 8));
+//
+//        [1011].在D天内送达包裹的能力
 //        System.out.println(shipWithinDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5));
 //        System.out.println(shipWithinDays(new int[]{3, 2, 2, 4, 1, 4}, 3));
 //        System.out.println(shipWithinDays(new int[]{337, 399, 204, 451, 273, 471, 37, 211, 67, 224, 126, 123, 294, 295, 498, 69, 264, 307, 419, 232, 361, 301, 116, 216, 227, 203, 456, 195, 444, 302, 58, 496, 84, 280, 58, 107, 300, 334, 418, 241}, 20));
