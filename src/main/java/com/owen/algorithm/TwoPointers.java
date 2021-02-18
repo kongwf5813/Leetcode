@@ -1,13 +1,18 @@
 package com.owen.algorithm;
 
+import org.apache.tinkerpop.gremlin.process.traversal.P;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.zip.DeflaterOutputStream;
 
 import chemaxon.jep.function.In;
 
@@ -296,6 +301,73 @@ public class TwoPointers {
         return write;
     }
 
+    //[480].滑动窗口中位数
+    public static class Solution480 {
+        PriorityQueue<Long> small;
+        PriorityQueue<Long> large;
+
+        public double[] medianSlidingWindow(int[] nums, int k) {
+            small = new PriorityQueue<>((o1, o2) -> {
+                if (o2 > o1) {
+                    return 1;
+                } else if (o2 < o1) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+            large = new PriorityQueue<>();
+            double[] res = new double[nums.length - k + 1];
+            int left = 0, right = 0, index = 0;
+            while (right < nums.length) {
+                int num = nums[right];
+                right++;
+                addNum(num);
+
+                if (right - left >= k) {
+                    res[index++] = median();
+                    removeNum(nums[left]);
+                    left++;
+                }
+            }
+            return res;
+        }
+
+        private void addNum(long num) {
+            if (small.size() >= large.size()) {
+                small.offer(num);
+                large.offer(small.poll());
+            } else {
+                large.offer(num);
+                small.offer(large.poll());
+            }
+        }
+
+        private void removeNum(long num) {
+            if (small.contains(num)) {
+                small.remove(num);
+                if (large.size() > small.size()) {
+                    small.offer(large.poll());
+                }
+            } else {
+                large.remove(num);
+                if (small.size() > large.size()) {
+                    large.offer(small.poll());
+                }
+            }
+        }
+
+        private double median() {
+            if (small.size() > large.size()) {
+                return small.peek();
+            } else if (small.size() < large.size()) {
+                return large.peek();
+            } else {
+                return small.isEmpty() ? 0 : small.peek() / 2.0d + large.peek() / 2.0d;
+            }
+        }
+    }
+
     //[567].字符串的排列
     public static boolean checkInclusion(String s1, String s2) {
         int[] need = new int[26];
@@ -416,8 +488,14 @@ public class TwoPointers {
 //        System.out.println(compress(new char[]{'a'}));
 //        System.out.println(compress(new char[]{'a', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c'}));
 //
+//        [480].滑动窗口中位数
+//        Solution480 solution480 = new Solution480();
+//        System.out.println(Arrays.toString(solution480.medianSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 4)));
+//        System.out.println(Arrays.toString(solution480.medianSlidingWindow(new int[]{-2147483648, -2147483648, 2147483647, -2147483648, -2147483648, -2147483648, 2147483647, 2147483647, 2147483647, 2147483647, -2147483648, 2147483647, -2147483648}, 3)));
+//        System.out.println(Arrays.toString(solut ion480.medianSlidingWindow(new int[]{1}, 1)));
+//
 //        [556].下一个更大元素III
-//        System.out.println(nextGreaterElement(14782));
+//        System.out.println(nextGreaterElement(14782c));
 //
 //        [567].字符串的排列
 //        System.out.println(checkInclusion("ab", "eidboaoo"));;

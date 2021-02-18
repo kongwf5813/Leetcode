@@ -1,5 +1,7 @@
 package com.owen.algorithm;
 
+import com.amazonaws.services.dynamodbv2.xspec.S;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,6 +34,54 @@ public class StackProblem {
             }
         }
         return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
+    }
+
+    public static class MinStack {
+
+        Stack<Long> stack;
+        long min;
+
+        /**
+         * initialize your data structure here.
+         */
+        public MinStack() {
+            stack = new Stack<Long>();
+        }
+
+        public void push(int x) {
+            if (stack.isEmpty()) {
+                stack.push(0l);
+                min = x;
+            } else {
+                if (x < min) {
+                    stack.push(x - min);
+                    min = x;
+                } else {
+                    stack.push(x - min);
+                }
+            }
+        }
+
+        public void pop() {
+            if (!stack.isEmpty()) {
+                if (stack.peek() < 0) {
+                    min = min - stack.peek();
+                }
+                stack.pop();
+            }
+        }
+
+        public int top() {
+            if (stack.peek() < 0) {
+                return (int)min;
+            } else {
+                return (int)(min + stack.peek());
+            }
+        }
+
+        public int getMin() {
+            return (int)min;
+        }
     }
 
     //[224].基本计算器
@@ -453,7 +503,7 @@ public class StackProblem {
         Arrays.sort(chars, leftIdx + 1, chars.length);
 
         long ret = Long.parseLong(new String(chars));
-        return ret > Integer.MAX_VALUE ? -1 : (int)ret;
+        return ret > Integer.MAX_VALUE ? -1 : (int) ret;
     }
 
 
@@ -579,6 +629,14 @@ public class StackProblem {
 //        System.out.println(freqStack.pop());
 
     public static void main(String[] args) {
+        MinStack minStack = new MinStack();
+        minStack.push(-2);
+        minStack.push(0);
+        minStack.push(-3);
+        System.out.println(minStack.getMin());
+        minStack.pop();
+        System.out.println(minStack.top());
+        System.out.println(minStack.getMin());
 //        [224].基本计算器
 //        System.out.println(calculate("(1+(4+5+2)-3)"));
 //        System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));

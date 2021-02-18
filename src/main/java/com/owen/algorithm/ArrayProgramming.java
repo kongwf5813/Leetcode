@@ -407,6 +407,63 @@ public class ArrayProgramming {
         return false;
     }
 
+    //[134].加油站
+    public static int canCompleteCircuit(int[] gas, int[] cost) {
+        int spare = 0;
+        int minSpare = Integer.MAX_VALUE;
+        int n = gas.length, start = 0;
+        for (int i = 0; i < n; i++) {
+            //到达i+1总的剩余油量
+            spare += gas[i] - cost[i];
+            if (spare < minSpare) {
+                minSpare = spare;
+                start = i;
+            }
+        }
+        return spare >= 0 ? (start + 1) % n : -1;
+    }
+
+    //[163].多数元素
+    public static int majorityElement(int[] nums) {
+        int candidate = nums[0];
+        int count = 0;
+        for (int num : nums) {
+            //票数为0，意味着需要替换候选人
+            if (0 == count) {
+                candidate = num;
+            }
+
+            //候选人相同+1
+            if (num == candidate) {
+                count++;
+            } else {
+                //候选人不相同，减票数
+                count--;
+            }
+        }
+        return candidate;
+    }
+
+    //[189].旋转数组
+    public static void rotate(int[] nums, int k) {
+        int realK = k % nums.length;
+        //前n-k个
+        swap(nums, 0, nums.length - realK - 1);
+        //后k个
+        swap(nums, nums.length - realK, nums.length - 1);
+        swap(nums, 0, nums.length - 1);
+    }
+
+    private static void swap(int[] nums, int x, int y) {
+        while (x < y) {
+            int temp = nums[y];
+            nums[y] = nums[x];
+            nums[x] = temp;
+            x++;
+            y--;
+        }
+    }
+
     //[179].最大数
     public static String largestNumber(int[] nums) {
         String[] strings = new String[nums.length];
@@ -450,47 +507,6 @@ public class ArrayProgramming {
             return quickSort(nums, left, l - 1, index);
         } else {
             return quickSort(nums, l + 1, right, index);
-        }
-    }
-
-    //[163].多数元素
-    public static int majorityElement(int[] nums) {
-        int candidate = nums[0];
-        int count = 0;
-        for (int num : nums) {
-            //票数为0，意味着需要替换候选人
-            if (0 == count) {
-                candidate = num;
-            }
-
-            //候选人相同+1
-            if (num == candidate) {
-                count++;
-            } else {
-                //候选人不相同，减票数
-                count--;
-            }
-        }
-        return candidate;
-    }
-
-    //[189].旋转数组
-    public static void rotate(int[] nums, int k) {
-        int realK = k % nums.length;
-        //前n-k个
-        swap(nums, 0, nums.length - realK - 1);
-        //后k个
-        swap(nums, nums.length - realK, nums.length - 1);
-        swap(nums, 0, nums.length - 1);
-    }
-
-    private static void swap(int[] nums, int x, int y) {
-        while (x < y) {
-            int temp = nums[y];
-            nums[y] = nums[x];
-            nums[x] = temp;
-            x++;
-            y--;
         }
     }
 
@@ -1112,6 +1128,8 @@ public class ArrayProgramming {
 //        System.out.println(searchII(new int[]{1, 0, 1}, 1));
 //        System.out.println(searchII(new int[]{1, 0, 1}, 0));
 //
+
+        System.out.println(canCompleteCircuit(new int[]{1,2,3,4,5}, new int[]{3,4,5,1,2}));
 //        [163].多数元素
 //        System.out.println(majorityElement(new int[]{1, 2, 1, 2, 3, 2}));
 //
