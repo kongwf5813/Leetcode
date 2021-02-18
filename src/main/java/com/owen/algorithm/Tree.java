@@ -1086,6 +1086,42 @@ public class Tree {
         res.add(root.val);
     }
 
+    //[623].在二叉树中增加一行
+    public static TreeNode addOneRow(TreeNode root, int v, int d) {
+        if (d == 1) {
+            TreeNode newOne = new TreeNode(v);
+            newOne.left = root;
+            return newOne;
+        }
+        LinkedList<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        int layer = 1;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                if (layer == d - 1) {
+                    TreeNode newLeft = new TreeNode(v);
+                    TreeNode newRight = new TreeNode(v);
+                    newLeft.left = cur.left;
+                    newRight.right = cur.right;
+
+                    cur.left = newLeft;
+                    cur.right = newRight;
+                } else {
+                    if (cur.left != null) {
+                        queue.offer(cur.left);
+                    }
+                    if (cur.right != null) {
+                        queue.offer(cur.right);
+                    }
+                }
+            }
+            layer++;
+        }
+        return root;
+    }
+
     //[700].二叉搜索树中的搜索
     public static TreeNode searchBST(TreeNode root, int val) {
         if (root == null) {
@@ -1383,6 +1419,9 @@ public class Tree {
 //        System.out.println(a);
 //        TreeNode res = code.deserialize(a);
 //
+//        [421].数组中两个数的最大异或值
+//        System.out.println(new Solution421().findMaximumXOR(new int[]{3, 10, 5, 25, 2, 8}));
+//
 //        [427].建立四叉树
 //        Solution427.Node node  = new Solution427().construct(new int[][]{{1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 1, 1, 0, 0, 0, 0}});
 //        System.out.println();
@@ -1423,6 +1462,15 @@ public class Tree {
 //        root.left.right = new TreeNode(3);
 //        root.right.right = new TreeNode(9);
 //        System.out.println(largestValues(root));
-        System.out.println(new Solution421().findMaximumXOR(new int[]{3, 10, 5, 25, 2, 8}));
+//
+//        [623].在二叉树中增加一行
+//        TreeNode root = new TreeNode(4);
+//        root.left = new TreeNode(2);
+//        root.right = new TreeNode(6);
+//        root.left.left = new TreeNode(3);
+//        root.left.right = new TreeNode(1);
+//        root.right.left = new TreeNode(5);
+//        TreeNode newOne = addOneRow(root, 1,2);
+
     }
 }
