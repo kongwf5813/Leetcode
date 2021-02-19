@@ -1,10 +1,5 @@
 package com.owen.algorithm;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
-
-import org.omg.PortableInterceptor.DISCARDING;
-import org.xmlcml.euclid.Int;
-
 import java.util.*;
 
 /**
@@ -1016,6 +1011,26 @@ public class ArrayProgramming {
         return eor;
     }
 
+    //[565].数组嵌套
+    public static int arrayNesting(int[] nums) {
+        //5,4,0,3,1,6,2
+        //0-5 5-6 6-2 2-0
+        //1-4 4-1
+        int res = 0;
+        Set<Integer> unique = new HashSet<>();
+        for (int i = 0; i < nums.length ; i++) {
+            int k = i, count = 0;
+            while (!unique.contains(nums[k])) {
+                unique.add(nums[k]);
+                k = nums[k];
+                count++;
+            }
+            res = Math.max(res, count);
+        }
+        return res;
+    }
+
+
     //[575].分糖果
     public static int distributeCandies(int[] candyType) {
         Set<Integer> set = new HashSet<>();
@@ -1023,6 +1038,28 @@ public class ArrayProgramming {
             set.add(candy);
         }
         return Math.min(set.size(), candyType.length / 2);
+    }
+
+    //[611].有效三角形的个数
+    public static int triangleNumber(int[] nums) {
+        if(nums.length < 3) return 0;
+
+        //2,2,3,4
+        Arrays.sort(nums);
+
+        int count = 0;
+        for (int k = nums.length -1; k > 1; k --) {
+            int i = 0, j = k -1;
+            while (i < j) {
+                if (nums[i] + nums[j] > nums[k]) {
+                    count += j -i;
+                    j--;
+                } else {
+                    i++;
+                }
+            }
+        }
+        return count;
     }
 
     //[1288].删除被覆盖区间
@@ -1128,8 +1165,9 @@ public class ArrayProgramming {
 //        System.out.println(searchII(new int[]{1, 0, 1}, 1));
 //        System.out.println(searchII(new int[]{1, 0, 1}, 0));
 //
-
-        System.out.println(canCompleteCircuit(new int[]{1,2,3,4,5}, new int[]{3,4,5,1,2}));
+//        [134].加油站
+//        System.out.println(canCompleteCircuit(new int[]{1,2,3,4,5}, new int[]{3,4,5,1,2}));
+//
 //        [163].多数元素
 //        System.out.println(majorityElement(new int[]{1, 2, 1, 2, 3, 2}));
 //
@@ -1245,11 +1283,17 @@ public class ArrayProgramming {
 //        [540]. 有序数组中的单一元素
 //        System.out.println(singleNonDuplicate(new int[]{3,3,7,7,10,11,11}));
 //
+//        [565].数组嵌套
+//        System.out.println(arrayNesting(new int[]{5,4,0,3,1,6,2}));
+//        System.out.println(arrayNesting(new int[]{0}));
+//
 //        [575].分糖果
 //        System.out.println(distributeCandies(new int[]{1,1,2,3}));
 //
+//        [611].有效三角形的个数
+//        System.out.println(triangleNumber(new int[]{2,2,3,4}));
+//
 //        [1288].删除被覆盖区间
 //        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));
-
     }
 }

@@ -1,13 +1,11 @@
 package com.owen.algorithm;
 
+import com.owen.algorithm.LinkList.ListNode;
+
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.owen.algorithm.LinkList.ListNode;
-
-import chemaxon.jep.function.In;
 
 public class Tree {
 

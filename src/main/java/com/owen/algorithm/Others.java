@@ -1,10 +1,6 @@
 package com.owen.algorithm;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.amazonaws.services.dynamodbv2.xspec.S;
-import com.owen.algorithm.LinkList.ListNode;
 
 public class Others {
 
