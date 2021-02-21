@@ -508,7 +508,7 @@ public class TwoPointers {
 //        System.out.println(findUnsortedSubarray(new int[]{2,6,4,8,10,9,15}));
 //        System.out.println(findUnsortedSubarray(new int[]{1,2,3,4,5}));
 //
-
-        System.out.println(judgeSquareSum(5));
+//        [633].平方数之和
+//        System.out.println(judgeSquareSum(5));
     }
 }
