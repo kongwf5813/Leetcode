@@ -1331,8 +1331,10 @@ public class ArrayProgramming {
 //        [611].有效三角形的个数
 //        System.out.println(triangleNumber(new int[]{2,2,3,4}));
 //
-        System.out.println(leastInterval(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2));
-        System.out.println(leastInterval(new char[]{'A','A','A','A','A','A','B','C','D','E','F','G'}, 2));
+//        [621].任务调度器
+//        System.out.println(leastInterval(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2));
+//        System.out.println(leastInterval(new char[]{'A','A','A','A','A','A','B','C','D','E','F','G'}, 2));
+//
 //        [628].三个数的最大乘积
 //        System.out.println(maximumProduct(new int[] {-3, -2, 1,3}));
 //
