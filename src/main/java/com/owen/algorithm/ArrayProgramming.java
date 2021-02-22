@@ -791,7 +791,6 @@ public class ArrayProgramming {
         }
     }
 
-
     //[406].根据身高重建队列
     public static int[][] reconstructQueue(int[][] people) {
         //[7,0] [7,1] [6,1] [5,0] [5,2] [4,4]
@@ -826,7 +825,6 @@ public class ArrayProgramming {
         return !((i >= 1 && board[i - 1][j] == 'X') || (j >= 1 && board[i][j - 1] == 'X'));
     }
 
-
     //[435].无重叠区间
     public static int eraseOverlapIntervals(int[][] intervals) {
         if (intervals.length == 0) return 0;
@@ -846,7 +844,6 @@ public class ArrayProgramming {
         }
         return res;
     }
-
 
     //[442].数组中重复的数据
     public static List<Integer> findDuplicates(int[] nums) {
@@ -1030,7 +1027,6 @@ public class ArrayProgramming {
         return res;
     }
 
-
     //[575].分糖果
     public static int distributeCandies(int[] candyType) {
         Set<Integer> set = new HashSet<>();
@@ -1038,6 +1034,15 @@ public class ArrayProgramming {
             set.add(candy);
         }
         return Math.min(set.size(), candyType.length / 2);
+    }
+
+    //[598].范围求和II
+    public static int maxCount(int m, int n, int[][] ops) {
+        for (int[] op: ops) {
+            m = Math.min(m, op[0]);
+            n = Math.min(n, op[1]);
+        }
+        return m * n;
     }
 
     //[611].有效三角形的个数
@@ -1060,6 +1065,40 @@ public class ArrayProgramming {
             }
         }
         return count;
+    }
+
+    //[621].任务调度器
+    public static int leastInterval(char[] tasks, int n) {
+        //AAABBBCCCDD  n=2 优先冷却时间的最大值计算 ABCABCABC = 9 再计算实际最大值ABCDABCDABC 11
+        int[] cnt = new int[26];
+        for (char task : tasks) {
+            cnt[task - 'A']++;
+        }
+        int max = 0;
+        for (int count : cnt) {
+            max = Math.max(max, count);
+        }
+
+        int remain = 0;
+        for (int count : cnt) {
+            if (count == max) {
+                remain++;
+            }
+        }
+        //前半部分为ABCABC值，能配对成功的数量，后半部分为ABC，不需要间隙的数量
+        int res = (max -1) * (n+1) + remain;
+
+        return Math.max(res, tasks.length);
+    }
+
+    //[628].三个数的最大乘积
+    public static int maximumProduct(int[] nums) {
+        if (nums.length < 3) return 0;
+
+        Arrays.sort(nums);
+        int n = nums.length;
+        int res = Math.max(nums[n-1] * nums[n-2] * nums[n-3], nums[n-1] * nums[0] * nums[1]);
+        return res;
     }
 
     //[1288].删除被覆盖区间
@@ -1241,7 +1280,6 @@ public class ArrayProgramming {
 //        res.reset();
 //        System.out.println(Arrays.toString(res.shuffle()));
 //
-//
 //        [406].根据身高重建队列
 //        int[][] res = reconstructQueue(new int[][]{{7,0},{4,4},{7,1},{5,0},{6,1},{5,2}});
 //
@@ -1292,6 +1330,13 @@ public class ArrayProgramming {
 //
 //        [611].有效三角形的个数
 //        System.out.println(triangleNumber(new int[]{2,2,3,4}));
+//
+//        [621].任务调度器
+//        System.out.println(leastInterval(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2));
+//        System.out.println(leastInterval(new char[]{'A','A','A','A','A','A','B','C','D','E','F','G'}, 2));
+//
+//        [628].三个数的最大乘积
+//        System.out.println(maximumProduct(new int[] {-3, -2, 1,3}));
 //
 //        [1288].删除被覆盖区间
 //        System.out.println(removeCoveredIntervals(new int[][] {{1,4},{3,6},{2,8}}));

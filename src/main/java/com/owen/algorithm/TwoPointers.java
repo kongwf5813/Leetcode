@@ -420,6 +420,23 @@ public class TwoPointers {
         return right - left > 0 ? right - left + 1 : 0;
     }
 
+    //[633].平方数之和
+    public static boolean judgeSquareSum(int c) {
+        if (c < 0) return false;
+       int left = 0, right = (int)Math.sqrt(c);
+       while (left <= right) {
+           int sum = left * left + right * right;
+           if (sum == c) {
+               return true;
+           } else if (sum < c) {
+               left++;
+           } else {
+               right--;
+           }
+       }
+       return false;
+    }
+
     public static void main(String[] args) {
 //        [3].无重复子串的最长子串
 //        System.out.println(lengthOfLongestSubstring("dvdf"));
@@ -491,5 +508,7 @@ public class TwoPointers {
 //        System.out.println(findUnsortedSubarray(new int[]{2,6,4,8,10,9,15}));
 //        System.out.println(findUnsortedSubarray(new int[]{1,2,3,4,5}));
 //
+//        [633].平方数之和
+//        System.out.println(judgeSquareSum(5));
     }
 }
