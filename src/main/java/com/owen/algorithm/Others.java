@@ -1709,6 +1709,74 @@ public class Others {
         return (p[0] - q[0]) * (p[0] - q[0]) + (p[1] - q[1]) * (p[1] - q[1]);
     }
 
+    //[640].求解方程
+    public static String solveEquation(String equation) {
+        if (equation == null || equation.length() == 0)  return "No solution";
+        equation = equation.replaceAll("-", "+-");
+        String left = equation.split("=")[0];
+        String right = equation.split("=")[1];
+
+        int leftNum = 0;
+        int rightNum = 0;
+        int leftX = 0;
+        int rightX = 0;
+        for (String each : left.split("\\+")) {
+            if (each.contains("x")) {
+                String remove = each.replace("x", "");
+                leftX += remove.equals("") ? 1 : (remove.equals("-") ? -1 : Integer.parseInt(remove));
+            } else if (each.length() > 0) {
+                leftNum += Integer.parseInt(each);
+            }
+        }
+
+        for (String each : right.split("\\+")) {
+            if (each.contains("x")) {
+                String remove = each.replace("x", "");
+                rightX += remove.equals("") ? 1 : (remove.equals("-") ? -1 : Integer.parseInt(remove));
+            } else if (each.length() > 0) {
+                rightNum += Integer.parseInt(each);
+            }
+        }
+
+        if (leftX == rightX) {
+            if (leftNum == rightNum) {
+                return "Infinite solutions";
+            } else {
+                return "No solution";
+            }
+        } else {
+            return "x=" + (rightNum - leftNum) / (leftX - rightX);
+        }
+    }
+
+    //[636].函数的独占时间
+    public static int[] exclusiveTime(int n, List<String> logs) {
+        int[] res = new int[n];
+        Stack<Integer> stack = new Stack<>();
+        String[] pos = logs.get(0).split(":");
+        stack.push(Integer.parseInt(pos[0]));
+        //start start end end
+        //start end start end
+        int prev = Integer.parseInt(pos[2]);
+        for (int i = 1; i < logs.size(); i++) {
+            pos = logs.get(i).split(":");
+            if (pos[1].equals("start")) {
+                //递归运行，start就是第一段的结束时间
+                if (!stack.isEmpty()) {
+                    res[stack.peek()] += Integer.parseInt(pos[2]) - prev;
+                }
+                prev = Integer.parseInt(pos[2]);
+                stack.push(Integer.parseInt(pos[0]));
+            } else {
+                //end永远都是运行时间，相减就可以
+                res[stack.peek()] += Integer.parseInt(pos[2]) - prev + 1;
+                prev = Integer.parseInt(pos[2]) + 1;
+                stack.pop();
+            }
+        }
+        return res;
+    }
+
     //[804].唯一摩斯密码词
     public static int uniqueMorseRepresentations(String[] words) {
         String[] morse = new String[]{".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."};
@@ -2013,8 +2081,10 @@ public class Others {
 //        [553].最优除法
 //        System.out.println(optimalDivision(new int[]{1000,100,10,2}));
 //
-        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1, 2, 2, 1), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 2), Arrays.asList(2, 4), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 1, 1))));
-        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1), Arrays.asList(1), Arrays.asList(1))));
+//        [554].砖墙
+//        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1, 2, 2, 1), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 2), Arrays.asList(2, 4), Arrays.asList(3, 1, 2), Arrays.asList(1, 3, 1, 1))));
+//        System.out.println(leastBricks(Arrays.asList(Arrays.asList(1), Arrays.asList(1), Arrays.asList(1))));
+//
 //        [592].分数加减运算
 //        System.out.println(fractionAddition("-1/2+1/2"));
 //        System.out.println(fractionAddition("-1/2+1/2+1/3"));
@@ -2024,6 +2094,17 @@ public class Others {
 //
 //        [593].有效的正方形
 //        System.out.println(validSquare(new int[]{0, 0}, new int[]{1, 1}, new int[]{1, 0}, new int[]{0, 1}));
+//
+//        [636].函数的独占时间
+//        System.out.println(Arrays.toString(exclusiveTime(2, Arrays.asList("0:start:0", "1:start:2", "1:end:5", "0:end:6"))));
+//
+//        [640].求解方程
+//        System.out.println(solveEquation("x+5-3+x=6+x-2"));
+//        System.out.println(solveEquation("2x=x"));
+//        System.out.println(solveEquation("2x+3x-6x=x+2"));
+//        System.out.println(solveEquation("x=x+2"));
+//        System.out.println(solveEquation("-x=x+2"));
+//        System.out.println(solveEquation("-x=-x+3x+2"));
 //
 //        [804].唯一摩斯密码词
 //        System.out.println(uniqueMorseRepresentations(new String[]{"gin", "zen", "gig", "msg"}));
