@@ -181,15 +181,15 @@ public class LinkList {
         dummyHead.next = head;
         ListNode cur = dummyHead;
         while (cur.next != null && cur.next.next != null) {
-           if (cur.next.val == cur.next.next.val) {
-               ListNode temp = cur.next;
-               while (temp != null && temp.next != null && temp.val == temp.next.val) {
-                   temp = temp.next;
-               }
-               cur.next = temp.next;
-           } else {
-               cur = cur.next;
-           }
+            if (cur.next.val == cur.next.next.val) {
+                ListNode temp = cur.next;
+                while (temp != null && temp.next != null && temp.val == temp.next.val) {
+                    temp = temp.next;
+                }
+                cur.next = temp.next;
+            } else {
+                cur = cur.next;
+            }
         }
         return dummyHead.next;
     }
@@ -525,7 +525,7 @@ public class LinkList {
                     //把拉平的节点拼接的原来的next节点
                     if (next != null) {
                         lastNode.next = next;
-                        next.prev  = lastNode;
+                        next.prev = lastNode;
                     }
                 }
 
@@ -542,21 +542,21 @@ public class LinkList {
         Stack<Integer> stack1 = new Stack<>();
         Stack<Integer> stack2 = new Stack<>();
 
-        while(l1 != null) {
+        while (l1 != null) {
             stack1.push(l1.val);
             l1 = l1.next;
         }
 
-        while(l2 != null) {
+        while (l2 != null) {
             stack2.push(l2.val);
             l2 = l2.next;
         }
 
         int carry = 0;
         ListNode res = null;
-        while(!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
-            int a = stack1.isEmpty()  ? 0 : stack1.pop();
-            int b = stack2.isEmpty() ? 0: stack2.pop();
+        while (!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
+            int a = stack1.isEmpty() ? 0 : stack1.pop();
+            int b = stack2.isEmpty() ? 0 : stack2.pop();
             int cur = a + b + carry;
             carry = cur / 10;
             cur %= 10;
@@ -596,6 +596,17 @@ public class LinkList {
             stack.push(i);
         }
         return res;
+    }
+
+
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+
+        ListNode p1 = headA, p2 = headB;
+        while (p1 != p2) {
+            p1 = p1 == null ? headB : p1.next;
+            p2 = p2 == null ? headA : p2.next;
+        }
+        return p1;
     }
 
     public static void main(String[] args) {

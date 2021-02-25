@@ -124,20 +124,32 @@ public class Others {
 
     //[43].字符串相乘
     public static String multiply(String num1, String num2) {
+        if (num1 == null || num2 == null) return "0";
+
         char[] c1 = num1.toCharArray();
         char[] c2 = num2.toCharArray();
-        int outLevel = 1;
-        int res = 0;
-        for (int i = c2.length - 1; i >= 0; i--) {
-            int cur = 0, innerLevel = 1;
-            for (int j = c1.length - 1; j >= 0; j--) {
-                cur += (c2[i] - '0') * (c1[j] - '0') * innerLevel;
-                innerLevel *= 10;
+
+        int m = c1.length, n = c2.length;
+        int[] res = new int[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                int muti = (c2[j] - '0') * (c1[i] - '0');
+                //加上进位信息
+                muti += res[i + j + 1];
+                //保留的值，不超过10
+                res[i + j + 1] = muti % 10;
+                //进位
+                res[i + j] += muti / 10;
             }
-            res += cur * outLevel;
-            outLevel *= 10;
         }
-        return "" + res;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0 ; i< res.length; i++) {
+            if (sb.length() == 0 && res[i] == 0) {
+                continue;
+            }
+            sb.append(res[i]);
+        }
+        return sb.length() == 0 ? "0" : sb.toString();
     }
 
     //[49] 字母异位分组
@@ -1711,7 +1723,7 @@ public class Others {
 
     //[640].求解方程
     public static String solveEquation(String equation) {
-        if (equation == null || equation.length() == 0)  return "No solution";
+        if (equation == null || equation.length() == 0) return "No solution";
         equation = equation.replaceAll("-", "+-");
         String left = equation.split("=")[0];
         String right = equation.split("=")[1];
@@ -1813,10 +1825,10 @@ public class Others {
 //        System.out.println(trap(new int[]{4,2,0,3,2,5}));
 //
 //        [43].字符串相乘
-//        System.out.println(multiply("123", "456"));
-//        System.out.println(multiply("2", "3"));
-//        System.out.println(multiply("123", "89"));
-//
+        System.out.println(multiply("123", "456"));
+        System.out.println(multiply("2", "3"));
+        System.out.println(multiply("123", "89"));
+
 //        [49].字母异位分组
 //        System.out.println(groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}));
 //        System.out.println(groupAnagrams(new String[]{}));
