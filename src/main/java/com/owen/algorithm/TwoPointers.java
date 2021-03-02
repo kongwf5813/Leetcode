@@ -423,18 +423,18 @@ public class TwoPointers {
     //[633].平方数之和
     public static boolean judgeSquareSum(int c) {
         if (c < 0) return false;
-       int left = 0, right = (int)Math.sqrt(c);
-       while (left <= right) {
-           int sum = left * left + right * right;
-           if (sum == c) {
-               return true;
-           } else if (sum < c) {
-               left++;
-           } else {
-               right--;
-           }
-       }
-       return false;
+        int left = 0, right = (int) Math.sqrt(c);
+        while (left <= right) {
+            int sum = left * left + right * right;
+            if (sum == c) {
+                return true;
+            } else if (sum < c) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
@@ -453,6 +453,7 @@ public class TwoPointers {
 //        System.out.println(lengthOfLongestSubstring("aa"));
 //        System.out.println(lengthOfLongestSubstring("pwwwwkeeew"));
 //
+        System.out.println(lengthOfLongestSubstringV2("pwwk"));
 //        [76].最小覆盖子串
 //        System.out.println(minWindow("ADOBECODEBANC", "ABC"));
 //        System.out.println(minWindow("a", "c"));
