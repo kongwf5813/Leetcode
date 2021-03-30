@@ -771,6 +771,41 @@ public class Others {
         }
     }
 
+
+    //[50].Pow(x,n)
+    public static double myPow(double x, int n) {
+        if (n == 0) return 1;
+        if (n == 1) return x;
+        if (n == -1) return 1 / x;
+
+        double half = myPow(x, n / 2);
+        double rest = myPow(x, n % 2);
+        return half * half * rest;
+    }
+
+    //[53].最大子序和
+    public static int maxSubArray(int[] nums) {
+        //sum表示以nums[i]为结尾的最大子序列和，前面为负数，则取当前值。否则扩充子序列和。
+        int sum = nums[0], ans = 0;
+        for (int i = 1; i < nums.length; i++) {
+            sum = Math.max(sum + nums[i], nums[i]);
+            ans = Math.max(sum, ans);
+        }
+        return ans;
+    }
+
+    //[55].跳跃游戏
+    public static boolean canJump(int[] nums) {
+        int end = 0;
+        for (int i = 0; i < nums.length - 1; i++) {
+            end = Math.max(end, i + nums[i]);
+            if (i >= end) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);
 //        f.next = new ListNode(4);
@@ -878,10 +913,8 @@ public class Others {
 
 //        System.out.println(countAndSay(7));
 
-
 //        System.out.println(combinationSum(new int[]{2, 3, 6, 7}, 7));
 //        System.out.println(combinationSum(new int[]{2, 3, 5}, 8));
-
 
 //        System.out.println(combinationSum2(new int[]{10,1,2,7,6,1,5}, 8));
 
@@ -889,8 +922,9 @@ public class Others {
 
         System.out.println(permute(new int[]{1, 2, 3}));
 
-
         System.out.println(permuteUnique(new int[]{1, 1, 2}));
+
+        System.out.println(maxSubArray(new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4}));
     }
 
 
