@@ -1,5 +1,6 @@
 package com.owen.algorithm.v2;
 
+import com.owen.algorithm.LinkList;
 import com.owen.algorithm.LinkList.ListNode;
 
 import java.util.*;
@@ -272,7 +273,6 @@ public class Others {
         return res;
     }
 
-
     //[17].电话号码的字母组合
     public static List<String> letterCombinations(String digits) {
         List<String> res = new ArrayList<>();
@@ -281,7 +281,6 @@ public class Others {
         dfsForLetter(res, new StringBuilder(), digits, 0, strings);
         return res;
     }
-
 
     private static void dfsForLetter(List<String> res, StringBuilder select, String digits, int index, String[] strings) {
         if (digits.length() == select.length()) {
@@ -298,53 +297,601 @@ public class Others {
         }
     }
 
-
-    public static void main(String[] args) {
-        ListNode f = new ListNode(2);
-        f.next = new ListNode(4);
-        f.next.next = new ListNode(3);
-
-        ListNode result = addTwoNumbers(f, null);
-        while (result != null) {
-            System.out.print("->" + result.val);
-            result = result.next;
+    //[19].
+    public static ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode dummyHead = new ListNode(0);
+        dummyHead.next = head;
+        ListNode slow = dummyHead, fast = dummyHead;
+        while (n-- > 0) {
+            fast = fast.next;
         }
 
-        System.out.println(lengthOfLongestSubstring("abcabcdb"));
-        System.out.println(lengthOfLongestSubstring(""));
-        System.out.println(lengthOfLongestSubstring("pwwkew"));
-        System.out.println(lengthOfLongestSubstring("abba"));
-
-        System.out.println(reverse(Integer.MAX_VALUE));
-        System.out.println(reverse(123));
-
-
-        System.out.println(myAtoi("-2147483649"));
-        System.out.println(myAtoi("-91283472332"));
-        System.out.println(myAtoi("   -42"));
-        System.out.println(myAtoi("9223372036854775808"));
-
-        System.out.println(isPalindrome(2147447412));
-        System.out.println(isPalindrome(123));
-
-        System.out.println(intToRoman(1994));
-        System.out.println(intToRoman(3999));
-
-        System.out.println(romanToInt("MMMCMXCIX"));
-        System.out.println(romanToInt("I"));
-
-
-        System.out.println(longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
-        System.out.println(longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
-
-
-        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
-        System.out.println(threeSum(new int[]{0, 0, 0, 0, 0, 0, 0}));
-        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4, -2, -3, 3, 0, 4}));
-
-        System.out.println(threeSumClosest(new int[]{-1, 2, 1, -4}, 1));
-
-        System.out.println(letterCombinations("23"));
-        System.out.println(letterCombinations("22"));
+        while (fast.next != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        slow.next = slow.next.next;
+        return dummyHead.next;
     }
+
+    //[20].有效括号
+    public static boolean isValid(String s) {
+        if (s == null || s.length() == 0) return true;
+        Stack<Character> stack = new Stack<>();
+        char[] chars = s.toCharArray();
+        for (char ch : chars) {
+            if (ch == '{' || ch == '(' || ch == '[') {
+                stack.push(ch);
+            } else if (ch == '}') {
+                if (stack.isEmpty() || stack.peek() != '{') return false;
+                else stack.pop();
+            } else if (ch == ']') {
+                if (stack.isEmpty() || stack.peek() != '[') return false;
+                else stack.pop();
+            } else if (ch == ')') {
+                if (stack.isEmpty() || stack.peek() != '(') return false;
+                else stack.pop();
+            }
+        }
+        return stack.isEmpty();
+    }
+
+    //[21].合并两个有序链表
+    public static ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode dummyHead = new ListNode(0), cur = dummyHead;
+        while (l1 != null && l2 != null) {
+            if (l1.val < l2.val) {
+                cur.next = l1;
+                l1 = l1.next;
+                cur = cur.next;
+            } else {
+                cur.next = l2;
+                l2 = l2.next;
+                cur = cur.next;
+            }
+        }
+        cur.next = l1 == null ? l2 : l1;
+        return dummyHead.next;
+    }
+
+    //[22].括号生成
+    public static List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        if (n < 0) return res;
+        dfsForGenerateParenthesis(n, n, new StringBuilder(), res);
+        return res;
+    }
+
+    private static void dfsForGenerateParenthesis(int left, int right, StringBuilder sb, List<String> res) {
+        if (left > right || left < 0 || right < 0) {
+            return;
+        }
+
+        if (left == 0 && right == 0) {
+            res.add(sb.toString());
+            return;
+        }
+        sb.append('(');
+        dfsForGenerateParenthesis(left - 1, right, sb, res);
+        sb.deleteCharAt(sb.length() - 1);
+
+        sb.append(')');
+        dfsForGenerateParenthesis(left, right - 1, sb, res);
+        sb.deleteCharAt(sb.length() - 1);
+    }
+
+    //[23].合并k个升序链表
+    public ListNode mergeKLists(ListNode[] lists) {
+        PriorityQueue<ListNode> queue = new PriorityQueue<>(Comparator.comparingInt(o -> o.val));
+        for (int i = 0; i < lists.length; i++) {
+            if (lists[i] != null) {
+                queue.offer(lists[i]);
+            }
+        }
+
+        ListNode dummyHead = new ListNode(-1), cur = dummyHead;
+        while (!queue.isEmpty()) {
+            ListNode top = queue.poll();
+            cur.next = top;
+            cur = cur.next;
+            if (top.next != null) {
+                queue.offer(top.next);
+            }
+        }
+        return dummyHead.next;
+    }
+
+    //[24].两两交换链表中的节点
+    public static ListNode swapPairs(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode next = head.next;
+        ListNode newHead = swapPairs(next.next);
+        next.next = head;
+        head.next = newHead;
+        return next;
+    }
+
+    public static ListNode reverseKGroup(ListNode head, int k) {
+        ListNode start = head, end = head;
+        for (int i = 0; i < k; i++) {
+            if (end == null) return head;
+            end = end.next;
+        }
+
+        ListNode dummyHead = new ListNode(-1);
+        ListNode cur = start;
+        while (cur != end) {
+            ListNode dummyHeadNext = dummyHead.next;
+            ListNode next = cur.next;
+            cur.next = dummyHeadNext;
+            dummyHead.next = cur;
+            cur = next;
+        }
+
+        start.next = reverseKGroup(end, k);
+        return dummyHead.next;
+    }
+
+    //[26].刪除排序数组中的重复项
+    public static int removeDuplicates(int[] nums) {
+        if (nums.length == 0) return 0;
+        if (nums.length == 1) return 1;
+        int slow = 0, fast = 1;
+        while (fast < nums.length) {
+            if (nums[slow] == nums[fast]) {
+                fast++;
+            } else {
+                nums[++slow] = nums[fast];
+                fast++;
+            }
+        }
+        return slow + 1;
+    }
+
+    //[27].移除元素
+    public static int removeElement(int[] nums, int val) {
+        int slow = -1, fast = 0;
+        while (fast < nums.length) {
+            if (nums[fast] == val) {
+                fast++;
+            } else {
+                nums[++slow] = nums[fast];
+                fast++;
+            }
+        }
+        return slow + 1;
+    }
+
+    //[31].下一个排列
+    public static void nextPermutation(int[] nums) {
+        int i = nums.length - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) {
+            i--;
+        }
+
+        if (i >= 0) {
+            int j = nums.length - 1;
+            while (j >= 0 && nums[i] >= nums[j]) {
+                j--;
+            }
+            swap(nums, i, j);
+        }
+        reverse(nums, i + 1);
+    }
+
+    private static void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
+    private static void reverse(int[] nums, int start) {
+        int end = nums.length - 1;
+        while (start < end) {
+            swap(nums, start, end);
+            end--;
+            start++;
+        }
+    }
+
+    //[33].搜索旋转排序数组
+    public static int search(int[] nums, int target) {
+        if (nums == null || nums.length == 0) {
+            return -1;
+        }
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+
+            if (nums[mid] > nums[right]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    //[34].再排序数组中查找元素的第一个和最后一个位置
+    public static int[] searchRange(int[] nums, int target) {
+        int left = findIndex(nums, target, true);
+        int right = findIndex(nums, target, false);
+        return new int[]{left, right};
+    }
+
+    private static int findIndex(int[] nums, int target, boolean isLeft) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                if (isLeft) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (isLeft && (left >= nums.length || nums[left] != target)) return -1;
+        if (!isLeft && (right < 0 || nums[right] != target)) return -1;
+        return isLeft ? left : right;
+    }
+
+    //[35].搜索插入位置
+    public static int searchInsert(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (target == nums[mid]) {
+                return mid;
+            } else if (target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    //[36].有效地数独
+    public static boolean isValidSudoku(char[][] board) {
+        for (int i = 0; i < 9; i++) {
+            int[] rowCount = new int[10];
+            int[] colCount = new int[10];
+            int[] areaCount = new int[10];
+            for (int j = 0; j < 9; j++) {
+                char ch = board[i][j];
+                if (ch != '.') {
+                    if (rowCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        rowCount[ch - '0']++;
+                    }
+                }
+
+                ch = board[j][i];
+                if (ch != '.') {
+                    if (colCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        colCount[ch - '0']++;
+                    }
+                }
+
+                int x = (i / 3) * 3 + j / 3;
+                int y = (i % 3) * 3 + j % 3;
+                ch = board[x][y];
+                if (ch != '.') {
+                    if (areaCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        areaCount[ch - '0']++;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    //[38].外观数列
+    public static String countAndSay(int n) {
+        if (n == 1) {
+            return "1";
+        }
+
+        String s = countAndSay(n - 1);
+        StringBuilder sb = new StringBuilder();
+        int start = 0;
+        for (int right = 1; right < s.length(); right++) {
+            if (s.charAt(start) != s.charAt(right)) {
+                sb.append(right - start).append(s.charAt(start));
+                start = right;
+            }
+        }
+        sb.append(s.length() - start).append(s.charAt(start));
+        return sb.toString();
+    }
+
+    //[39].组合总和
+    public static List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForCombinationSum(candidates, 0, target, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForCombinationSum(int[] candidates, int start, int target, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+        //用start变量代表只能往后选择，不能往前选择
+        for (int i = start; i < candidates.length; i++) {
+            int candidate = candidates[i];
+            if (target >= candidate) {
+                select.addLast(candidate);
+                dfsForCombinationSum(candidates, i, target - candidate, select, res);
+                select.removeLast();
+            }
+        }
+    }
+
+    //[40].组合总和II
+    public static List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(candidates);
+        dfsForCombinationSum2(candidates, 0, target, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForCombinationSum2(int[] candidates, int start, int target, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        //用start变量代表只能往后选择，不能往前选择
+        //本层选择中，跳过重复的数字，解集不能包含重复的组合。
+        for (int i = start; i < candidates.length; i++) {
+            if (i > start && candidates[i] == candidates[i - 1]) {
+                continue;
+            }
+            int candidate = candidates[i];
+            if (target >= candidate) {
+                select.addLast(candidate);
+                dfsForCombinationSum2(candidates, i + 1, target - candidate, select, res);
+                select.removeLast();
+            }
+        }
+
+    }
+
+    //[45].跳跃游戏II
+    public static int jump(int[] nums) {
+        int end = 0, steps = 0, maxPos = 0;
+        for (int i = 0; i < nums.length - 1; i++) {
+            maxPos = Math.max(maxPos, i + nums[i]);
+            if (end == i) {
+                end = maxPos;
+                steps++;
+            }
+        }
+        return steps;
+    }
+
+    //[46].全排列
+    public static List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForPremute(nums, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForPremute(int[] nums, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (select.size() == nums.length) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        //没有重复的数字
+        for (int num : nums) {
+            if (!select.contains(num)) {
+                select.addLast(num);
+                dfsForPremute(nums, select, res);
+                select.removeLast();
+            }
+        }
+    }
+
+    public static List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        dfsForPermuteUnique(nums, new boolean[nums.length], new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForPermuteUnique(int[] nums, boolean[] visited, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (nums.length == select.size()) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = 0; i < nums.length; i++) {
+            //本层选择中如果前一个被选择过，并且相同，则跳过。
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                if (visited[i - 1]) {
+                    continue;
+                }
+            }
+
+            //递归选择中当前被选择过，跳过。
+            if (visited[i]) {
+                continue;
+            }
+
+            select.addLast(nums[i]);
+            visited[i] = true;
+            dfsForPermuteUnique(nums, visited, select, res);
+            select.removeLast();
+            visited[i] = false;
+        }
+    }
+
+
+    //[48].旋转图像
+    public static void rotate(int[][] matrix) {
+        int n = matrix.length;
+        if (n == 1) {
+            return;
+        }
+        //外向内共n/2层需要旋转
+        for (int i = 0; i < n / 2; i++) {
+            //每一层需要处理的列数
+            for (int j = i; j < n - i - 1; j++) {
+                int tmp = matrix[i][j];
+                matrix[i][j] = matrix[n - 1 - j][i];
+                matrix[n - 1 - j][i] = matrix[n - 1 - i][n - 1 - j];
+                matrix[n - 1 - i][n - 1 - j] = matrix[j][n - 1 - i];
+                matrix[j][n - 1 - i] = tmp;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+//        ListNode f = new ListNode(2);
+//        f.next = new ListNode(4);
+//        f.next.next = new ListNode(3);
+//
+//        ListNode result = addTwoNumbers(f, null);
+//        while (result != null) {
+//            System.out.print("->" + result.val);
+//            result = result.next;
+//        }
+//
+//        System.out.println(lengthOfLongestSubstring("abcabcdb"));
+//        System.out.println(lengthOfLongestSubstring(""));
+//        System.out.println(lengthOfLongestSubstring("pwwkew"));
+//        System.out.println(lengthOfLongestSubstring("abba"));
+//
+//        System.out.println(reverse(Integer.MAX_VALUE));
+//        System.out.println(reverse(123));
+//
+//
+//        System.out.println(myAtoi("-2147483649"));
+//        System.out.println(myAtoi("-91283472332"));
+//        System.out.println(myAtoi("   -42"));
+//        System.out.println(myAtoi("9223372036854775808"));
+//
+//        System.out.println(isPalindrome(2147447412));
+//        System.out.println(isPalindrome(123));
+//
+//        System.out.println(intToRoman(1994));
+//        System.out.println(intToRoman(3999));
+//
+//        System.out.println(romanToInt("MMMCMXCIX"));
+//        System.out.println(romanToInt("I"));
+//
+//
+//        System.out.println(longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
+//        System.out.println(longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
+//
+//
+//        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4}));
+//        System.out.println(threeSum(new int[]{0, 0, 0, 0, 0, 0, 0}));
+//        System.out.println(threeSum(new int[]{-1, 0, 1, 2, -1, -4, -2, -3, 3, 0, 4}));
+//
+//        System.out.println(threeSumClosest(new int[]{-1, 2, 1, -4}, 1));
+//
+//        System.out.println(letterCombinations("23"));
+//        System.out.println(letterCombinations("22"));
+//
+//        ListNode l1 = new ListNode(1);
+//        l1.next = new ListNode(2);
+//        ListNode res = removeNthFromEnd(l1, 1);
+//        System.out.println();
+//
+//        System.out.println(isValid("{[]}"));
+//
+//        System.out.println(removeDuplicates(new int[]{0, 0, 0, 1, 1, 1}));
+//        System.out.println(removeDuplicates(new int[]{0, 0, 1, 1, 1, 2, 2, 3, 3, 4}));
+//        System.out.println(removeDuplicates(new int[]{1, 1, 2}));
+//
+//        System.out.println(removeElement(new int[]{2, 2, 3, 4, 5}, 2));
+//        System.out.println(removeElement(new int[]{0, 1, 2, 2, 3, 0, 4, 2}, 2));
+
+
+//        System.out.println(generateParenthesis(3));
+
+//        ListNode f = new ListNode(1);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
+//        f.next.next.next.next.next = new ListNode(6);
+//        f.next.next.next.next.next.next = new ListNode(7);
+//        f.next.next.next.next.next.next.next = new ListNode(8);
+//        f.next.next.next.next.next.next.next.next = new ListNode(9);
+//
+//        ListNode res = reverseKGroup(f, 3);
+//        System.out.println();
+
+//        int[] arr = new int[]{3,2,1};
+//        nextPermutation(arr);
+//        System.out.println(Arrays.toString(arr));
+//
+//        arr = new int[]{4,5,2,6,3,1};
+//        nextPermutation(arr);
+//        System.out.println(Arrays.toString(arr));
+
+//        arr = new int[]{1,1};
+//        nextPermutation(arr);
+//        System.out.println(Arrays.toString(arr));
+
+//        System.out.println(searchInsert(new int[]{1,3,5,6}, 5));
+//        System.out.println(searchInsert(new int[]{1,3,5,6}, 2));
+//        System.out.println(searchInsert(new int[]{1,3,5,6}, 7));
+//        System.out.println(searchInsert(new int[]{1,3,5,6}, 0));
+
+//        System.out.println(isValidSudoku(new char[][]{{'8','3','.','.','7','.','.','.','.'},
+//                {'6','.','.','1','9','5','.','.','.'},
+//                {'.','9','8','.','.','.','.','6','.'},
+//                {'8','.','.','.','6','.','.','.','3'},
+//                {'4','.','.','8','.','3','.','.','1'},
+//                {'7','.','.','.','2','.','.','.','6'},
+//                {'.','6','.','.','.','.','2','8','.'},
+//                {'.','.','.','4','1','9','.','.','5'},
+//                {'.','.','.','.','8','.','.','7','9'}}));
+
+//        System.out.println(countAndSay(7));
+
+
+//        System.out.println(combinationSum(new int[]{2, 3, 6, 7}, 7));
+//        System.out.println(combinationSum(new int[]{2, 3, 5}, 8));
+
+
+//        System.out.println(combinationSum2(new int[]{10,1,2,7,6,1,5}, 8));
+
+//        System.out.println(jump(new int[]{2, 3, 1, 1, 4}));
+
+        System.out.println(permute(new int[]{1, 2, 3}));
+
+
+        System.out.println(permuteUnique(new int[]{1, 1, 2}));
+    }
+
+
 }

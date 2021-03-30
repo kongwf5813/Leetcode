@@ -239,7 +239,7 @@ public class ArrayProgramming {
         return result;
     }
 
-    //[68].旋转图像
+    //[48].旋转图像
     public static void rotateMatrix(int[][] matrix) {
         int n = matrix.length;
         if (n == 1) {
