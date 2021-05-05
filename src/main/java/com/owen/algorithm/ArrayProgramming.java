@@ -901,6 +901,17 @@ public class ArrayProgramming {
         return res;
     }
 
+    //[462].最少移动次数使数组相等II
+    public static int minMoves2(int[] nums) {
+        Arrays.sort(nums);
+        int res = 0;
+        int mid = nums[nums.length / 2];
+        for (int num : nums) {
+            res += Math.abs(num - mid);
+        }
+        return res;
+    }
+
     //[477].汉明距离总和
     public static int totalHammingDistance(int[] nums) {
         //题目是求两两之间的距离

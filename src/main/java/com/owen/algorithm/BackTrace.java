@@ -779,6 +779,58 @@ public class BackTrace {
                 || dfsForMakesquare(nums, index + 1, a, b, c, d + num, side);
     }
 
+    //[491].递增子序列
+    public static List<List<Integer>> findSubsequences(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        LinkedList select = new LinkedList();
+        dfs(nums, -1, res, select);
+        return res;
+    }
+
+    private static void dfs(int[] nums, int start, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() > 1) {
+            res.add(new ArrayList<>(select));
+        }
+
+        Set<Integer> set = new HashSet<>();
+        for (int i = start + 1; i < nums.length; i++) {
+            if (set.contains(nums[i])) {
+                continue;
+            }
+
+            set.add(nums[i]);
+            if (start == -1 || nums[i] >= nums[start]) {
+                select.add(nums[i]);
+                dfs(nums, i, res, select);
+                select.removeLast();
+            }
+        }
+    }
+
+
+    //[494].目标和
+    public static int findTargetSumWays(int[] nums, int S) {
+        AtomicInteger res = new AtomicInteger();
+        dfs(nums, 0, S, res);
+        return res.get();
+    }
+
+    private static void dfs(int[] nums, int index, int target, AtomicInteger res) {
+        if (index == nums.length) {
+            if (target == 0) {
+                res.incrementAndGet();
+            }
+            return;
+        }
+
+        target += nums[index];
+        dfs(nums, index + 1, target, res);
+        target -= nums[index];
+
+        target -= nums[index];
+        dfs(nums, index + 1, target, res);
+        target += nums[index];
+    }
     //[529].扫雷机器人
     public static char[][] updateBoard(char[][] board, int[] click) {
         int x = click[0], y = click[1];
@@ -951,14 +1003,21 @@ public class BackTrace {
 //        [473].火柴拼正方形
 //        System.out.println(makesquare(new int[]{1, 1, 2, 2, 2}));
 //        System.out.println(makesquare(new int[]{3, 3, 3, 3, 4}));
-
+//
+//        [491].递增子序列
+//        System.out.println(findSubsequences(new int[]{4, 6, 7, 7}));
+//
+//        [494].目标和
+//        System.out.println(findTargetSumWays(new int[]{1, 1, 1, 1, 1}, 3));
+//
 //        [529].扫雷机器人
 //        char[][] board = new char[][]{{'E', 'E', 'E', 'E', 'E'}, {'E', 'E', 'M', 'E', 'E'}, {'E', 'E', 'E', 'E', 'E'}, {'E', 'E', 'E', 'E', 'E'}};
 //        updateBoard(board, new int[]{3, 0});
 //        updateBoard(board, new int[]{1, 2});
-
-        int[][] res = updateMatrix(new int[][]{{0,0,0},{0,1,0},{1,1,1}});
-        System.out.println();
+//
+//        [542].01 矩阵
+//        int[][] res = updateMatrix(new int[][]{{0,0,0},{0,1,0},{1,1,1}});
+//        System.out.println();
 
     }
 }
