@@ -2353,7 +2353,7 @@ public class Others {
         Set<String> res = new HashSet<>();
         Set<String> unique = new HashSet<>();
         for (int i = 9; i < s.length(); i++) {
-            String sub = s.substring(i - 9, i +1);
+            String sub = s.substring(i - 9, i + 1);
             if (unique.contains(sub)) {
                 res.add(sub);
             }
@@ -2362,6 +2362,45 @@ public class Others {
         return new ArrayList<>(res);
     }
 
+    //[201].数字范围按位与
+    public static int rangeBitwiseAnd(int left, int right) {
+        //最长公共前缀即可
+        //记录右移次数
+        int count = 0;
+        while (left != right) {
+            left >>= 1;
+            right >>= 1;
+            count++;
+        }
+        return left << count;
+    }
+
+
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = head;
+        ListNode pre = dummyHead, cur = head;
+        while (cur != null) {
+            ListNode next = cur.next;
+            if (cur.val == val) {
+                pre.next = next;
+            } else {
+                pre = cur;
+            }
+            cur = next;
+        }
+        return dummyHead.next;
+    }
+
+    //[206].反转链表
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) return head;
+
+        ListNode last = reverseList(head.next);
+        head.next.next = head;
+        head.next = null;
+        return last;
+    }
 
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);
@@ -2617,6 +2656,7 @@ public class Others {
 //
 //        System.out.println(evalRPN(new String[]{"2", "1", "+", "3", "*"}));
 
+//        System.out.println(rangeBitwiseAnd(5, 7));
 
     }
 }
