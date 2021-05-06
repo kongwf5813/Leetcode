@@ -1,21 +1,10 @@
 package com.owen.algorithm.v2;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.owen.algorithm.LinkList.ListNode;
 import com.owen.algorithm.Others.Node;
 import com.owen.algorithm.Tree.TreeNode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 
 public class Others {
 
@@ -31,7 +20,6 @@ public class Others {
         }
         return new int[0];
     }
-
 
     //[2]两数相加
     public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -729,6 +717,7 @@ public class Others {
         }
     }
 
+    //[47].全排列II
     public static List<List<Integer>> permuteUnique(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
         Arrays.sort(nums);
@@ -859,6 +848,341 @@ public class Others {
         }
     }
 
+    //[58].最后一个单词的长度
+    public static int lengthOfLastWord(String s) {
+        int end = s.length() - 1;
+        while (end >= 0 && s.charAt(end) == ' ') {
+            end--;
+        }
+        int start = end;
+
+        while (start >= 0 && s.charAt(start) != ' ') {
+            start--;
+        }
+        return end - start;
+    }
+
+    //[59].螺旋矩阵II
+    public static int[][] generateMatrix(int n) {
+        if (n < 0) return null;
+
+        int[][] res = new int[n][n];
+        int top = 0, bottom = n - 1, left = 0, right = n - 1, num = 1;
+        while (top <= bottom && left <= right) {
+            for (int col = left; col <= right; col++) {
+                res[top][col] = num++;
+            }
+            for (int row = top + 1; row <= bottom; row++) {
+                res[row][right] = num++;
+            }
+
+            if (right > left && bottom > top) {
+                for (int col = right - 1; col >= left; col--) {
+                    res[bottom][col] = num++;
+                }
+
+                for (int row = bottom - 1; row > top; row--) {
+                    res[row][left] = num++;
+                }
+            }
+            top++;
+            right--;
+            bottom--;
+            left++;
+
+        }
+        return res;
+    }
+
+    //[61].旋转链表
+    public static ListNode rotateRight(ListNode head, int k) {
+        int size = 0;
+        ListNode cur = head;
+        while (cur != null) {
+            size++;
+            cur = cur.next;
+        }
+        int realK = k % size;
+        if (size == 1 || size == 0 || realK == 0) {
+            return head;
+        }
+
+        ListNode slow = head, fast = head;
+        while (realK-- > 0) {
+            fast = fast.next;
+        }
+        while (fast.next != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = slow.next;
+        fast.next = head;
+        slow.next = null;
+        return dummyHead.next;
+    }
+
+    //[62].不同的路径
+    public static int uniquePaths(int m, int n) {
+        //dp[i][j] 有多少种路径
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            dp[i][0] = 1;
+        }
+        for (int i = 0; i < n; i++) {
+            dp[0][i] = 1;
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    //[63].不同的路径II
+    public static int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        int row = obstacleGrid.length, col = obstacleGrid[0].length;
+        int[][] dp = new int[row][col];
+
+        for (int i = 0; i < col; i++) {
+            if (obstacleGrid[0][i] == 1) {
+                break;
+            } else {
+                dp[0][i] = 1;
+            }
+        }
+        for (int i = 0; i < row; i++) {
+            if (obstacleGrid[i][0] == 1) {
+                break;
+            } else {
+                dp[i][0] = 1;
+            }
+        }
+
+        for (int i = 1; i < row; i++) {
+            for (int j = 1; j < col; j++) {
+                if (obstacleGrid[i][j] == 0) {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[row - 1][col - 1];
+    }
+
+    //[64].最小路径和
+    public static int minPathSum(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) return -1;
+
+        int n = grid[0].length;
+        //最小路径和
+        int[][] dp = new int[m][n];
+        dp[0][0] = grid[0][0];
+        for (int i = 1; i < m; i++) {
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
+        }
+        for (int i = 1; i < n; i++) {
+            dp[0][i] = dp[0][i - 1] + grid[0][i];
+        }
+
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    //[66].加一
+    public static int[] plusOne(int[] digits) {
+        for (int i = digits.length - 1; i >= 0; i--) {
+            digits[i]++;
+            digits[i] %= 10;
+            //没有发生进位，直接返回
+            if (digits[i] != 0) {
+                return digits;
+            }
+        }
+        //一直有进位
+        digits = new int[digits.length + 1];
+        digits[0] = 1;
+        return digits;
+    }
+
+    //[67].二进制求和
+    public static String addBinary(String a, String b) {
+        int n = Math.max(a.length(), b.length());
+        StringBuilder sb = new StringBuilder();
+        int carry = 0;
+        //最大长度，倒序遍历
+        for (int i = 0; i < n; i++) {
+            carry += i < a.length() ? (a.charAt(a.length() - i - 1) - '0') : 0;
+            carry += i < b.length() ? (b.charAt(b.length() - i - 1) - '0') : 0;
+            sb.insert(0, carry % 2);
+            carry /= 2;
+        }
+
+        if (carry > 0) {
+            sb.insert(0, 1);
+        }
+
+        return sb.toString();
+    }
+
+    //[69]x的平方根
+    public int mySqrt(int x) {
+        int left = 1, right = x;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (mid * mid == x) {
+                return mid;
+            } else if (mid * mid > x) {
+                right = mid - 1;
+            } else {
+                left = mid;
+            }
+        }
+        return left;
+    }
+
+    //[70].爬楼梯
+    public static int climbStairs(int n) {
+        if (n == 1) return 1;
+
+        //dp到达i阶楼梯表示有多少种
+        int[] dp = new int[n];
+        dp[0] = 1;
+        dp[1] = 2;
+        for (int i = 2; i < n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n - 1];
+    }
+
+    //[82].删除排序链表中的重复元素II
+    public static ListNode deleteDuplicates(ListNode head) {
+        ListNode dummyHead = new ListNode(-1);
+        dummyHead.next = head;
+        ListNode cur = dummyHead;
+
+        while (cur.next != null && cur.next.next != null) {
+            if (cur.next.val == cur.next.next.val) {
+                int val = cur.next.val;
+
+                while (cur.next != null && val == cur.next.val) {
+                    cur.next = cur.next.next;
+                }
+            } else {
+                cur = cur.next;
+            }
+        }
+        return dummyHead.next;
+    }
+
+    //[83].删除排序链表种的重复元素
+    public static ListNode deleteDuplicates2(ListNode head) {
+        if (head == null) return head;
+        //当慢针和快针相等的时候，跳过快针当前值
+        //1,1,2,3,3
+        ListNode cur = head;
+
+        while (cur.next != null) {
+            if (cur.val == cur.next.val) {
+                cur.next = cur.next.next;
+            } else {
+                cur = cur.next;
+            }
+        }
+        return head;
+    }
+
+    //[86].分隔链表
+    public static ListNode partition(ListNode head, int x) {
+        ListNode largeHead = new ListNode(-1);
+        ListNode large = largeHead;
+        ListNode smallHead = new ListNode(-1);
+        ListNode small = smallHead;
+        while (head != null) {
+            if (head.val < x) {
+                small.next = head;
+                small = small.next;
+            } else {
+                large.next = head;
+                large = large.next;
+            }
+            head = head.next;
+        }
+
+        //断开指针
+        large.next = null;
+        small.next = largeHead.next;
+        return smallHead.next;
+    }
+
+    //[88].合并两个有序数组
+    public static void merge(int[] nums1, int m, int[] nums2, int n) {
+        int p = m - 1, q = n - 1;
+        int tail = m + n - 1;
+        while (p >= 0 || q >= 0) {
+            if (p == -1) {
+                nums1[tail--] = nums2[q--];
+            } else if (q == -1) {
+                nums1[tail--] = nums1[p--];
+            } else if (nums1[p] < nums2[q]) {
+                nums1[tail--] = nums2[q--];
+            } else {
+                nums1[tail--] = nums1[p--];
+            }
+        }
+    }
+
+    //[89].格雷编码
+    public static List<Integer> grayCode(int n) {
+        //n = 3, 互为镜像，倒叙 追加1 即可
+        //000
+        //001
+        //011
+        //010
+        //110
+        //111
+        //101
+        //100
+        List<Integer> res = new ArrayList<>();
+        res.add(0);
+        int head = 1;
+        //0 -> 2
+        //1 -> 4
+        //2 -> 8
+        for (int i = 0; i < n; i++) {
+            for (int j = res.size() - 1; j >= 0; j--) {
+                res.add(head + res.get(j));
+            }
+            head <<= 1;
+        }
+        return res;
+    }
+
+    //[90].子集II
+    public static List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForSubsetsWithDup(nums, 0, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForSubsetsWithDup(int[] nums, int start, LinkedList<Integer> select, List<List<Integer>> res) {
+        res.add(new ArrayList<>(select));
+        for (int i = start; i < nums.length; i++) {
+            //本层决策树如果发现之前有相同的跳过
+            if (i > start && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            select.addLast(nums[i]);
+            dfsForSubsetsWithDup(nums, i + 1, select, res);
+            select.removeLast();
+        }
+    }
+
     //[93].复原IP地址
     public static List<String> restoreIpAddresses(String s) {
         List<String> res = new ArrayList<>();
@@ -896,21 +1220,54 @@ public class Others {
 
     }
 
-    //[95].不同的二叉搜索树II
-    public List<TreeNode> generateTrees(int n) {
-        return dfsForBuildTree(1, n);
+    //[94].二叉树的中序遍历（递归法）
+    public static List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        dfsForInorderTraversal(root, res);
+        return res;
     }
 
-    private static List<TreeNode> dfsForBuildTree(int start, int end) {
-        List<TreeNode> res = new LinkedList<>();
+    private static void dfsForInorderTraversal(TreeNode root, List<Integer> res) {
+        if (root == null) return;
+
+        dfsForInorderTraversal(root.left, res);
+        res.add(root.val);
+        dfsForInorderTraversal(root.right, res);
+    }
+
+    //[94].二叉树的中序遍历（迭代法）
+    public static List<Integer> inorderTraversal2(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            } else {
+                cur = stack.pop();
+                res.add(cur.val);
+                cur = cur.right;
+            }
+        }
+        return res;
+    }
+
+    //[95].不同的二叉搜索树II
+    public static List<TreeNode> generateTrees(int n) {
+        return dfsForGenerateTrees(1, n);
+    }
+
+    private static List<TreeNode> dfsForGenerateTrees(int start, int end) {
+        List<TreeNode> res = new ArrayList<>();
         if (start > end) {
             res.add(null);
             return res;
         }
 
         for (int i = start; i <= end; i++) {
-            List<TreeNode> left = dfsForBuildTree(start, i - 1);
-            List<TreeNode> right = dfsForBuildTree(i + 1, end);
+            List<TreeNode> left = dfsForGenerateTrees(start, i - 1);
+            List<TreeNode> right = dfsForGenerateTrees(i + 1, end);
             for (TreeNode l : left) {
                 for (TreeNode r : right) {
                     TreeNode root = new TreeNode(i);
@@ -921,6 +1278,26 @@ public class Others {
             }
         }
         return res;
+    }
+
+    //[96].不同的二叉搜索树
+    public static int numTrees(int n) {
+        //1 2 3 4
+        //1  1
+        //2  1 + 1
+        //3  2 + 1 + 2
+        //4  5 + 2*2 + 2*2 + 5
+        //dp[4] = dp[0]* dp[3] + dp[1] * dp[2] + dp[2] * dp[1] + dp[3] * dp[0]
+        //i个数，组成树的个数
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                dp[i] += dp[j] * dp[i - j - 1];
+            }
+        }
+        return dp[n];
     }
 
     //[97].交错字符串
@@ -1949,7 +2326,42 @@ public class Others {
             }
         }
         return res.toString();
+
     }
+
+    //[179].最大数
+    public static String largestNumber(int[] nums) {
+        int len = nums.length;
+        String[] arr = new String[len];
+        for (int i = 0; i < nums.length; i++) {
+            arr[i] = String.valueOf(nums[i]);
+        }
+        Arrays.sort(arr, (a, b) -> (b + a).compareTo(a + b));
+        //[0,0]
+        if (arr[0].equals("0")) return "0";
+        StringBuilder sb = new StringBuilder();
+        for (String str : arr) {
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+
+    //[187].重复的DNA序列
+    public static List<String> findRepeatedDnaSequences(String s) {
+        if (s.length() <= 10) return null;
+
+        Set<String> res = new HashSet<>();
+        Set<String> unique = new HashSet<>();
+        for (int i = 9; i < s.length(); i++) {
+            String sub = s.substring(i - 9, i +1);
+            if (unique.contains(sub)) {
+                res.add(sub);
+            }
+            unique.add(sub);
+        }
+        return new ArrayList<>(res);
+    }
+
 
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);
@@ -2071,6 +2483,40 @@ public class Others {
 //
 //        System.out.println(maxSubArray(new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4}));
 //
+//        [46].全排列
+//        System.out.println(permute(new int[]{1, 2, 3}));
+//
+//        [47].全排列II
+//        System.out.println(permuteUnique(new int[]{1, 1, 2}));
+//
+//        [53].最大子序和
+//        System.out.println(maxSubArray(new int[]{-2, 1, -3, 4, -1, 2, 1, -5, 4}));
+//
+//        [58].最后一个单词的长度
+//        System.out.println(lengthOfLastWord("Hello word "));
+//
+//        [59].螺旋矩阵II
+//        System.out.println(generateMatrix(3));
+//
+//        [61].旋转链表
+//        ListNode f = new ListNode(1);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
+//        ListNode res = rotateRight(f, 2);
+
+//
+//        [62].不同的路径
+//        System.out.println(uniquePaths(3, 7));
+//        System.out.println(uniquePaths(3, 2));
+//        System.out.println(uniquePaths(3, 3));
+//        [63].不同的路径II
+//        System.out.println(uniquePathsWithObstacles(new int[][]{{0, 0, 0}, {0, 1, 0}, {0, 0, 0}}));
+
+//        System.out.println(minPathSum(new int[][]{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}}));
+//
+//        System.out.println(Arrays.toString(plusOne(new int[]{0})));
 //        System.out.println(restoreIpAddresses("010010"));
 //
 //        System.out.println(isInterleave("aabcc", "dbbca", "aadbbcbcac"));
@@ -2116,40 +2562,61 @@ public class Others {
 //        tree114.right.right = new TreeNode(6);
 //        flatten(tree114);
 //        System.out.println();
-        System.out.println(generate(6));
+//        System.out.println(generate(6));
+//
+//        System.out.println(getRow(6));
+//
+//        List<List<Integer>> triangle = new ArrayList<>();
+//        triangle.add(Arrays.asList(2));
+//        triangle.add(Arrays.asList(3, 4));
+//        triangle.add(Arrays.asList(6, 5, 7));
+//        triangle.add(Arrays.asList(4, 1, 8, 3));
+//        System.out.println(minimumTotal(triangle));
+//
+//        char[][] board = new char[][]{{'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}};
+//        solve(board);
+//        char[][] board2 = new char[][]{{'O'}};
+//        solve(board2);
+//
+//        [131].分割回文串
+//        System.out.println(partition("aba"));
+//        System.out.println(partition("aab"));
+//        System.out.println(partition("aabbaacbc"));
+//
+//
+//        System.out.println(addBinary("11", "1"));
+//        System.out.println(addBinary("1010", "1011"));
+//
+//        System.out.println(climbStairs(3));
+//
+//        int[] res = new int[]{1, 2, 3, 0, 0, 0};
+//        merge(res, 3, new int[]{2, 5, 6}, 3);
+//        System.out.println(Arrays.toString(res));
+//
+//        System.out.println(grayCode(3));
+//
+//        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
+//
+//
+//        System.out.println(restoreIpAddresses("101023"));
+//        System.out.println(restoreIpAddresses("25525511135"));
+//        System.out.println(restoreIpAddresses(""));
+//
+//        System.out.println(singleNumber2(new int[]{2, 3, 2, 3, 2, 3, 9}));
+//
+//        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
+//        System.out.println(wordBreak("applepenapple", Arrays.asList("apple", "pen")));
+//
+//        ListNode f = new ListNode(1);
+//        f.next = new ListNode(2);
+//        f.next.next = new ListNode(3);
+//        f.next.next.next = new ListNode(4);
+//        f.next.next.next.next = new ListNode(5);
+//        reorderList(f);
+//        System.out.println();
+//
+//        System.out.println(evalRPN(new String[]{"2", "1", "+", "3", "*"}));
 
-        System.out.println(getRow(6));
 
-        List<List<Integer>> triangle = new ArrayList<>();
-        triangle.add(Arrays.asList(2));
-        triangle.add(Arrays.asList(3, 4));
-        triangle.add(Arrays.asList(6, 5, 7));
-        triangle.add(Arrays.asList(4, 1, 8, 3));
-        System.out.println(minimumTotal(triangle));
-
-        char[][] board = new char[][]{{'X', 'X', 'X', 'X'}, {'X', 'O', 'O', 'X'}, {'X', 'X', 'O', 'X'}, {'X', 'O', 'X', 'X'}};
-        solve(board);
-        char[][] board2 = new char[][]{{'O'}};
-        solve(board2);
-
-        //        [131].分割回文串
-        System.out.println(partition("aba"));
-        System.out.println(partition("aab"));
-        System.out.println(partition("aabbaacbc"));
-
-        System.out.println(singleNumber2(new int[]{2, 3, 2, 3, 2, 3, 9}));
-
-        System.out.println(wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "cat")));
-        System.out.println(wordBreak("applepenapple", Arrays.asList("apple", "pen")));
-
-        ListNode f = new ListNode(1);
-        f.next = new ListNode(2);
-        f.next.next = new ListNode(3);
-        f.next.next.next = new ListNode(4);
-        f.next.next.next.next = new ListNode(5);
-        reorderList(f);
-        System.out.println();
-
-        System.out.println(evalRPN(new String[]{"2", "1", "+", "3", "*"}));
     }
 }
