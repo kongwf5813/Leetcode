@@ -2375,7 +2375,7 @@ public class Others {
         return left << count;
     }
 
-
+    //[203].移除链表元素
     public ListNode removeElements(ListNode head, int val) {
         ListNode dummyHead = new ListNode(-1);
         dummyHead.next = head;
