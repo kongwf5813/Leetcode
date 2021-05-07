@@ -2402,6 +2402,352 @@ public class Others {
         return last;
     }
 
+    //[198].打家劫舍
+    public static int rob(int[] nums) {
+        //反方向定义打劫，从i到最后，打劫的最大金额
+        //dp[i] = Math.max(dp[i+2]+ nums[i], dp[i+1]);
+//        int n = nums.length;
+//        int[] dp = new int[n + 2];
+//        for (int i = n - 1; i >= 0; i--) {
+//            dp[i] = Math.max(dp[i + 2] + nums[i], dp[i + 1]);
+//        }
+//        return dp[0];
+        //状态压缩
+        int n = nums.length;
+        int dp_i_1 = 0, dp_i_2 = 0, dp_i = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
+            //从大到小
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
+    }
+
+    public static int rob2(int[] nums) {
+        if (nums.length == 1) return nums[0];
+        return Math.max(dfsForRob(nums, 0, nums.length - 2),
+                dfsForRob(nums, 1, nums.length - 1));
+    }
+
+    private static int dfsForRob(int[] nums, int s, int e) {
+        int dp_i = 0, dp_i_2 = 0, dp_i_1 = 0;
+        for (int i = e; i >= s; i--) {
+            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
+    }
+
+    //[]
+    public static List<Integer> rightSideView(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<Integer> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                if (i == size - 1) {
+                    res.add(node.val);
+                }
+                if (node.left != null) {
+                    queue.offer(node.left);
+                }
+
+                if (node.right != null) {
+                    queue.offer(node.right);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[200].岛屿的数量
+    public static int numIslands(char[][] grid) {
+        int row = grid.length, col = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (grid[i][j] == '1') {
+                    dfsForNumIslands(grid, i, j);
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    private static void dfsForNumIslands(char[][] grid, int i, int j) {
+        int row = grid.length, col = grid[0].length;
+        if (i >= row || i < 0 || j < 0 || j >= col || grid[i][j] != '1') {
+            return;
+        }
+        grid[i][j] = '2';
+        dfsForNumIslands(grid, i + 1, j);
+        dfsForNumIslands(grid, i - 1, j);
+        dfsForNumIslands(grid, i, j + 1);
+        dfsForNumIslands(grid, i, j - 1);
+    }
+
+    //[207]
+    public static boolean canFinish(int numCourses, int[][] prerequisites) {
+        // 1 <- 2,2 <- 3
+        int[] inDegrees = new int[numCourses];
+        for (int[] pre : prerequisites) {
+            inDegrees[pre[0]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int course = 0; course < inDegrees.length; course++) {
+            if (inDegrees[course] == 0) {
+                queue.offer(course);
+            }
+        }
+
+        int count = 0;
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            count++;
+            for (int[] pre : prerequisites) {
+                if (course != pre[1]) continue;
+
+                inDegrees[pre[0]]--;
+                if (inDegrees[pre[0]] == 0) {
+                    queue.offer(pre[0]);
+                }
+            }
+        }
+        return count == numCourses;
+    }
+
+    //[208]
+    class Trie {
+        Trie[] next;
+        boolean isEnd;
+
+        /**
+         * Initialize your data structure here.
+         */
+        public Trie() {
+            next = new Trie[26];
+            isEnd = false;
+        }
+
+        /**
+         * Inserts a word into the trie.
+         */
+        public void insert(String word) {
+            Trie root = this;
+            char[] arr = word.toCharArray();
+            for (char ch : arr) {
+                Trie next = root.next[ch - 'a'];
+                if (next == null) {
+                    next = new Trie();
+                    root.next[ch - 'a'] = next;
+                }
+                root = next;
+            }
+            root.isEnd = true;
+        }
+
+        /**
+         * Returns if the word is in the trie.
+         */
+        public boolean search(String word) {
+            Trie root = this;
+            for (char ch : word.toCharArray()) {
+                Trie next = root.next[ch - 'a'];
+                if (next == null) return false;
+
+                root = next;
+            }
+            return root.isEnd;
+        }
+
+        /**
+         * Returns if there is any word in the trie that starts with the given prefix.
+         */
+        public boolean startsWith(String prefix) {
+            Trie root = this;
+            for (char ch : prefix.toCharArray()) {
+                Trie next = root.next[ch - 'a'];
+                if (next == null) return false;
+                root = next;
+            }
+            return true;
+        }
+    }
+
+    //[210]
+    public static int[] findOrder(int numCourses, int[][] prerequisites) {
+        int[] res = new int[numCourses];
+        int[] inDegrees = new int[numCourses];
+        for (int[] pre : prerequisites) {
+            inDegrees[pre[0]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int course = 0; course < inDegrees.length; course++) {
+            if (inDegrees[course] == 0) {
+                queue.offer(course);
+            }
+        }
+        int index = 0;
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            res[index++] = course;
+            for (int[] pre : prerequisites) {
+                if (pre[1] != course) continue;
+
+                inDegrees[pre[0]]--;
+                if (inDegrees[pre[0]] == 0) {
+                    queue.offer(pre[0]);
+                }
+            }
+        }
+        return index == numCourses ? res : new int[0];
+    }
+
+    //[209]
+    public static int minSubArrayLen(int target, int[] nums) {
+        //7     2,3,1,2,4,3
+        int right = 0, left = 0, sum = 0, res = Integer.MAX_VALUE;
+        while (right < nums.length) {
+            sum += nums[right];
+            right++;
+            //提前多加了1
+            while (sum >= target) {
+                //提前多减1
+                left++;
+                sum -= nums[left];
+
+                res = Math.min(res, right - left);
+            }
+        }
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
+    //[217]
+    public static boolean containsDuplicate(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            if (set.contains(num)) {
+                return true;
+            }
+            set.add(num);
+        }
+        return false;
+    }
+
+    //[219]
+    public static boolean containsNearbyDuplicate(int[] nums, int k) {
+        Set<Integer> set = new HashSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            int num = nums[i];
+            if (set.contains(num)) return true;
+            set.add(num);
+            if (set.size() > k) {
+                set.remove(nums[i - k]);
+            }
+        }
+        return false;
+    }
+
+    //[215]
+    public static int findKthLargest(int[] nums, int k) {
+        return 0;
+    }
+
+    //[216]
+    public static List<List<Integer>> combinationSum3(int k, int n) {
+        //选择1-9,边界 size = k && sum == n
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForCombinationSum3(k, n, 1, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForCombinationSum3(int k, int target, int start, LinkedList<Integer> select, List<List<Integer>> res) {
+        if (select.size() == k) {
+            if (target == 0) {
+                res.add(new ArrayList<>(select));
+            }
+            return;
+        }
+        for (int num = start; num <= 9; num++) {
+            select.addLast(num);
+            dfsForCombinationSum3(k, target - num, num + 1, select, res);
+            select.removeLast();
+        }
+    }
+
+    //[220]
+    public static boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        TreeSet<Long> set = new TreeSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            int num = nums[i];
+            Long ceiling = set.ceiling((long) num);
+            Long floor = set.floor((long) num);
+            if (ceiling != null && ceiling - (long) num <= (long) t) {
+                return true;
+            }
+            if (floor != null && (long) num - floor <= (long) t) {
+                return true;
+            }
+            set.add((long) num);
+            if (set.size() > k) {
+                set.remove(nums[i - k]);
+            }
+        }
+        return false;
+    }
+
+    //[221]
+    public static int maximalSquare(char[][] matrix) {
+        int row = matrix.length, col = matrix[0].length;
+        int[][] dp = new int[row][col];
+        //dp[i][j] 0,0 到i,j的最大正方形的边长
+        //dp[i][j] = Math.max(dp[i-1][j], dp[i][j])
+
+        int maxSide = 0;
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i - 1][j - 1], dp[i][j - 1])) + 1;
+                    }
+                    maxSide = Math.max(maxSide, dp[i][j]);
+                }
+            }
+        }
+        return maxSide * maxSide;
+    }
+
+    //[222]
+    public static int countNodes(TreeNode root) {
+        if (root == null) return 0;
+        int leftLevel = countLevel(root.left);
+        int rightLevel = countLevel(root.right);
+
+        if (leftLevel == rightLevel) {
+            //右子树+ (根节点 + 左子树)
+            return countNodes(root.right) + (1 << leftLevel);
+        } else {
+            return countNodes(root.left) + (1 << rightLevel);
+        }
+    }
+
+    private static int countLevel(TreeNode root) {
+        if (root == null) return 0;
+        int level = 0;
+        while (root != null) {
+            level++;
+            root = root.left;
+        }
+        return level;
+    }
+
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);
 //        f.next = new ListNode(4);
@@ -2463,10 +2809,7 @@ public class Others {
 //
 //        System.out.println(removeElement(new int[]{2, 2, 3, 4, 5}, 2));
 //        System.out.println(removeElement(new int[]{0, 1, 2, 2, 3, 0, 4, 2}, 2));
-
-
 //        System.out.println(generateParenthesis(3));
-
 //        ListNode f = new ListNode(1);
 //        f.next = new ListNode(2);
 //        f.next.next = new ListNode(3);
@@ -2479,7 +2822,7 @@ public class Others {
 //
 //        ListNode res = reverseKGroup(f, 3);
 //        System.out.println();
-
+//
 //        int[] arr = new int[]{3,2,1};
 //        nextPermutation(arr);
 //        System.out.println(Arrays.toString(arr));
@@ -2573,7 +2916,6 @@ public class Others {
 //        tree103.right.left.right = new TreeNode(22);
 //        System.out.println(zigzagLevelOrder(tree103));
 //
-//
 //        TreeNode tree107 = new TreeNode(3);
 //        tree107.left = new TreeNode(9);
 //        tree107.right = new TreeNode(20);
@@ -2636,7 +2978,6 @@ public class Others {
 //
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
 //
-//
 //        System.out.println(restoreIpAddresses("101023"));
 //        System.out.println(restoreIpAddresses("25525511135"));
 //        System.out.println(restoreIpAddresses(""));
@@ -2655,8 +2996,15 @@ public class Others {
 //        System.out.println();
 //
 //        System.out.println(evalRPN(new String[]{"2", "1", "+", "3", "*"}));
-
 //        System.out.println(rangeBitwiseAnd(5, 7));
-
+//        System.out.println(rob(new int[]{2, 7, 9, 3, 1}));
+//        System.out.println(rob(new int[]{1, 2, 3, 1}));
+//        System.out.println(rob2(new int[]{2, 7, 9, 3, 1}));
+//        System.out.println(Arrays.toString(findOrder(4, new int[][]{{1, 0}, {2, 0}, {3, 1}, {3, 2}})));
+//        System.out.println(Arrays.toString(findOrder(2, new int[][]{{1, 0}, {0, 1}})));
+//        System.out.println(minSubArrayLen(7, new int[]{2, 3, 1, 2, 4, 3}));
+//        System.out.println(minSubArrayLen(4, new int[]{1,4,4}));
+//
+//        System.out.println(combinationSum3(3, 9));
     }
 }
