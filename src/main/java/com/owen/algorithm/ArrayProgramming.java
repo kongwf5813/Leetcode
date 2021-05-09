@@ -418,7 +418,7 @@ public class ArrayProgramming {
         return spare >= 0 ? (start + 1) % n : -1;
     }
 
-    //[163].多数元素
+    //[169].多数元素
     public static int majorityElement(int[] nums) {
         int candidate = nums[0];
         int count = 0;

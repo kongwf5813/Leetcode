@@ -2,9 +2,11 @@ package com.owen.algorithm.v2;
 
 import com.owen.algorithm.LinkList.ListNode;
 import com.owen.algorithm.Others.Node;
+import com.owen.algorithm.Tree;
 import com.owen.algorithm.Tree.TreeNode;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Others {
 
@@ -2329,6 +2331,22 @@ public class Others {
 
     }
 
+    //[169].多数元素
+    public static int majorityElement(int[] nums) {
+        int candidate = nums[0];
+        int count = 0;
+
+        for (int num : nums) {
+            if (count == 0) {
+                candidate = num;
+            }
+
+            if (candidate == num) count++;
+            else count--;
+        }
+        return candidate;
+    }
+
     //[179].最大数
     public static String largestNumber(int[] nums) {
         int len = nums.length;
@@ -2440,7 +2458,7 @@ public class Others {
         return dp_i;
     }
 
-    //[]
+    //[199].二叉树的右视图
     public static List<Integer> rightSideView(TreeNode root) {
         Queue<TreeNode> queue = new LinkedList<>();
         queue.offer(root);
@@ -2715,6 +2733,7 @@ public class Others {
                     if (i == 0 || j == 0) {
                         dp[i][j] = 1;
                     } else {
+                        //左边和上边都为1， 但是左上角为0，此时并不能组成一个大正方形
                         dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i - 1][j - 1], dp[i][j - 1])) + 1;
                     }
                     maxSide = Math.max(maxSide, dp[i][j]);
@@ -2754,10 +2773,379 @@ public class Others {
         TreeNode temp = root.left;
         root.left = root.right;
         root.right = temp;
-
         invertTree(root.left);
         invertTree(root.right);
         return root;
+    }
+
+    //[229]求众数II
+    public static List<Integer> majorityElement2(int[] nums) {
+        List<Integer> res = new ArrayList<>();
+        int n = nums.length;
+        int cand1 = nums[0], cand2 = nums[0], count1 = 0, count2 = 0;
+        for (int num : nums) {
+            //投票计数
+            if (cand1 == num) {
+                count1++;
+                continue;
+            }
+            if (cand2 == num) {
+                count2++;
+                continue;
+            }
+
+            //更新候选人
+            if (count1 == 0) {
+                cand1 = num;
+                count1 = 1;
+                continue;
+            }
+            if (count2 == 0) {
+                cand2 = num;
+                count2 = 1;
+                continue;
+            }
+
+            count1--;
+            count2--;
+        }
+
+        count1 = count2 = 0;
+        for (int num : nums) {
+            if (num == cand1) count1++;
+            else if (num == cand2) count2++;
+        }
+
+        if (count1 > n / 3) res.add(cand1);
+        if (count2 > n / 3) res.add(cand2);
+        return res;
+    }
+
+    //[230]
+    public static int kthSmallest(TreeNode root, int k) {
+        AtomicInteger res = new AtomicInteger();
+        dfsForKthSmallest(root, k, new AtomicInteger(0), res);
+        return res.get();
+    }
+
+    private static void dfsForKthSmallest(TreeNode root, int k, AtomicInteger count, AtomicInteger res) {
+        if (root == null) return;
+
+        //中序遍历是从小到大
+        dfsForKthSmallest(root.left, k, count, res);
+        if (count.incrementAndGet() == k) {
+            res.addAndGet(root.val);
+            return;
+        }
+        dfsForKthSmallest(root.right, k, count, res);
+    }
+
+    //[234]
+    class Solution234 {
+        private ListNode left;
+
+        public boolean isPalindrome(ListNode head) {
+            left = head;
+            return traverse(head);
+        }
+
+        private boolean traverse(ListNode right) {
+            if (right == null) return true;
+            boolean res = traverse(right.next);
+            res = res & left.val == right.val;
+            left = left.next;
+            return res;
+        }
+    }
+
+    //[235]
+    public static TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root.val < p.val && root.val < q.val) return lowestCommonAncestor(root.right, p, q);
+        else if (root.val > p.val && root.val > q.val) return lowestCommonAncestor(root.left, p, q);
+        else return root;
+    }
+
+    //[236]
+    public static TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        //只要有找到一个匹配的节点就返回其祖先
+        if (root == null || p == root || q == root) return root;
+        TreeNode left = lowestCommonAncestor2(root.left, p, q);
+        TreeNode right = lowestCommonAncestor2(root.right, p, q);
+        if (left == null) return right;
+        if (right == null) return left;
+        return root;
+    }
+
+    //[237]
+    public static void deleteNode(ListNode node) {
+        //拷贝后面的节点
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+
+    //[238]
+    public static int[] productExceptSelf(int[] nums) {
+        int n = nums.length;
+        int[] left = new int[n + 1];
+        int[] right = new int[n + 1];
+        left[0] = 1;
+        for (int i = 0; i < n; i++) {
+            left[i + 1] = left[i] * nums[i];
+        }
+        right[n] = 1;
+        for (int i = n - 1; i >= 0; i--) {
+            right[i] = right[i + 1] * nums[i];
+        }
+
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = left[i] * right[i + 1];
+        }
+        return res;
+    }
+
+    //[240]
+    public static boolean searchMatrix2(int[][] matrix, int target) {
+        int row = matrix.length, col = matrix[0].length;
+        int x = 0, y = col - 1;
+        while (x >= 0 && x < row && y >= 0 && y < col) {
+            if (matrix[x][y] == target) {
+                return true;
+            } else if (matrix[x][y] > target) {
+                y--;
+            } else {
+                x++;
+            }
+        }
+        return true;
+    }
+
+    //[241]
+    public static List<Integer> diffWaysToCompute(String expression) {
+        return dfsForDiffWaysToCompute(expression, new HashMap<>());
+    }
+
+    private static List<Integer> dfsForDiffWaysToCompute(String expression, Map<String, List<Integer>> temp) {
+        if (temp.containsKey(expression)) {
+            return temp.get(expression);
+        }
+
+        List<Integer> res = new ArrayList<>();
+        char[] arr = expression.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char ch = arr[i];
+            if (ch != '+' && ch != '*' && ch != '-') {
+                continue;
+            }
+            List<Integer> left = dfsForDiffWaysToCompute(expression.substring(0, i), temp);
+            List<Integer> right = dfsForDiffWaysToCompute(expression.substring(i + 1), temp);
+
+            for (int l : left) {
+                for (int r : right) {
+                    if (ch == '+') {
+                        res.add(l + r);
+                    } else if (ch == '-') {
+                        res.add(l - r);
+                    } else {
+                        res.add(l * r);
+                    }
+                }
+            }
+        }
+        if (res.size() == 0) {
+            res.add(Integer.parseInt(expression));
+        }
+
+        temp.put(expression, res);
+        return res;
+    }
+
+
+    public static List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        dfsForBinaryTreePaths(root, new LinkedList<>(), res);
+        return res;
+    }
+
+    private static void dfsForBinaryTreePaths(TreeNode root, LinkedList<String> select, List<String> res) {
+        if (root == null) return;
+        select.add(String.valueOf(root.val));
+        if (root.right == null && root.left == null) {
+            res.add(String.join("->", select));
+            return;
+        }
+        if (root.left != null) {
+            dfsForBinaryTreePaths(root.left, select, res);
+            select.removeLast();
+        }
+        if (root.right != null) {
+            dfsForBinaryTreePaths(root.right, select, res);
+            select.removeLast();
+        }
+    }
+
+    //[260].只出现一次的数字III
+    public static int[] singleNumber3(int[] nums) {
+        int xor = 0;
+        for (int num : nums) {
+            xor ^= num;
+        }
+
+        //两个数的共同异或值, 然后分个组, 根据xor某一位为1来区分
+        int bit = 1;
+        while ((xor & 1) == 0) {
+            xor >>= 1;
+            bit <<= 1;
+        }
+        int res1 = 0, res2 = 0;
+        for (int num : nums) {
+            if ((num & bit) == 1) {
+                res1 ^= num;
+            } else {
+                res2 ^= num;
+            }
+        }
+        return new int[]{res1, res2};
+    }
+
+
+    //[263].丑数
+    public static boolean isUgly(int n) {
+        if (n <= 0) return false;
+        int[] divs = new int[]{5, 3, 2};
+        for (int div : divs) {
+            while (n % div == 0) {
+                n /= div;
+            }
+        }
+        return n == 1;
+    }
+
+    //[264].丑数II
+    public static int nthUglyNumber(int n) {
+        int[] dp = new int[n];
+        dp[0] = 1;
+        int pt0 = 0, pt1 = 0, pt2 = 0;
+        for (int i = 1; i < n; i++) {
+            dp[i] = Math.min(dp[pt0] * 2, Math.min(dp[pt1] * 3, dp[pt2] * 5));
+            //注意不能有重复值，相同都得跳过
+            if (dp[i] == dp[pt0] * 2) pt0++;
+            if (dp[i] == dp[pt1] * 3) pt1++;
+            if (dp[i] == dp[pt2] * 5) pt2++;
+        }
+        return dp[n - 1];
+    }
+
+    //[279].完全平方数
+    public static int numSquares(int n) {
+        if (n <= 0) return 0;
+        int[] dp = new int[n + 1];
+        dp[0] = 0;
+        for (int i = 1; i <= n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 1; j * j <= i; j++) {
+                dp[i] = Math.min(dp[i], dp[i - j * j] + 1);
+            }
+        }
+        return dp[n];
+    }
+
+    //[283].移动零
+    public static void moveZeroes(int[] nums) {
+        int slow = 0, fast = 0;
+        while (fast < nums.length) {
+            if (nums[fast] != 0) {
+                nums[slow] = nums[fast];
+                slow++;
+            }
+            fast++;
+        }
+
+        for (int i = slow; i < nums.length; i++) {
+            nums[i] = 0;
+        }
+    }
+
+    //[287].寻找重复数
+    public static int findDuplicate(int[] nums) {
+        int slow = 0, fast = 0;
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+        slow = 0;
+        while (fast != slow) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
+    }
+
+    //[299].猜数字游戏
+    public static String getHint(String secret, String guess) {
+        int[] cache = new int[10];
+        int x = 0, y = 0;
+        for (int i = 0; i < secret.length(); i++) {
+            if (secret.charAt(i) == guess.charAt(i)) {
+                x++;
+            } else {
+                cache[secret.charAt(i) - '0']++;
+            }
+        }
+
+        for (int i = 0; i < guess.length(); i++) {
+            if (secret.charAt(i) != guess.charAt(i)) {
+                int guessNum = guess.charAt(i) - '0';
+                if (cache[guessNum] > 0) {
+                    y++;
+                    cache[guessNum]--;
+                }
+            }
+        }
+        return "" + x + "A" + y + "B";
+    }
+
+    //[300].最长递增子序列
+    public static int lengthOfLIS(int[] nums) {
+        int n = nums.length;
+        if (n == 0) return 0;
+        //以i为结尾的最长递增子序列长度
+        int[] dp = new int[n];
+        int res = 1;
+        //10,9,2,5,3,7,101,18
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i]) {
+                    dp[i] = Math.max(dp[i], dp[j]) + 1;
+                }
+            }
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+    }
+
+    //[304].二维区域和检索 - 矩阵不可变
+    class NumMatrix {
+        int[][] sum;
+
+        public NumMatrix(int[][] matrix) {
+            int row = matrix.length, col = matrix[0].length;
+            sum = new int[row + 1][col + 1];
+            for (int i = 1; i <= row; i++) {
+                for (int j = 1; j <= col; j++) {
+                    sum[i][j] = sum[i - 1][j] + sum[i][j - 1] - sum[i - 1][j - 1] + matrix[i - 1][j - 1];
+                }
+            }
+        }
+
+        public int sumRegion(int row1, int col1, int row2, int col2) {
+            row1++;
+            col1++;
+            row2++;
+            col2++;
+            return sum[row2][col2] - sum[row2][col1 - 1] - sum[row1 - 1][col2] + sum[row1 - 1][col1 - 1];
+        }
     }
 
 
@@ -3019,5 +3407,25 @@ public class Others {
 //        System.out.println(minSubArrayLen(4, new int[]{1,4,4}));
 //
 //        System.out.println(combinationSum3(3, 9));
+
+//        TreeNode tree226 = new TreeNode(1);
+//        tree226.left = new TreeNode(2);
+//        tree226.right = new TreeNode(5);
+//        tree226.left.left = new TreeNode(3);
+//        tree226.left.right = new TreeNode(4);
+//        tree226.right.right = new TreeNode(6);
+//        invertTree(tree226);
+//        System.out.println();
+
+
+        TreeNode root = new TreeNode(1);
+        TreeNode l1 = new TreeNode(2);
+        TreeNode l2 = new TreeNode(5);
+        TreeNode r1 = new TreeNode(3);
+        root.left = l1;
+        l1.right = l2;
+        root.right = r1;
+        System.out.println(binaryTreePaths(root));
+//
     }
 }
