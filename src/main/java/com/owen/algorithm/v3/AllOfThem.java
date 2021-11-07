@@ -261,10 +261,14 @@ public class AllOfThem {
         if (n <= 0) return false;
         // 45 = 3 * 3 * 5
         // 9 = 3 * 3 * 1
-        while (n % 3 == 0) {
+/*        while (n % 3 == 0) {
             n = n / 3;
         }
-        return n == 1;
+        return n == 1;*/
+
+        //因为3是质数，所以3^19肯定是3^n的最大公约数。
+        int max = (int) Math.pow(3, 19);
+        return max % n == 0;
     }
 
     //[342].4的幂
