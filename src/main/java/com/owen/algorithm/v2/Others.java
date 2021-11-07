@@ -3148,6 +3148,178 @@ public class Others {
         }
     }
 
+    //[337].打家劫舍III
+    public static int rob(TreeNode root) {
+        if (root == null) return 0;
+
+        int rob_it = root.val
+                + (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0)
+                + (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
+        int rob_not = rob(root.left) + rob(root.right);
+        return Math.max(rob_it, rob_not);
+    }
+
+    //[306].累加数
+    public static boolean isAdditiveNumber(String num) {
+        return dfsForIsAdditiveNumber(num, 0, 0, 0, 0);
+    }
+
+    private static boolean dfsForIsAdditiveNumber(String num, int start, int k, long pre, long sum) {
+        if (start == num.length()) {
+            return k > 2;
+        }
+
+        for (int i = start; i < num.length(); i++) {
+            //一个0是可以，01就是不可以
+            if (num.charAt(i) == '0' && i - start > 0) {
+                break;
+            }
+
+            String number = num.substring(start, i + 1);
+            long cur = Long.parseLong(number);
+            if (cur != sum && k >= 2) {
+                continue;
+            }
+
+            if (dfsForIsAdditiveNumber(num, i + 1, k + 1, cur, pre + cur)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //[316].去除重复字母
+    public static String removeDuplicateLetters(String s) {
+        int[] count = new int[26];
+        for (char ch : s.toCharArray()) {
+            count[ch - 'a']++;
+        }
+        Stack<Character> stack = new Stack<>();
+        boolean[] inStack = new boolean[26];
+        for (char ch : s.toCharArray()) {
+            count[ch - 'a']--;
+
+            if (inStack[ch - 'a']) {
+                continue;
+            }
+
+            while (!stack.isEmpty() && count[stack.peek() - 'a'] > 0 && stack.peek() > ch) {
+                char top = stack.pop();
+                inStack[top - 'a'] = false;
+            }
+            stack.push(ch);
+            inStack[ch - 'a'] = true;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.append(stack.pop());
+        }
+        return sb.reverse().toString();
+    }
+
+    //[318].最大单词长度乘积
+    public static int maxProduct(String[] words) {
+        int[] codes = new int[words.length];
+        for (int i = 0; i < words.length; i++) {
+            int code = 0;
+            for (char ch : words[i].toCharArray()) {
+                code |= 1 << (ch - 'a');
+            }
+            codes[i] = code;
+        }
+
+        int res = 0;
+        for (int i = 0; i < words.length - 1; i++) {
+            for (int j = i + 1; i < words.length; j++) {
+                if ((codes[i] & codes[j]) == 0) {
+                    res = Math.max(res, words[i].length() * words[j].length());
+                }
+            }
+        }
+        return res;
+    }
+
+    //[319].灯泡开关
+    public static int bulbSwitch(int n) {
+        //第20灯泡, 只有在 1, 2, 4, 5, 10, 20轮的时候被操作
+        return (int) Math.sqrt(n);
+    }
+
+    //[328].奇偶链表
+    public static ListNode oddEvenList(ListNode head) {
+        if (head == null) return null;
+        //链表题画个图就明白了
+        ListNode odd = head, even = head.next, x = even;
+        while (even != null && even.next != null) {
+            //在even变化之前变更odd
+            odd.next = even.next;
+            //even变化
+            even.next = even.next.next;
+            //不需要断指针
+            odd = odd.next;
+            even = even.next;
+        }
+        odd.next = x;
+        return head;
+    }
+
+    //[322].零钱兑换,求最少次数
+    public static int coinChange(int[] coins, int amount) {
+        if (amount == 0 || coins.length == 0) return 0;
+        //兑换总钱数为i的时候， 最少零钱次数
+        int[] dp = new int[amount + 1];
+        for (int i = 1; i <= amount; i++) {
+            dp[i] = amount + 1;
+            for (int j = 0; j < coins.length; j++) {
+                //可以装进
+                if (coins[j] <= i) {
+                    //选择不装进背包，选择装进背包
+                    dp[i] = Math.min(dp[i], dp[i - coins[j]] + 1);
+                }
+            }
+        }
+        return dp[amount] == amount + 1 ? -1 : dp[amount];
+    }
+
+    //[518].零钱兑换II
+    public static int change(int amount, int[] coins) {
+        int n = coins.length;
+        /*
+        //前i个coin，凑成amount的总数
+        //到底是用n+1还是n取决于状态转移方程怎么用i,如果是i-1, 那么都统一成i-1.
+        int[][] dp = new int[n + 1][amount + 1];
+        //状态转移方程决定需要设置成1
+        for (int i = 0; i <= n; i++)
+            dp[i][0] = 1;
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= amount; j++) {
+                if (j >= coins[i - 1]) {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i - 1]];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[n][amount];
+        */
+
+        int[] dp = new int[amount +1];
+        dp[0] = 1;
+        //涉及到i只有coins，所以只需要正常遍历就可以
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j <= amount; j++) {
+                if (j >= coins[i]) {
+                    dp[j] = dp[j] + dp[j - coins[i]];
+                }
+            }
+        }
+        return dp[amount];
+    }
+
+
+
 
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);
