@@ -3008,7 +3008,6 @@ public class Others {
         return new int[]{res1, res2};
     }
 
-
     //[263].丑数
     public static boolean isUgly(int n) {
         if (n <= 0) return false;
@@ -3318,8 +3317,67 @@ public class Others {
         return dp[amount];
     }
 
+    //[313].超级丑数
+    public static int nthSuperUglyNumber(int n, int[] primes) {
+        //2,7,13,19
+        //1,2,4,7,8,13,14,16,19,26,28,32
+        //以i为结尾的超级丑数
+        int m = primes.length;
+        int[] dp = new int[n];
+        dp[0] = 1;
+        int[] pointers = new int[m];
+
+        for (int i = 1; i < n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 0; j < m; i++) {
+                dp[i] = Math.min(dp[i], dp[pointers[j]] * primes[j]);
+            }
+
+            for (int j = 0; j < m; i++) {
+                if (dp[i] == dp[pointers[j]] * primes[j]) {
+                    pointers[j]++;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
 
 
+    //[343]
+    public static int integerBreak(int n) {
+        if (n <= 1) return 0;
+        // 1   2    3    4
+        // 0   1    2    4
+        //凑成数字i，的最大乘积
+        //dp[i] = Math.max(dp[i], dp[i-j] * j)
+        int[] dp = new int[n + 1];
+        for (int i = 1; i < dp.length; i++) {
+            for (int j = 1; j < i; j++) {
+                //第一个数为j的时候， 可以选择不拆分第二个数和继续拆分第二个数
+                dp[i] = Math.max(dp[i], Math.max(j * (i - j), j * dp[i - j]));
+            }
+        }
+        return dp[n];
+    }
+
+    //[338]
+    public static int[] countBits(int num) {
+        //00 01 10 11 100 101 111
+        //dp[i] 数字i的比特数
+        int[] dp = new int[num + 1];
+        int power = 1;
+        for (int i = 1; i <= num; i++) {
+            if (i == 1 << power) {
+                dp[i] = 1;
+                power++;
+            } else {
+                //dp[111 & 011] + 1
+                int lower = (1 << (power - 1)) - 1;
+                dp[i] = dp[i & lower] + 1;
+            }
+        }
+        return dp;
+    }
 
     public static void main(String[] args) {
 //        ListNode f = new ListNode(2);

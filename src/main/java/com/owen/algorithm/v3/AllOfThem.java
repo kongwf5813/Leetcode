@@ -279,6 +279,193 @@ public class AllOfThem {
         return (n & (n - 1)) == 0 && (n & 0xaaaaaaaa) == 0;
     }
 
+    public int countSubIslands(int[][] grid1, int[][] grid2) {
+        int m = grid1.length, n = grid1[0].length;
+        for (int i = 0; i <m; i++) {
+            for (int j = 0; j < n; j++) {
+                //前面是水，后面是陆，淹掉它
+                if (grid1[i][j] == 0 && grid2[i][j] == 1) {
+                    dfs(grid2, i, j);
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 0; i <m; i++) {
+            for (int j = 0; j < n; j++) {
+                //剩下的都应该是子集
+                if (grid2[i][j] == 1) {
+                    res++;
+                    dfs(grid2, i, j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private void dfs(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || x > m -1 || y <0 || y > n-1) {
+            return;
+        }
+
+        if (grid[x][y] == 0) {
+            return;
+        }
+        grid[x][y] = 0;
+
+        dfs(grid, x -1, y);
+        dfs(grid, x +1, y);
+        dfs(grid, x, y -1);
+        dfs(grid, x, y +1);
+    }
+
+    public int networkDelayTime(int[][] times, int n, int k) {
+        int[] distTo = dijkstra(times, k, n);
+        int res = 0;
+        for (int i = 1; i <= n; i++) {
+            if (distTo[i] == Integer.MAX_VALUE) {
+                return -1;
+            }
+            res = Math.max(res, distTo[i]);
+        }
+        return res;
+    }
+
+    private int[] dijkstra(int[][] times, int start, int n) {
+        List<int[]>[] graph = new LinkedList[n + 1];
+        for (int i = 1; i < n + 1; i++) {
+            graph[i] = new LinkedList<>();
+        }
+        for (int[] time : times) {
+            graph[time[0]].add(new int[]{time[1], time[2]});
+        }
+
+        int[] distTo = new int[n + 1];
+        Arrays.fill(distTo, Integer.MAX_VALUE);
+        //id + 目前的最短距离
+        Queue<int[]> queue = new PriorityQueue<>(Comparator.comparingInt(a -> a[1]));
+        queue.offer(new int[]{start, 0});
+        distTo[start] = 0;
+        while (!queue.isEmpty()) {
+            int[] curNode = queue.poll();
+            int id = curNode[0];
+            int dist = curNode[1];
+            if (dist > distTo[id]) {
+                continue;
+            }
+            for (int[] next : graph[start]) {
+                int nextId = next[1];
+                int weight = next[2];
+                int distToNext = distTo[id] + weight;
+                if (distToNext < distTo[nextId]) {
+                    distTo[nextId] = distToNext;
+                    queue.offer(new int[]{nextId, distToNext});
+                }
+            }
+        }
+        return distTo;
+    }
+
+    public int minimumCost(int N, int[][] connections) {
+        UnionFind uf = new UnionFind(N + 1);
+        Arrays.sort(connections, (a, b) -> a[2] - b[2]);
+        int res = Integer.MAX_VALUE;
+        for (int[] connect : connections) {
+            if (uf.connect(connect[0], connect[1])) {
+                continue;
+            }
+            uf.connect(connect[0], connect[1]);
+            res += connect[2];
+        }
+        return uf.count == 2 ? res : -1;
+    }
+
+    public static class UnionFind {
+        private int[] parent;
+        private int[] size;
+        private int count;
+
+        public UnionFind(int count) {
+            parent = new int[count];
+            size = new int[count];
+            this.count = count;
+            for (int i = 0; i < count; i++) {
+                parent[i] = i;
+                size[i] = 1;
+            }
+        }
+
+        public int find(int x) {
+            while (x != parent[x]) {
+                parent[x] = parent[parent[x]];
+                x = parent[x];
+            }
+            return x;
+        }
+
+        public boolean connect(int p, int q) {
+            return find(p) == find(q);
+        }
+
+        public void union(int p, int q) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            if (rootP == rootQ) {
+                return;
+            }
+            if (size[rootP] > size[rootQ]) {
+                parent[rootQ] = rootP;
+                size[rootP] += size[rootQ];
+            } else {
+                parent[rootP] = rootQ;
+                size[rootQ] += size[rootP];
+            }
+            count--;
+        }
+    }
+
+    public void solve(char[][] board) {
+        int m = board.length, n = board[0].length;
+        //从边界出发找到O的替换掉
+        for (int i = 0; i < m; i++) {
+            dfsForSolve(board, i, 0);
+            dfsForSolve(board, i, n - 1);
+        }
+        for (int j = 0; j < m; j++) {
+            dfsForSolve(board, 0, j);
+            dfsForSolve(board, m - 1, j);
+        }
+        //把边界的O修改成X
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O') {
+                    board[i][j] = 'X';
+                } else if (board[i][j] == 'Y') {
+                    board[i][j] = 'O';
+                }
+            }
+        }
+
+    }
+
+    private void dfsForSolve(char[][] board, int x, int y) {
+        int m = board.length, n = board[0].length;
+        if (x < 0 || y < 0 || x > m - 1 || y > n - 1) {
+            return;
+        }
+        //不是水
+        if (board[x][y] != 'O') {
+            return;
+        }
+        //淹掉它
+        board[x][y] = 'Y';
+        dfsForSolve(board, x - 1, y);
+        dfsForSolve(board, x + 1, y);
+        dfsForSolve(board, x, y - 1);
+        dfsForSolve(board, x, y + 1);
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
