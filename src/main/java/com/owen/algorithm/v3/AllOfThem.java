@@ -279,47 +279,9 @@ public class AllOfThem {
         return (n & (n - 1)) == 0 && (n & 0xaaaaaaaa) == 0;
     }
 
-    public int countSubIslands(int[][] grid1, int[][] grid2) {
-        int m = grid1.length, n = grid1[0].length;
-        for (int i = 0; i <m; i++) {
-            for (int j = 0; j < n; j++) {
-                //前面是水，后面是陆，淹掉它
-                if (grid1[i][j] == 0 && grid2[i][j] == 1) {
-                    dfs(grid2, i, j);
-                }
-            }
-        }
-        int res = 0;
-        for (int i = 0; i <m; i++) {
-            for (int j = 0; j < n; j++) {
-                //剩下的都应该是子集
-                if (grid2[i][j] == 1) {
-                    res++;
-                    dfs(grid2, i, j);
-                }
-            }
-        }
-        return res;
-    }
-
-    private void dfs(int[][] grid, int x, int y) {
-        int m = grid.length, n = grid[0].length;
-        if (x < 0 || x > m -1 || y <0 || y > n-1) {
-            return;
-        }
-
-        if (grid[x][y] == 0) {
-            return;
-        }
-        grid[x][y] = 0;
-
-        dfs(grid, x -1, y);
-        dfs(grid, x +1, y);
-        dfs(grid, x, y -1);
-        dfs(grid, x, y +1);
-    }
-
+    //[743].网络延迟时间
     public int networkDelayTime(int[][] times, int n, int k) {
+        //最短路径
         int[] distTo = dijkstra(times, k, n);
         int res = 0;
         for (int i = 1; i <= n; i++) {
@@ -366,15 +328,17 @@ public class AllOfThem {
         return distTo;
     }
 
+    //[1135].最低成本联通所有城市
     public int minimumCost(int N, int[][] connections) {
         UnionFind uf = new UnionFind(N + 1);
+        //最低成本升序
         Arrays.sort(connections, (a, b) -> a[2] - b[2]);
         int res = Integer.MAX_VALUE;
         for (int[] connect : connections) {
             if (uf.connect(connect[0], connect[1])) {
                 continue;
             }
-            uf.connect(connect[0], connect[1]);
+            uf.union(connect[0], connect[1]);
             res += connect[2];
         }
         return uf.count == 2 ? res : -1;
@@ -424,6 +388,7 @@ public class AllOfThem {
         }
     }
 
+    //[130].被围绕的区域
     public void solve(char[][] board) {
         int m = board.length, n = board[0].length;
         //从边界出发找到O的替换掉
@@ -465,18 +430,51 @@ public class AllOfThem {
         dfsForSolve(board, x, y + 1);
     }
 
-    public int islandPerimeter(int[][] grid) {
+    //[200].岛屿数量
+    public int numIslands(char[][] grid) {
         int m = grid.length, n = grid[0].length;
-        //1是岛屿，0是水
         int res = 0;
-        for (int i = 0; i < m ; i++) {
+        for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
-                    res += dfsForIslandPerimeter(grid, i, j);
+                if (grid[i][j] == '1') {
+                    res++;
+                    dfsForIslands(grid, i, j);
                 }
             }
         }
         return res;
+    }
+
+    private void dfsForIslands(char[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || x > m - 1 || y < 0 || y > n - 1) {
+            return;
+        }
+
+        if (grid[x][y] == '0') {
+            return;
+        }
+        //是陆地就淹掉它
+        grid[x][y] = '0';
+        dfsForIslands(grid, x - 1, y);
+        dfsForIslands(grid, x + 1, y);
+        dfsForIslands(grid, x, y - 1);
+        dfsForIslands(grid, x, y + 1);
+    }
+
+    //[463].岛屿的周长
+    public int islandPerimeter(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        //1是岛屿，0是水
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    //题目说了只有一个
+                    return dfsForIslandPerimeter(grid, i, j);
+                }
+            }
+        }
+        return 0;
     }
 
     private int dfsForIslandPerimeter(int[][] grid, int x, int y) {
@@ -499,6 +497,121 @@ public class AllOfThem {
                 + dfsForIslandPerimeter(grid, x, y - 1)
                 + dfsForIslandPerimeter(grid, x, y + 1);
     }
+
+    //[695].岛屿的最大面积
+    public int maxAreaOfIsland(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    int area = dfsForMaxAreaOfIsland(grid, i, j);
+                    res = Math.max(res, area);
+                }
+            }
+        }
+        return res;
+    }
+
+    private int dfsForMaxAreaOfIsland(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || y < 0 || x >= m || y >= n) {
+            return 0;
+        }
+        if (grid[x][y] == 0) {
+            return 0;
+        }
+        grid[x][y] = 0;
+        return dfsForMaxAreaOfIsland(grid, x - 1, y)
+                + dfsForMaxAreaOfIsland(grid, x + 1, y)
+                + dfsForMaxAreaOfIsland(grid, x, y - 1)
+                + dfsForMaxAreaOfIsland(grid, x, y + 1) + 1;
+    }
+
+    //[1254].统计封闭岛屿的数目
+    public int closedIsland(int[][] grid) {
+        //0是陆地，1是水
+        int m = grid.length, n = grid[0].length;
+        //先淹掉周边的陆地，剩下的都是被水包围的
+        for (int i = 0; i < m; i++) {
+            dfsForClosedIsland(grid, i, 0);
+            dfsForClosedIsland(grid, i, n - 1);
+        }
+        for (int j = 0; j < n; j++) {
+            dfsForClosedIsland(grid, 0, j);
+            dfsForClosedIsland(grid, m - 1, j);
+        }
+
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                 if (grid[i][j] == 0) {
+                     res++;
+                     dfsForClosedIsland(grid, i, j);
+                 }
+            }
+        }
+        return res;
+    }
+
+    private void dfsForClosedIsland(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || y < 0 || x >= m || y >= n) {
+            return;
+        }
+        if (grid[x][y] == 1) {
+            return;
+        }
+        //淹掉它
+        grid[x][y] = 1;
+
+        dfsForClosedIsland(grid, x - 1, y);
+        dfsForClosedIsland(grid, x + 1, y);
+        dfsForClosedIsland(grid, x, y - 1);
+        dfsForClosedIsland(grid, x, y + 1);
+    }
+
+    //[1905].统计子岛屿
+    public int countSubIslands(int[][] grid1, int[][] grid2) {
+        int m = grid1.length, n = grid1[0].length;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                //前面是水，后面是陆，淹掉它
+                if (grid1[i][j] == 0 && grid2[i][j] == 1) {
+                    dfsForCountSubIslands(grid2, i, j);
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                //剩下的都应该是子集
+                if (grid2[i][j] == 1) {
+                    res++;
+                    dfsForCountSubIslands(grid2, i, j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private void dfsForCountSubIslands(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || x > m - 1 || y < 0 || y > n - 1) {
+            return;
+        }
+
+        if (grid[x][y] == 0) {
+            return;
+        }
+        grid[x][y] = 0;
+
+        dfsForCountSubIslands(grid, x - 1, y);
+        dfsForCountSubIslands(grid, x + 1, y);
+        dfsForCountSubIslands(grid, x, y - 1);
+        dfsForCountSubIslands(grid, x, y + 1);
+    }
+
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
