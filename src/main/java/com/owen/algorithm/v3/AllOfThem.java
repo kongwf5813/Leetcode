@@ -465,6 +465,40 @@ public class AllOfThem {
         dfsForSolve(board, x, y + 1);
     }
 
+    public int islandPerimeter(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        //1是岛屿，0是水
+        int res = 0;
+        for (int i = 0; i < m ; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    res += dfsForIslandPerimeter(grid, i, j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private int dfsForIslandPerimeter(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        //遇到边界就+1
+        if (x < 0 || y < 0 || x >= m || y >= n) {
+            return 1;
+        }
+        //遇到水域+1
+        if (grid[x][y] == 0) {
+            return 1;
+        }
+        //已经遍历过了，计数为0
+        if (grid[x][y] == 2) {
+            return 0;
+        }
+        grid[x][y] = 2;
+        return dfsForIslandPerimeter(grid, x - 1, y)
+                + dfsForIslandPerimeter(grid, x + 1, y)
+                + dfsForIslandPerimeter(grid, x, y - 1)
+                + dfsForIslandPerimeter(grid, x, y + 1);
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
