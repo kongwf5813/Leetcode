@@ -19,6 +19,21 @@ public class AllOfThem {
             this.next = next;
         }
     }
+    public static class TreeNode {
+        public int val;
+        public TreeNode left;
+        public TreeNode right;
+
+        public TreeNode(int x) {
+            val = x;
+        }
+
+        TreeNode(int val, TreeNode left, TreeNode right) {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
 
     //[2].两数相加
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -545,10 +560,10 @@ public class AllOfThem {
         int res = 0;
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                 if (grid[i][j] == 0) {
-                     res++;
-                     dfsForClosedIsland(grid, i, j);
-                 }
+                if (grid[i][j] == 0) {
+                    res++;
+                    dfsForClosedIsland(grid, i, j);
+                }
             }
         }
         return res;
@@ -612,6 +627,57 @@ public class AllOfThem {
         dfsForCountSubIslands(grid, x, y + 1);
     }
 
+    //[96].不同的二叉搜索树
+    public int numTrees(int n) {
+        //方法1 递归解决
+        //return dfsForNumTrees(new int[n + 1][n + 1], 1, n);
+
+        //方法2
+        // 1  1
+        // 2  2
+        // 3  2 + 1 + 2
+        // 4  5 + 1 * 2 + 2*1 + 5
+        //i个节点的数量，而不是前i个节点的数量
+        //dp[i] = dp[0] * dp [i - 1] + dp[1] * dp[i-2] + ... + dp[i-1]* dp[0]
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                dp[i] += dp[j] * dp[i - j - 1];
+            }
+        }
+        return dp[n];
+    }
+
+    private int dfsForNumTrees(int[][] memo, int start, int end) {
+        if (start > end) {
+            return 1;
+        }
+        if (memo[start][end] != 0) {
+            return memo[start][end];
+        }
+        int res = 0;
+        for (int i = start; i <= end; i++) {
+            int left = dfsForNumTrees(memo, start, i - 1);
+            int right = dfsForNumTrees(memo, i + 1, end);
+            res += left * right;
+        }
+        memo[start][end] = res;
+        return res;
+    }
+
+    public boolean isValidBST(TreeNode root) {
+        return false;
+    }
+
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        return false;
+    }
+
+    public boolean isSymmetric(TreeNode root) {
+        return false;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -619,5 +685,6 @@ public class AllOfThem {
 
         System.out.println(new AllOfThem().findMinHeightTrees(2, new int[][]{{0, 1}}));
         System.out.println(new AllOfThem().findMinHeightTrees(6, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {5, 4}}));
+        System.out.println(new AllOfThem().numTrees(3));
     }
 }
