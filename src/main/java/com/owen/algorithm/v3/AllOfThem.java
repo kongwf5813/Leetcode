@@ -627,6 +627,33 @@ public class AllOfThem {
         dfsForCountSubIslands(grid, x, y + 1);
     }
 
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) return null;
+        return dfsForGenerateTrees(1, n);
+    }
+
+    private List<TreeNode> dfsForGenerateTrees(int start, int end) {
+        List<TreeNode> res = new ArrayList<>();
+        if (start > end) {
+            res.add(null);
+            return res;
+        }
+        for (int i = start; i <= end; i++) {
+            List<TreeNode> leftTree = dfsForGenerateTrees(start, i - 1);
+            List<TreeNode> rightTree = dfsForGenerateTrees(i + 1, end);
+            //始终都只有一个节点
+            for (TreeNode left : leftTree) {
+                for (TreeNode right : rightTree) {
+                    TreeNode root = new TreeNode(i);
+                    root.left = left;
+                    root.right = right;
+                    res.add(root);
+                }
+            }
+        }
+        return res;
+    }
+
     //[96].不同的二叉搜索树
     public int numTrees(int n) {
         //方法1 递归解决
@@ -668,15 +695,99 @@ public class AllOfThem {
     }
 
     public boolean isValidBST(TreeNode root) {
+        return dfsIsValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private boolean dfsIsValidBST(TreeNode root, Long min, Long max) {
+        if (root == null) return true;
+        if (min < root.val && root.val < max) {
+            return dfsIsValidBST(root.left, min, (long) root.val) &&
+                    dfsIsValidBST(root.right, (long) root.val, max);
+        }
         return false;
     }
 
     public boolean isSameTree(TreeNode p, TreeNode q) {
-        return false;
+        return dfsIsSameTree(p, q);
+    }
+
+    private boolean dfsIsSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p.val != q.val) return false;
+        return dfsIsSameTree(p.left, q.left) && dfsIsSameTree(p.right, q.right);
     }
 
     public boolean isSymmetric(TreeNode root) {
-        return false;
+        if (root == null) return true;
+        return dfsIsSymmetric(root.left, root.right);
+    }
+
+    private boolean dfsIsSymmetric(TreeNode p, TreeNode q) {
+        //是否为镜像，意味着，主节点相等， p的左节点 = q的右节点， p的右节点 = q的左节点
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p.val != q.val) return false;
+        return dfsIsSymmetric(p.left, q.right) && dfsIsSymmetric(p.right, q.left);
+    }
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if (root == null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                level.add(cur.val);
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        if (root == null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        boolean flag = true;
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            LinkedList<Integer> list = new LinkedList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                if (flag) {
+                    list.addLast(cur.val);
+                } else {
+                    list.addFirst(cur.val);
+                }
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(list);
+            flag = !flag;
+        }
+        return res;
+    }
+
+    public int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
     }
 
     public static void main(String[] args) {
