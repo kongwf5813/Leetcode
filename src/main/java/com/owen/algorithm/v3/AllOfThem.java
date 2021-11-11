@@ -1,5 +1,7 @@
 package com.owen.algorithm.v3;
 
+import com.owen.algorithm.Tree;
+
 import java.util.*;
 
 public class AllOfThem {
@@ -19,6 +21,7 @@ public class AllOfThem {
             this.next = next;
         }
     }
+
     public static class TreeNode {
         public int val;
         public TreeNode left;
@@ -694,6 +697,7 @@ public class AllOfThem {
         return res;
     }
 
+    //[98].验证二叉搜索树
     public boolean isValidBST(TreeNode root) {
         return dfsIsValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
     }
@@ -707,23 +711,27 @@ public class AllOfThem {
         return false;
     }
 
+    //[100].相同的树
     public boolean isSameTree(TreeNode p, TreeNode q) {
         return dfsIsSameTree(p, q);
     }
 
     private boolean dfsIsSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
         if (p == null && q != null) return false;
         if (p != null && q == null) return false;
         if (p.val != q.val) return false;
         return dfsIsSameTree(p.left, q.left) && dfsIsSameTree(p.right, q.right);
     }
 
+    //[101].对称二叉树
     public boolean isSymmetric(TreeNode root) {
         if (root == null) return true;
         return dfsIsSymmetric(root.left, root.right);
     }
 
     private boolean dfsIsSymmetric(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
         //是否为镜像，意味着，主节点相等， p的左节点 = q的右节点， p的右节点 = q的左节点
         if (p == null && q != null) return false;
         if (p != null && q == null) return false;
@@ -731,6 +739,7 @@ public class AllOfThem {
         return dfsIsSymmetric(p.left, q.right) && dfsIsSymmetric(p.right, q.left);
     }
 
+    //[102].二叉树的层序遍历
     public List<List<Integer>> levelOrder(TreeNode root) {
         if (root == null) return null;
         Queue<TreeNode> queue = new LinkedList<>();
@@ -755,6 +764,7 @@ public class AllOfThem {
         return res;
     }
 
+    //[103].二叉树的锯齿形层序遍历
     public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
         if (root == null) return null;
         Queue<TreeNode> queue = new LinkedList<>();
@@ -785,9 +795,48 @@ public class AllOfThem {
         return res;
     }
 
+    //[104].二叉树的最大深度
     public int maxDepth(TreeNode root) {
         if (root == null) return 0;
         return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+    }
+
+    //[105].从前序与中序遍历序列构造二叉树
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        int pLen = preorder.length;
+        int iLen = inorder.length;
+        if (pLen != iLen) {
+            return null;
+        }
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree(preorder, inorder, 0, pLen - 1, 0, iLen - 1, indexMap);
+    }
+
+    private TreeNode dfsForBuildTree(int[] preorder, int[] inorder, int ps, int pe, int is, int ie, Map<Integer, Integer> indexMap) {
+        if (ps > pe || is > ie) return null;
+        int rootVal = preorder[ps];
+        TreeNode root = new TreeNode(rootVal);
+        int index = indexMap.get(rootVal);
+        TreeNode left = dfsForBuildTree(preorder, inorder, ps + 1, index - is + ps, is, index - 1, indexMap);
+        TreeNode right = dfsForBuildTree(preorder, inorder, index - is + ps + 1, pe, index + 1, ie, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    public TreeNode buildTree2(int[] inorder, int[] postorder) {
+        return null;
+    }
+
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        return null;
+    }
+
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return null;
     }
 
     public static void main(String[] args) {
