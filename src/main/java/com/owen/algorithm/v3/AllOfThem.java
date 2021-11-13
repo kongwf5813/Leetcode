@@ -1,11 +1,10 @@
 package com.owen.algorithm.v3;
 
-import com.owen.algorithm.Tree;
 
 import java.util.*;
 
 public class AllOfThem {
-    public class ListNode {
+    private class ListNode {
         int val;
         ListNode next;
 
@@ -22,7 +21,7 @@ public class AllOfThem {
         }
     }
 
-    public static class TreeNode {
+    private class TreeNode {
         public int val;
         public TreeNode left;
         public TreeNode right;
@@ -35,6 +34,29 @@ public class AllOfThem {
             this.val = val;
             this.left = left;
             this.right = right;
+        }
+    }
+
+    private class Node {
+        public int val;
+        public Node left;
+        public Node right;
+        public Node next;
+        public Node random;
+        public List<Node> neighbors;
+
+        public Node() {
+        }
+
+        public Node(int _val) {
+            val = _val;
+        }
+
+        public Node(int _val, Node _left, Node _right, Node _next) {
+            val = _val;
+            left = _left;
+            right = _right;
+            next = _next;
         }
     }
 
@@ -827,16 +849,279 @@ public class AllOfThem {
         return root;
     }
 
+    //[106].从中序与后序遍历序列构造二叉树
     public TreeNode buildTree2(int[] inorder, int[] postorder) {
-        return null;
+        int iLen = inorder.length;
+        int pLen = postorder.length;
+        if (iLen != pLen) return null;
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree2(inorder, postorder, 0, iLen - 1, 0, pLen - 1, indexMap);
     }
 
+    private TreeNode dfsForBuildTree2(int[] inorder, int[] postorder, int is, int ie, int ps, int pe, Map<Integer, Integer> indexMap) {
+        if (is > ie || ps > pe) {
+            return null;
+        }
+        int rootVal = postorder[pe];
+        TreeNode root = new TreeNode(rootVal);
+        int index = indexMap.get(rootVal);
+
+        TreeNode left = dfsForBuildTree2(inorder, postorder, is, index - 1, ps, ps + index - is - 1, indexMap);
+        TreeNode right = dfsForBuildTree2(inorder, postorder, index + 1, ie, ps + index - is, pe - 1, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[107].二叉树的层序遍历 II
     public List<List<Integer>> levelOrderBottom(TreeNode root) {
-        return null;
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        if (root != null) {
+            queue.offer(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                level.add(cur.val);
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(0, level);
+        }
+        return res;
     }
 
+    //[108].将有序数组转换为二叉搜索树
     public TreeNode sortedArrayToBST(int[] nums) {
-        return null;
+        return dfsForSortedArrayToBST(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode dfsForSortedArrayToBST(int[] nums, int s, int e) {
+        if (s > e) return null;
+        int mid = s + (e - s) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        TreeNode left = dfsForSortedArrayToBST(nums, s, mid - 1);
+        TreeNode right = dfsForSortedArrayToBST(nums, mid + 1, e);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[109].有序链表转换二叉搜索树
+    public TreeNode sortedListToBST(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head, fast = head, pre = null;
+        while (fast != null && fast.next != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        TreeNode root = new TreeNode(slow.val);
+        //只有一个节点了
+        if (pre == null) return root;
+
+        //断开前面一个节点
+        pre.next = null;
+        root.left = sortedListToBST(head);
+        root.right = sortedListToBST(slow.next);
+        return root;
+    }
+
+    //[110].平衡二叉树
+    public boolean isBalanced(TreeNode root) {
+        return dfsForIsBalanced(root) >= 0;
+    }
+
+    //不平衡就是-1， 否则返回高度
+    private int dfsForIsBalanced(TreeNode root) {
+        if (root == null) return 0;
+        int left = dfsForIsBalanced(root.left);
+        int right = dfsForIsBalanced(root.right);
+
+        if (left == -1 || right == -1 || Math.abs(left - right) > 1) {
+            return -1;
+        }
+        return Math.max(left, right) + 1;
+    }
+
+    //[111].二叉树的最小深度
+    public int minDepth(TreeNode root) {
+        if (root == null) return 0;
+        int left = minDepth(root.left);
+        int right = minDepth(root.right);
+        //有一棵子树没有，此时高度应该是2， 而不是下面的1，计算就会不对。
+        if (left == 0 || right == 0) {
+            return left + right + 1;
+        }
+        return Math.min(left, right) + 1;
+    }
+
+    //[112].路径总和
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        //一定不是叶子节点
+        if (root == null) return false;
+        //判断叶子节点标准
+        if (root.left == null && root.right == null) {
+            return targetSum == root.val;
+        }
+        return hasPathSum(root.left, targetSum - root.val)
+                || hasPathSum(root.right, targetSum - root.val);
+    }
+
+    //[113].路径总和 II
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForPathSum(root, targetSum, new LinkedList<>(), res);
+        return res;
+    }
+
+    private void dfsForPathSum(TreeNode root, int targetSum, LinkedList<Integer> path, List<List<Integer>> res) {
+        if (root == null) return;
+
+        //前序遍历
+        path.addLast(root.val);
+        if (root.left == null && root.right == null && targetSum == root.val) {
+            res.add(new ArrayList<>(path));
+            //回溯撤销节点的，加了return，会导致叶子节点会有撤销成功，导致路径上少减少一次撤销，从而使得下一次的选择会多一个节点。
+            //主要取决于前序遍历顺序不能变更。
+        }
+
+        dfsForPathSum(root.left, targetSum - root.val, path, res);
+        dfsForPathSum(root.right, targetSum - root.val, path, res);
+        path.removeLast();
+    }
+
+    //[114].二叉树展开为链表
+    public void flatten(TreeNode root) {
+        if (root == null) return;
+
+        flatten(root.left);
+        flatten(root.right);
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        root.right = left;
+        root.left = null;
+
+        TreeNode cur = root;
+        //最后一个叶子节点
+        while (cur.right != null) {
+            cur = cur.right;
+        }
+        cur.right = right;
+    }
+
+    //[116].填充每个节点的下一个右侧节点指针
+    public Node connect(Node root) {
+        if (root == null) return null;
+        dfsForConnect(root.left, root.right);
+        return root;
+    }
+
+    private void dfsForConnect(Node left, Node right) {
+        if (left == null || right == null) {
+            return;
+        }
+        left.next = right;
+        dfsForConnect(left.left, left.right);
+        dfsForConnect(right.left, right.right);
+        dfsForConnect(left.right, right.left);
+    }
+
+    //[118].杨辉三角
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        for (int i = 0; i < numRows; i++) {
+            List<Integer> level = new ArrayList<>();
+            for (int j = 0; j <= i; j++) {
+                if (j == 0 || j == i) {
+                    level.add(1);
+                } else {
+                    level.add(res.get(i - 1).get(j - 1) + res.get(i - 1).get(j));
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
+    //[119].杨辉三角 II
+    public List<Integer> getRow(int rowIndex) {
+        List<Integer> res = new ArrayList<>();
+        res.add(1);
+        for (int i = 1; i <= rowIndex; i++) {
+            res.add(0);
+            for (int j = i; j > 0; j--) {
+                res.set(j, res.get(j) + res.get(j - 1));
+            }
+        }
+        return res;
+    }
+
+    //[120].三角形最小路径和
+    public int minimumTotal(List<List<Integer>> triangle) {
+        int n = triangle.size();
+        //走到(i, j)点的最小路径和
+        int[][] dp = new int[n][n];
+        dp[0][0] = triangle.get(0).get(0);
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                if (j == 0) {
+                    dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
+                } else if (j == i) {
+                    dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
+                }
+            }
+        }
+        int min = dp[n - 1][0];
+        for (int i = 1; i < n; i++) {
+            min = Math.min(min, dp[n - 1][i]);
+        }
+        return min;
+    }
+    //[120].三角形最小路径和（空间压缩）
+    public int minimumTotal2(List<List<Integer>> triangle) {
+        int n = triangle.size();
+        //到底层i的最短路径和
+        int[] dp = new int[n];
+        dp[0] = triangle.get(0).get(0);
+        int pre = 0, cur;
+        //  pre          cur, pre'     cur'
+        // (i-1, j-1)   (i-1, j)     (i-1, j+1)
+        //        ＼        ↓    ＼      ↓
+        //               (i, j)       (i, j+1)
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                cur = dp[j];
+                if (j == 0) {
+                    dp[j] = cur + triangle.get(i).get(j);
+                } else if (j == i) {
+                    dp[j] = pre + triangle.get(i).get(j);
+                } else {
+                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
+                }
+                pre = cur;
+            }
+        }
+        int min = dp[0];
+        for (int i = 1; i < n; i++) {
+            min = Math.min(min, dp[i]);
+        }
+        return min;
     }
 
     public static void main(String[] args) {
@@ -846,5 +1131,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().findMinHeightTrees(2, new int[][]{{0, 1}}));
         System.out.println(new AllOfThem().findMinHeightTrees(6, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {5, 4}}));
         System.out.println(new AllOfThem().numTrees(3));
+        System.out.println(new AllOfThem().generate(5));
+        System.out.println(new AllOfThem().getRow(4));
     }
 }
