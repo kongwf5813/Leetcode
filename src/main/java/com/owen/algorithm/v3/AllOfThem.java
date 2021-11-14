@@ -368,6 +368,18 @@ public class AllOfThem {
         return distTo;
     }
 
+    //[261].以图判树
+    public boolean validTree(int n, int[][] edges) {
+        UnionFind uf = new UnionFind(n);
+        for (int[] edge : edges) {
+            if (uf.connect(edge[0], edge[1])) {
+                return false;
+            }
+            uf.union(edge[0], edge[1]);
+        }
+        return uf.count == 1;
+    }
+
     //[1135].最低成本联通所有城市
     public int minimumCost(int N, int[][] connections) {
         UnionFind uf = new UnionFind(N + 1);
@@ -382,6 +394,32 @@ public class AllOfThem {
             res += connect[2];
         }
         return uf.count == 2 ? res : -1;
+    }
+
+    //[1584].连接所有点的最小费用
+    public int minCostConnectPoints(int[][] points) {
+        int size = points.length;
+        //点要转化为边集合
+        List<int[]> edges = new ArrayList<>();
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < size; j++) {
+                edges.add(new int[]{i, j, Math.abs(points[i][0] - points[j][0]) + Math.abs(points[i][1] - points[j][1])});
+            }
+        }
+
+        Collections.sort(edges, Comparator.comparingInt(a -> ((int[]) a)[2]));
+
+        int res = 0;
+        UnionFind uf = new UnionFind(size);
+        for (int[] edge : edges) {
+            if (uf.connect(edge[0], edge[1])) {
+                continue;
+            }
+            res += edge[2];
+
+            uf.union(edge[0], edge[1]);
+        }
+        return res;
     }
 
     public static class UnionFind {
@@ -1040,6 +1078,7 @@ public class AllOfThem {
         dfsForConnect(left.right, right.left);
     }
 
+
     //[118].杨辉三角
     public List<List<Integer>> generate(int numRows) {
         List<List<Integer>> res = new ArrayList<>();
@@ -1093,6 +1132,7 @@ public class AllOfThem {
         }
         return min;
     }
+
     //[120].三角形最小路径和（空间压缩）
     public int minimumTotal2(List<List<Integer>> triangle) {
         int n = triangle.size();
@@ -1124,6 +1164,244 @@ public class AllOfThem {
         return min;
     }
 
+    //[121].买卖股票的最佳时机
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        //到第i天，0表示不持股票，1表示持有股票
+        int[][] dp = new int[n][2];
+
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //不持股票，（昨天卖掉股票的利润，今天卖掉股票的利润）
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+
+            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
+            dp[i][1] = Math.max(dp[i - 1][1], -prices[i]);
+        }
+
+        return dp[n - 1][0];
+    }
+
+    //[121].买卖股票的最佳时机 优化版
+    public int maxProfit_y(int[] prices) {
+        int n = prices.length;
+        int dp_0 = 0;
+        int dp_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //不持股票，（今天卖掉股票的利润，昨天卖掉股票的利润）
+            dp_0 = Math.max(dp_0, dp_1 + prices[i]);
+            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
+            dp_1 = Math.max(dp_1, -prices[i]);
+        }
+
+        return dp_0;
+    }
+
+    //[122].买卖股票的最佳时机 II
+    public int maxProfit2(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
+    //[122].买卖股票的最佳时机 II 优化版
+    public int maxProfit2_y(int[] prices) {
+        int n = prices.length;
+        int dp_0 = 0;
+        int dp_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            int pre_dp_0 = dp_0;
+            int pre_dp_1 = dp_1;
+            dp_0 = Math.max(pre_dp_0, pre_dp_1 + prices[i]);
+            dp_1 = Math.max(pre_dp_1, pre_dp_0 - prices[i]);
+        }
+        return dp_0;
+    }
+
+    //[123].买卖股票的最佳时机 III
+    public int maxProfit3(int[] prices) {
+        // dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+        // dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+        int n = prices.length;
+        int[][][] dp = new int[n][3][2];
+        dp[0][1][0] = 0;
+        dp[0][2][0] = 0;
+        dp[0][1][1] = -prices[0];
+        dp[0][2][1] = -prices[0];
+
+        for (int i = 1; i < n; i++) {
+            dp[i][2][0] = Math.max(dp[i - 1][2][0], dp[i - 1][2][1] + prices[i]);
+            dp[i][2][1] = Math.max(dp[i - 1][2][1], dp[i - 1][1][0] - prices[i]);
+
+            dp[i][1][0] = Math.max(dp[i - 1][1][0], dp[i - 1][1][1] + prices[i]);
+            dp[i][1][1] = Math.max(dp[i - 1][1][1], -prices[i]);
+        }
+        return dp[n - 1][2][0];
+    }
+
+    //[123].买卖股票的最佳时机 III 优化版
+    public int maxProfit3_y(int[] prices) {
+        int n = prices.length;
+        int dp_1_0 = 0;
+        int dp_1_1 = -prices[0];
+        int dp_2_0 = 0;
+        int dp_2_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp_2_0 = Math.max(dp_2_0, dp_2_1 + prices[i]);
+            dp_2_1 = Math.max(dp_2_1, dp_1_0 - prices[i]);
+            dp_1_0 = Math.max(dp_1_0, dp_1_1 + prices[i]);
+            dp_1_1 = Math.max(dp_1_1, -prices[i]);
+        }
+        return dp_2_0;
+    }
+
+    //[128].最长连续序列
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            set.add(num);
+        }
+        int res = 0;
+        for (int num : set) {
+            if (!set.contains(num - 1)) {
+                int cur = num;
+                int longest = 1;
+                while (set.contains(cur + 1)) {
+                    cur += 1;
+                    longest += 1;
+                }
+                res = Math.max(res, longest);
+            }
+        }
+        return res;
+    }
+
+    //[129].求根节点到叶节点数字之和
+    public int sumNumbers(TreeNode root) {
+        return dfsForSumNumbers(root, 0);
+    }
+
+    private int dfsForSumNumbers(TreeNode root, int preVal) {
+        if (root == null) return 0;
+        int cur = preVal * 10 + root.val;
+        if (root.left == null && root.right == null) {
+            return cur;
+        }
+        return dfsForSumNumbers(root.right, cur) + dfsForSumNumbers(root.left, cur);
+    }
+
+    //[131].分割回文串
+    public List<List<String>> partition(String s) {
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                //三个字符，并且收尾相等，就是回文
+                dp[i][j] = (dp[i + 1][j - 1] || j - i < 3) && s.charAt(i) == s.charAt(j);
+            }
+        }
+
+        List<List<String>> res = new ArrayList<>();
+        dfsForPartition(s, 0, res, new LinkedList<>(), dp);
+        return res;
+    }
+
+    private void dfsForPartition(String s, int start, List<List<String>> res, LinkedList<String> path, boolean[][] dp) {
+        if (start == s.length()) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = start; i < s.length(); i++) {
+            if (!dp[start][i]) {
+                continue;
+            }
+            path.addLast(s.substring(start, i + 1));
+            dfsForPartition(s, i + 1, res, path, dp);
+            path.removeLast();
+        }
+    }
+
+    //[133].克隆图
+    public Node cloneGraph(Node node) {
+        if (node == null) return null;
+        //hash赋值，同时充当访问标记
+        Map<Node, Node> cloneMap = new HashMap<>();
+        dfsForCloneGraph(node, cloneMap);
+        return cloneMap.get(node);
+    }
+
+    private void dfsForCloneGraph(Node node, Map<Node, Node> cloneMap) {
+        //已经创建过了，就不需要再次创建了
+        if (cloneMap.containsKey(node)) {
+            return;
+        }
+        Node clone = new Node(node.val);
+        cloneMap.put(node, clone);
+        if (node.neighbors != null && node.neighbors.size() > 0) {
+            clone.neighbors = new ArrayList<>();
+            for (Node neigh : node.neighbors) {
+                dfsForCloneGraph(neigh, cloneMap);
+                clone.neighbors.add(cloneMap.get(neigh));
+            }
+        }
+    }
+
+    //[134].加油站
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int left = 0, minLeft = Integer.MAX_VALUE;
+        int n = gas.length;
+        int start = 0;
+        for (int i = 0; i < n; i++) {
+            left += gas[i] - cost[i];
+            //剩余最小，更新位置
+            if (left < minLeft) {
+                minLeft = left;
+                start = i;
+            }
+        }
+        //下一个位置才是起始位置，并且可能超过数组长度，并且是环
+        return left >= 0 ? (start + 1) % n : -1;
+    }
+
+    //[136].只出现一次的数字
+    public int singleNumber(int[] nums) {
+        int res = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            res ^= nums[i];
+        }
+        return res;
+    }
+
+    //[137]只出现一次的数字 II
+    public int singleNumber2(int[] nums) {
+        int res = 0;
+        for (int i = 0; i < 32; i++) {
+            int count = 0;
+            int pos = 1 << i;
+            for (int num : nums) {
+                if ((pos & num) == pos) {
+                    count++;
+                }
+            }
+            if (count % 3 != 0) {
+                res |= 1 << i;
+            }
+        }
+        return res;
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -1133,5 +1411,9 @@ public class AllOfThem {
         System.out.println(new AllOfThem().numTrees(3));
         System.out.println(new AllOfThem().generate(5));
         System.out.println(new AllOfThem().getRow(4));
+        System.out.println(new AllOfThem().partition("aabc"));
+        System.out.println(new AllOfThem().singleNumber(new int[]{1, 2, 1}));
+        System.out.println(new AllOfThem().singleNumber(new int[]{4, 1, 2, 1, 2}));
+        System.out.println(new AllOfThem().singleNumber2(new int[]{0, 1, 0, 1, 0, 1, -99}));
     }
 }
