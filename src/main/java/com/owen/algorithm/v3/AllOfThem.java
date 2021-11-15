@@ -1401,6 +1401,7 @@ public class AllOfThem {
         return res;
     }
 
+    //[19].删除链表的倒数第 N 个结点
     public ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode slow = head, fast = head;
         int count = 0;
@@ -1426,6 +1427,7 @@ public class AllOfThem {
         }
     }
 
+    //[21].合并两个有序链表
     public ListNode mergeTwoList(ListNode first, ListNode second) {
         ListNode dummyHead = new ListNode(-1), p = dummyHead;
         ListNode p1 = first, p2 = second;
@@ -1449,36 +1451,7 @@ public class AllOfThem {
         return dummyHead.next;
     }
 
-    public boolean hasCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) return true;
-        }
-        return false;
-    }
-
-    public ListNode detectCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) {
-                break;
-            }
-        }
-        if (fast == null || fast.next == null) return null;
-
-        slow = head;
-        while (slow != fast) {
-            slow = slow.next;
-            fast = fast.next;
-        }
-        return slow;
-    }
-
+    //[23].合并K个升序链表
     public ListNode mergeKLists(ListNode[] lists) {
         //小顶堆
         Queue<ListNode> queue = new PriorityQueue<>((a,b) -> a.val - b.val);
@@ -1500,6 +1473,7 @@ public class AllOfThem {
         return dummyHead.next;
     }
 
+    //[24].两两交换链表中的节点
     public ListNode swapPairs(ListNode head) {
         if (head == null || head.next == null) return head;
         ListNode first = head, second = head.next;
@@ -1510,6 +1484,55 @@ public class AllOfThem {
         return second;
     }
 
+    //[141].环形链表
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+
+    //[142].环形链表 II
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) {
+                break;
+            }
+        }
+        if (fast == null || fast.next == null) return null;
+
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+
+    public void reorderList(ListNode head) {
+    }
+
+    public List<Integer> preorderTraversal(TreeNode root) {
+        return null;
+    }
+    public List<Integer> postorderTraversal(TreeNode root) {
+        return null;
+    }
+
+    public ListNode insertionSortList(ListNode head) {
+        return null;
+    }
+
+    public ListNode sortList(ListNode head) {
+        return null;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
