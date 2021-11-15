@@ -4,14 +4,14 @@ package com.owen.algorithm.v3;
 import java.util.*;
 
 public class AllOfThem {
-    private class ListNode {
+    public static class ListNode {
         int val;
         ListNode next;
 
         ListNode() {
         }
 
-        ListNode(int val) {
+        public ListNode(int val) {
             this.val = val;
         }
 
@@ -21,7 +21,7 @@ public class AllOfThem {
         }
     }
 
-    private class TreeNode {
+    public static class TreeNode {
         public int val;
         public TreeNode left;
         public TreeNode right;
@@ -37,7 +37,7 @@ public class AllOfThem {
         }
     }
 
-    private class Node {
+    public static class Node {
         public int val;
         public Node left;
         public Node right;
@@ -1401,6 +1401,115 @@ public class AllOfThem {
         return res;
     }
 
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode slow = head, fast = head;
+        int count = 0;
+        while (count < n) {
+            fast = fast.next;
+            count++;
+        }
+        ListNode pre = null;
+        while (fast != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        //第一个节点
+        if (pre == null) {
+            pre = slow.next;
+            slow.next = null;
+            return pre;
+        } else {
+            pre.next = slow.next;
+            return head;
+        }
+    }
+
+    public ListNode mergeTwoList(ListNode first, ListNode second) {
+        ListNode dummyHead = new ListNode(-1), p = dummyHead;
+        ListNode p1 = first, p2 = second;
+        while (p1 != null && p2 != null) {
+            if (p1.val < p2.val) {
+                p.next = p1;
+                p1 = p1.next;
+            } else {
+                p.next = p2;
+                p2 = p2.next;
+            }
+            p = p.next;
+        }
+
+        if (p1 != null) {
+            p.next = p1;
+        }
+        if (p2 != null) {
+            p.next = p2;
+        }
+        return dummyHead.next;
+    }
+
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) {
+                break;
+            }
+        }
+        if (fast == null || fast.next == null) return null;
+
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+
+    public ListNode mergeKLists(ListNode[] lists) {
+        //小顶堆
+        Queue<ListNode> queue = new PriorityQueue<>((a,b) -> a.val - b.val);
+        for (ListNode node : lists) {
+            if (node != null) {
+                queue.offer(node);
+            }
+        }
+        ListNode dummyHead = new ListNode(-1), h = dummyHead;
+        while (!queue.isEmpty()) {
+            ListNode cur = queue.poll();
+            h.next = cur;
+
+            if (cur.next != null) {
+                queue.offer(cur.next);
+            }
+            h = h.next;
+        }
+        return dummyHead.next;
+    }
+
+    public ListNode swapPairs(ListNode head) {
+        if (head == null || head.next == null) return head;
+        ListNode first = head, second = head.next;
+        ListNode next = second.next;
+
+        second.next = first;
+        first.next = swapPairs(next);
+        return second;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -1415,5 +1524,16 @@ public class AllOfThem {
         System.out.println(new AllOfThem().singleNumber(new int[]{1, 2, 1}));
         System.out.println(new AllOfThem().singleNumber(new int[]{4, 1, 2, 1, 2}));
         System.out.println(new AllOfThem().singleNumber2(new int[]{0, 1, 0, 1, 0, 1, -99}));
+        ListNode list = new ListNode(1);
+        list.next = new ListNode(2);
+        list.next.next = new ListNode(3);
+        list.next.next.next = new ListNode(4);
+        ListNode r1 = new AllOfThem().swapPairs(list);
+
+        ListNode second = new ListNode(1);
+        second.next = new ListNode(2);
+        second.next.next = new ListNode(3);
+        ListNode result = new AllOfThem().mergeTwoList(list, second);
+
     }
 }
