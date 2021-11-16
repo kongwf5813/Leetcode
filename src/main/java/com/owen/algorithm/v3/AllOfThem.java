@@ -1534,6 +1534,58 @@ public class AllOfThem {
         return null;
     }
 
+
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null) return null;
+        ListNode p = head;
+        for (int i = 0; i < k; i++) {
+            if (p == null) return head;
+            p = p.next;
+        }
+        ListNode newHead = reverse(head, p);
+        ListNode last = reverseKGroup(p.next, k);
+        head.next = last;
+        return newHead;
+    }
+
+    private ListNode reverse(ListNode head, ListNode end) {
+        ListNode dummy = new ListNode(-1);
+        ListNode p = head;
+        while (p != end) {
+            ListNode next = p.next;
+            p.next = dummy.next;
+            dummy.next = p;
+            p = next;
+        }
+
+        end.next = dummy.next;
+        dummy.next = end;
+        return dummy.next;
+    }
+
+    public ListNode rotateRight(ListNode head, int k) {
+        int count = 0;
+        ListNode p = head;
+        while (p != null) {
+            p = p.next;
+            count++;
+        }
+        int realK = k % count;
+        if (realK == 0) return head;
+
+        ListNode slow = head, fast = head;
+        for (int i = 0; i < realK; i++) {
+            fast = fast.next;
+        }
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        slow.next.next = null;
+        fast.next = head;
+        return fast;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
