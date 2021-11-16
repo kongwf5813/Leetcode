@@ -1454,7 +1454,7 @@ public class AllOfThem {
     //[23].合并K个升序链表
     public ListNode mergeKLists(ListNode[] lists) {
         //小顶堆
-        Queue<ListNode> queue = new PriorityQueue<>((a,b) -> a.val - b.val);
+        Queue<ListNode> queue = new PriorityQueue<>((a, b) -> a.val - b.val);
         for (ListNode node : lists) {
             if (node != null) {
                 queue.offer(node);
@@ -1516,12 +1516,53 @@ public class AllOfThem {
         return slow;
     }
 
+    //[143].重排链表
     public void reorderList(ListNode head) {
+        if (head == null) return;
+        ListNode slow = head, fast = head, mid = null;
+        while (fast != null && fast.next != null) {
+            mid = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+
+        //奇数节点需要重置下
+        if (fast != null) {
+            mid = slow;
+        }
+
+        ListNode q = reverseList(mid.next);
+        mid.next = null;
+        ListNode p = head;
+        while (q != null) {
+            ListNode qNext = q.next;
+            ListNode pNext = p.next;
+            q.next  = pNext;
+            p.next = q;
+            q = qNext;
+            p = pNext;
+        }
     }
 
+    //[144].二叉树的前序遍历
     public List<Integer> preorderTraversal(TreeNode root) {
-        return null;
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode cur = stack.pop();
+            res.add(cur.val);
+
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            if (cur.left != null) {
+                stack.push(cur.left);
+            }
+        }
+        return res;
     }
+
     public List<Integer> postorderTraversal(TreeNode root) {
         return null;
     }
@@ -1534,7 +1575,7 @@ public class AllOfThem {
         return null;
     }
 
-
+    //[25].K个一组翻转链表
     public ListNode reverseKGroup(ListNode head, int k) {
         if (head == null) return null;
         ListNode p = head;
@@ -1563,27 +1604,31 @@ public class AllOfThem {
         return dummy.next;
     }
 
+    //[61].旋转链表
     public ListNode rotateRight(ListNode head, int k) {
         int count = 0;
-        ListNode p = head;
+        ListNode p = head, last = null;
         while (p != null) {
+            last = p;
             p = p.next;
             count++;
         }
-        int realK = k % count;
-        if (realK == 0) return head;
+        int realK;
+        if (count == 0 || count == 1 || (realK = k % count) == 0) return head;
 
         ListNode slow = head, fast = head;
         for (int i = 0; i < realK; i++) {
             fast = fast.next;
         }
-        while (fast != null && fast.next != null) {
+        ListNode pre = null;
+        while (fast != null) {
+            pre = slow;
             slow = slow.next;
             fast = fast.next;
         }
-        slow.next.next = null;
-        fast.next = head;
-        return fast;
+        pre.next = null;
+        last.next = head;
+        return slow;
     }
 
     public static void main(String[] args) {
@@ -1609,6 +1654,14 @@ public class AllOfThem {
         second.next = new ListNode(2);
         second.next.next = new ListNode(3);
         ListNode result = new AllOfThem().mergeTwoList(list, second);
+
+        ListNode l61 = new ListNode(1);
+        l61.next = new ListNode(2);
+        l61.next.next = new ListNode(3);
+        l61.next.next.next = new ListNode(4);
+        l61.next.next.next.next = new ListNode(5);
+        ListNode r61 = new AllOfThem().rotateRight(l61, 2);
+        System.out.println();
 
     }
 }
