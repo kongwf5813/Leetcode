@@ -1,6 +1,8 @@
 package com.owen.algorithm.v3;
 
 
+import com.owen.algorithm.Tree;
+
 import java.util.*;
 
 public class AllOfThem {
@@ -1061,6 +1063,44 @@ public class AllOfThem {
         cur.right = right;
     }
 
+
+    //[144].二叉树的前序遍历
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode cur = stack.pop();
+            res.add(cur.val);
+
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            if (cur.left != null) {
+                stack.push(cur.left);
+            }
+        }
+        return res;
+    }
+
+    //[145].二叉树的后序遍历
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                res.add(0, cur.val);
+                stack.push(cur);
+                cur = cur.right;
+            } else {
+                cur = stack.pop();
+                cur = cur.left;
+            }
+        }
+        return res;
+    }
+
     //[116].填充每个节点的下一个右侧节点指针
     public Node connect(Node root) {
         if (root == null) return null;
@@ -1077,7 +1117,6 @@ public class AllOfThem {
         dfsForConnect(right.left, right.right);
         dfsForConnect(left.right, right.left);
     }
-
 
     //[118].杨辉三角
     public List<List<Integer>> generate(int numRows) {
@@ -1484,97 +1523,6 @@ public class AllOfThem {
         return second;
     }
 
-    //[141].环形链表
-    public boolean hasCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) return true;
-        }
-        return false;
-    }
-
-    //[142].环形链表 II
-    public ListNode detectCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) {
-                break;
-            }
-        }
-        if (fast == null || fast.next == null) return null;
-
-        slow = head;
-        while (slow != fast) {
-            slow = slow.next;
-            fast = fast.next;
-        }
-        return slow;
-    }
-
-    //[143].重排链表
-    public void reorderList(ListNode head) {
-        if (head == null) return;
-        ListNode slow = head, fast = head, mid = null;
-        while (fast != null && fast.next != null) {
-            mid = slow;
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-
-        //奇数节点需要重置下
-        if (fast != null) {
-            mid = slow;
-        }
-
-        ListNode q = reverseList(mid.next);
-        mid.next = null;
-        ListNode p = head;
-        while (q != null) {
-            ListNode qNext = q.next;
-            ListNode pNext = p.next;
-            q.next  = pNext;
-            p.next = q;
-            q = qNext;
-            p = pNext;
-        }
-    }
-
-    //[144].二叉树的前序遍历
-    public List<Integer> preorderTraversal(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        stack.push(root);
-        while (!stack.isEmpty()) {
-            TreeNode cur = stack.pop();
-            res.add(cur.val);
-
-            if (cur.right != null) {
-                stack.push(cur.right);
-            }
-            if (cur.left != null) {
-                stack.push(cur.left);
-            }
-        }
-        return res;
-    }
-
-    public List<Integer> postorderTraversal(TreeNode root) {
-        return null;
-    }
-
-    public ListNode insertionSortList(ListNode head) {
-        return null;
-    }
-
-    public ListNode sortList(ListNode head) {
-        return null;
-    }
-
     //[25].K个一组翻转链表
     public ListNode reverseKGroup(ListNode head, int k) {
         if (head == null) return null;
@@ -1631,6 +1579,290 @@ public class AllOfThem {
         return slow;
     }
 
+    //[82]删除排序链表中的重复元素 II
+    public ListNode deleteDuplicates2(ListNode head) {
+        ListNode slow = head, fast = head;
+        return null;
+    }
+
+    //[83].删除排序链表中的重复元素
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null) {
+            if (slow.val != fast.val) {
+                slow.next = fast;
+                slow = slow.next;
+            }
+            fast = fast.next;
+        }
+        slow.next = null;
+        return head;
+    }
+
+    //[86].分隔链表
+    public ListNode partition(ListNode head, int x) {
+        ListNode sDummy = new ListNode(-1), fDummy = new ListNode(-1), cur = head, s = sDummy, f = fDummy;
+        while (cur != null) {
+            ListNode next = cur.next;
+            if (cur.val < x) {
+                s.next = cur;
+                s = s.next;
+            } else {
+                f.next = cur;
+                f = f.next;
+            }
+            //每次都断掉防止麻烦
+            cur.next = null;
+            cur = next;
+        }
+        s.next = fDummy.next;
+        return sDummy.next;
+    }
+
+    //[92].反转链表 II
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode pre = dummy;
+        for (int i = 0; i < left - 1; i++) {
+            pre = pre.next;
+        }
+        ListNode cur = pre.next;
+        ListNode next;
+        for (int i = 0; i < right - left; i++) {
+            next = cur.next;
+            //移动的永远是cur
+            cur.next = next.next;
+            //此处的cur是会变动的，所以接的是pre.next节点
+            next.next = pre.next;
+            pre.next = next;
+        }
+        return dummy.next;
+    }
+
+    //[138].复制带随机指针的链表
+    public Node copyRandomList(Node head) {
+        return null;
+    }
+
+    //[141].环形链表
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+
+    //[142].环形链表 II
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) {
+                break;
+            }
+        }
+        if (fast == null || fast.next == null) return null;
+
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+
+    //[143].重排链表
+    public void reorderList(ListNode head) {
+        if (head == null) return;
+        ListNode slow = head, fast = head, mid = null;
+        while (fast != null && fast.next != null) {
+            mid = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+
+        //奇数节点需要重置下
+        if (fast != null) {
+            mid = slow;
+        }
+
+        ListNode q = reverseList(mid.next);
+        mid.next = null;
+        ListNode p = head;
+        while (q != null) {
+            ListNode qNext = q.next;
+            ListNode pNext = p.next;
+            q.next = pNext;
+            p.next = q;
+            q = qNext;
+            p = pNext;
+        }
+    }
+
+    //[147].对链表进行插入排序
+    public ListNode insertionSortList(ListNode head) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode cur = head.next, lastSorted = head;
+        while (cur != null) {
+            //维护最后排序好的指针
+            if (lastSorted.val <= cur.val) {
+                lastSorted = lastSorted.next;
+            } else {
+                //肯定要从头开始找
+                ListNode pre = dummy;
+                while (pre.next.val < cur.val) {
+                    pre = pre.next;
+                }
+                //lastSorted后继节点指向cur后面的节点，因为cur之前都是排序好的
+                lastSorted.next = cur.next;
+
+                //pre的后面一个节点比较大，插入到pre后面
+                cur.next = pre.next;
+                pre.next = cur;
+            }
+            cur = lastSorted.next;
+        }
+        return dummy.next;
+    }
+
+    //[148].排序链表
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) return head;
+        ListNode fast = head, slow = head, pre = null;
+        while (fast != null && fast.next != null) {
+            pre = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        pre.next = null;
+
+        //奇数情况，左边少一个， 右边多一个
+        ListNode left = sortList(head);
+        ListNode right = sortList(slow);
+        return merge(left, right);
+    }
+
+    private ListNode merge(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode(-1), cur = dummy;
+        while (left != null && right != null) {
+            if (left.val < right.val) {
+                cur.next = left;
+                left = left.next;
+            } else {
+                cur.next = right;
+                right = right.next;
+            }
+            cur = cur.next;
+        }
+
+        cur.next = left == null ? right : left;
+        return dummy.next;
+    }
+
+    //[160].相交链表
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p1 = headA, p2 = headB;
+        while (p1 != p2) {
+            if (p1 != null) {
+                p1 = p1.next;
+            } else {
+                p1 = headB;
+            }
+
+            if (p2 != null) {
+                p2 = p2.next;
+            } else {
+                p2 = headA;
+            }
+        }
+        return p1;
+    }
+
+    //[203].移除链表元素
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode slow = dummy, fast = head;
+        while (fast != null) {
+            if (fast.val == val) {
+                slow.next = fast.next;
+            } else {
+                slow = fast;
+            }
+            fast = fast.next;
+        }
+        return dummy.next;
+    }
+
+    //[206].反转链表
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) return head;
+
+        ListNode last = reverseList(head.next);
+        head.next.next = head;
+        head.next = null;
+        return last;
+    }
+
+    //[206].反转链表 迭代
+    public ListNode reverseList2(ListNode head) {
+        ListNode cur = head, pre = null;
+        while (cur != null) {
+            ListNode next = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = next;
+        }
+        return pre;
+    }
+
+    //[234].回文链表
+    private ListNode left;
+    public boolean isPalindrome(ListNode head) {
+        left = head;
+        return helperIsPalindrome(head);
+    }
+
+    private boolean helperIsPalindrome(ListNode right) {
+        if (right == null) return true;
+        boolean res = isPalindrome(right.next);
+        res = res && (left.val == right.val);
+        left = left.next;
+        return res;
+    }
+
+
+    //[237].删除链表中的节点
+    public void deleteNode(ListNode node) {
+        //不知道前面的节点，那只能去复制，删掉下一个节点
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+
+    //[328].奇偶链表
+    public ListNode oddEvenList(ListNode head) {
+        return null;
+    }
+
+    //[876].链表的中间结点
+    public ListNode middleNode(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -1661,6 +1893,13 @@ public class AllOfThem {
         l61.next.next.next = new ListNode(4);
         l61.next.next.next.next = new ListNode(5);
         ListNode r61 = new AllOfThem().rotateRight(l61, 2);
+
+        ListNode l141 = new ListNode(1);
+        l141.next = new ListNode(2);
+        l141.next.next = new ListNode(3);
+        l141.next.next.next = new ListNode(4);
+//        l141.next.next.next.next = new ListNode(5);
+        new AllOfThem().reorderList(l141);
         System.out.println();
 
     }
