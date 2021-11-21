@@ -1643,7 +1643,29 @@ public class AllOfThem {
 
     //[138].复制带随机指针的链表
     public Node copyRandomList(Node head) {
-        return null;
+        if (head == null) return null;
+        //旧 + 新的
+        Map<Node, Node> map = new HashMap<>();
+        Node newHead = new Node(head.val);
+        map.put(head, newHead);
+
+        Node cur = head;
+        while (cur != null) {
+            Node copy = map.get(cur);
+
+            if (cur.random != null) {
+                map.putIfAbsent(cur.random, new Node(cur.random.val));
+                copy.random = map.get(cur.random);
+            }
+
+            if (cur.next != null) {
+                map.putIfAbsent(cur.next, new Node(cur.next.val));
+                copy.next = map.get(cur.next);
+            }
+
+            cur = cur.next;
+        }
+        return newHead;
     }
 
     //[141].环形链表
@@ -1826,6 +1848,7 @@ public class AllOfThem {
 
     //[234].回文链表
     private ListNode left;
+
     public boolean isPalindrome(ListNode head) {
         left = head;
         return helperIsPalindrome(head);
@@ -1833,12 +1856,11 @@ public class AllOfThem {
 
     private boolean helperIsPalindrome(ListNode right) {
         if (right == null) return true;
-        boolean res = isPalindrome(right.next);
+        boolean res = helperIsPalindrome(right.next);
         res = res && (left.val == right.val);
         left = left.next;
         return res;
     }
-
 
     //[237].删除链表中的节点
     public void deleteNode(ListNode node) {
@@ -1849,7 +1871,23 @@ public class AllOfThem {
 
     //[328].奇偶链表
     public ListNode oddEvenList(ListNode head) {
-        return null;
+        ListNode oddHead = new ListNode(-1);
+        ListNode evenHead = new ListNode(-1);
+        ListNode cur = head, odd = oddHead, even = evenHead;
+        for (int i = 1; cur != null; i++) {
+            ListNode next = cur.next;
+            if (i % 2 != 0) {
+                odd.next = cur;
+                odd = odd.next;
+            } else {
+                even.next = cur;
+                even = even.next;
+            }
+            cur.next = null;
+            cur = next;
+        }
+        odd.next = evenHead.next;
+        return oddHead.next;
     }
 
     //[876].链表的中间结点
@@ -1862,6 +1900,57 @@ public class AllOfThem {
         return slow;
     }
 
+    //[198].打家劫舍
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+
+        //dp[i] 从第i间房打劫的最大金额
+        int[] dp = new int[n + 1];
+        dp[n - 1] = nums[n - 1];
+        //因为i需要从倒数第二个位置开始，所以需要n+1个空间
+        for (int i = n - 2; i >= 0; i--) {
+            dp[i] = Math.max(dp[i + 2] + nums[i], dp[i + 1]);
+        }
+        return dp[0];
+    }
+
+    //[213].打家劫舍 II
+    public int rob2(int[] nums) {
+        return 0;
+    }
+
+    //[337].打家劫舍 III
+    public int rob(TreeNode root) {
+        return 0;
+    }
+
+    //[146].LRU 缓存机制
+    class LRUCache {
+
+        public LRUCache(int capacity) {
+
+        }
+
+        public int get(int key) {
+            return 0;
+        }
+
+        public void put(int key, int value) {
+
+        }
+    }
+
+    //[150].逆波兰表达式求值
+    public int evalRPN(String[] tokens) {
+        return 0;
+    }
+
+    //[151].翻转字符串里的单词
+    public String reverseWords(String s) {
+        return null;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -1900,7 +1989,13 @@ public class AllOfThem {
         l141.next.next.next = new ListNode(4);
 //        l141.next.next.next.next = new ListNode(5);
         new AllOfThem().reorderList(l141);
-        System.out.println();
+
+
+        ListNode l328 = new ListNode(1);
+        l328.next = new ListNode(2);
+        l328.next.next = new ListNode(3);
+        l328.next.next.next = new ListNode(4);
+        ListNode r328 = new AllOfThem().oddEvenList(l328);
 
     }
 }
