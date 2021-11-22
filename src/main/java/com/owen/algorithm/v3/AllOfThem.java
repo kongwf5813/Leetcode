@@ -1918,12 +1918,34 @@ public class AllOfThem {
 
     //[213].打家劫舍 II
     public int rob2(int[] nums) {
-        return 0;
+        int len = nums.length;
+        if (len == 0) return 0;
+        if (len == 1) return nums[0];
+        return Math.max(rob2(nums, 0, len - 2), rob2(nums, 1, len - 1));
+    }
+
+    private int rob2(int[] nums, int start, int end) {
+        int dp_i = 0, dp_i_2 = 0, dp_i_1 = 0;
+        for (int i = end; i >= start; i--) {
+            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
     }
 
     //[337].打家劫舍 III
+    private Map<TreeNode, Integer> map = new HashMap<>();
     public int rob(TreeNode root) {
-        return 0;
+        if (root == null) return 0;
+        if (map.containsKey(root)) return map.get(root);
+        int rob_it = root.val +
+                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
+                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
+        int rob_not = rob(root.left) + rob(root.right);
+        int res = Math.max(rob_it, rob_not);
+        map.put(root, res);
+        return res;
     }
 
     //[146].LRU 缓存机制
