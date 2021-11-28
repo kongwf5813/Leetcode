@@ -3,7 +3,9 @@ package com.owen.algorithm.v3;
 
 import com.owen.algorithm.Tree;
 
+import javax.swing.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AllOfThem {
     public static class ListNode {
@@ -118,6 +120,32 @@ public class AllOfThem {
             }
         }
         return area;
+    }
+
+    //[22].括号生成
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        if (n <= 0) return res;
+        backtraceForGenerateParenthesis(n, n, res, new StringBuilder());
+        return res;
+    }
+
+    private void backtraceForGenerateParenthesis(int left, int right, List<String> res, StringBuilder sb) {
+        if (right < left || left < 0 || right < 0) {
+            return;
+        }
+        if (left == 0 && right == 0) {
+            res.add(sb.toString());
+            return;
+        }
+
+        sb.append('(');
+        backtraceForGenerateParenthesis(left - 1, right, res, sb);
+        sb.deleteCharAt(sb.length() - 1);
+
+        sb.append(')');
+        backtraceForGenerateParenthesis(left, right - 1, res, sb);
+        sb.deleteCharAt(sb.length() - 1);
     }
 
     //[46].全排列
@@ -1936,6 +1964,7 @@ public class AllOfThem {
 
     //[337].打家劫舍 III
     private Map<TreeNode, Integer> map = new HashMap<>();
+
     public int rob(TreeNode root) {
         if (root == null) return 0;
         if (map.containsKey(root)) return map.get(root);
@@ -1971,7 +2000,235 @@ public class AllOfThem {
 
     //[151].翻转字符串里的单词
     public String reverseWords(String s) {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        int len = s.length();
+        int left = 0;
+        while (s.charAt(left) == ' ') {
+            left++;
+        }
+
+        for (int i = len - 1; i >= left; i--) {
+            int j = i;
+            while (i >= left && s.charAt(i) != ' ') {
+                i--;
+            }
+
+            if (i != j) {
+                sb.append(s.substring(i + 1, j + 1));
+                if (i > left) {
+                    sb.append(" ");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    //[33].搜索旋转排序数组
+    public int search(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+
+            //说明left到mid是严格递增
+            if (nums[mid] > nums[right]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    //mid肯定不等于target
+                    left = mid + 1;
+                }
+            } else {
+                //说明mid到right是严格递增
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    //mid肯定不等于target
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    //[34].在排序数组中查找元素的第一个和最后一个位置
+    public int[] searchRange(int[] nums, int target) {
+        int leftBound = findIndex(nums, target, true);
+        int rightBound = findIndex(nums, target, false);
+        return new int[]{leftBound, rightBound};
+    }
+
+    private int findIndex(int[] nums, int target, boolean isLeft) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                if (isLeft) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (isLeft) {
+            if (left >= nums.length || nums[left] != target) return -1;
+            return left;
+        } else {
+            if (right < 0 || nums[right] != target) return -1;
+            return right;
+        }
+    }
+
+    private int findLeftIndex(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (target == nums[mid]) {
+                right = mid - 1;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (target < nums[mid]) {
+                right = mid - 1;
+            }
+        }
+
+        if (left >= nums.length || nums[left] != target) return -1;
+        return left;
+    }
+
+    private int findRightIndex(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (target == nums[mid]) {
+                left = mid + 1;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (target < nums[mid]) {
+                right = mid - 1;
+            }
+        }
+
+        if (right < 0 || nums[right] != target) return -1;
+        return right;
+    }
+
+    //[35].搜索插入位置
+    public int searchInsert(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+
+    //[74].搜索二维矩阵
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int left = 0, right = m * n - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int x = mid / m;
+            int y = mid % m;
+            if (matrix[x][y] == target) {
+                return true;
+            } else if (matrix[x][y] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return false;
+    }
+
+    //[81].搜索旋转排序数组 II
+    public boolean search3(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                return true;
+            }
+
+            //10111 11101 这两种情况中，没办法判断递增区间走向，所以砍掉左边的相同的
+            if (nums[mid] == nums[left]) {
+                left++;
+            } else if (nums[mid] > nums[right]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return false;
+    }
+
+    //[240].搜索二维矩阵 II
+    public boolean searchMatrix2(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int x = 0, y = n - 1;
+
+        while (x >= 0 && x < m && y >= 0 && y < n) {
+            if (matrix[x][y] == target) {
+                return true;
+            } else if (matrix[x][y] < target) {
+                x++;
+            } else {
+                y--;
+            }
+        }
+        return false;
+    }
+
+    //[153].寻找旋转排序数组中的最小值
+    public int findMin(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return nums[left];
+    }
+
+    //[162].寻找峰值
+    public int findPeakElement(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        //因为需要判断后一个值，所以此处是left < right
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[mid + 1]) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
     }
 
     public static void main(String[] args) {
@@ -2018,6 +2275,12 @@ public class AllOfThem {
         l328.next.next = new ListNode(3);
         l328.next.next.next = new ListNode(4);
         ListNode r328 = new AllOfThem().oddEvenList(l328);
+
+        System.out.println(new AllOfThem().reverseWords("  Bob    Loves  Alice   "));
+
+        System.out.println(new AllOfThem().findLeftIndex(new int[]{1}, 5));
+        System.out.println(new AllOfThem().searchInsert(new int[]{1}, 5));
+        System.out.println(new AllOfThem().search3(new int[]{1, 0, 1, 1, 1}, 0));
 
     }
 }
