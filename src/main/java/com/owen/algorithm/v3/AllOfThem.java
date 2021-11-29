@@ -2231,6 +2231,45 @@ public class AllOfThem {
         return left;
     }
 
+    //[37].解数独
+    public void solveSudoku(char[][] board) {
+        backtraceSolveSudoku(board, 0, 0);
+    }
+
+    private boolean backtraceSolveSudoku(char[][] board, int x, int y) {
+        if (y == 9) {
+            return backtraceSolveSudoku(board, x + 1, 0);
+        }
+
+        //已经第10行了
+        if (x == 9) {
+            return true;
+        }
+
+        if (board[x][y] != '.') {
+            return backtraceSolveSudoku(board, x, y + 1);
+        }
+        for (char i = '1'; i <= '9'; i++) {
+            if (!isValidSudoku(board, x, y, i)) {
+                continue;
+            }
+            board[x][y] = i;
+            if (backtraceSolveSudoku(board, x, y + 1)) return true;
+            board[x][y] = '.';
+        }
+        return false;
+    }
+
+    private boolean isValidSudoku(char[][] board, int x, int y, char ch) {
+        for (int i = 0; i < 9; i++) {
+            if (board[x][i] == ch) return false;
+            if (board[i][y] == ch) return false;
+            if (board[(x / 3) * 3 + i / 3][(y / 3) * 3 + i % 3] == ch) return false;
+        }
+        return true;
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
