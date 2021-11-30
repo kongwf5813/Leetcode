@@ -4,6 +4,7 @@ package com.owen.algorithm.v3;
 import com.owen.algorithm.Tree;
 
 import javax.swing.*;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1995,8 +1996,30 @@ public class AllOfThem {
 
     //[150].逆波兰表达式求值
     public int evalRPN(String[] tokens) {
-        return 0;
+        Stack<String> stack = new Stack<>();
+        for (String token : tokens) {
+            if (token.equals("+")
+                    || token.equals("-")
+                    || token.equals("*")
+                    || token.equals("/")) {
+                int second = Integer.parseInt(stack.pop());
+                int first = Integer.parseInt(stack.pop());
+                if (token.equals("+")) {
+                    stack.push("" + (second + first));
+                } else if (token.equals("-")) {
+                    stack.push("" + (first - second));
+                } else if (token.equals("*")) {
+                    stack.push("" + (first * second));
+                } else {
+                    stack.push("" + (first / second));
+                }
+            } else {
+                stack.push(token);
+            }
+        }
+        return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
     }
+
 
     //[151].翻转字符串里的单词
     public String reverseWords(String s) {
@@ -2269,6 +2292,33 @@ public class AllOfThem {
         return true;
     }
 
+    //[17].电话号码的字母组合
+    public List<String> letterCombinations(String digits) {
+        List<String> res = new ArrayList<>();
+        if (digits.length() == 0) return res;
+        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        backtraceForLetterCombinations(digits, 0, res, new StringBuilder(), numbers);
+        return res;
+    }
+
+    private void backtraceForLetterCombinations(String digits, int s, List<String> res, StringBuilder sb, String[] numbers) {
+        if (s == digits.length()) {
+            res.add(sb.toString());
+            return;
+        }
+        char ch = digits.charAt(s);
+        for (char choice : numbers[ch - '0'].toCharArray()) {
+            sb.append(choice);
+            backtraceForLetterCombinations(digits, s + 1, res, sb, numbers);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        return null;
+    }
+
+
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -2321,5 +2371,6 @@ public class AllOfThem {
         System.out.println(new AllOfThem().searchInsert(new int[]{1}, 5));
         System.out.println(new AllOfThem().search3(new int[]{1, 0, 1, 1, 1}, 0));
 
+        System.out.println(new AllOfThem().letterCombinations("23"));
     }
 }
