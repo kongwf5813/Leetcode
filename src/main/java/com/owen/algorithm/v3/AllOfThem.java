@@ -2369,6 +2369,18 @@ public class AllOfThem {
         }
     }
 
+    public List<List<String>> solveNQueens(int n) {
+        return null;
+    }
+
+    public List<List<Integer>> combine(int n, int k) {
+        return null;
+    }
+
+    public List<List<Integer>> subsets(int[] nums) {
+        return null;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
