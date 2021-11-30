@@ -2314,10 +2314,60 @@ public class AllOfThem {
         }
     }
 
+    //[39].组合总和
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
-        return null;
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) return res;
+        backtraceForCombinationSum(candidates, 0, target, res, new LinkedList<>());
+        return res;
     }
 
+    private void backtraceForCombinationSum(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i < candidates.length; i++) {
+            if (candidates[i] > target) {
+                continue;
+            }
+            select.addLast(candidates[i]);
+            backtraceForCombinationSum(candidates, i, target - candidates[i], res, select);
+            select.removeLast();
+        }
+    }
+
+
+    //[40]组合总和 II
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) return res;
+        Arrays.sort(candidates);
+        backtraceForCombinationSum2(candidates, 0, target, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombinationSum2(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i < candidates.length; i++) {
+            //本层如果有重复的话，只选第一个，后面的直接跳过
+            if (i > s && candidates[i] == candidates[i - 1]) {
+                continue;
+            }
+            if (candidates[i] > target) {
+                continue;
+            }
+            select.addLast(candidates[i]);
+            //元素不能重复选择，只能从下一个选择
+            backtraceForCombinationSum2(candidates, i + 1, target - candidates[i], res, select);
+            select.removeLast();
+        }
+    }
 
 
     public static void main(String[] args) {
@@ -2372,5 +2422,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().search3(new int[]{1, 0, 1, 1, 1}, 0));
 
         System.out.println(new AllOfThem().letterCombinations("23"));
+        System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
+        System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
     }
 }
