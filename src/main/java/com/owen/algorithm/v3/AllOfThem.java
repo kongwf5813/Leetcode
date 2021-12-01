@@ -2374,13 +2374,81 @@ public class AllOfThem {
     }
 
     public List<List<Integer>> combine(int n, int k) {
+
         return null;
+    }
+
+    private void backtraceForCombine(int n, int k, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() == k) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i <=n; i++) {
+
+        }
+
     }
 
     public List<List<Integer>> subsets(int[] nums) {
-        return null;
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForSubsets(nums, 0, res, new LinkedList<>());
+        return res;
     }
 
+    private void backtraceForSubsets(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        //1 2 3
+        if (s == nums.length) {
+            return;
+        }
+        res.add(new ArrayList<>(select));
+        for (int i = s; i < nums.length; i++) {
+            select.addLast(nums[i]);
+
+            backtraceForSubsets(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+    public int trap(int[] height) {
+        int res = 0;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < height.length; i++) {
+            int curHeight = height[i];
+            int maxHeight = 0;
+            while (!stack.isEmpty() && curHeight >= height[stack.peek()]) {
+                int top = stack.pop();
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                maxHeight = Math.max(maxHeight, height[top]);
+                int left = stack.peek();
+                int width = i - left - 1;
+
+                res += width * (Math.min(height[left], curHeight) - maxHeight);
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        Map<Integer, Integer> numberMap = new HashMap<>();
+        Stack<Integer> stack = new Stack<>();
+        for (int i = nums2.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums2[i] >= nums2[stack.peek()]) {
+                stack.pop();
+            }
+            numberMap.put(nums2[i], stack.isEmpty() ? -1 : nums2[stack.peek()]);
+            stack.push(i);
+        }
+
+        int[] res = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++) {
+            res[i] = numberMap.get(nums1[i]);
+        }
+        return res;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -2436,5 +2504,9 @@ public class AllOfThem {
         System.out.println(new AllOfThem().letterCombinations("23"));
         System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
         System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
+        System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
+        System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
+        System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
+        System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[] {4,1,2}, new int[]{1,3,4,2})));
     }
 }
