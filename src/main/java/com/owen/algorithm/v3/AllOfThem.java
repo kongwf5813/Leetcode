@@ -2370,7 +2370,62 @@ public class AllOfThem {
     }
 
     public List<List<String>> solveNQueens(int n) {
-        return null;
+        List<List<String>> res = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            sb.append('.');
+        }
+        LinkedList select = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            select.add(sb.toString());
+        }
+        backtraceForSolveNQueens(n, 0, res, select);
+        return res;
+    }
+
+    private void backtraceForSolveNQueens(int n, int row, List<List<String>> res, LinkedList<String> select) {
+        if (row == n) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+        char[] arr = select.get(row).toCharArray();
+        for (int col = 0; col < n; col++) {
+            if (!isValid(select, row, col)) {
+                continue;
+            }
+            arr[col] = 'Q';
+            select.set(row, new String(arr));
+
+            backtraceForSolveNQueens(n, row + 1, res, select);
+
+            arr[col] = '.';
+            select.set(row, new String(arr));
+        }
+    }
+
+    private boolean isValid(LinkedList<String> select, int row, int col) {
+        int n = select.get(row).length();
+        //每次行上是一个选择，所以不需要判断行是否合法，因为肯定合法
+        //列不合法
+        for (int i = 0; i < n; i++) {
+            if (select.get(i).charAt(col) == 'Q') {
+                return false;
+            }
+        }
+        //左上不合法
+        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (select.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+
+        //右上不合法
+        for (int i = row, j = col; i >= 0 && j < n; i--, j++) {
+            if (select.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+        return true;
     }
 
     public List<List<Integer>> combine(int n, int k) {
@@ -2511,5 +2566,6 @@ public class AllOfThem {
         System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
         System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[]{4, 1, 2}, new int[]{1, 3, 4, 2})));
         System.out.println(new AllOfThem().combine(4, 2));
+        System.out.println(new AllOfThem().solveNQueens(4));
     }
 }
