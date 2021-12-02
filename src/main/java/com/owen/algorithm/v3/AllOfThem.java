@@ -2374,8 +2374,9 @@ public class AllOfThem {
     }
 
     public List<List<Integer>> combine(int n, int k) {
-
-        return null;
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForCombine(n, k, 1, res, new LinkedList<>());
+        return res;
     }
 
     private void backtraceForCombine(int n, int k, int s, List<List<Integer>> res, LinkedList<Integer> select) {
@@ -2384,10 +2385,11 @@ public class AllOfThem {
             return;
         }
 
-        for (int i = s; i <=n; i++) {
-
+        for (int i = s; i <= n; i++) {
+            select.addLast(i);
+            backtraceForCombine(n, k, i + 1, res, select);
+            select.removeLast();
         }
-
     }
 
     public List<List<Integer>> subsets(int[] nums) {
@@ -2507,6 +2509,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
         System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
         System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
-        System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[] {4,1,2}, new int[]{1,3,4,2})));
+        System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[]{4, 1, 2}, new int[]{1, 3, 4, 2})));
+        System.out.println(new AllOfThem().combine(4, 2));
     }
 }
