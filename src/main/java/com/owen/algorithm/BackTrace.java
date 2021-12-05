@@ -957,7 +957,7 @@ public class BackTrace {
 //
 //        [90].子集II
 //        System.out.println(subsetsWithDup(new int[]{1, 2, 2, 3}));
-//        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
+        System.out.println(subsetsWithDup(new int[]{1, 2, 2}));
 //        System.out.println(subsetsWithDup(new int[]{}));
 //
 //        [131].分割回文串

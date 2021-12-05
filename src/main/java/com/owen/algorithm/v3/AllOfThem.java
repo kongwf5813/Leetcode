@@ -1092,7 +1092,6 @@ public class AllOfThem {
         cur.right = right;
     }
 
-
     //[144].二叉树的前序遍历
     public List<Integer> preorderTraversal(TreeNode root) {
         List<Integer> res = new ArrayList<>();
@@ -2020,7 +2019,6 @@ public class AllOfThem {
         return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
     }
 
-
     //[151].翻转字符串里的单词
     public String reverseWords(String s) {
         StringBuilder sb = new StringBuilder();
@@ -2338,7 +2336,6 @@ public class AllOfThem {
         }
     }
 
-
     //[40]组合总和 II
     public List<List<Integer>> combinationSum2(int[] candidates, int target) {
         List<List<Integer>> res = new ArrayList<>();
@@ -2369,6 +2366,7 @@ public class AllOfThem {
         }
     }
 
+    //[51].N皇后
     public List<List<String>> solveNQueens(int n) {
         List<List<String>> res = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
@@ -2428,6 +2426,7 @@ public class AllOfThem {
         return true;
     }
 
+    //[77].组合
     public List<List<Integer>> combine(int n, int k) {
         List<List<Integer>> res = new ArrayList<>();
         backtraceForCombine(n, k, 1, res, new LinkedList<>());
@@ -2447,6 +2446,7 @@ public class AllOfThem {
         }
     }
 
+    //[78].子集
     public List<List<Integer>> subsets(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
         backtraceForSubsets(nums, 0, res, new LinkedList<>());
@@ -2455,18 +2455,104 @@ public class AllOfThem {
 
     private void backtraceForSubsets(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
         //1 2 3
-        if (s == nums.length) {
-            return;
-        }
         res.add(new ArrayList<>(select));
         for (int i = s; i < nums.length; i++) {
             select.addLast(nums[i]);
-
             backtraceForSubsets(nums, i + 1, res, select);
             select.removeLast();
         }
     }
 
+    //[90].子集 II
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        backtraceForSubsetsWithDup(nums, 0, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForSubsetsWithDup(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        res.add(new ArrayList<>(select));
+        for (int i = s; i < nums.length; i++) {
+            //本层中有重复的，则跳过，永远直选第一个
+            if (i > s && nums[i] == nums[i - 1]) {
+                continue;
+            }
+
+            select.addLast(nums[i]);
+            backtraceForSubsetsWithDup(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+    //[79].单词搜索
+    public boolean exist(char[][] board, String word) {
+        int m = board.length;
+        int n = board[0].length;
+        boolean[][] visit = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (backtraceForExist(board, i, j, word, 0, visit)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean backtraceForExist(char[][] board, int x, int y, String word, int s, boolean[][] visit) {
+        if (board[x][y] != word.charAt(s)) {
+            return false;
+        }
+        if (s == word.length() - 1) {
+            return true;
+        }
+
+        visit[x][y] = true;
+        int[][] direct = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        int m = board.length;
+        int n = board[0].length;
+        for (int[] di : direct) {
+            int newX = x + di[0];
+            int newY = y + di[1];
+            if (newX >= 0 && newX < m
+                    && newY >= 0 && newY < n
+                    && !visit[newX][newY]
+                    && backtraceForExist(board, newX, newY, word, s + 1, visit)) {
+                return true;
+            }
+        }
+
+        visit[x][y] = false;
+        return false;
+    }
+
+    //[89].格雷编码
+    public List<Integer> grayCode(int n) {
+        boolean[] visit = new boolean[1 << n];
+        LinkedList<Integer> select = new LinkedList<>();
+        backtraceForGrayCode(n, 0, visit, select);
+        return select;
+    }
+
+    private boolean backtraceForGrayCode(int n, int cur, boolean[] visit, LinkedList<Integer> select) {
+        if (select.size() == 1 << n) {
+            return true;
+        }
+
+        select.add(cur);
+        visit[cur] = true;
+        for (int i = 0; i < n; i++) {
+            int next = cur ^ 1 << i;
+            if (!visit[next] && backtraceForGrayCode(n, next, visit, select)) {
+                return true;
+            }
+        }
+        visit[cur] = false;
+        return false;
+    }
+
+    //[42].接雨水
     public int trap(int[] height) {
         int res = 0;
         Stack<Integer> stack = new Stack<>();
@@ -2489,6 +2575,27 @@ public class AllOfThem {
         return res;
     }
 
+    //[456].132 模式
+    public boolean find132pattern(int[] nums) {
+        int n = nums.length;
+        if (n <= 2) return false;
+        //[3,5,0,3,4]
+        Stack<Integer> stack = new Stack<>();
+        //维护是一个单调递减栈
+        int maxRight = Integer.MIN_VALUE;
+        for (int i = n - 1; i >= 0; i--) {
+            if (nums[i] < maxRight) {
+                return true;
+            }
+            while (!stack.isEmpty() && nums[i] > stack.peek()) {
+                maxRight = Math.max(maxRight, stack.pop());
+            }
+            stack.push(nums[i]);
+        }
+        return false;
+    }
+
+    //[496].下一个更大元素I
     public int[] nextGreaterElement(int[] nums1, int[] nums2) {
         Map<Integer, Integer> numberMap = new HashMap<>();
         Stack<Integer> stack = new Stack<>();
@@ -2505,6 +2612,187 @@ public class AllOfThem {
             res[i] = numberMap.get(nums1[i]);
         }
         return res;
+    }
+
+    //[383].赎金信
+    public boolean canConstruct(String ransomNote, String magazine) {
+        if (ransomNote.length() > magazine.length()) return false;
+        int[] count = new int[26];
+        for (int i = 0; i < magazine.length(); i++) {
+            count[magazine.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < ransomNote.length(); i++) {
+            if (--count[ransomNote.charAt(i) - 'a'] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[372].超级次方
+    public int superPow(int a, int[] b) {
+        return dfsForSuperPow(a, b, b.length - 1);
+    }
+
+    public int dfsForSuperPow(int a, int[] b, int index) {
+        if (index < 0) {
+            return 1;
+        }
+        int base = 1337;
+        int part1 = myPow(a, b[index]);
+        int part2 = myPow(dfsForSuperPow(a, b, index - 1), 10);
+        return part1 * part2 % base;
+    }
+
+    //快速幂
+    private int myPow(int a, int b) {
+        if (b == 0) return 1;
+        int base = 1337;
+        a %= base;
+
+        if (b % 2 == 0) {
+            int half = myPow(a, b / 2);
+            return half * half % base;
+        } else {
+            return a * myPow(a, b - 1) % base;
+        }
+    }
+
+    //[50].Pow(x, n)
+    public double myPow(double x, int n) {
+        if (n == 0) return 1;
+        if (n == 1) return x;
+        if (n == -1) return 1 / x;
+
+        double half = myPow(x, n / 2);
+        double left = myPow(x, n % 2);
+        return half * half * left;
+    }
+
+    //[581].最短无序连续子数组
+    public int findUnsortedSubarray(int[] nums) {
+        int right = 0;
+        int left = nums.length - 1;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = nums.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) {
+                right = Math.max(right, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        //一个栈没办法同时找到左右边界
+        stack.clear();
+        for (int i = 0; i < nums.length; i++) {
+            while (!stack.isEmpty() && nums[i] < nums[stack.peek()]) {
+                left = Math.min(left, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        return right > left ? right - left + 1 : 0;
+    }
+
+    //[739].每日温度
+    public int[] dailyTemperatures(int[] temperatures) {
+        int[] res = new int[temperatures.length];
+        Stack<Integer> stack = new Stack<>();
+        //单调递增减栈，遇到小的压掉它
+        for (int i = temperatures.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
+                stack.pop();
+            }
+
+            res[i] = stack.isEmpty() ? 0 : stack.peek() - i;
+            stack.push(i);
+        }
+        return res;
+    }
+
+    //[300].最长递增子序列
+    public int lengthOfLIS(int[] nums) {
+        int size = nums.length;
+        if (size == 0) return 0;
+        int[] dp = new int[size];
+        int length = 1;
+        for (int i = 0; i < size; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            length = Math.max(length, dp[i]);
+        }
+
+        return length;
+    }
+
+    //[354].俄罗斯套娃信封问题
+    public int maxEnvelopes(int[][] envelopes) {
+        int n = envelopes.length;
+        Arrays.sort(envelopes, (a, b) -> {
+            if (a[0] == b[0]) return b[1] - a[1];
+            else return a[0] - b[0];
+        });
+        int[] height = new int[n];
+        for (int i = 0; i < n; i++) {
+            height[i] = envelopes[i][1];
+        }
+        return lengthOfLIS(height);
+    }
+
+    //[392].判断子序列
+    public boolean isSubsequence(String s, String t) {
+        int i = 0, j = 0;
+        while (i < s.length() && j < t.length()) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+                j++;
+            }
+            j++;
+        }
+        return i == s.length();
+    }
+
+    //[172].阶乘后的零
+    public int trailingZeroes(int n) {
+        int res = 0;
+        long d = 5;
+        while (n >= d) {
+            res += n / d;
+            d *= 5;
+        }
+        return res;
+    }
+
+    //[199].二叉树的右视图
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        dfsForRightSideView(root, 0, res);
+        return res;
+    }
+
+    private void dfsForRightSideView(TreeNode root, int depth, List<Integer> res) {
+        if (root == null) return;
+        if (res.size() == depth) {
+            res.add(root.val);
+        }
+        dfsForRightSideView(root.right, depth + 1, res);
+        dfsForRightSideView(root.left, depth + 1, res);
+    }
+
+    //[201].数字范围按位与
+    public int rangeBitwiseAnd(int left, int right) {
+        int m = left, n = right;
+        int count = 0;
+        while (m < n) {
+            count++;
+            m >>= 1;
+            n >>= 1;
+        }
+        return m << count;
     }
 
     public static void main(String[] args) {
@@ -2562,10 +2850,32 @@ public class AllOfThem {
         System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
         System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
         System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
+        System.out.println(new AllOfThem().subsetsWithDup(new int[]{1, 2, 2}));
         System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
         System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
         System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[]{4, 1, 2}, new int[]{1, 3, 4, 2})));
         System.out.println(new AllOfThem().combine(4, 2));
         System.out.println(new AllOfThem().solveNQueens(4));
+//        System.out.println(new AllOfThem().find132pattern(new int[]{1,2,3,4}));
+//        System.out.println(new AllOfThem().find132pattern(new int[]{3,1,4,2}));
+        System.out.println(new AllOfThem().find132pattern(new int[]{-1, 3, 2, 0}));
+//        System.out.println(new AllOfThem().find132pattern(new int[]{3, 5, 0, 3, 4}));
+        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{30, 60, 90})));
+        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
+        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73})));
+        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{2, 6, 4, 8, 10, 9, 15}));
+        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 4}));
+        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 3, 3}));
+        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1}));
+        System.out.println(new AllOfThem().grayCode(3));
+        System.out.println(new AllOfThem().superPow(2, new int[]{1, 0}));
+        System.out.println(new AllOfThem().trailingZeroes(10000));
+
+        TreeNode t199 = new TreeNode(1);
+        t199.left =  new TreeNode(2);
+        t199.right = new TreeNode(3);
+        t199.left.right = new TreeNode(5);
+        t199.right.left = new TreeNode(4);
+        System.out.println(new AllOfThem().rightSideView(t199));
     }
 }
