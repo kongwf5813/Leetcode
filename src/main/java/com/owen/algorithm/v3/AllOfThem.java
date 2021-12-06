@@ -2709,6 +2709,22 @@ public class AllOfThem {
         return res;
     }
 
+    //[503].下一个更大的元素II
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 2 * n - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums[i % n] >= stack.peek()) {
+                stack.pop();
+            }
+
+            res[i % n] = stack.isEmpty() ? -1 : stack.peek();
+            stack.push(nums[i % n]);
+        }
+        return res;
+    }
+
     //[300].最长递增子序列
     public int lengthOfLIS(int[] nums) {
         int size = nums.length;
@@ -2795,6 +2811,87 @@ public class AllOfThem {
         return m << count;
     }
 
+    public String truncateSentence(String s, int k) {
+        int count = 0, end = 0;
+        for (int i = 1; i <= s.length(); i++) {
+            if (i == s.length() || s.charAt(i) == ' ') {
+                count++;
+                if (count == k) {
+                    end = i;
+                    break;
+                }
+            }
+        }
+        return s.substring(0, end);
+    }
+
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForFindSubsequences(nums, 0, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForFindSubsequences(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() >= 2) {
+            res.add(new ArrayList<>(select));
+        }
+
+        Set<Integer> set = new HashSet<>();
+        for (int i = s; i < nums.length; i++) {
+            if (set.contains(nums[i])) {
+                continue;
+            }
+            if (select.size() > 0 && nums[i] < select.getLast()) {
+                continue;
+            }
+
+            set.add(nums[i]);
+            select.addLast(nums[i]);
+            backtraceForFindSubsequences(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+    //[209].长度最小的子数组
+    public int minSubArrayLen(int target, int[] nums) {
+        //2,3,1,2,4, 3
+        //2 5 6 8 12 15
+        int n = nums.length;
+        int[] preSum = new int[n + 1];
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+            preSum[i + 1] = sum;
+        }
+        int left = 0, right = 0, res = Integer.MAX_VALUE;
+        while (right < nums.length) {
+            right++;
+            //找到合理的，就缩
+            while (preSum[right] - preSum[left] >= target) {
+                res = Math.min(res, right - left);
+                left++;
+            }
+
+        }
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
+    //[674].最长连续递增序列
+    public static int findLengthOfLCIS(int[] nums) {
+        //1 2 5 4 7
+        int n = nums.length;
+        if (n == 1) return 1;
+        int left = 0, right = 1, res = 0;
+        while (right < n) {
+            if (nums[right - 1] >= nums[right]) {
+                left = right;
+            }
+            res = Math.max(res, right - left + 1);
+            right++;
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -2872,7 +2969,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().trailingZeroes(10000));
 
         TreeNode t199 = new TreeNode(1);
-        t199.left =  new TreeNode(2);
+        t199.left = new TreeNode(2);
         t199.right = new TreeNode(3);
         t199.left.right = new TreeNode(5);
         t199.right.left = new TreeNode(4);
