@@ -2811,6 +2811,7 @@ public class AllOfThem {
         return m << count;
     }
 
+    //[1816].截断句子
     public String truncateSentence(String s, int k) {
         int count = 0, end = 0;
         for (int i = 1; i <= s.length(); i++) {
@@ -2825,6 +2826,7 @@ public class AllOfThem {
         return s.substring(0, end);
     }
 
+    //[491].递增子序列
     public List<List<Integer>> findSubsequences(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
         backtraceForFindSubsequences(nums, 0, res, new LinkedList<>());
