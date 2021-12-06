@@ -2366,6 +2366,32 @@ public class AllOfThem {
         }
     }
 
+    //[216].组合总和 III
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (n < 0) return res;
+        backtraceForCombinationSum3(k, n, 1, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombinationSum3(int k, int n, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() == k) {
+            if (n == 0) {
+                res.add(new ArrayList<>(select));
+            }
+            return;
+        }
+
+        for (int i = s; i <= 9; i++) {
+            if (i > n) {
+                continue;
+            }
+            select.addLast(i);
+            backtraceForCombinationSum3(k, n - i, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
     //[51].N皇后
     public List<List<String>> solveNQueens(int n) {
         List<List<String>> res = new ArrayList<>();
@@ -2634,7 +2660,7 @@ public class AllOfThem {
         return dfsForSuperPow(a, b, b.length - 1);
     }
 
-    public int dfsForSuperPow(int a, int[] b, int index) {
+    private int dfsForSuperPow(int a, int[] b, int index) {
         if (index < 0) {
             return 1;
         }
@@ -2894,6 +2920,44 @@ public class AllOfThem {
         return res;
     }
 
+    //[215].数组中的第K个最大元素
+    public int findKthLargest(int[] nums, int k) {
+        //第K大意味着是从小到大是第n-k位
+        return quickSort(nums, 0, nums.length - 1, nums.length - k);
+    }
+
+    private int quickSort(int[] nums, int left, int right, int targetIndex) {
+        int l = left, r = right;
+        int pivot = nums[l];
+        while (l < r) {
+            while (l < r && pivot <= nums[r]) r--;
+            nums[l] = nums[r];
+
+            while (l < r && nums[l] <= pivot) l++;
+            nums[r] = nums[l];
+        }
+        nums[l] = pivot;
+
+        if (l == targetIndex) {
+            return nums[l];
+        } else if (l < targetIndex) {
+            return quickSort(nums, l + 1, right, targetIndex);
+        } else {
+            return quickSort(nums, left, l - 1, targetIndex);
+        }
+    }
+
+    //[221].最大正方形
+    public int maximalSquare(char[][] matrix) {
+        return 0;
+    }
+
+    //[279].完全平方数
+    public int numSquares(int n) {
+        return 0;
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -2948,6 +3012,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().letterCombinations("23"));
         System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
         System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
+        System.out.println(new AllOfThem().combinationSum3(3, 9));
         System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
         System.out.println(new AllOfThem().subsetsWithDup(new int[]{1, 2, 2}));
         System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
