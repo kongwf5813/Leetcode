@@ -2983,25 +2983,26 @@ public class AllOfThem {
         return res;
     }
 
+    //[56].合并区间
     public int[][] merge(int[][] intervals) {
         //1 2  1 5  3 6  7 9
-        Arrays.sort(intervals, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
-        int start = intervals[0][0];
-        int end = intervals[0][1];
-        List<int[]> res = new ArrayList<>();
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        LinkedList<int[]> res = new LinkedList<>();
+        res.addLast(intervals[0]);
         for (int i = 1; i < intervals.length; i++) {
-            if (intervals[i][0] > end) {
-                res.add(new int[]{start, end});
-                start = intervals[i][0];
-                end = intervals[i][1];
-            } else if (intervals[i][0] <= end) {
-                end = Math.max(end, intervals[i][1]);
-            }
-            if (i == intervals.length - 1) {
-                res.add(new int[]{start, end});
+            int[] last = res.getLast();
+            if (intervals[i][0] <= last[1]) {
+                last[1] = Math.max(last[1], intervals[i][1]);
+            } else {
+                res.addLast(intervals[i]);
             }
         }
         return res.toArray(new int[res.size()][]);
+    }
+
+    //[57].
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        return null;
     }
 
     //[215].数组中的第K个最大元素
@@ -3033,12 +3034,36 @@ public class AllOfThem {
 
     //[221].最大正方形
     public int maximalSquare(char[][] matrix) {
-        return 0;
+        int m = matrix.length, n = matrix[0].length;
+        //以i,j为终点的能构成正方形的最大边长
+        int[][] dp = new int[m][n];
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                    }
+                    res = Math.max(dp[i][j], res);
+                }
+            }
+        }
+        return res * res;
     }
 
     //[279].完全平方数
     public int numSquares(int n) {
-        return 0;
+        if (n <= 0) return 0;
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 1; j * j <= i; j++) {
+                dp[i] = Math.min(dp[i - j * j] + 1, dp[i]);
+            }
+        }
+        return dp[n];
     }
 
     public static void main(String[] args) {
@@ -3124,5 +3149,8 @@ public class AllOfThem {
         t199.left.right = new TreeNode(5);
         t199.right.left = new TreeNode(4);
         System.out.println(new AllOfThem().rightSideView(t199));
+        System.out.println(new AllOfThem().merge(new int[][]{{1, 4}, {1, 4}}));
+
+        System.out.println(new AllOfThem().numSquares(12));
     }
 }
