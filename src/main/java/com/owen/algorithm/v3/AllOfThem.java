@@ -3005,6 +3005,11 @@ public class AllOfThem {
         return null;
     }
 
+    //[435].
+    public int eraseOverlapIntervals(int[][] intervals) {
+        return 0;
+    }
+
     //[215].数组中的第K个最大元素
     public int findKthLargest(int[] nums, int k) {
         //第K大意味着是从小到大是第n-k位
