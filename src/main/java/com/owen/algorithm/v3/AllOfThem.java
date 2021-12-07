@@ -721,6 +721,69 @@ public class AllOfThem {
         dfsForCountSubIslands(grid, x, y + 1);
     }
 
+    //[1034].边界着色
+    public int[][] colorBorder(int[][] grid, int row, int col, int color) {
+        //原始颜色是跟color可能不相同的
+        //遇到的边界其实是只有看到下一个是颜色不同的时候，才能确定的
+        //岛屿可以任意修改，要么0，要么1，可以通过修改达到访问的目的
+        //只更改边界颜色，意味着访问了之后不能更改颜色，不然回溯之后条件变化会导致判断条件失败，所以保存起来，之后再修改。
+        int m = grid.length, n = grid[0].length;
+        LinkedList<int[]> border = new LinkedList<>();
+        dfsForColorBorder(grid, row, col, grid[row][col], border, new boolean[m][n]);
+
+        for (int[] need : border) {
+            grid[need[0]][need[1]] = color;
+        }
+        return grid;
+    }
+
+    private void dfsForColorBorder(int[][] grid, int x, int y, int originalColor, LinkedList<int[]> border, boolean[][] visit) {
+        int m = grid.length, n = grid[0].length;
+        int[][] directions = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
+        visit[x][y] = true;
+        boolean isBorder = false;
+        for (int[] direct : directions) {
+            int nx = x + direct[0];
+            int ny = y + direct[1];
+
+            if (!(nx >= 0 && nx < m && ny >= 0 && ny < n && grid[nx][ny] == originalColor)) {
+                isBorder = true;
+            } else if (!visit[nx][ny]) {
+                dfsForColorBorder(grid, nx, ny, originalColor, border, visit);
+            }
+        }
+        if (isBorder) {
+            border.addLast(new int[]{x, y});
+        }
+    }
+
+    private int[][] colorBorderV2(int[][] grid, int row, int col, int color) {
+        int m = grid.length, n = grid[0].length;
+        dfsForColorBorder(grid, row, col, color, grid[row][col], new boolean[m][n]);
+        return grid;
+    }
+
+    private void dfsForColorBorder(int[][] grid, int x, int y, int color, int originalColor, boolean[][] visit) {
+        int m = grid.length, n = grid[0].length;
+        int[][] directions = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+
+        visit[x][y] = true;
+        for (int[] direct : directions) {
+            int nx = x + direct[0];
+            int ny = y + direct[1];
+            //访问过的，可能处理过边界，所以不访问了
+            if (nx >= 0 && ny >= 0 && nx < m && ny < n && !visit[nx][ny] && grid[nx][ny] == originalColor) {
+                //找到跟原始相同的颜色，不是边界，则继续递归
+                dfsForColorBorder(grid, nx, ny, color, originalColor, visit);
+            } else if (nx >= 0 && ny >= 0 && nx < m && ny < n && !visit[nx][ny] && grid[nx][ny] != originalColor || nx < 0 || ny < 0 || nx >= m || ny >= n) {
+                //找到跟原始不相同的颜色，或者超出边界，直接修改颜色
+                grid[x][y] = color;
+            }
+        }
+    }
+
+
     public List<TreeNode> generateTrees(int n) {
         if (n == 0) return null;
         return dfsForGenerateTrees(1, n);
@@ -2920,6 +2983,27 @@ public class AllOfThem {
         return res;
     }
 
+    public int[][] merge(int[][] intervals) {
+        //1 2  1 5  3 6  7 9
+        Arrays.sort(intervals, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+        List<int[]> res = new ArrayList<>();
+        for (int i = 1; i < intervals.length; i++) {
+            if (intervals[i][0] > end) {
+                res.add(new int[]{start, end});
+                start = intervals[i][0];
+                end = intervals[i][1];
+            } else if (intervals[i][0] <= end) {
+                end = Math.max(end, intervals[i][1]);
+            }
+            if (i == intervals.length - 1) {
+                res.add(new int[]{start, end});
+            }
+        }
+        return res.toArray(new int[res.size()][]);
+    }
+
     //[215].数组中的第K个最大元素
     public int findKthLargest(int[] nums, int k) {
         //第K大意味着是从小到大是第n-k位
@@ -2956,7 +3040,6 @@ public class AllOfThem {
     public int numSquares(int n) {
         return 0;
     }
-
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
