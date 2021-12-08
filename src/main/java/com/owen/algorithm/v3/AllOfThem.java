@@ -3000,11 +3000,49 @@ public class AllOfThem {
         return res.toArray(new int[res.size()][]);
     }
 
-    //[57].
+    //[57].插入区间
     public int[][] insert(int[][] intervals, int[] newInterval) {
+        if (newInterval.length == 0) return intervals;
+        LinkedList<int[]> res = new LinkedList<>();
+        int left = newInterval[0], right = newInterval[1];
+        for (int i = 0; i < intervals.length; i++) {
+            int[] interval = intervals[i];
+            if (interval[0] > right) {
+                res.add(new int[]{left, right});
+                //在插入区间右侧，且不相交，则添加插入区域
+                //同时更新插入区域，保证下一次添加为插入区域
+                left = interval[0];
+                right = interval[1];
+            } else if (left > interval[1]) {
+                //在插入区间左侧，且不相交，则添加左侧区域
+                res.add(interval);
+            } else {
+                //相交，维护区域
+                left = Math.min(interval[0], left);
+                right = Math.max(interval[1], right);
+            }
+        }
+        //还剩最后一个区域需要添加
+        res.add(new int[]{left, right});
+        return res.toArray(new int[][]{});
+    }
+
+    //[436].
+    public int[] findRightInterval(int[][] intervals) {
         return null;
     }
 
+    //[986].区间列表的交集
+    public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
+        return null;
+    }
+
+    //[1288].删除被覆盖的区间
+    public int removeCoveredIntervals(int[][] intervals) {
+        return 0;
+    }
+
+    //[689].三个无重叠子数组的最大和
     public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
         int[] res = new int[3];
         int sum1 = 0, maxSum1 = 0, maxIdx1 = 0;
@@ -3040,14 +3078,14 @@ public class AllOfThem {
         return res;
     }
 
-    //[435].
+    //[435].无重叠区间
     public int eraseOverlapIntervals(int[][] intervals) {
         int n = intervals.length;
         int overlap = 0;
         //1,2  2,3  3,4  1,3
         Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
         int end = intervals[0][1];
-        for (int i = 1; i < n ; i++) {
+        for (int i = 1; i < n; i++) {
             int[] cur = intervals[i];
             if (cur[0] < end) {
                 overlap++;
@@ -3059,7 +3097,6 @@ public class AllOfThem {
         }
         return overlap;
     }
-
 
     //[215].数组中的第K个最大元素
     public int findKthLargest(int[] nums, int k) {
@@ -3121,6 +3158,7 @@ public class AllOfThem {
         }
         return dp[n];
     }
+
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
