@@ -3005,10 +3005,61 @@ public class AllOfThem {
         return null;
     }
 
+    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
+        int[] res = new int[3];
+        int sum1 = 0, maxSum1 = 0, maxIdx1 = 0;
+        int sum2 = 0, maxSum12 = 0, maxIdx21 = 0, maxIdx22 = 0;
+        int sum3 = 0, maxSum123 = 0;
+
+        for (int i = 2 * k; i < nums.length; i++) {
+            sum1 += nums[i - 2 * k];
+            sum2 += nums[i - k];
+            sum3 += nums[i];
+            if (i >= 3 * k - 1) {
+                if (sum1 > maxSum1) {
+                    maxSum1 = sum1;
+                    maxIdx1 = i - 3 * k + 1;
+                }
+                if (sum2 + maxSum1 > maxSum12) {
+                    maxSum12 = sum2 + maxSum1;
+                    maxIdx21 = maxIdx1;
+                    maxIdx22 = i - 2 * k + 1;
+                }
+                if (sum3 + maxSum12 > maxSum123) {
+                    maxSum123 = sum3 + maxSum12;
+                    res[0] = maxIdx21;
+                    res[1] = maxIdx22;
+                    res[2] = i - k + 1;
+                }
+
+                sum1 -= nums[i - 3 * k + 1];
+                sum2 -= nums[i - 2 * k + 1];
+                sum3 -= nums[i - k + 1];
+            }
+        }
+        return res;
+    }
+
     //[435].
     public int eraseOverlapIntervals(int[][] intervals) {
-        return 0;
+        int n = intervals.length;
+        int overlap = 0;
+        //1,2  2,3  3,4  1,3
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        int end = intervals[0][1];
+        for (int i = 1; i < n ; i++) {
+            int[] cur = intervals[i];
+            if (cur[0] < end) {
+                overlap++;
+                //默认保留最短的，长的覆盖范围更大，所以删除
+                end = Math.min(end, cur[1]);
+            } else {
+                end = cur[1];
+            }
+        }
+        return overlap;
     }
+
 
     //[215].数组中的第K个最大元素
     public int findKthLargest(int[] nums, int k) {
