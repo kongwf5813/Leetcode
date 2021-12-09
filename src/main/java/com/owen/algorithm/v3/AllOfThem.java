@@ -3029,17 +3029,70 @@ public class AllOfThem {
 
     //[436].
     public int[] findRightInterval(int[][] intervals) {
-        return null;
+        int n = intervals.length;
+        int[][] sort = new int[n][2];
+        //第一个索引 + 真实索引
+        for (int i = 0; i < n; i++) {
+            sort[i] = new int[]{intervals[i][0], i};
+        }
+
+        int[] res = new int[n];
+        //保证最小排序
+        Arrays.sort(sort, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        for (int i = 0; i < n; i++) {
+            int v = intervals[i][1];
+            int left = 0, right = n - 1;
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (sort[mid][0] == v) {
+                    right = mid;
+                } else if (sort[mid][0] > v) {
+                    right = mid;
+                } else if (sort[mid][0] < v) {
+                    left = mid + 1;
+                }
+            }
+            res[i] = sort[left][0] >= v ? sort[left][1] : -1;
+        }
+        return res;
     }
 
     //[986].区间列表的交集
     public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
-        return null;
+        List<int[]> res = new ArrayList<>();
+        int i = 0, j = 0;
+        while (i < firstList.length && j < secondList.length) {
+            int[] first = firstList[i];
+            int[] second = secondList[j];
+            //相交
+            if (first[1] >= second[0] && second[1] >= first[0]) {
+                res.add(new int[]{Math.max(first[0], second[0]), Math.min(first[1], second[1])});
+            }
+
+            if (first[1] > second[1]) {
+                j++;
+            } else {
+                i++;
+            }
+        }
+        return res.toArray(new int[][]{});
     }
 
     //[1288].删除被覆盖的区间
     public int removeCoveredIntervals(int[][] intervals) {
-        return 0;
+        Arrays.sort(intervals, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
+        //只需要一个右侧边界是因为已经按照左边界排序了。
+        int right = intervals[0][1];
+        int res = 0;
+        for (int i = 1; i < intervals.length; i++) {
+            //此时右边界包含，必定，左边界也被包含
+            if (right >= intervals[i][1]) {
+                res++;
+            } else {
+                right = intervals[i][1];
+            }
+        }
+        return intervals.length - res;
     }
 
     //[689].三个无重叠子数组的最大和
@@ -3159,39 +3212,42 @@ public class AllOfThem {
         return dp[n];
     }
 
-
+    //[794].有效的井字游戏
     public boolean validTicTacToe(String[] board) {
         int xCount = 0, oCount = 0;
-        for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < 3; j++) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
                 if (board[i].charAt(j) == 'X') {
                     xCount++;
-                } else if(board[i].charAt(j) == 'O') {
+                } else if (board[i].charAt(j) == 'O') {
                     oCount++;
                 }
             }
         }
-        if(xCount < oCount || xCount - oCount > 1) {
+        if (xCount < oCount || xCount - oCount > 1) {
             return false;
         }
-        if(win(board, 'X') && xCount - oCount != 1) {
+        if (win(board, 'X') && xCount - oCount != 1) {
             return false;
         }
-        if(win(board, 'O') && xCount != oCount) {
+        if (win(board, 'O') && xCount != oCount) {
             return false;
         }
         return true;
     }
 
     private boolean win(String[] board, char ch) {
-        for(int i = 0; i < 3; i++) {
-            if(board[i].charAt(0) == board[i].charAt(1) && board[i].charAt(1) == board[i].charAt(2) && board[i].charAt(0) == ch) return true;
-            if(board[0].charAt(i) == board[1].charAt(i) && board[1].charAt(i) == board[2].charAt(i) && board[0].charAt(i) == ch) return true;
+        for (int i = 0; i < 3; i++) {
+            if (board[i].charAt(0) == board[i].charAt(1) && board[i].charAt(1) == board[i].charAt(2) && board[i].charAt(0) == ch)
+                return true;
+            if (board[0].charAt(i) == board[1].charAt(i) && board[1].charAt(i) == board[2].charAt(i) && board[0].charAt(i) == ch)
+                return true;
         }
 
-        if (board[0].charAt(0) == board[1].charAt(1) && board[0].charAt(0) == board[2].charAt(2) && board[2].charAt(2) == ch) return true;
-        if (board[0].charAt(2) == board[1].charAt(1) && board[0].charAt(2) == board[2].charAt(0) && board[2].charAt(0) == ch) return true;
-
+        if (board[0].charAt(0) == board[1].charAt(1) && board[0].charAt(0) == board[2].charAt(2) && board[2].charAt(2) == ch)
+            return true;
+        if (board[0].charAt(2) == board[1].charAt(1) && board[0].charAt(2) == board[2].charAt(0) && board[2].charAt(0) == ch)
+            return true;
         return false;
     }
 
