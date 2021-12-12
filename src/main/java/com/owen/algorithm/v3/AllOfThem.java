@@ -2203,6 +2203,42 @@ public class AllOfThem {
         return right;
     }
 
+    //版本2
+    private int findLeftIndex2(int[] nums, int target) {
+        //左边界，大于等于target
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            //mid偏左
+            int mid = left + (right - left) / 2;
+            //值在右边，排除左边界
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                //大于等于，可能是该值
+                right = mid;
+            }
+        }
+        return nums[left] == target ? left : -1;
+    }
+
+    //版本2
+    private int findRightIndexV2(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        //右边界，小于等于target
+        while (left < right) {
+            //mid偏右
+            int mid = left + (right - left + 1) / 2;
+            //值在左边，排除右边界
+            if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                //小于等于，可能是该值
+                left = mid;
+            }
+        }
+        return nums[right] == target ? right : -1;
+    }
+
     //[35].搜索插入位置
     public int searchInsert(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
@@ -3039,20 +3075,22 @@ public class AllOfThem {
         int[] res = new int[n];
         //保证最小排序
         Arrays.sort(sort, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        //找到一个大于等于它的最小值就是左边界, labuladong模版
         for (int i = 0; i < n; i++) {
             int v = intervals[i][1];
             int left = 0, right = n - 1;
-            while (left < right) {
+            while (left <= right) {
                 int mid = left + (right - left) / 2;
                 if (sort[mid][0] == v) {
-                    right = mid;
+                    right = mid - 1;
                 } else if (sort[mid][0] > v) {
-                    right = mid;
+                    right = mid - 1;
                 } else if (sort[mid][0] < v) {
                     left = mid + 1;
                 }
             }
-            res[i] = sort[left][0] >= v ? sort[left][1] : -1;
+            //额外的补充条件
+            res[i] = left > n - 1 || sort[left][0] < v ? -1 : sort[left][1];
         }
         return res;
     }
@@ -3251,6 +3289,289 @@ public class AllOfThem {
         return false;
     }
 
+    //[748].最短补全词
+    public String shortestCompletingWord(String licensePlate, String[] words) {
+        int[] need = new int[26];
+        for (int i = 0; i < licensePlate.length(); i++) {
+            char ch = licensePlate.charAt(i);
+            if (Character.isLetter(ch)) {
+                need[Character.toLowerCase(ch) - 'a']++;
+            }
+        }
+
+        int index = -1;
+        for (int i = 0; i < words.length; i++) {
+            int[] cnt = new int[26];
+            String word = words[i];
+            for (int j = 0; j < word.length(); j++) {
+                char ch = word.charAt(j);
+                cnt[ch - 'a']++;
+            }
+            boolean valid = true;
+            for (int j = 0; j < 26; j++) {
+                if (cnt[j] < need[j]) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid && (index == -1 || words[i].length() < words[index].length())) {
+                index = i;
+            }
+        }
+        return words[index];
+    }
+
+    //[875].爱吃香蕉的珂珂
+    public int minEatingSpeed(int[] piles, int h) {
+        int left = 1, right = Arrays.stream(piles).max().getAsInt();
+        //首先肯定是左侧边界
+        //hours(x) 是单调递减函数，不能死背模板
+        // \
+        //  \___   h
+        //      \
+        //        x (横轴)
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (hours(piles, mid) == h) {
+                right = mid;
+            } else if (hours(piles, mid) > h) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    private int hours(int[] piles, int speed) {
+        int res = 0;
+        for (int pile : piles) {
+            if (pile % speed == 0) {
+                res += pile / speed;
+            } else {
+                res += pile / speed + 1;
+            }
+        }
+        return res;
+    }
+
+    //[1011].在 D 天内送达包裹的能力
+    public int shipWithinDays(int[] weights, int days) {
+        int left = Arrays.stream(weights).max().getAsInt(), right = Arrays.stream(weights).sum();
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (days(weights, mid) == days) {
+                right = mid;
+            } else if (days(weights, mid) > days) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    private int days(int[] weights, int capacity) {
+        int res = 0;
+        for (int i = 0; i < weights.length; ) {
+            int cap = capacity;
+            //不断的尝试放到容量中，不够就跳出，增加一天
+            while (i < weights.length) {
+                if (cap < weights[i]) {
+                    break;
+                } else {
+                    cap -= weights[i];
+                }
+                i++;
+            }
+            res++;
+        }
+        return res;
+    }
+
+    //[45].跳跃游戏 II
+    public int jump(int[] nums) {
+        int n = nums.length;
+        //刚开始为-1，防止多计数
+        int res = -1, nextMaxIndex = 0, end = 0;
+        for (int i = 0; i < n; i++) {
+            nextMaxIndex = Math.max(i + nums[i], nextMaxIndex);
+            //到达最远地方
+            if (i == end) {
+                //更新最远距离
+                end = nextMaxIndex;
+                //计数
+                res++;
+            }
+        }
+        return res;
+    }
+
+    //[55].跳跃游戏
+    public boolean canJump(int[] nums) {
+        int n = nums.length;
+        int maxIndex = 0;
+        //最后一个需要排除掉，因为可能正好相等
+        for (int i = 0; i < n - 1; i++) {
+            maxIndex = Math.max(maxIndex, nums[i] + i);
+            if (maxIndex <= i) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[71].简化路径
+    public String simplifyPath(String path) {
+        String[] strings = path.split("/");
+        Stack<String> stack = new Stack<>();
+        for (String str : strings) {
+            if (!stack.isEmpty() && str.equals("..")) {
+                stack.pop();
+            } else if (!str.equals("") && !str.equals(".") && !str.equals("..")) {
+                //两个//中间就是空串
+                stack.push(str);
+            }
+        }
+        if (stack.isEmpty()) return "/";
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.insert(0, "/" + stack.pop());
+        }
+        return sb.toString();
+    }
+
+    //[911].在线选举
+    public static class TopVotedCandidate {
+        int[] successor;
+        int[] times;
+
+        public TopVotedCandidate(int[] persons, int[] times) {
+            int n = persons.length;
+            successor = new int[n];
+            Map<Integer, Integer> voteCounts = new HashMap<>();
+            int topP = -1;
+            for (int i = 0; i < n; i++) {
+                int p = persons[i];
+
+                voteCounts.put(p, voteCounts.getOrDefault(p, 0) + 1);
+                //相等，也需要更新最新的领先者
+                if (!voteCounts.containsKey(topP) || voteCounts.get(p) >= voteCounts.get(topP)) {
+                    topP = p;
+                }
+                successor[i] = topP;
+            }
+            this.times = times;
+        }
+
+        public int q(int t) {
+            //找到<=t 的时间
+            int left = 0, right = times.length - 1;
+            while (left < right) {
+                int mid = left + (right - left + 1) / 2;
+                if (times[mid] <= t) {
+                    left = mid;
+                } else {
+                    right = mid - 1;
+                }
+            }
+            return successor[left];
+        }
+    }
+
+    //[709].转换成小写字母
+    public String toLowerCase(String s) {
+        StringBuilder sb = new StringBuilder();
+        char[] chars = s.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'A' && ch <= 'Z') {
+                ch |= 32;
+            }
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
+    //[2073].买票需要的时间
+    public int timeRequiredToBuy(int[] tickets, int k) {
+        int need = tickets[k];
+        int res = 0;
+        //2 3 4 1, 如果k=1, i = 2因为在它后面，最多也就能购2票，k就结束了
+        for (int i = 0; i < tickets.length; i++) {
+            if (i <= k) {
+                res += Math.min(need, tickets[i]);
+            } else {
+                res += Math.min(need - 1, tickets[i]);
+            }
+        }
+        return res;
+    }
+
+    //[69].Sqrt(x)
+    public int mySqrt(int x) {
+        if (x == 0) return 0;
+        int left = 1, right = x;
+        while (left < right) {
+            int mid = left + (right - left + 1) / 2;
+            if (mid == x / mid) {
+                left = mid;
+            } else if (mid < x / mid) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+
+    //[915].分割数组
+    public int partitionDisjoint(int[] nums) {
+        int n = nums.length;
+        //左边的最大值 <= 右边的最小值
+        int[] leftMax = new int[n];
+        int[] rightMin = new int[n];
+        int leftM = nums[0], rightM = nums[n - 1];
+        for (int i = 0; i < n; i++) {
+            if (nums[i] >= leftM) {
+                leftM = nums[i];
+            }
+            leftMax[i] = leftM;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            if (nums[i] <= rightM) {
+                rightM = nums[i];
+            }
+            rightMin[i] = rightM;
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            //左边的比右边的大的时候，可以继续扩，知道找到边界， 左边最大<=右边最小为止
+            if (leftMax[i] <= rightMin[i + 1]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    //[面试题 17.12].BiNode
+    private TreeNode pre = null, head = null;
+    public TreeNode convertBiNode(TreeNode root) {
+        //二叉搜索树，中序遍历一定是从小到大的
+        //应该先找到前一个节点，然后把当前节点作为它的右孩子，最后左孩子置空
+        if (root == null) return null;
+        convertBiNode(root.left);
+        if (pre == null) {
+            head = root;
+        } else {
+            pre.right = root;
+        }
+        pre = root;
+        root.left = null;
+        convertBiNode(root.right);
+        return head;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -3337,5 +3658,30 @@ public class AllOfThem {
         System.out.println(new AllOfThem().merge(new int[][]{{1, 4}, {1, 4}}));
 
         System.out.println(new AllOfThem().numSquares(12));
+
+        TopVotedCandidate candidate = new AllOfThem.TopVotedCandidate(new int[]{0, 1, 1, 0, 0, 1, 0}, new int[]{0, 5, 10, 15, 20, 25, 30});
+        System.out.println(candidate.q(3));
+        System.out.println(candidate.q(12));
+        System.out.println(candidate.q(25));
+        System.out.println(candidate.q(15));
+        System.out.println(candidate.q(24));
+        System.out.println(candidate.q(8));
+        System.out.println(new AllOfThem().jump(new int[]{2, 3, 1, 1, 4}));
+
+        System.out.println(new AllOfThem().simplifyPath("../"));
+        System.out.println(new AllOfThem().timeRequiredToBuy(new int[]{2, 3, 4, 1}, 1));
+        System.out.println(new AllOfThem().minEatingSpeed(new int[]{30, 11, 23, 4, 20}, 6));
+        System.out.println(new AllOfThem().shipWithinDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5));
+        System.out.println(new AllOfThem().mySqrt(2147395599));
+
+        TreeNode t1712 = new TreeNode(4);
+        t1712.left = new TreeNode(2);
+        t1712.right = new TreeNode(5);
+        t1712.left.left = new TreeNode(1);
+        t1712.left.right = new TreeNode(3);
+        t1712.right.right = new TreeNode(6);
+        t1712.left.left.left = new TreeNode(0);
+
+        new AllOfThem().convertBiNode(t1712);
     }
 }
