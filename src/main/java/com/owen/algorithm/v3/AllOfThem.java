@@ -3572,6 +3572,48 @@ public class AllOfThem {
         return head;
     }
 
+    public int maxIncreaseKeepingSkyline(int[][] grid) {
+        // 0 1 1
+        // 2 1 1
+        int n = grid.length;
+        int[] left = new int[n];
+        int[] upper = new int[n];
+        for (int i = 0; i < n; i++) {
+            upper[i] = Integer.MIN_VALUE;
+            left[i] = Integer.MIN_VALUE;
+            for (int j = 0; j < n; j++) {
+                left[i] = Math.max(left[i], grid[i][j]);
+                upper[i] = Math.max(upper[i], grid[j][i]);
+            }
+        }
+
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                res += Math.min(upper[j], left[i]) - grid[i][j];
+            }
+        }
+        return res;
+    }
+
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        //对角线翻转
+        for (int i = 0; i < n;i++) {
+            for (int j = 0; j < i; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            int[] temp = matrix[n -i];
+            matrix[n-i] = matrix[i];
+            matrix[i] = temp;
+        }
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
