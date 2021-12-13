@@ -3556,6 +3556,7 @@ public class AllOfThem {
 
     //[面试题 17.12].BiNode
     private TreeNode pre = null, head = null;
+
     public TreeNode convertBiNode(TreeNode root) {
         //二叉搜索树，中序遍历一定是从小到大的
         //应该先找到前一个节点，然后把当前节点作为它的右孩子，最后左孩子置空
@@ -3572,6 +3573,7 @@ public class AllOfThem {
         return head;
     }
 
+    //[807].保持城市天际线
     public int maxIncreaseKeepingSkyline(int[][] grid) {
         // 0 1 1
         // 2 1 1
@@ -3596,10 +3598,11 @@ public class AllOfThem {
         return res;
     }
 
+    //[48].旋转图像
     public void rotate(int[][] matrix) {
         int n = matrix.length;
         //对角线翻转
-        for (int i = 0; i < n;i++) {
+        for (int i = 0; i < n; i++) {
             for (int j = 0; j < i; j++) {
                 int temp = matrix[i][j];
                 matrix[i][j] = matrix[j][i];
@@ -3607,8 +3610,9 @@ public class AllOfThem {
             }
         }
 
+        //左右互换
         for (int i = 0; i < n; i++) {
-            int left = 0, right = n-1;
+            int left = 0, right = n - 1;
             while (left < right) {
                 int temp = matrix[i][left];
                 matrix[i][left] = matrix[i][right];
@@ -3617,6 +3621,82 @@ public class AllOfThem {
                 right--;
             }
         }
+    }
+
+    //[54].螺旋矩阵
+    public List<Integer> spiralOrder(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int top = 0, bottom = m - 1;
+        int left = 0, right = n - 1;
+        List<Integer> res = new ArrayList<>();
+        while (res.size() < m * n) {
+            if (top <= bottom) {
+                for (int i = left; i <= right; i++) {
+                    res.add(matrix[top][i]);
+                }
+                top++;
+            }
+            if (left <= right) {
+                for (int i = top; i <= bottom; i++) {
+                    res.add(matrix[i][right]);
+                }
+                right--;
+            }
+
+            if (top <= bottom) {
+                for (int i = right; i >= left; i--) {
+                    res.add(matrix[bottom][i]);
+                }
+                bottom--;
+            }
+
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    res.add(matrix[i][left]);
+                }
+                left++;
+            }
+        }
+        return res;
+    }
+
+    //[59].螺旋矩阵 II
+    public int[][] generateMatrix(int n) {
+        int top = 0, bottom = n - 1;
+        int left = 0, right = n - 1;
+        int num = 0;
+        int [][] res = new int[n][n];
+        //每个都从1开始计数，那么当num == n平方就是结束条件，能够正常退出
+        while (num < n * n) {
+            if (top <= bottom) {
+                for (int i = left; i <= right; i++) {
+                    res[top][i] = ++num;
+                }
+                top++;
+            }
+
+            if (left <= right) {
+                for (int i = top; i <= bottom; i++) {
+                    res[i][right] = ++num;
+                }
+                right--;
+            }
+
+            if (top <= bottom) {
+                for (int i = right; i >= left; i--) {
+                    res[bottom][i] = ++num;
+                }
+                bottom--;
+            }
+
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    res[i][left] = ++num;
+                }
+                left++;
+            }
+        }
+        return res;
     }
 
     public static void main(String[] args) {
@@ -3730,5 +3810,9 @@ public class AllOfThem {
         t1712.left.left.left = new TreeNode(0);
 
         new AllOfThem().convertBiNode(t1712);
+
+
+        System.out.println(new AllOfThem().spiralOrder(new int[][]{{1,2,3},{4,5,6},{7,8,9}}));
+        System.out.println(new AllOfThem().generateMatrix(3));
     }
 }
