@@ -3699,6 +3699,41 @@ public class AllOfThem {
         return res;
     }
 
+    //[630].课程表 III
+    public int scheduleCourse(int[][] courses) {
+        //将课程按照最后的截止日期从小到大，起始时间从小到大排序
+        Arrays.sort(courses, (a, b) -> a[1] == b[1] ? a[0] - b[0] : a[1] - b[1]);
+        //大根堆，如果当前课程可以正常结束，则更新结束时间; 如果当前课程不可以正常结束，替换掉之前持续时间比它大的已经选入的课程，并更新结束时间
+        PriorityQueue<Integer> queue = new PriorityQueue<>((a, b) -> b - a);
+        int finishAt = 0;
+        for (int[] course : courses) {
+            if (finishAt + course[0] <= course[1]) {
+                finishAt += course[0];
+                queue.offer(course[0]);
+            } else if (!queue.isEmpty() && queue.peek() > course[0]) {
+                finishAt -= queue.poll() - course[0];
+                queue.offer(course[0]);
+            }
+        }
+        return queue.size();
+    }
+
+    public int subarraySum(int[] nums, int k) {
+        int preSum = 0, res = 0;
+        Map<Integer, Integer> preSumCount = new HashMap<>();
+        //当只有一个元素满足k的时候，需要统计为1
+        preSumCount.put(0, 1);
+        for (int i = 0; i < nums.length; i++) {
+            preSum += nums[i];
+            //preSum比k大
+            if (preSumCount.containsKey(preSum - k)) {
+                res += preSumCount.get(preSum - k);
+            }
+            preSumCount.put(preSum, preSumCount.getOrDefault(preSum, 0) + 1);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
