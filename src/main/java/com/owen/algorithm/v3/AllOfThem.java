@@ -3665,7 +3665,7 @@ public class AllOfThem {
         int top = 0, bottom = n - 1;
         int left = 0, right = n - 1;
         int num = 0;
-        int [][] res = new int[n][n];
+        int[][] res = new int[n][n];
         //每个都从1开始计数，那么当num == n平方就是结束条件，能够正常退出
         while (num < n * n) {
             if (top <= bottom) {
@@ -3718,7 +3718,56 @@ public class AllOfThem {
         return queue.size();
     }
 
+    //[238].除自身以外数组的乘积
+    public int[] productExceptSelf(int[] nums) {
+        return null;
+    }
+
+    //[303].区域和检索 - 数组不可变
+    public static class NumArray {
+
+        //preSum[i]代表nums[0...i-1]的和
+        int[] preSum;
+
+        public NumArray(int[] nums) {
+            preSum = new int[nums.length + 1];
+            int sum = 0;
+            for (int i = 0; i < nums.length; i++) {
+                sum += nums[i];
+                preSum[i + 1] = sum;
+            }
+        }
+
+        public int sumRange(int left, int right) {
+            return preSum[right + 1] - preSum[left];
+        }
+    }
+
+    //[304].二维区域和检索 - 矩阵不可变
+    public static class NumMatrix {
+        int[][] preSum;
+
+        public NumMatrix(int[][] matrix) {
+            int m = matrix.length;
+            int n = matrix[0].length;
+            preSum = new int[m + 1][n + 1];
+
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    preSum[i + 1][j + 1] = preSum[i][j + 1] + preSum[i + 1][j] - preSum[i][j] + matrix[i][j];
+                }
+            }
+        }
+
+        public int sumRegion(int row1, int col1, int row2, int col2) {
+            //减数据的时候，要结合图理解下，应该是外面的一格坐标才行
+            return preSum[row2 + 1][col2 + 1] - preSum[row2+1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
+        }
+    }
+
+    //[560].和为 K 的子数组
     public int subarraySum(int[] nums, int k) {
+        //[1,1,1]
         int preSum = 0, res = 0;
         Map<Integer, Integer> preSumCount = new HashMap<>();
         //当只有一个元素满足k的时候，需要统计为1
@@ -3846,8 +3895,12 @@ public class AllOfThem {
 
         new AllOfThem().convertBiNode(t1712);
 
-
-        System.out.println(new AllOfThem().spiralOrder(new int[][]{{1,2,3},{4,5,6},{7,8,9}}));
+        System.out.println(new AllOfThem().spiralOrder(new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}));
         System.out.println(new AllOfThem().generateMatrix(3));
+
+        NumArray numArray = new NumArray(new int[]{-2, 0, 3, -5, 2, -1});
+        System.out.println(numArray.sumRange(0, 2));
+        System.out.println(numArray.sumRange(2, 5));
+        System.out.println(numArray.sumRange(0, 5));
     }
 }
