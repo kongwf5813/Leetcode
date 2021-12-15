@@ -3720,7 +3720,23 @@ public class AllOfThem {
 
     //[238].除自身以外数组的乘积
     public int[] productExceptSelf(int[] nums) {
-        return null;
+        int n = nums.length;
+        int[] left = new int[n + 1];
+        int[] right = new int[n + 1];
+        left[0] = 1;
+        right[n] = 1;
+        for (int i = 0; i < n; i++) {
+            left[i + 1] = left[i] * nums[i];
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            right[i] = right[i + 1] * nums[i];
+        }
+
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = left[i] * right[i + 1];
+        }
+        return res;
     }
 
     //[303].区域和检索 - 数组不可变
@@ -3761,7 +3777,38 @@ public class AllOfThem {
 
         public int sumRegion(int row1, int col1, int row2, int col2) {
             //减数据的时候，要结合图理解下，应该是外面的一格坐标才行
-            return preSum[row2 + 1][col2 + 1] - preSum[row2+1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
+            return preSum[row2 + 1][col2 + 1] - preSum[row2 + 1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
+        }
+    }
+
+    //[528].按权重随机选择
+    public static class Solution528 {
+        int[] preSum;
+
+        public Solution528(int[] w) {
+            int n = w.length;
+            preSum = new int[n];
+            preSum[0] = w[0];
+            for (int i = 1; i < n; i++) {
+                preSum[i] = preSum[i - 1] + w[i];
+            }
+        }
+
+        public int pickIndex() {
+            int n = preSum.length;
+            //选择[1, total]之间的值
+            int w = new Random().nextInt(preSum[n - 1]) + 1;
+            //左边界算法
+            int left = 0, right = n - 1;
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (preSum[mid] >= w) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            return left;
         }
     }
 
@@ -3793,7 +3840,7 @@ public class AllOfThem {
             graph[i] = new ArrayList<>();
         }
         int[] indegree = new int[n];
-        for (int[] rich: richer) {
+        for (int[] rich : richer) {
             graph[rich[0]].add(rich[1]);
             indegree[rich[1]]++;
         }
@@ -3808,13 +3855,13 @@ public class AllOfThem {
         }
         while (!queue.isEmpty()) {
             int cur = queue.poll();
-            for(int next : graph[cur]) {
+            for (int next : graph[cur]) {
                 //当前人找到的那个最安静的人 < 邻接人找到的那个最安静的人的时候，则更新。
                 if (quiet[ans[cur]] < quiet[ans[next]]) {
                     ans[next] = ans[cur];
                 }
                 //加不进去没关系，但是度得维护下
-                if(--indegree[next] == 0) {
+                if (--indegree[next] == 0) {
                     queue.offer(next);
                 }
             }
