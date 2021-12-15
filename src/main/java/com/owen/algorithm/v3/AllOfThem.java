@@ -3783,6 +3783,45 @@ public class AllOfThem {
         return res;
     }
 
+    //[851].喧闹和富有
+    public int[] loudAndRich(int[][] richer, int[] quiet) {
+        int n = quiet.length;
+        //有钱->没钱 的邻接表， 从入度为0开始入队(从最有钱的开始遍历)，只有当前节点的比邻接点更安静，则更新邻接点的位置
+        int[] ans = new int[n];
+        List<Integer>[] graph = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+        int[] indegree = new int[n];
+        for (int[] rich: richer) {
+            graph[rich[0]].add(rich[1]);
+            indegree[rich[1]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            //初始值为本身
+            ans[i] = i;
+            //入度为0，都是些最有钱的人
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            for(int next : graph[cur]) {
+                //当前人找到的那个最安静的人 < 邻接人找到的那个最安静的人的时候，则更新。
+                if (quiet[ans[cur]] < quiet[ans[next]]) {
+                    ans[next] = ans[cur];
+                }
+                //加不进去没关系，但是度得维护下
+                if(--indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+        return ans;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
