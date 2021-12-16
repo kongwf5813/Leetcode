@@ -3869,6 +3869,43 @@ public class AllOfThem {
         return ans;
     }
 
+    public int visiblePoints(List<List<Integer>> points, int angle, List<Integer> location) {
+        //首先转化极坐标，其次扩大坐标范围，滑动窗口更新可见数量
+        List<Double> polarDegrees = new ArrayList<>();
+        int x = location.get(0), y = location.get(1), sameCount = 0;
+        for (List<Integer> point : points) {
+            if (x == point.get(0) && y == point.get(1)) {
+                sameCount++;
+                continue;
+            }
+            //是弧度值，值范围(-PI,PI]
+            polarDegrees.add(Math.atan2(point.get(1) - y, point.get(0) - x));
+        }
+        int n = polarDegrees.size();
+        //只从小到大排序0到n-1
+        Collections.sort(polarDegrees);
+        //当有-PI的时候，与PI是重叠的，解决第三象限和第二象限不能连续扫描的问题，加上2PI，就是-PI变成了PI值，又可以和第二象限连续了。
+        for (int i = 0; i < n; i++) {
+            polarDegrees.add(polarDegrees.get(i) + 2 * Math.PI);
+        }
+
+        int left = 0, right = 0, maxCount = 0;
+        //换算成弧度值
+        double range = angle * Math.PI / 180;
+        //滑动窗口遍历数组，不断扩大右边区域，发现不在范围内，缩小左边区域，区间值就是点的个数
+        while (right < 2 * n) {
+            while (left < right && polarDegrees.get(right) - polarDegrees.get(left) > range) {
+                left++;
+            }
+            //更新值
+            maxCount = Math.max(maxCount, right - left + 1);
+            right++;
+        }
+
+        return maxCount + sameCount;
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
