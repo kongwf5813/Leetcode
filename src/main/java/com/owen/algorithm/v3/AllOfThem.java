@@ -3905,6 +3905,17 @@ public class AllOfThem {
         return maxCount + sameCount;
     }
 
+    public static int numWaterBottles(int numBottles, int numExchange) {
+        int bottles = numBottles, left = numBottles;
+        while (left >= numExchange) {
+            //可以换多少瓶新的
+            int empty = left / numExchange;
+            bottles += empty;
+            //剩余的变成了新换的+ 剩下换不了的
+            left = empty + left% numExchange;
+        }
+        return bottles;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
