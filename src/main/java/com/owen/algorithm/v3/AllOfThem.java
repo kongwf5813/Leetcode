@@ -1,12 +1,7 @@
 package com.owen.algorithm.v3;
 
 
-import com.owen.algorithm.Tree;
-
-import javax.swing.*;
-
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class AllOfThem {
     public static class ListNode {
@@ -3004,7 +2999,7 @@ public class AllOfThem {
     }
 
     //[674].最长连续递增序列
-    public static int findLengthOfLCIS(int[] nums) {
+    public int findLengthOfLCIS(int[] nums) {
         //1 2 5 4 7
         int n = nums.length;
         if (n == 1) return 1;
@@ -3063,7 +3058,7 @@ public class AllOfThem {
         return res.toArray(new int[][]{});
     }
 
-    //[436].
+    //[436].寻找右区间
     public int[] findRightInterval(int[][] intervals) {
         int n = intervals.length;
         int[][] sort = new int[n][2];
@@ -3869,6 +3864,7 @@ public class AllOfThem {
         return ans;
     }
 
+    //[1610].可见点的最大数目
     public int visiblePoints(List<List<Integer>> points, int angle, List<Integer> location) {
         //首先转化极坐标，其次扩大坐标范围，滑动窗口更新可见数量
         List<Double> polarDegrees = new ArrayList<>();
@@ -3905,16 +3901,122 @@ public class AllOfThem {
         return maxCount + sameCount;
     }
 
-    public static int numWaterBottles(int numBottles, int numExchange) {
+    //[1518].换酒问题
+    public int numWaterBottles(int numBottles, int numExchange) {
         int bottles = numBottles, left = numBottles;
         while (left >= numExchange) {
             //可以换多少瓶新的
             int empty = left / numExchange;
             bottles += empty;
             //剩余的变成了新换的+ 剩下换不了的
-            left = empty + left% numExchange;
+            left = empty + left % numExchange;
         }
         return bottles;
+    }
+
+    class Difference {
+        int[] diffSum;
+
+        public Difference(int[] nums) {
+            int n = nums.length;
+            diffSum = new int[n];
+            int temp = 0;
+            for (int i = 0; i < n; i++) {
+                diffSum[i] = nums[i] - temp;
+                temp = nums[i];
+            }
+        }
+
+        public void insert(int i, int j, int num) {
+            diffSum[i] += num;
+            //数组会超过
+            if (j + 1 < diffSum.length) {
+                diffSum[j + 1] -= num;
+            }
+        }
+
+        public int[] result() {
+            int[] nums = new int[diffSum.length];
+            int sum = 0;
+            for (int i = 0; i < diffSum.length; i++) {
+                sum += diffSum[i];
+                nums[i] = sum;
+            }
+            return nums;
+        }
+    }
+
+    //[1109].航班预订统计
+    public int[] corpFlightBookings(int[][] bookings, int n) {
+        Difference difference = new Difference(new int[n]);
+        for (int[] booking : bookings) {
+            difference.insert(booking[0] - 1, booking[1] - 1, booking[2]);
+        }
+        return difference.result();
+    }
+
+    //[1094].拼车
+    public boolean carPooling(int[][] trips, int capacity) {
+        //可以从1开始，0位置没有人乘车也没关系，没人<容量
+        Difference difference = new Difference(new int[1001]);
+        for (int[] trip : trips) {
+            //[1, 5] 5下车，说明区间在1,4之间，5重新上车乘客数才是要跟容量比
+            difference.insert(trip[1], trip[2] - 1, trip[0]);
+        }
+        int[] result = difference.result();
+        for (int each : result) {
+            if (each > capacity) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[523].连续的子数组和
+    public boolean checkSubarraySum(int[] nums, int k) {
+        if (nums.length < 2) return false;
+
+        //[23,2,4,6,7], k = 6
+        //子数组和，需要的是快速定位区间和，另外需要判断连续子数组，已知一个值和结果，那么就可以用hash来判断，跟两数之和类似
+        //k的倍数， (preSum[j] - preSum[i]) % k == 0; 即前后两个前缀和取余数相等就是判断条件！！！
+        Map<Integer, Integer> preSumMap = new HashMap<>();
+        preSumMap.put(0, -1);
+        int preSum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            preSum += nums[i];
+
+            int reminder = preSum % k;
+            if (preSumMap.containsKey(reminder)) {
+                if (i - preSumMap.get(reminder) > 1) {
+                    return true;
+                }
+            } else {
+                preSumMap.put(reminder, i);
+            }
+        }
+        return false;
+    }
+
+    //[525].连续数组
+    public int findMaxLength(int[] nums) {
+        //首先求解是连续数组，所以需要构造区间统计0和1的个数，可以0的时候前缀和-1， 1的时候前缀和+1
+        //当某个前缀和再次出现的时候，一定代表0和1是相等的。
+        Map<Integer, Integer> preSumMap = new HashMap<>();
+        preSumMap.put(0, -1);
+        int preSum = 0, res = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == 1) {
+                preSum++;
+            } else {
+                preSum--;
+            }
+            if (preSumMap.containsKey(preSum)) {
+                res = Math.max(res, i - preSumMap.get(preSum));
+            } else {
+                preSumMap.put(preSum, i);
+            }
+        }
+        return res;
     }
 
     public static void main(String[] args) {
@@ -4036,5 +4138,7 @@ public class AllOfThem {
         System.out.println(numArray.sumRange(0, 2));
         System.out.println(numArray.sumRange(2, 5));
         System.out.println(numArray.sumRange(0, 5));
+
+        System.out.println(Arrays.toString(new AllOfThem().corpFlightBookings(new int[][]{{1, 2, 10}, {2, 3, 20}, {2, 5, 25}}, 5)));
     }
 }
