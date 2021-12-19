@@ -2292,20 +2292,21 @@ public class AllOfThem {
         while (left < right) {
             //mid偏右
             int mid = left + (right - left + 1) / 2;
-            //值在左边，排除右边界
-            if (nums[mid] > target) {
-                right = mid - 1;
-            } else {
+            if (nums[mid] <= target) {
                 //小于等于，可能是该值
                 left = mid;
+            } else {
+                //值在左边，排除右边界
+                right = mid - 1;
             }
         }
 //        return nums[left] == target ? left : -1;
         return left;
     }
 
-    //找到大于target的右边界
+    //这确实是个右边界算法
     private int findRightIndexV3(int[] nums, int target) {
+        //对于不存在和存在的数而言，找的是大于它的第一个数
         int left = 0, right = nums.length -1;
         while (left < right) {
             int mid = left + (right - left) / 2;
@@ -4488,6 +4489,8 @@ public class AllOfThem {
         System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 3));
         System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 2));
         System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 3));
+        System.out.println(new AllOfThem().findRightIndexV3(new int[] {1,2,2,4}, 2));
+        System.out.println(new AllOfThem().findRightIndexV3(new int[] {1,2,2,4}, 3));
 
 
     }
