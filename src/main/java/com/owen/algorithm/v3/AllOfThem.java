@@ -345,6 +345,34 @@ public class AllOfThem {
         return (n & (n - 1)) == 0 && (n & 0xaaaaaaaa) == 0;
     }
 
+    //[343].整数拆分
+    public int integerBreak(int n) {
+        //1 2 3 4 5
+        //0 1 2
+        int[] dp = new int[n + 1];
+        dp[1] = 0;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j < i; j++) {
+                //之前的拆法的乘积*拆出来的数 直接拆出两个数的乘积
+                dp[i] = Math.max(dp[i], Math.max((i - j) * dp[j], (i - j) * j));
+            }
+        }
+        return dp[n];
+    }
+
+
+    //[344].反转字符串
+    public void reverseString(char[] s) {
+        int left = 0, right = s.length - 1;
+        while (left < right) {
+            char ch = s[left];
+            s[left] = s[right];
+            s[right] = ch;
+            left++;
+            right--;
+        }
+    }
+
     //[743].网络延迟时间
     public int networkDelayTime(int[][] times, int n, int k) {
         //最短路径
@@ -1665,6 +1693,42 @@ public class AllOfThem {
         return slow;
     }
 
+    //[2074].反转偶数长度组的节点
+    public ListNode reverseEvenLengthGroups(ListNode head) {
+        int count = 0;
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode pre = dummy;
+        ListNode cur = head;
+        while (cur != null) {
+            count++;
+
+            int length = 0;
+            ListNode next = cur;
+            while (length < count && next != null) {
+                next = next.next;
+                length++;
+            }
+            if (length % 2 == 0) {
+                //cur就是要转化的头节点, cur一直在当前节点上没变
+                for (int i = 0; i < length - 1; i++) {
+                    ListNode removed = cur.next;
+                    cur.next = cur.next.next;
+                    removed.next = pre.next;
+                    pre.next = removed;
+                }
+                pre = cur;
+                cur = cur.next;
+            } else {
+                for (int i = 0; i < length; i++) {
+                    cur = cur.next;
+                    pre = pre.next;
+                }
+            }
+        }
+        return dummy.next;
+    }
+
     //[82]删除排序链表中的重复元素 II
     public ListNode deleteDuplicates2(ListNode head) {
         ListNode slow = head, fast = head;
@@ -2201,25 +2265,30 @@ public class AllOfThem {
     //版本2
     private int findLeftIndex2(int[] nums, int target) {
         //左边界，大于等于target
+        //对于不存在的数而言，找的是大于它的第一个数
+        //对于存在的多个数而言，找的是等于它的第一个数
         int left = 0, right = nums.length - 1;
         while (left < right) {
             //mid偏左
             int mid = left + (right - left) / 2;
-            //值在右边，排除左边界
-            if (nums[mid] < target) {
-                left = mid + 1;
-            } else {
+            if (nums[mid] >= target) {
                 //大于等于，可能是该值
                 right = mid;
+            } else {
+                //值在右边，排除左边界
+                left = mid + 1;
             }
         }
-        return nums[left] == target ? left : -1;
+//        return nums[left] == target ? left : -1;
+        return left;
     }
 
     //版本2
     private int findRightIndexV2(int[] nums, int target) {
         int left = 0, right = nums.length - 1;
         //右边界，小于等于target
+        //对于不存在的数而言，找的是小于它的最后一个数
+        //对于存在的多个数而言，找的是等于它的最后一个数
         while (left < right) {
             //mid偏右
             int mid = left + (right - left + 1) / 2;
@@ -2231,7 +2300,22 @@ public class AllOfThem {
                 left = mid;
             }
         }
-        return nums[right] == target ? right : -1;
+//        return nums[left] == target ? left : -1;
+        return left;
+    }
+
+    //找到大于target的右边界
+    private int findRightIndexV3(int[] nums, int target) {
+        int left = 0, right = nums.length -1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
     }
 
     //[35].搜索插入位置
@@ -4019,6 +4103,259 @@ public class AllOfThem {
         return res;
     }
 
+    //[419].甲板上的战舰
+    public int countBattleships(char[][] board) {
+        //X就改变成.，往下面和右边扩大范围
+        int m = board.length, n = board[0].length;
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] != 'X') {
+                    continue;
+                }
+                board[i][j] = '-';
+                for (int k = i + 1; k < m && board[k][j] == 'X'; k++) board[k][j] = '-';
+                for (int k = j + 1; k < n && board[i][k] == 'X'; k++) board[i][k] = '-';
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    private int countBattleshipsV2(char[][] board) {
+        //X就改变成.，往下面和右边扩大范围
+        int m = board.length, n = board[0].length;
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                //除了最左边和最上边的边界情况，只计算最左上角的战舰个数
+                if (i > 0 && board[i - 1][j] == 'X') continue;
+                if (j > 0 && board[i][j - 1] == 'X') continue;
+                if (board[i][j] == 'X') {
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+
+    //[187].重复的DNA序列
+    public List<String> findRepeatedDnaSequences(String s) {
+        List<String> res = new ArrayList<>();
+        if (s.length() < 10) return res;
+//        Map<String, Integer> dnaMap = new HashMap<>();
+//        for (int i = 10; i < s.length(); i++) {
+//            String subDna = s.substring(i - 10, i);
+//            dnaMap.put(subDna, dnaMap.getOrDefault(subDna, 0) + 1);
+//            //这是不是也是一个思路改进呢？？
+//            if (dnaMap.get(subDna) == 2) {
+//                res.add(subDna);
+//            }
+//        }
+
+        Map<Character, Integer> map = new HashMap<>();
+        map.put('A', 0);
+        map.put('C', 1);
+        map.put('T', 2);
+        map.put('G', 3);
+        //前10位先构造出来，一共需要20位，理论上够的
+        int x = 0;
+        for (int i = 0; i < 9; i++) {
+            x = (x << 2) | map.get(s.charAt(i));
+        }
+        int n = s.length();
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int i = 0; i <= n - 10; i++) {
+            //前面算了9位，从index 9开始算
+            x = ((x << 2) | map.get(s.charAt(i + 9))) & ((1 << 20) - 1);
+            count.put(x, count.getOrDefault(x, 0) + 1);
+            if (count.get(x) == 2) {
+                res.add(s.substring(i, i + 10));
+            }
+        }
+        return res;
+    }
+
+    //[1375].二进制字符串前缀一致的次数
+    public int numTimesAllBlue(int[] flips) {
+        int maxPos = 0, cnt = 0;
+        //[3,2,4,1,5] 最大的位置等于当前位置就意味着是一个前缀字符串
+        for (int i = 0; i < flips.length; i++) {
+            maxPos = Math.max(maxPos, flips[i]);
+            if (i + 1 == maxPos) {
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+
+    //[2075].解码斜向换位密码
+    public String decodeCiphertext(String encodedText, int rows) {
+        if (encodedText.isEmpty() || rows == 1) return encodedText;
+        int cols = encodedText.length() / rows;
+        int i = 0, j = 0, count = 0;
+        StringBuilder sb = new StringBuilder();
+        while (j < cols) {
+            sb.append(encodedText.charAt(i * cols + j));
+            count++;
+            i++;
+            j++;
+            //右下角一个元素标记着最多还有一斜行，最多cols个元素，达不到最后列，就可以结束了。
+            if (count % rows == 0) {
+                i = 0;
+                j = count / rows;
+            }
+        }
+        //只能剔除掉最后的空格
+        j = sb.length() - 1;
+        while (sb.charAt(j) == ' ') {
+            j--;
+        }
+        return sb.delete(j + 1, sb.length()).toString();
+    }
+
+    //[997].找到小镇的法官
+    public int findJudge(int n, int[][] trust) {
+        int[] outDegree = new int[n + 1];
+        int[] inDegree = new int[n + 1];
+        for (int[] item : trust) {
+            outDegree[item[0]]++;
+            inDegree[item[1]]++;
+        }
+        for (int i = 1; i <= n; i++) {
+            if (inDegree[i] == n - 1 && outDegree[i] == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    //[5956].找出数组中的第一个回文字符串
+    public String firstPalindrome(String[] words) {
+        for (int i = 0; i < words.length; i++) {
+            if (isPalindrome(words[i])) {
+                return words[i];
+            }
+        }
+        return "";
+    }
+
+    private boolean isPalindrome(String word) {
+        int left = 0, right = word.length() - 1;
+        while (left < right) {
+            if (word.charAt(left) == word.charAt(right)) {
+                left++;
+                right--;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[5957].向字符串添加空格
+    public String addSpaces(String s, int[] spaces) {
+        StringBuilder sb = new StringBuilder(s);
+        int count = 0;
+        for (int space : spaces) {
+            sb.insert(space + count, ' ');
+            count++;
+        }
+        return sb.toString();
+    }
+
+    //[5958].股票平滑下跌阶段的数目
+    public long getDescentPeriods(int[] prices) {
+        int n = prices.length;
+        //从第1个开始，少算了一个数
+        //count前面子集的个数，默认从1开始，本身也是递减的
+        long ans = 1, count = 1;
+        for (int i = 1; i < n; i++) {
+            if (prices[i - 1] == prices[i] + 1) {
+                count++;
+            } else {
+                count = 1;
+            }
+            ans += count;
+        }
+
+        return ans;
+    }
+
+    //[5959].使数组 K 递增的最少操作次数
+    public int kIncreasing(int[] arr, int k) {
+        int n = arr.length, ans = 0;
+        for (int i = 0; i < k; i++) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = i; j < n; j += k) {
+                list.add(arr[j]);
+            }
+            //如果是一个，则不需要计数
+            if (list.size() == 1) continue;
+
+            //最大递增子序列
+            int[] dp = new int[list.size()];
+            //最大默认有0堆
+            int maxLen = 0;
+            for (int num : list) {
+                //目前已有的堆上找到比它大的最小，放上去
+                int left = 0, right = maxLen;
+                while (left < right) {
+                    int mid = left + (right - left) / 2;
+                    if (dp[mid] <= num) {
+                        left = mid + 1;
+                    } else {
+                        right = mid;
+                    }
+                }
+                //放最顶上去
+                dp[left] = num;
+                //需要新建一个堆
+                if (maxLen == left) {
+                    maxLen++;
+                }
+            }
+            ans += list.size() - maxLen;
+        }
+        return ans;
+    }
+
+    public int kIncreasingV2(int[] arr, int k) {
+        int n = arr.length, ans = 0;
+        for (int i = 0; i < k; i++) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = i; j < n; j += k) {
+                list.add(arr[j]);
+            }
+            //如果是一个，则不需要调整个数
+            if (list.size() == 1) continue;
+
+            int[] dp = new int[list.size()];
+            //最大默认有0堆
+            int maxLen = 0;
+            for (int num : list) {
+                //目前已有的堆上找到比它大的最小，放上去
+                int left = 0, right = maxLen;
+                while (left < right) {
+                    int mid = left + (right - left) / 2;
+                    if (dp[mid] <= num) {
+                        left = mid + 1;
+                    } else {
+                        right = mid;
+                    }
+                }
+                //放最顶上去
+                dp[left] = num;
+                //需要新建一个堆
+                if (maxLen == left) {
+                    maxLen++;
+                }
+            }
+            ans += list.size() - maxLen;
+        }
+        return ans;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
@@ -4140,5 +4477,18 @@ public class AllOfThem {
         System.out.println(numArray.sumRange(0, 5));
 
         System.out.println(Arrays.toString(new AllOfThem().corpFlightBookings(new int[][]{{1, 2, 10}, {2, 3, 20}, {2, 5, 25}}, 5)));
+        System.out.println(new AllOfThem().countBattleships(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
+        System.out.println(new AllOfThem().countBattleshipsV2(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
+        System.out.println(new AllOfThem().findRepeatedDnaSequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"));
+        System.out.println(new AllOfThem().decodeCiphertext("ch   ie   pr", 3));
+        System.out.println(new AllOfThem().decodeCiphertext("coding", 1));
+        System.out.println(new AllOfThem().getDescentPeriods(new int[]{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 3, 10, 9, 8, 7}));
+        System.out.println(new AllOfThem().kIncreasingV2(new int[]{5,5,5,5,4}, 1));
+        System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 2));
+        System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 3));
+        System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 2));
+        System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 3));
+
+
     }
 }
