@@ -2307,7 +2307,7 @@ public class AllOfThem {
     //这确实是个右边界算法
     private int findRightIndexV3(int[] nums, int target) {
         //对于不存在和存在的数而言，找的是大于它的第一个数
-        int left = 0, right = nums.length -1;
+        int left = 0, right = nums.length - 1;
         while (left < right) {
             int mid = left + (right - left) / 2;
             if (nums[mid] <= target) {
@@ -4327,9 +4327,9 @@ public class AllOfThem {
         int ans = 0, n = heaters.length;
         for (int house : houses) {
             int left = findRightIndex(heaters, house, n);
-            int right = left +1;
-            int leftRadius = left <0 ? Integer.MAX_VALUE: house - heaters[left];
-            int rightRadius = right >= n ? Integer.MAX_VALUE:  heaters[right] - house;
+            int right = left + 1;
+            int leftRadius = left < 0 ? Integer.MAX_VALUE : house - heaters[left];
+            int rightRadius = right >= n ? Integer.MAX_VALUE : heaters[right] - house;
             ans = Math.max(ans, Math.min(leftRadius, rightRadius));
         }
         return ans;
@@ -4339,19 +4339,37 @@ public class AllOfThem {
         //1,2,4
         //找到位置小于等于house的heater
         //如果没有相等的，那么就找到小于它的，如果有相等的，找它自己
-        int left = 0, right = n -1;
+        int left = 0, right = n - 1;
         while (left < right) {
-            int mid = left + (right - left +1) /2;
+            int mid = left + (right - left + 1) / 2;
             if (heaters[mid] <= house) {
                 left = mid;
             } else {
-                right = mid -1;
+                right = mid - 1;
             }
         }
         if (heaters[left] > house) {
             return -1;
         }
         return left;
+    }
+
+    //[275].H 指数 II
+    public int hIndex(int[] citations) {
+        int n = citations.length;
+        int left = 0, right = n - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            //引用次数小于论文篇数(不满足共h篇论文引用次数不少于h)，往右边走
+            if (citations[mid] < n - mid) {
+                left = mid + 1;
+            } else {
+                //引用次数>=论文篇数，还应该往左边走走，找到更大的论文篇数
+                right = mid;
+            }
+        }
+        //h指数
+        return n - left;
     }
 
     public static void main(String[] args) {
@@ -4481,13 +4499,13 @@ public class AllOfThem {
         System.out.println(new AllOfThem().decodeCiphertext("ch   ie   pr", 3));
         System.out.println(new AllOfThem().decodeCiphertext("coding", 1));
         System.out.println(new AllOfThem().getDescentPeriods(new int[]{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 3, 10, 9, 8, 7}));
-        System.out.println(new AllOfThem().kIncreasing(new int[]{5,5,5,5,4}, 1));
-        System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 2));
-        System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 3));
-        System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 2));
-        System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 3));
-        System.out.println(new AllOfThem().findRightIndexV3(new int[] {1,2,2,4}, 2));
-        System.out.println(new AllOfThem().findRightIndexV3(new int[] {1,2,2,4}, 3));
+        System.out.println(new AllOfThem().kIncreasing(new int[]{5, 5, 5, 5, 4}, 1));
+        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 2));
+        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 3));
+        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 2));
+        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 3));
+        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 2));
+        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
 
 
     }
