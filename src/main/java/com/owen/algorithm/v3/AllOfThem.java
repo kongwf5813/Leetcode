@@ -4299,7 +4299,7 @@ public class AllOfThem {
             //最大默认有0堆
             int maxLen = 0;
             for (int num : list) {
-                //目前已有的堆上找到比它大的最小，放上去
+                //右侧边界，大于的模版
                 int left = 0, right = maxLen;
                 while (left < right) {
                     int mid = left + (right - left) / 2;
@@ -4321,40 +4321,37 @@ public class AllOfThem {
         return ans;
     }
 
-    public int kIncreasingV2(int[] arr, int k) {
-        int n = arr.length, ans = 0;
-        for (int i = 0; i < k; i++) {
-            List<Integer> list = new ArrayList<>();
-            for (int j = i; j < n; j += k) {
-                list.add(arr[j]);
-            }
-            //如果是一个，则不需要调整个数
-            if (list.size() == 1) continue;
-
-            int[] dp = new int[list.size()];
-            //最大默认有0堆
-            int maxLen = 0;
-            for (int num : list) {
-                //目前已有的堆上找到比它大的最小，放上去
-                int left = 0, right = maxLen;
-                while (left < right) {
-                    int mid = left + (right - left) / 2;
-                    if (dp[mid] <= num) {
-                        left = mid + 1;
-                    } else {
-                        right = mid;
-                    }
-                }
-                //放最顶上去
-                dp[left] = num;
-                //需要新建一个堆
-                if (maxLen == left) {
-                    maxLen++;
-                }
-            }
-            ans += list.size() - maxLen;
+    //[475].供暖器
+    public static int findRadius(int[] houses, int[] heaters) {
+        Arrays.sort(heaters);
+        int ans = 0, n = heaters.length;
+        for (int house : houses) {
+            int left = findRightIndex(heaters, house, n);
+            int right = left +1;
+            int leftRadius = left <0 ? Integer.MAX_VALUE: house - heaters[left];
+            int rightRadius = right >= n ? Integer.MAX_VALUE:  heaters[right] - house;
+            ans = Math.max(ans, Math.min(leftRadius, rightRadius));
         }
         return ans;
+    }
+
+    private static int findRightIndex(int[] heaters, int house, int n) {
+        //1,2,4
+        //找到位置小于等于house的heater
+        //如果没有相等的，那么就找到小于它的，如果有相等的，找它自己
+        int left = 0, right = n -1;
+        while (left < right) {
+            int mid = left + (right - left +1) /2;
+            if (heaters[mid] <= house) {
+                left = mid;
+            } else {
+                right = mid -1;
+            }
+        }
+        if (heaters[left] > house) {
+            return -1;
+        }
+        return left;
     }
 
     public static void main(String[] args) {
@@ -4484,7 +4481,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().decodeCiphertext("ch   ie   pr", 3));
         System.out.println(new AllOfThem().decodeCiphertext("coding", 1));
         System.out.println(new AllOfThem().getDescentPeriods(new int[]{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 3, 10, 9, 8, 7}));
-        System.out.println(new AllOfThem().kIncreasingV2(new int[]{5,5,5,5,4}, 1));
+        System.out.println(new AllOfThem().kIncreasing(new int[]{5,5,5,5,4}, 1));
         System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 2));
         System.out.println(new AllOfThem().findLeftIndex2(new int[] {1,2,2,4}, 3));
         System.out.println(new AllOfThem().findRightIndexV2(new int[] {1,2,2,4}, 2));
