@@ -4372,6 +4372,23 @@ public class AllOfThem {
         return n - left;
     }
 
+    //[1154].一年中的第几天
+    public static int dayOfYear(String date) {
+        String[] vars = date.split("-");
+        int year = Integer.parseInt(vars[0]);
+        int month = Integer.parseInt(vars[1]);
+        int day = Integer.parseInt(vars[2]);
+        int[] days = new int[]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)) {
+            days[1] += 1;
+        }
+        int ans = 0;
+        for (int i = 0; i < month - 1; i++) {
+            ans += days[i];
+        }
+        return ans + day;
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
