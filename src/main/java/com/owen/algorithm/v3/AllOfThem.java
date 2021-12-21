@@ -4389,6 +4389,40 @@ public class AllOfThem {
         return ans + day;
     }
 
+
+    private TreeNode preNode, leftMax, rightMin;
+    public void recoverTree(TreeNode root) {
+        helper(root);
+        if (leftMax != null && rightMin != null) {
+            int temp = leftMax.val;
+            leftMax.val = rightMin.val;
+            rightMin.val = temp;
+        }
+    }
+
+    private void helper(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        helper(root.left);
+        if (preNode == null) {
+            preNode = root;
+        } else {
+            //左右子树交换会有两段，1 2 8 4 5 6 7 3
+            //前面一个节点大于后面节点，前面一个节点是交换节点
+            if (preNode.val > root.val) {
+                //只能取第一个
+                if (leftMax == null) {
+                    leftMax = preNode;
+                }
+                //可以一直覆盖
+                rightMin = root;
+            }
+            preNode = root;
+        }
+        helper(root.right);
+    }
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
