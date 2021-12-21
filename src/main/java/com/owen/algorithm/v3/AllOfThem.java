@@ -4373,7 +4373,7 @@ public class AllOfThem {
     }
 
     //[1154].一年中的第几天
-    public static int dayOfYear(String date) {
+    public int dayOfYear(String date) {
         String[] vars = date.split("-");
         int year = Integer.parseInt(vars[0]);
         int month = Integer.parseInt(vars[1]);
@@ -4389,8 +4389,9 @@ public class AllOfThem {
         return ans + day;
     }
 
-
+    //[99].恢复二叉搜索树
     private TreeNode preNode, leftMax, rightMin;
+
     public void recoverTree(TreeNode root) {
         helper(root);
         if (leftMax != null && rightMin != null) {
@@ -4421,6 +4422,82 @@ public class AllOfThem {
             preNode = root;
         }
         helper(root.right);
+    }
+
+    //[面试题 16.19].水域大小
+    public int[] pondSizes(int[][] land) {
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < land.length; i++) {
+            for (int j = 0; j < land[0].length; j++) {
+                if (land[i][j] == 0) {
+                    res.add(dfsForPondSizes(land, i, j));
+                }
+            }
+        }
+        return res.stream().sorted().mapToInt(i -> i).toArray();
+    }
+
+    private int dfsForPondSizes(int[][] land, int i, int j) {
+        if (land[i][j] != 0) {
+            return 0;
+        }
+        land[i][j] = -1;
+
+        int[][] directions = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+
+        int res = 1;
+        for (int[] direct : directions) {
+            int newX = i + direct[0];
+            int newY = j + direct[1];
+            if (newX < 0 || newY < 0 || newX >= land.length || newY >= land[0].length) {
+                continue;
+            }
+            res += dfsForPondSizes(land, newX, newY);
+        }
+        return res;
+    }
+
+    //[70].爬楼梯
+    public int climbStairs(int n) {
+//        int[] dp = new int[n+1];
+//        dp[0] = 1;
+//        dp[1] = 1;
+//
+//        for (int i = 2; i <= n; i++) {
+//            dp[i] = dp[i-1] + dp[i-2];
+//        }
+//        return dp[n];
+        int dp_2 = 1, dp_1 = 1, dp_i = 1;
+        for (int i = 2; i <= n; i++) {
+            dp_i = dp_1 + dp_2;
+            dp_2 = dp_1;
+            dp_1 = dp_i;
+        }
+        return dp_i;
+    }
+
+    //[388].文件的最长绝对路径
+    public int lengthLongestPath(String input) {
+        Stack<Integer> stack = new Stack<>();
+        String[] vals = input.split("\n");
+        int res = 0;
+        for (String val : vals) {
+            int level = val.lastIndexOf("\t") + 1;
+            //level
+            while (!stack.isEmpty() && level < stack.size()) {
+                stack.pop();
+            }
+            //多算了一个/
+            int len = stack.isEmpty() ? val.length() - level + 1 : stack.peek() + val.length() - level + 1;
+            //一层放一个新的值
+            stack.push(len);
+
+            //文件才需要计算最大长度，注意多算了一个/
+            if (val.contains(".")) {
+                res = Math.max(res, len -1);
+            }
+        }
+        return res;
     }
 
     public static void main(String[] args) {
@@ -4557,7 +4634,11 @@ public class AllOfThem {
         System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 3));
         System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 2));
         System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
+        System.out.println(Arrays.toString(new AllOfThem().pondSizes(new int[][]{{0, 2, 1, 0}, {0, 1, 0, 1}, {1, 1, 0, 1}, {0, 1, 0, 1}})));
+        System.out.println(new AllOfThem().climbStairs(2));
 
-
+        System.out.println(new AllOfThem().lengthLongestPath("dir\n\tsubdir1\n\tsubdir2\n\t\tfile.ext"));
+        System.out.println(new AllOfThem().lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
     }
+
 }
