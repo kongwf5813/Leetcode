@@ -4391,6 +4391,7 @@ public class AllOfThem {
 
 
     private TreeNode preNode, leftMax, rightMin;
+
     public void recoverTree(TreeNode root) {
         helper(root);
         if (leftMax != null && rightMin != null) {
@@ -4426,7 +4427,7 @@ public class AllOfThem {
     //Morris遍历
     private void preOrderMorris(TreeNode root) {
         TreeNode cur = root, rightMost = null;
-        while (cur !=  null) {
+        while (cur != null) {
             if (cur.left == null) {
                 //是从这边直接遍历到原来的根节点的
                 cur = cur.right;
@@ -4461,6 +4462,87 @@ public class AllOfThem {
             }
         }
         return -1;
+    }
+
+    //[449].序列化和反序列化二叉搜索树
+    public class Codec2 {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "";
+            StringBuilder sb = new StringBuilder();
+            dfsForSerialize(root, sb);
+            return sb.deleteCharAt(sb.length() - 1).toString();
+        }
+
+        private void dfsForSerialize(TreeNode root, StringBuilder sb) {
+            if (root == null) return;
+            sb.append(root.val).append(',');
+            dfsForSerialize(root.left, sb);
+            dfsForSerialize(root.right, sb);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data == null || data.length() == 0) return null;
+            String[] items = data.split(",");
+            return dfsForDeserialize(items, 0, items.length - 1);
+        }
+
+        private TreeNode dfsForDeserialize(String[] list, int start, int end) {
+            if (start > end) return null;
+            String val = list[start];
+            TreeNode root = new TreeNode(Integer.parseInt(val));
+
+            int index = end + 1;
+            for (int i = start + 1; i <= end; i++) {
+                if (Integer.parseInt(list[i]) > Integer.parseInt(val)) {
+                    index = i;
+                    break;
+                }
+            }
+            root.left = dfsForDeserialize(list, start + 1, index - 1);
+            root.right = dfsForDeserialize(list, index, end);
+            return root;
+        }
+    }
+
+    //[297]二叉树的序列化与反序列化
+    public class Codec {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "#";
+            //先序遍历
+            return root.val + "," + serialize(root.left) + "," + serialize(root.right);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            LinkedList<String> list = new LinkedList<>();
+            String[] items = data.split(",");
+            for (String item : items) {
+                list.addLast(item);
+            }
+            return dfsForDeserialize(list);
+        }
+
+        private TreeNode dfsForDeserialize(LinkedList<String> list) {
+            if (list.isEmpty()) return null;
+            String first = list.removeFirst();
+            if (first.equals("#")) {
+                return null;
+            }
+            TreeNode root = new TreeNode(Integer.parseInt(first));
+            root.left = dfsForDeserialize(list);
+            root.right = dfsForDeserialize(list);
+            return root;
+        }
+    }
+
+    //[306].累加数
+    public boolean isAdditiveNumber(String num) {
+        return true;
     }
 
     public static void main(String[] args) {
