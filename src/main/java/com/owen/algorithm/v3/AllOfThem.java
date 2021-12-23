@@ -4542,7 +4542,41 @@ public class AllOfThem {
 
     //[306].累加数
     public boolean isAdditiveNumber(String num) {
-        return true;
+        //199100199
+        //选择，前导0不能选择，需要知道之前两个数是什么，只能从前往后选择
+        return dfsForIsAdditiveNumber(num, 0, 0, 0, 0);
+    }
+
+    private boolean dfsForIsAdditiveNumber(String num, int start, long first, long second, int k) {
+        if (start == num.length()) {
+            return k > 2;
+        }
+
+        for (int i = start; i < num.length(); i++) {
+            long cur = selectNumber(num, start, i);
+            if (cur == -1) {
+                continue;
+            }
+            if (k >= 2 && first + second != cur) {
+                continue;
+            }
+
+            if (dfsForIsAdditiveNumber(num, i + 1, second, cur, k + 1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private long selectNumber(String num, int start, int end) {
+        if (num.charAt(start) == '0') {
+            return -1;
+        }
+        long number = 0;
+        for (int i = start; i <= end; i++) {
+            number = number * 10 + (num.charAt(i) - '0');
+        }
+        return number;
     }
 
     //[1044].最长重复子串
@@ -4584,6 +4618,10 @@ public class AllOfThem {
         return "";
     }
 
+    //[313].超级丑数
+    public int nthSuperUglyNumber(int n, int[] primes) {
+        return 0;
+    }
 
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -4719,6 +4757,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 3));
         System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 2));
         System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
+        System.out.println(new AllOfThem().isAdditiveNumber("199100199"));
 
 
     }
