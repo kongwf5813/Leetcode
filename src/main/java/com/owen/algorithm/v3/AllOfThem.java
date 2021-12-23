@@ -4545,6 +4545,46 @@ public class AllOfThem {
         return true;
     }
 
+    //[1044].最长重复子串
+    public static String longestDupSubstring(String s) {
+        int n = s.length(), P = 1313131;
+        long[] p = new long[n + 1], h = new long[n + 1];
+        p[0] = 1;
+        for (int i = 0; i < n; i++) {
+            //P次方数组，P的i次方
+            p[i + 1] = p[i] * P;
+            //s(0..i-1)的hash值
+            h[i + 1] = h[i] * P + s.charAt(i);
+        }
+        String ans = "";
+        int left = 1, right = n - 1;
+        while (left < right) {
+            int len = left + (right - left + 1) / 2;
+            String res = check(s, len, p, h);
+            if (res.length() == 0) right = len - 1;
+            else left = len;
+            ans = res.length() > ans.length() ? res : ans;
+        }
+        return ans;
+    }
+
+    private static String check(String s, int len, long[] p, long[] h) {
+        Set<Long> set = new HashSet<>();
+        for (int i = 1; i + len - 1 <= s.length(); i++) {
+            int j = i + len - 1;
+            //区间: i-1 ~ j-1
+            //abcabc, 为n进制数，最右边的是a * n^0，所以h[i-1]要往左边推j-i+1位才可以。
+            long hash = h[j] - h[i - 1] * p[j - i + 1];
+            if (set.contains(hash)) {
+                return s.substring(i - 1, j);
+            } else {
+                set.add(hash);
+            }
+        }
+        return "";
+    }
+
+
     public static void main(String[] args) {
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
