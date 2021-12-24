@@ -4620,7 +4620,96 @@ public class AllOfThem {
 
     //[313].超级丑数
     public int nthSuperUglyNumber(int n, int[] primes) {
-        return 0;
+        int k = primes.length;
+        //质数的指针
+        int[] pointers = new int[k];
+        int[] dp = new int[n];
+        dp[0] = 1;
+        for (int i = 1; i < n; i++) {
+            int min = Integer.MAX_VALUE;
+            for (int j = 0; j < k; j++) {
+                min = Math.min(dp[pointers[j]] * primes[j], min);
+            }
+            dp[i] = min;
+
+            for (int j = 0; j < k; j++) {
+                if (dp[pointers[j]] * primes[j] == min) {
+                    pointers[j]++;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
+
+    //[263].丑数
+    public boolean isUgly(int num) {
+        if (num < 0) return false;
+        int remain = num;
+        while (remain != 1) {
+            if (remain % 2 == 0) {
+                remain /= 2;
+            } else if (remain % 3 == 0) {
+                remain /= 3;
+            } else if (remain % 5 == 0) {
+                remain /= 5;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[264].丑数 II
+    public int nthUglyNumber(int n) {
+        //2 3 5 就是不用动态规划
+        int[] factors = new int[] {2,3,5};
+        PriorityQueue<Long> queue = new PriorityQueue<>();
+        Set<Long> set = new HashSet<>();
+        queue.offer(1L);
+        set.add(1L);
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            long min = queue.poll();
+            res = (int)min;
+            for (int factor: factors) {
+                long value = min * factor;
+                if (!set.contains(value)) {
+                    set.add(value);
+                    queue.offer(value);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[1705].吃苹果的最大数目
+    public int eatenApples(int[] apples, int[] days) {
+        //apples = [1,2,3,5,2], days = [3,2,1,4,2] //输出：7
+        //保质期 + 数量
+        PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        //当前时间没有苹果产生， 不加入队列； 当前有苹果产生，加入队列。
+        //如果当前，有保质期内的苹果，那么就可以吃一个。
+        int curTime = 0, n = apples.length, ans = 0;
+        while (curTime < n || !queue.isEmpty()) {
+            if (curTime < n && apples[curTime] > 0) {
+                //保质期：当前时间 + 最长的时间 -1
+                queue.offer(new int[]{curTime + days[curTime] - 1, apples[curTime]});
+            }
+            //保质期比现在早的，全部不要
+            while (!queue.isEmpty() && curTime > queue.peek()[0]) {
+                queue.poll();
+            }
+            if (!queue.isEmpty()) {
+                int[] cur = queue.poll();
+                //减了一个苹果之后，如果还有并且没有超过有效期，则重新添加进去
+                if (--cur[1] > 0 && cur[0] > curTime) {
+                    queue.offer(cur);
+                }
+                ans++;
+            }
+            curTime++;
+        }
+        return ans;
     }
 
     public static void main(String[] args) {
@@ -4759,6 +4848,6 @@ public class AllOfThem {
         System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
         System.out.println(new AllOfThem().isAdditiveNumber("199100199"));
 
-
+        System.out.println(new AllOfThem().nthUglyNumber(10));
     }
 }
