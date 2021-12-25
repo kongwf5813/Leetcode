@@ -60,6 +60,19 @@ public class AllOfThem {
         }
     }
 
+    //[1].两数之和
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> mapIndex = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int num = nums[i];
+            if (mapIndex.containsKey(target - num)) {
+                return new int[]{mapIndex.get(target - num), i};
+            }
+            mapIndex.put(num, i);
+        }
+        return new int[0];
+    }
+
     //[2].两数相加
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
         int capacity = 0;
@@ -101,6 +114,29 @@ public class AllOfThem {
             res = Math.max(res, right - left);
         }
         return res;
+    }
+
+    //[5].最长回文子串
+    public String longestPalindrome(String s) {
+        int n = s.length();
+        if (n == 0) return "";
+
+        //注意只要字符串非空，一定有一个单字符必定是回文，默认最小值为1
+        int maxLen = 1, start = 0;
+        boolean[][] dp = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 3 || dp[i + 1][j - 1]);
+                if (dp[i][j] && j - i + 1 > maxLen) {
+                    maxLen = j - i + 1;
+                    start = i;
+                }
+            }
+        }
+        return s.substring(start, start + maxLen);
     }
 
     //[11].盛最多水的容器
@@ -359,7 +395,6 @@ public class AllOfThem {
         }
         return dp[n];
     }
-
 
     //[344].反转字符串
     public void reverseString(char[] s) {
@@ -4662,7 +4697,7 @@ public class AllOfThem {
     //[264].丑数 II
     public int nthUglyNumber(int n) {
         //2 3 5 就是不用动态规划
-        int[] factors = new int[] {2,3,5};
+        int[] factors = new int[]{2, 3, 5};
         PriorityQueue<Long> queue = new PriorityQueue<>();
         Set<Long> set = new HashSet<>();
         queue.offer(1L);
@@ -4670,8 +4705,8 @@ public class AllOfThem {
         int res = 0;
         for (int i = 0; i < n; i++) {
             long min = queue.poll();
-            res = (int)min;
-            for (int factor: factors) {
+            res = (int) min;
+            for (int factor : factors) {
                 long value = min * factor;
                 if (!set.contains(value)) {
                     set.add(value);
@@ -4685,6 +4720,7 @@ public class AllOfThem {
     //[1705].吃苹果的最大数目
     public int eatenApples(int[] apples, int[] days) {
         //apples = [1,2,3,5,2], days = [3,2,1,4,2] //输出：7
+        //1. 可能没有苹果产生，2.苹果到了某一天有叠加，选快过期的是最好的选择
         //保质期 + 数量
         PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> a[0] - b[0]);
         //当前时间没有苹果产生， 不加入队列； 当前有苹果产生，加入队列。
@@ -4708,6 +4744,118 @@ public class AllOfThem {
                 ans++;
             }
             curTime++;
+        }
+        return ans;
+    }
+
+    //[1609].奇偶树
+    public boolean isEvenOddTree(TreeNode root) {
+        //就是不用BFS, 在处理每一层的时候，需要获取到前面一个节点。
+        return dfsForIsEvenOddTree(root, 0, new HashMap<>());
+    }
+
+    private boolean dfsForIsEvenOddTree(TreeNode root, int level, Map<Integer, Integer> levelMap) {
+        boolean flag = level % 2 == 0;
+        int prev = levelMap.getOrDefault(level, flag ? Integer.MIN_VALUE : Integer.MAX_VALUE);
+        if (flag && (root.val % 2 == 0 || root.val <= prev)) return false;
+        else if (!flag && (root.val % 2 != 0 || root.val >= prev)) return false;
+        levelMap.put(level, root.val);
+        if (root.left != null && !dfsForIsEvenOddTree(root.left, level + 1, levelMap)) return false;
+        if (root.right != null && !dfsForIsEvenOddTree(root.right, level + 1, levelMap)) return false;
+        return true;
+    }
+
+    //[802].找到最终的安全状态
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        //存反图之后，那么入度为0的节点就是安全节点，而且不用顺序遍历
+        //以出度为0的节点优先加入队列中，队列中的节点的邻居节点扣减出度，如果为0，加入队列。当队列为空，剩下的节点都是不合法节点。
+        int n = graph.length;
+        int[] outDegree = new int[n];
+        List<Integer>[] inDegreeMap = new List[n];
+        for (int i = 0; i < n; i++) {
+            inDegreeMap[i] = new LinkedList<>();
+        }
+        for (int i = 0; i < n; i++) {
+            int[] neighbors = graph[i];
+            for (int neighbor : neighbors) {
+                inDegreeMap[neighbor].add(i);
+                outDegree[i]++;
+            }
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (outDegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        List<Integer> ans = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            ans.add(cur);
+            //访问邻居节点，减出度
+            for (int neighbor : inDegreeMap[cur]) {
+                if (--outDegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+        Collections.sort(ans);
+        return ans;
+    }
+
+    //[1169].查询无效交易
+    public List<String> invalidTransactions(String[] transactions) {
+        Set<Integer> deleteIndex = new HashSet<>();
+        List<String[]> strList = new ArrayList<>();
+        int n = transactions.length;
+
+        for (int i = 0; i < n; i++) {
+            strList.add(transactions[i].split(","));
+        }
+
+        for (int i = 0; i < n; i++) {
+            String[] cur = strList.get(i);
+
+            if (Integer.parseInt(cur[2]) > 1000) {
+                deleteIndex.add(i);
+            }
+
+            for (int j = i + 1; j < n; j++) {
+                String[] next = transactions[j].split(",");
+                if (cur[0].equals(next[0])
+                        && !cur[3].equals(next[3])
+                        && Math.abs(Integer.parseInt(cur[1]) - Integer.parseInt(next[1])) <= 60) {
+                    deleteIndex.add(i);
+                    deleteIndex.add(j);
+                }
+            }
+        }
+
+        List<String> result = new ArrayList<>();
+        for (Integer index : deleteIndex) {
+            result.add(transactions[index]);
+        }
+        return result;
+    }
+
+    //[1876].长度为三且各字符不同的子字符串
+    public int countGoodSubstrings(String s) {
+        int n = s.length();
+        if (n < 3) return 0;
+        int ans = 0;
+        StringBuilder window = new StringBuilder();
+        for (int left = 0, right = 0; right < n; ) {
+            window.append(s.charAt(right++));
+
+            while (right - left >= 3) {
+                if (window.charAt(0) != window.charAt(1)
+                        && window.charAt(1) != window.charAt(2)
+                        && window.charAt(0) != window.charAt(2)) {
+                    ans++;
+                }
+                window.deleteCharAt(0);
+                left++;
+            }
         }
         return ans;
     }
@@ -4849,5 +4997,11 @@ public class AllOfThem {
         System.out.println(new AllOfThem().isAdditiveNumber("199100199"));
 
         System.out.println(new AllOfThem().nthUglyNumber(10));
+
+        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2}, {2, 3}, {5}, {0}, {5}, {}, {}}));
+        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2, 3, 4}, {1, 2}, {3, 4}, {0, 4}, {}}));
+        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv"}));
+        System.out.println(new AllOfThem().countGoodSubstrings("xyzzaz"));
+        System.out.println(new AllOfThem().countGoodSubstrings("aababcabc"));
     }
 }
