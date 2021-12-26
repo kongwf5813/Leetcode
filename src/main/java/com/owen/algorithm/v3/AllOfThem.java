@@ -139,6 +139,50 @@ public class AllOfThem {
         return s.substring(start, start + maxLen);
     }
 
+    //[6].Z 字形变换
+    public String convert(String s, int numRows) {
+        if (numRows == 0) return "";
+        if (numRows == 1) return s;
+        StringBuilder[] sbs = new StringBuilder[numRows];
+        for (int i = 0 ; i < numRows; i++) {
+            sbs[i] = new StringBuilder();
+        }
+        int index = 0;
+        boolean flag = false;
+        for (int i = 0; i < s.length(); i++) {
+            if (index == numRows -1) {
+                flag = true;
+            } else if (index == 0) {
+                flag = false;
+            }
+            sbs[index].append(s.charAt(i));
+            if (flag) {
+                index--;
+            } else {
+                index++;
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0 ; i < numRows; i++) {
+            sb.append(sbs[i].toString());
+        }
+        return sb.toString();
+    }
+
+    //[7].整数反转
+    public int reverse(int x) {
+        int revert = 0;
+        while (x != 0) {
+            int a = x % 10;
+            if (revert > Integer.MAX_VALUE / 10 || (revert == Integer.MAX_VALUE / 10 && a > 7)) return 0;
+            if (revert < Integer.MIN_VALUE / 10 || (revert == Integer.MIN_VALUE / 10 && a < -8)) return 0;
+
+            revert = revert * 10 + a;
+            x /= 10;
+        }
+        return revert;
+    }
+
     //[11].盛最多水的容器
     public int maxArea(int[] height) {
         int left = 0, right = height.length - 1, area = 0;
@@ -2045,6 +2089,27 @@ public class AllOfThem {
         res = res && (left.val == right.val);
         left = left.next;
         return res;
+    }
+
+    //[235].二叉搜索树的最近公共祖先
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root.val > q.val && root.val > p.val) return lowestCommonAncestor(root.left, p, q);
+        else if (root.val < p.val && root.val < q.val) return lowestCommonAncestor(root.right, p, q);
+        else return root;
+    }
+
+    //[236].二叉树的最近公共祖先
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) return root;
+        //只要有一个节点跟父节点相等，就认为找到了一个潜在的祖先节点
+        if (root == p) return root;
+        if (root == q) return root;
+        TreeNode leftCommon = lowestCommonAncestor2(root.left, p, q);
+        TreeNode rightCommon = lowestCommonAncestor2(root.right, p, q);
+        if (leftCommon == null) return rightCommon;
+        if (rightCommon == null) return leftCommon;
+        //左右两个祖先的时候，父节点才是公共祖先
+        return root;
     }
 
     //[237].删除链表中的节点
@@ -4860,7 +4925,95 @@ public class AllOfThem {
         return ans;
     }
 
+    //[1078].Bigram 分词
+    public String[] findOcurrences(String text, String first, String second) {
+        String[] words = text.split(" ");
+        List<String> result = new ArrayList<>();
+        for (int i = 2; i < words.length; i++) {
+            if (words[i - 2].equals(first) && words[i - 1].equals(second)) {
+                result.add(words[i]);
+            }
+        }
+        return result.toArray(new String[]{});
+    }
+
+    //[5963].反转两次的数字
+    public boolean isSameAfterReversals(int num) {
+        return num > 0 ? num % 10 != 0 : true;
+    }
+
+    //[5964].执行所有后缀指令
+    public int[] executeInstructions(int n, int[] startPos, String s) {
+        int[] res = new int[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            res[i] = dfsForExecuteInstructions(s, i, startPos[0], startPos[1], n);
+        }
+        return res;
+    }
+
+    private int dfsForExecuteInstructions(String s, int start, int x, int y, int n) {
+        if (start >= s.length()) return 0;
+        char ch = s.charAt(start);
+        int nextX = x, nextY = y;
+        if (ch == 'U') {
+            nextX = x - 1;
+        } else if (ch == 'R') {
+            nextY = y + 1;
+        } else if (ch == 'L') {
+            nextY = y - 1;
+        } else {
+            nextX = x + 1;
+        }
+        if (nextX < 0 || nextY < 0 || nextX >= n || nextY >= n) {
+            return 0;
+        }
+        return dfsForExecuteInstructions(s, start + 1, nextX, nextY, n) + 1;
+    }
+
+    //[5965].相同元素的间隔之和
+    public long[] getDistances(int[] arr) {
+        //key,value: key代表元素值， value[0]元素值相等，前面最近的一次下标，value[1]元素值相等的有多少个
+        Map<Integer, int[]> prefix = new HashMap<>();
+        Map<Integer, int[]> suffix = new HashMap<>();
+        int n = arr.length;
+        //从前往后，元素相等的距离差之和 = （个数*最近一次的距离） + 最近一次的值
+        long[] prefixDistanceSum = new long[n];
+        for (int i = 0; i < n; i++) {
+            int num = arr[i];
+            int[] value = prefix.getOrDefault(num, new int[2]);
+            int perIndex = value[0];
+            int count = value[1];
+            if (count != 0) {
+                prefixDistanceSum[i] = prefixDistanceSum[perIndex] + count * (i - perIndex);
+            }
+            value[0] = i;
+            value[1]++;
+            prefix.put(num, value);
+        }
+        //从后往前，元素相等的距离差之和 = （个数*最近一次的距离） + 最近一次的值
+        long[] suffixDistanceSum = new long[n];
+        for (int i = n-1; i >= 0; i--) {
+            int num = arr[i];
+            int[] value = suffix.getOrDefault(num, new int[2]);
+            int perIndex = value[0];
+            int count = value[1];
+            if (count != 0) {
+                suffixDistanceSum[i] = suffixDistanceSum[perIndex] + count * (perIndex -i);
+            }
+            value[0] = i;
+            value[1]++;
+            suffix.put(num, value);
+        }
+        //最终的距离等于从前往后 + 从后往前
+        long[] res = new long[n];
+        for (int i = 0; i < n ;i++) {
+            res[i] = prefixDistanceSum[i] + suffixDistanceSum[i];
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
+        System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
         System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
 
@@ -4870,6 +5023,12 @@ public class AllOfThem {
         System.out.println(new AllOfThem().generate(5));
         System.out.println(new AllOfThem().getRow(4));
         System.out.println(new AllOfThem().partition("aabc"));
+        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 4));
+        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 3));
+        System.out.println(new AllOfThem().convert("A", 1));
+
+        System.out.println(new AllOfThem().reverse(120));
+        System.out.println(new AllOfThem().reverse(-123));
         System.out.println(new AllOfThem().singleNumber(new int[]{1, 2, 1}));
         System.out.println(new AllOfThem().singleNumber(new int[]{4, 1, 2, 1, 2}));
         System.out.println(new AllOfThem().singleNumber2(new int[]{0, 1, 0, 1, 0, 1, -99}));
