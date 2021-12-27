@@ -144,13 +144,13 @@ public class AllOfThem {
         if (numRows == 0) return "";
         if (numRows == 1) return s;
         StringBuilder[] sbs = new StringBuilder[numRows];
-        for (int i = 0 ; i < numRows; i++) {
+        for (int i = 0; i < numRows; i++) {
             sbs[i] = new StringBuilder();
         }
         int index = 0;
         boolean flag = false;
         for (int i = 0; i < s.length(); i++) {
-            if (index == numRows -1) {
+            if (index == numRows - 1) {
                 flag = true;
             } else if (index == 0) {
                 flag = false;
@@ -163,7 +163,7 @@ public class AllOfThem {
             }
         }
         StringBuilder sb = new StringBuilder();
-        for (int i = 0 ; i < numRows; i++) {
+        for (int i = 0; i < numRows; i++) {
             sb.append(sbs[i].toString());
         }
         return sb.toString();
@@ -174,13 +174,57 @@ public class AllOfThem {
         int revert = 0;
         while (x != 0) {
             int a = x % 10;
-            if (revert > Integer.MAX_VALUE / 10 || (revert == Integer.MAX_VALUE / 10 && a > 7)) return 0;
-            if (revert < Integer.MIN_VALUE / 10 || (revert == Integer.MIN_VALUE / 10 && a < -8)) return 0;
+            if (revert > Integer.MAX_VALUE / 10 || (revert == Integer.MAX_VALUE / 10 && a > 7))
+                return 0;
+            if (revert < Integer.MIN_VALUE / 10 || (revert == Integer.MIN_VALUE / 10 && a < -8))
+                return 0;
 
             revert = revert * 10 + a;
             x /= 10;
         }
         return revert;
+    }
+
+    //[8].字符串转换整数 (atoi)
+    public int myAtoi(String s) {
+        boolean begin = true;
+        int n = s.length();
+        int sign = 1, res = 0;
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            if (begin && ch == ' ') {
+                continue;
+            } else if (begin && ch == '-') {
+                sign = -1;
+                begin = false;
+            } else if (begin && ch == '+') {
+                sign = 1;
+                begin = false;
+            } else if (Character.isDigit(ch)) {
+                int a = ch - '0';
+                if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && a < -8))
+                    return Integer.MIN_VALUE;
+                if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && a > 7))
+                    return Integer.MAX_VALUE;
+                res = res * 10 + sign * a;
+                begin = false;
+            } else {
+                break;
+            }
+        }
+        return res;
+    }
+
+    //[9].回文数
+    public boolean isPalindrome(int x) {
+        if (x < 0) return false;
+        int remain = x, res = 0;
+        while (remain != 0) {
+            int a = remain % 10;
+            res = res * 10 + a;
+            remain /= 10;
+        }
+        return x == res;
     }
 
     //[11].盛最多水的容器
@@ -2094,7 +2138,8 @@ public class AllOfThem {
     //[235].二叉搜索树的最近公共祖先
     public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
         if (root.val > q.val && root.val > p.val) return lowestCommonAncestor(root.left, p, q);
-        else if (root.val < p.val && root.val < q.val) return lowestCommonAncestor(root.right, p, q);
+        else if (root.val < p.val && root.val < q.val)
+            return lowestCommonAncestor(root.right, p, q);
         else return root;
     }
 
@@ -4826,7 +4871,8 @@ public class AllOfThem {
         else if (!flag && (root.val % 2 != 0 || root.val >= prev)) return false;
         levelMap.put(level, root.val);
         if (root.left != null && !dfsForIsEvenOddTree(root.left, level + 1, levelMap)) return false;
-        if (root.right != null && !dfsForIsEvenOddTree(root.right, level + 1, levelMap)) return false;
+        if (root.right != null && !dfsForIsEvenOddTree(root.right, level + 1, levelMap))
+            return false;
         return true;
     }
 
@@ -4992,13 +5038,13 @@ public class AllOfThem {
         }
         //从后往前，元素相等的距离差之和 = （个数*最近一次的距离） + 最近一次的值
         long[] suffixDistanceSum = new long[n];
-        for (int i = n-1; i >= 0; i--) {
+        for (int i = n - 1; i >= 0; i--) {
             int num = arr[i];
             int[] value = suffix.getOrDefault(num, new int[2]);
             int perIndex = value[0];
             int count = value[1];
             if (count != 0) {
-                suffixDistanceSum[i] = suffixDistanceSum[perIndex] + count * (perIndex -i);
+                suffixDistanceSum[i] = suffixDistanceSum[perIndex] + count * (perIndex - i);
             }
             value[0] = i;
             value[1]++;
@@ -5006,10 +5052,37 @@ public class AllOfThem {
         }
         //最终的距离等于从前往后 + 从后往前
         long[] res = new long[n];
-        for (int i = 0; i < n ;i++) {
+        for (int i = 0; i < n; i++) {
             res[i] = prefixDistanceSum[i] + suffixDistanceSum[i];
         }
         return res;
+    }
+
+    //[825].适龄的朋友
+    public int numFriendRequests(int[] ages) {
+        Arrays.sort(ages);
+        int n = ages.length, ans = 0;
+        for (int k = 0, i = 0, j = 0; k < n; k++) {
+            //20,30,100,110,120
+            //计算要么是全进来的，要么是全出去的，即计算进来，又计算出去，肯定有重复计算的数量
+            //左边能到k的关系，i k
+            while (i < k && !firstSelected(ages[i], ages[k])) i++;
+            if (j < k) j = k;
+            //右边能到k的关系，k j
+            while (j < n && firstSelected(ages[j], ages[k])) j++;
+            if (i < j) {
+                //相同的情况多扣1
+                ans += j - i - 1;
+            }
+        }
+        return ans;
+    }
+
+    private boolean firstSelected(int x, int y) {
+        if (y <= x * 0.5 + 7) return false;
+        if (y > x) return false;
+        if (y > 100 && x < 100) return false;
+        return true;
     }
 
     public static void main(String[] args) {
