@@ -2618,7 +2618,7 @@ public class AllOfThem {
     public List<String> letterCombinations(String digits) {
         List<String> res = new ArrayList<>();
         if (digits.length() == 0) return res;
-        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
         backtraceForLetterCombinations(digits, 0, res, new StringBuilder(), numbers);
         return res;
     }
@@ -5085,6 +5085,118 @@ public class AllOfThem {
         return true;
     }
 
+    //[472].连接词
+    public List<String> findAllConcatenatedWordsInADict(String[] words) {
+        TrieNode trie = new TrieNode();
+        List<String> res = new ArrayList<>();
+        //首先是短的在前面，长的在后面，用长的去匹配短，如果能到结尾，说明是成功的，否则是不成功的。
+        Arrays.sort(words, Comparator.comparingInt(String::length));
+        //一个单词的匹配需要从头到尾逐一匹配前面的单词，所以有选择，避免不了用深度优先遍历
+        for (String word : words) {
+            if (word.length() == 0) continue;
+            if (dfsForFindAllConcatenateWordsInADict(trie, word, 0)) {
+                res.add(word);
+            } else {
+                insertToTrie(trie, word);
+            }
+        }
+        return res;
+    }
+
+    private class TrieNode {
+        TrieNode[] children;
+        boolean isEnd;
+
+        public TrieNode() {
+            children = new TrieNode[26];
+            isEnd = false;
+        }
+    }
+
+    private boolean dfsForFindAllConcatenateWordsInADict(TrieNode root, String word, int start) {
+        if (start == word.length()) return true;
+        TrieNode cur = root;
+        //这么多选择
+        for (int i = start; i < word.length(); i++) {
+            int ch = word.charAt(i) - 'a';
+            cur = cur.children[ch];
+            if (cur == null) {
+                return false;
+            }
+            //一定要终结了才可以选择下一个位置
+            if (cur.isEnd) {
+                //传root，从头开始匹配
+                if (dfsForFindAllConcatenateWordsInADict(root, word, i + 1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void insertToTrie(TrieNode root, String word) {
+        TrieNode cur = root;
+        for (int i = 0; i < word.length(); i++) {
+            int ch = word.charAt(i) - 'a';
+            if (cur.children[ch] == null) {
+                cur.children[ch] = new TrieNode();
+            }
+            cur = cur.children[ch];
+        }
+        cur.isEnd = true;
+    }
+
+
+    public static class Trie {
+
+        private Trie[] children;
+        private boolean isEnd;
+
+        public Trie() {
+            children = new Trie[26];
+            isEnd = false;
+        }
+
+        public void insert(String word) {
+            Trie cur = this;
+            for (int i = 0; i < word.length(); i++) {
+                int ch = word.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    cur.children[ch] = new Trie();
+                }
+                cur = cur.children[ch];
+            }
+            cur.isEnd = true;
+        }
+
+        public boolean search(String word) {
+            if (word == null || word.length() == 0) return false;
+            Trie cur = this;
+            for (int i = 0; i < word.length(); i++) {
+                int ch = word.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    return false;
+                }
+                cur = cur.children[ch];
+            }
+            return cur.isEnd;
+        }
+
+        public boolean startsWith(String prefix) {
+            if (prefix == null || prefix.length() == 0) return false;
+            Trie cur = this;
+            for (int i = 0; i < prefix.length(); i++) {
+                int ch = prefix.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    return false;
+                }
+                cur = cur.children[ch];
+            }
+            return true;
+        }
+    }
+
+
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
@@ -5232,7 +5344,7 @@ public class AllOfThem {
 
         System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2}, {2, 3}, {5}, {0}, {5}, {}, {}}));
         System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2, 3, 4}, {1, 2}, {3, 4}, {0, 4}, {}}));
-        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv"}));
+        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv" }));
         System.out.println(new AllOfThem().countGoodSubstrings("xyzzaz"));
         System.out.println(new AllOfThem().countGoodSubstrings("aababcabc"));
     }
