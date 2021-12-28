@@ -1,6 +1,8 @@
 package com.owen.algorithm.v3;
 
 
+import jdk.management.resource.internal.inst.FileOutputStreamRMHooks;
+
 import java.util.*;
 
 public class AllOfThem {
@@ -240,6 +242,78 @@ public class AllOfThem {
             }
         }
         return area;
+    }
+
+    //[12].整数转罗马数字
+    public String intToRoman(int num) {
+        Map<Integer, String> index = new LinkedHashMap<Integer, String>() {{
+            put(1000, "M");
+            put(900, "CM");
+            put(500, "D");
+            put(400, "CD");
+            put(100, "C");
+            put(90, "XC");
+            put(50, "L");
+            put(40, "XL");
+            put(10, "X");
+            put(9, "IX");
+            put(5, "V");
+            put(4, "IV");
+            put(1, "I");
+        }};
+        int remain = num;
+        StringBuilder sb = new StringBuilder();
+        for (int number : index.keySet()) {
+            //从大到小
+            while (remain >= number) {
+                sb.append(index.get(number));
+                remain -= number;
+            }
+            if (remain == 0) {
+                break;
+            }
+        }
+        return sb.toString();
+    }
+
+    //[13].罗马数字转整数
+    public int romanToInt(String s) {
+        Map<Character, Integer> symbolValues = new HashMap<Character, Integer>() {{
+            put('I', 1);
+            put('V', 5);
+            put('X', 10);
+            put('L', 50);
+            put('C', 100);
+            put('D', 500);
+            put('M', 1000);
+        }};
+        int ans = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int cur = symbolValues.get(s.charAt(i));
+            if (i + 1 < s.length() && cur < symbolValues.get(s.charAt(i + 1))) {
+                ans -= cur;
+            } else {
+                ans += cur;
+            }
+        }
+        return ans;
+    }
+
+    //[14].最长公共前缀
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) {
+            return "";
+        }
+        int length = strs[0].length();
+        for (int i = 0; i < length; i++) {
+            char ch = strs[0].charAt(i);
+            for (int j = 1; j < strs.length; j++) {
+                if (i == strs[j].length() || strs[j].charAt(i) != ch) {
+                    return strs[0].substring(0, i);
+                }
+            }
+        }
+        return strs[0];
     }
 
     //[22].括号生成
@@ -2618,7 +2692,7 @@ public class AllOfThem {
     public List<String> letterCombinations(String digits) {
         List<String> res = new ArrayList<>();
         if (digits.length() == 0) return res;
-        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
+        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
         backtraceForLetterCombinations(digits, 0, res, new StringBuilder(), numbers);
         return res;
     }
@@ -5344,8 +5418,11 @@ public class AllOfThem {
 
         System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2}, {2, 3}, {5}, {0}, {5}, {}, {}}));
         System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2, 3, 4}, {1, 2}, {3, 4}, {0, 4}, {}}));
-        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv" }));
+        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv"}));
         System.out.println(new AllOfThem().countGoodSubstrings("xyzzaz"));
         System.out.println(new AllOfThem().countGoodSubstrings("aababcabc"));
+        System.out.println(new AllOfThem().intToRoman(3));
+        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
+        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
     }
 }
