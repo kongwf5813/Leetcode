@@ -1,8 +1,5 @@
 package com.owen.algorithm.v3;
 
-
-import jdk.management.resource.internal.inst.FileOutputStreamRMHooks;
-
 import java.util.*;
 
 public class AllOfThem {
@@ -204,9 +201,9 @@ public class AllOfThem {
                 begin = false;
             } else if (Character.isDigit(ch)) {
                 int a = ch - '0';
-                if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && a < -8))
+                if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && a < Integer.MIN_VALUE % 10))
                     return Integer.MIN_VALUE;
-                if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && a > 7))
+                if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && a > Integer.MAX_VALUE % 10))
                     return Integer.MAX_VALUE;
                 res = res * 10 + sign * a;
                 begin = false;
@@ -316,6 +313,27 @@ public class AllOfThem {
         return strs[0];
     }
 
+    //[20].有效的括号
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == ']') {
+                if (stack.isEmpty() || stack.pop() != '[')
+                    return false;
+            } else if (ch == '}') {
+                if (stack.isEmpty() || stack.pop() != '{')
+                    return false;
+            } else if (ch == ')') {
+                if (stack.isEmpty() || stack.pop() != '(')
+                    return false;
+            } else {
+                stack.push(ch);
+            }
+        }
+        return stack.isEmpty();
+    }
+
     //[22].括号生成
     public List<String> generateParenthesis(int n) {
         List<String> res = new ArrayList<>();
@@ -340,6 +358,47 @@ public class AllOfThem {
         sb.append(')');
         backtraceForGenerateParenthesis(left, right - 1, res, sb);
         sb.deleteCharAt(sb.length() - 1);
+    }
+
+    //[36].有效的数独
+    public boolean isValidSudoku(char[][] board) {
+        //判断是否有重复值，可以用hash，减少时间复杂度
+        for (int i = 0; i < 9; i++) {
+            //数字是1-9
+            int[] rowCount = new int[10];
+            int[] colCount = new int[10];
+            int[] areaCount = new int[10];
+            for (int j = 0; j < 9; j++) {
+                char ch = board[i][j];
+                //i作为行，j作为列
+                if (ch != '.') {
+                    if (rowCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        rowCount[ch - '0']++;
+                    }
+                }
+                //i作为列， j作为行
+                ch = board[j][i];
+                if (ch != '.') {
+                    if (colCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        colCount[ch - '0']++;
+                    }
+                }
+                //i作为格子序数， j格子内的索引
+                ch = board[(i / 3) * 3 + j / 3][(i % 3) * 3 + j % 3];
+                if (ch != '.') {
+                    if (areaCount[ch - '0'] > 0) {
+                        return false;
+                    } else {
+                        areaCount[ch - '0']++;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     //[46].全排列
@@ -5442,7 +5501,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().intToRoman(3));
         System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
         System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
-        System.out.println(new AllOfThem().countQuadruplets(new int[] {1,2,3,6}));
-        System.out.println(new AllOfThem().countQuadruplets(new int[] {1,1,1,3,5}));
+        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 2, 3, 6}));
+        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 1, 1, 3, 5}));
     }
 }
