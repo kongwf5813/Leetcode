@@ -5270,6 +5270,24 @@ public class AllOfThem {
         }
     }
 
+    //[1995].统计特殊四元组
+    public int countQuadruplets(int[] nums) {
+        //a + b = d - c, 以b逆序遍历，a从0到b-1， d从b+1到n-1
+        Map<Integer, Integer> countMap = new HashMap<>();
+        int n = nums.length, ans = 0;
+        for (int b = n - 3; b >= 1; b--) {
+            for (int d = b + 2; d < n; d++) {
+                int c = b + 1;
+                int d_c = nums[d] - nums[c];
+                countMap.put(d_c, countMap.getOrDefault(d_c, 0) + 1);
+            }
+            for (int a = 0; a < b; a++) {
+                ans += countMap.getOrDefault(nums[a] + nums[b], 0);
+            }
+        }
+        return ans;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
@@ -5424,5 +5442,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().intToRoman(3));
         System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
         System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
+        System.out.println(new AllOfThem().countQuadruplets(new int[] {1,2,3,6}));
+        System.out.println(new AllOfThem().countQuadruplets(new int[] {1,1,1,3,5}));
     }
 }
