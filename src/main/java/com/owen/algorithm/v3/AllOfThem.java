@@ -360,6 +360,69 @@ public class AllOfThem {
         sb.deleteCharAt(sb.length() - 1);
     }
 
+    //[27].移除元素
+    public int removeElement(int[] nums, int val) {
+        //等于val的时候，快针+1，不等于的时候，快针复制到慢针，并且快慢针都+1
+        int slow = 0, fast = 0;
+        while (fast < nums.length) {
+            if (nums[fast] != val) {
+                nums[slow] = nums[fast];
+                slow++;
+                fast++;
+            } else {
+                fast++;
+            }
+        }
+        return slow;
+    }
+
+    //[28].实现 strStr()
+    public int strStr(String haystack, String needle) {
+        if (needle == null || needle.length() == 0) return 0;
+        if (haystack == null || haystack.length() == 0 || haystack.length() < needle.length())
+            return -1;
+
+        //abcdabcdef   abcdef
+        int l = 0, r = 0;
+        while (l < haystack.length() && r < needle.length()) {
+            if (haystack.charAt(l) == needle.charAt(r)) {
+                l++;
+                r++;
+            } else {
+                //l的下一个位置重新开始
+                l = l - r + 1;
+                r = 0;
+            }
+        }
+        return r == needle.length() ? l - needle.length() : -1;
+    }
+
+    public void nextPermutation(int[] nums) {
+        // 1 7 6 2 4 5
+        // 1 7 6 2 5 4
+        //从后往前，找到第一个比后面小的数，位置为i
+        //再从后到i，找到第一个比i大的数
+        int n = nums.length;
+        int left = n - 1, right = n - 1;
+        while (left >= 0) {
+            if (nums[left] >= nums[right]) {
+                left--;
+            } else {
+                break;
+            }
+        }
+
+        if (left < 0) {
+            //全置换
+        } else {
+            int temp = nums[left];
+            nums[left] = nums[right];
+            nums[left] = temp;
+
+        }
+    }
+
+
     //[36].有效的数独
     public boolean isValidSudoku(char[][] board) {
         //判断是否有重复值，可以用hash，减少时间复杂度
@@ -5347,6 +5410,30 @@ public class AllOfThem {
         return ans;
     }
 
+    public static boolean isNStraightHand(int[] hand, int groupSize) {
+        int n = hand.length;
+        if (n < groupSize) return false;
+        Arrays.sort(hand);
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int poker : hand) {
+            count.put(poker, count.getOrDefault(poker, 0) + 1);
+        }
+
+        //从小到大，选择最小的牌
+        for (int start : hand) {
+            //后面的牌被用掉了，可以继续找次小的牌
+            if (count.get(start) == 0) continue;
+            //连续选择后面牌，如果数量为0，则断牌了。
+            for (int i = 0; i < groupSize; i++) {
+                int target = start + i;
+                if (count.getOrDefault(target, 0) == 0) {
+                    return false;
+                }
+                count.put(target, count.get(target) - 1);
+            }
+        }
+        return true;
+    }
 
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
@@ -5503,5 +5590,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
         System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 2, 3, 6}));
         System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 1, 1, 3, 5}));
+        System.out.println(new AllOfThem().removeElement(new int[]{1}, 1));
+        System.out.println(new AllOfThem().removeElement(new int[]{1}, 0));
     }
 }
