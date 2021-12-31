@@ -5342,7 +5342,6 @@ public class AllOfThem {
         cur.isEnd = true;
     }
 
-
     public static class Trie {
 
         private Trie[] children;
@@ -5410,6 +5409,7 @@ public class AllOfThem {
         return ans;
     }
 
+    //[846].一手顺子
     public static boolean isNStraightHand(int[] hand, int groupSize) {
         int n = hand.length;
         if (n < groupSize) return false;
@@ -5433,6 +5433,97 @@ public class AllOfThem {
             }
         }
         return true;
+    }
+
+    //[507].完美数
+    public boolean checkPerfectNumber(int num) {
+        if (num == 1) return false;
+        int sum = 1;
+        //36以6为界，左边从2到6，就是右边18到6，计算的时候1排除在外
+        //1 2 3 4 6 9 12 18
+        for (int i = 2; i <= num / i; i++) {
+            if (num % i == 0) {
+                sum += i;
+                sum += num / i;
+            }
+        }
+        return sum == num;
+    }
+
+    //[1446].连续字符
+    public int maxPower(String s) {
+        if (s.length() == 0) return 0;
+        int left = 0, right = 0;
+        int res = 0;
+//        while (right < s.length()) {
+//            if (s.charAt(right) == s.charAt(left)) {
+//                right++;
+//                res = Math.max(res, right - left);
+//            } else {
+//                left = right;
+//            }
+//        }
+//        return res;
+        //上面的写法每次都得重新设置最大值
+        while (left < s.length()) {
+            right = left;
+            while (right < s.length() && s.charAt(left) == s.charAt(right)) right++;
+            res = Math.max(res, right - left);
+            //换到不想等的位置继续
+            left = right;
+        }
+        return res;
+    }
+
+    //[506].相对名次
+    public String[] findRelativeRanks(int[] score) {
+        int n = score.length;
+        int[] clone = score.clone();
+        Arrays.sort(clone);
+        Map<Integer, Integer> order = new HashMap<>();
+        for (int i = 1; i <= n; i++) {
+            order.put(clone[i - 1], n - i + 1);
+        }
+
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            int no = order.get(score[i]);
+            if (no == 1) {
+                ans[i] = "Gold Medal";
+            } else if (no == 2) {
+                ans[i] = "Silver Medal";
+            } else if (no == 3) {
+                ans[i] = "Bronze Medal";
+            } else {
+                ans[i] = String.valueOf(no);
+            }
+        }
+        return ans;
+    }
+    //[1005].K 次取反后最大化的数组和
+    public int largestSumAfterKNegations(int[] nums, int k) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        int sum = 0;
+        //-5 -4 -1 2 3 4    k = 5 k剩余为偶数
+        //-5 -4 -1 2 3 4    k = 2  k没剩余
+        for (int i = 0; i < n; i++) {
+            if (nums[i] < 0 && k > 0) {
+                nums[i] = -nums[i];
+                k--;
+            }
+            sum += nums[i];
+        }
+        //k没有剩余
+        if (k ==0) return sum;
+        //k剩余偶数，可以全部抵扣掉
+        else if (k % 2 ==0) return sum;
+        //k剩余奇数，可以只变更最小的那个数
+        else {
+            Arrays.sort(nums);
+            //原来是加的，现在要变成负值，需要扣原来加的。
+            return sum - 2 * nums[0];
+        }
     }
 
     public static void main(String[] args) {
