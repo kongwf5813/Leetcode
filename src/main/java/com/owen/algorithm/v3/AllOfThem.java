@@ -1,6 +1,20 @@
 package com.owen.algorithm.v3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
+import java.util.Stack;
 
 public class AllOfThem {
     public static class ListNode {
@@ -397,31 +411,38 @@ public class AllOfThem {
         return r == needle.length() ? l - needle.length() : -1;
     }
 
+    //[31].下一个排列
     public void nextPermutation(int[] nums) {
         // 1 7 6 2 4 5
-        // 1 7 6 2 5 4
-        //从后往前，找到第一个比后面小的数，位置为i
-        //再从后到i，找到第一个比i大的数
+        // 1 7 6 2 5 4 3
+        //后往前一直找到第一个 前面<后面 的值就是待交换的较小值
+        //后往前找到第一个比较小值大的值
+        //交换之后，从较小值后面全部翻转，因为都是递增排序，所以只需要全部翻转就可以。
         int n = nums.length;
-        int left = n - 1, right = n - 1;
-        while (left >= 0) {
-            if (nums[left] >= nums[right]) {
-                left--;
-            } else {
-                break;
-            }
-        }
+        int i = n - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) i--;
 
-        if (left < 0) {
-            //全置换
-        } else {
-            int temp = nums[left];
-            nums[left] = nums[right];
-            nums[left] = temp;
-
+        //降序，那么翻转全部
+        if (i >= 0) {
+            int j = n - 1;
+            while (j > i && nums[j] <= nums[i]) j--;
+            int temp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = temp;
         }
+        reverse(nums, i + 1);
     }
 
+    private void reverse(int[] nums, int start) {
+        int end = nums.length - 1;
+        while (start < end) {
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start++;
+            end--;
+        }
+    }
 
     //[36].有效的数独
     public boolean isValidSudoku(char[][] board) {
@@ -462,6 +483,25 @@ public class AllOfThem {
             }
         }
         return true;
+    }
+
+    //[38].外观数列
+    public String countAndSay(int n) {
+        if (n == 1) return "1";
+
+        String pre = countAndSay(n - 1);
+        int count = 1;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < pre.length(); i++) {
+            if (pre.charAt(i - 1) == pre.charAt(i)) {
+                count++;
+            } else {
+                sb.append(count).append(pre.charAt(i - 1));
+                count = 1;
+            }
+        }
+        sb.append(count).append(pre.charAt(pre.length() - 1));
+        return sb.toString();
     }
 
     //[46].全排列
@@ -523,6 +563,24 @@ public class AllOfThem {
         }
     }
 
+    //[53].最大子数组和
+    public int maxSubArray(int[] nums) {
+        int n = nums.length;
+        //以i为结尾的最大连续子数组和，当dp[i-1] + nums[i] < nums[i]的时候，dp[i] = nums[i]
+        int res = Integer.MIN_VALUE;
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            if (dp[i - 1] + nums[i] < nums[i]) {
+                dp[i] = nums[i];
+            } else {
+                dp[i] = dp[i - 1] + nums[i];
+            }
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+    }
+
     //[62].不同路径
     public int uniquePaths(int m, int n) {
         int[] dp = new int[n];
@@ -537,6 +595,143 @@ public class AllOfThem {
             }
         }
         return dp[n - 1];
+    }
+
+    //[64].最小路径和
+    public int minPathSum(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        //从[0][0]到[i][j]的最小路径和
+        int[][] dp = new int[m][n];
+        dp[0][0] = grid[0][0];
+        for (int i = 1; i < m; i++) {
+            dp[i][0] = dp[i - 1][0] + grid[i][0];
+        }
+        for (int j = 1; j < n; j++) {
+            dp[0][j] = dp[0][j - 1] + grid[0][j];
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = Math.min(dp[i][j - 1], dp[i - 1][j]) + grid[i][j];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    //[66].加一
+    public int[] plusOne(int[] digits) {
+        int capacity = 1;
+        int n = digits.length;
+        for (int i = n - 1; i >= 0; i--) {
+            int sum = capacity + digits[i];
+            capacity = sum / 10;
+            digits[i] = sum % 10;
+            //进位只可能是10，所以不是0则没有进位，直接退出
+            if (digits[i] != 0) {
+                return digits;
+            }
+        }
+        //[9,9,9] => [1,0,0,0]
+        digits = new int[n + 1];
+        digits[0] = 1;
+        return digits;
+    }
+
+    //[67].二进制求和
+    public String addBinary(String a, String b) {
+        int aLen = a.length(), bLen = b.length();
+        int i = aLen - 1, j = bLen - 1;
+        StringBuilder sb = new StringBuilder();
+        int cap = 0;
+        while (i >= 0 || j >= 0 || cap != 0) {
+            int first = i >= 0 ? a.charAt(i--) - '0' : 0;
+            int second = j >= 0 ? b.charAt(j--) - '0' : 0;
+            int sum = first + second + cap;
+            sb.insert(0, sum % 2);
+
+            cap = sum / 2;
+        }
+        return sb.toString();
+    }
+
+    //[69].Sqrt(x)
+    public int mySqrt(int x) {
+        if (x == 0) return 0;
+        int left = 1, right = x;
+        while (left < right) {
+            int mid = left + (right - left + 1) / 2;
+            if (mid == x / mid) {
+                left = mid;
+            } else if (mid < x / mid) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+
+    //[70].爬楼梯
+    public int climbStairs(int n) {
+        if (n == 0) return 0;
+        //爬到第i阶，有多少种方案
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            dp[i] = dp[i - 2] + dp[i - 1];
+        }
+        return dp[n];
+    }
+
+    //[73].矩阵置零
+    public void setZeroes(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        boolean rowZero = false, colZero = false;
+        for (int i = 1; i < m; i++) {
+            if (matrix[i][0] == 0) {
+                colZero = true;
+                break;
+            }
+        }
+        for (int j = 1; j < n; j++) {
+            if (matrix[0][j] == 0) {
+                rowZero = true;
+                break;
+            }
+        }
+        if (matrix[0][0] == 0) {
+            colZero = true;
+            rowZero = true;
+        }
+        //映射到第一行和第一列上
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+        //根据第一行和第一列上的修改为0
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        //之前第一列有0，只需要设置第一列
+        if (colZero) {
+            for (int i = 0; i < m; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+        //之前第一行有0，只需要设置第一行
+        if (rowZero) {
+            for (int i = 0; i < n; i++) {
+                matrix[0][i] = 0;
+            }
+        }
     }
 
     //[207].课程表
@@ -3100,21 +3295,25 @@ public class AllOfThem {
 
     //[42].接雨水
     public int trap(int[] height) {
+        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
+        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
         int res = 0;
         Stack<Integer> stack = new Stack<>();
         for (int i = 0; i < height.length; i++) {
-            int curHeight = height[i];
-            int maxHeight = 0;
-            while (!stack.isEmpty() && curHeight >= height[stack.peek()]) {
-                int top = stack.pop();
+            //   |   |
+            //   | | |
+            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
+            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
+                int cur = stack.pop();
+                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
                 if (stack.isEmpty()) {
                     continue;
                 }
-                maxHeight = Math.max(maxHeight, height[top]);
-                int left = stack.peek();
-                int width = i - left - 1;
-
-                res += width * (Math.min(height[left], curHeight) - maxHeight);
+                // 左右位置，并有左右位置得出「宽度」和「高度」
+                int l = stack.peek(), r = i;
+                int w = r - l + 1 - 2;
+                int h = Math.min(height[l], height[r]) - height[cur];
+                res += w * h;
             }
             stack.push(i);
         }
@@ -3929,23 +4128,6 @@ public class AllOfThem {
         return res;
     }
 
-    //[69].Sqrt(x)
-    public int mySqrt(int x) {
-        if (x == 0) return 0;
-        int left = 1, right = x;
-        while (left < right) {
-            int mid = left + (right - left + 1) / 2;
-            if (mid == x / mid) {
-                left = mid;
-            } else if (mid < x / mid) {
-                left = mid;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return left;
-    }
-
     //[915].分割数组
     public int partitionDisjoint(int[] nums) {
         int n = nums.length;
@@ -4199,6 +4381,33 @@ public class AllOfThem {
         public int sumRegion(int row1, int col1, int row2, int col2) {
             //减数据的时候，要结合图理解下，应该是外面的一格坐标才行
             return preSum[row2 + 1][col2 + 1] - preSum[row2 + 1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
+        }
+    }
+
+    //[384].打乱数组
+    class Solution384 {
+        int[] original;
+
+        public Solution384(int[] nums) {
+            original = nums;
+        }
+
+        public int[] reset() {
+            return original;
+        }
+
+        public int[] shuffle() {
+            int[] res = original.clone();
+            Random random = new Random();
+            //请认真思考下，等概率是什么。第一次被选中 * 第二次被选中的概率 = 1/n
+            for (int i = 0; i < res.length; i++) {
+                //[i, n) => [0, n - i) + i
+                int j = random.nextInt(res.length - i) + i;
+                int temp = res[i];
+                res[i] = res[j];
+                res[j] = temp;
+            }
+            return res;
         }
     }
 
@@ -5500,6 +5709,7 @@ public class AllOfThem {
         }
         return ans;
     }
+
     //[1005].K 次取反后最大化的数组和
     public int largestSumAfterKNegations(int[] nums, int k) {
         Arrays.sort(nums);
@@ -5515,16 +5725,48 @@ public class AllOfThem {
             sum += nums[i];
         }
         //k没有剩余
-        if (k ==0) return sum;
-        //k剩余偶数，可以全部抵扣掉
-        else if (k % 2 ==0) return sum;
-        //k剩余奇数，可以只变更最小的那个数
+        if (k == 0) return sum;
+            //k剩余偶数，可以全部抵扣掉
+        else if (k % 2 == 0) return sum;
+            //k剩余奇数，可以只变更最小的那个数
         else {
             Arrays.sort(nums);
             //原来是加的，现在要变成负值，需要扣原来加的。
             return sum - 2 * nums[0];
         }
     }
+
+    //[2022].将一维数组转变成二维数组
+    public int[][] construct2DArray(int[] original, int m, int n) {
+        int len = original.length;
+        if (len != m * n) return new int[0][0];
+        int[][] res = new int[m][n];
+        for (int i = 0; i < len; i++) {
+            int x = i / n;
+            int y = i % n;
+            res[x][y] = original[i];
+        }
+        return res;
+    }
+
+    //[390].消除游戏
+    public int lastRemaining(int n) {
+        //1 2 3 4  => 2 从左到右删除剩下2
+        //1 2 3 4  => 3 从右到左删除剩下3
+
+        //1 2 3 4 5 => 2 从左到右删剩下2
+        //1 2 3 4 5 => 4 从右到左删除剩下4
+        //f(i) + f'(i) = i + 1
+
+        //1 2 3 4 5 => 从左到右删除
+        //2 4       => 5/2 = 2从右往左删除
+        //f(i) = 2 * f'(i/2)
+
+        //由公式可得：
+        //f(i) = 2* (i/2 + 1 - f(i/2))
+        return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
+    }
+
 
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
@@ -5683,5 +5925,7 @@ public class AllOfThem {
         System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 1, 1, 3, 5}));
         System.out.println(new AllOfThem().removeElement(new int[]{1}, 1));
         System.out.println(new AllOfThem().removeElement(new int[]{1}, 0));
+        System.out.println(new AllOfThem().addBinary("11", "1"));
+
     }
 }
