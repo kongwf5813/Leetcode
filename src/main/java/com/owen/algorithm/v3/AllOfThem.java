@@ -4904,6 +4904,17 @@ public class AllOfThem {
         return left;
     }
 
+    //[274].H 指数
+    public int hIndex1(int[] citations) {
+        //0 1 3 5 6
+        Arrays.sort(citations);
+        int count = 0, n = citations.length;
+        while (count < n && citations[n - count - 1] > count) {
+            count++;
+        }
+        return count;
+    }
+
     //[275].H 指数 II
     public int hIndex(int[] citations) {
         int n = citations.length;
@@ -4922,6 +4933,22 @@ public class AllOfThem {
         return n - left;
     }
 
+    //[283].移动零
+    public void moveZeroes(int[] nums) {
+        int n = nums.length;
+        int left = 0;
+        for (int right = 0; right < n; right++) {
+            if (nums[right] != 0) {
+                nums[left] = nums[right];
+                left++;
+            }
+        }
+        //减少交换次数
+        while (left < n) {
+            nums[left++] = 0;
+        }
+    }
+
     //[1154].一年中的第几天
     public static int dayOfYear(String date) {
         String[] vars = date.split("-");
@@ -4938,7 +4965,6 @@ public class AllOfThem {
         }
         return ans + day;
     }
-
 
     private TreeNode preNode, leftMax, rightMin;
 
@@ -5765,6 +5791,24 @@ public class AllOfThem {
         //由公式可得：
         //f(i) = 2* (i/2 + 1 - f(i/2))
         return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
+    }
+
+    //[1185].一周中的第几天
+    public String dayOfTheWeek(int day, int month, int year) {
+        String[] week = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        int[] months = new int[]{-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        //年份带来的天数 + 闰年带来的差异，1972年是闰年
+        int days = (year - 1971) * 365 + (year - 1969) / 4;
+        for (int i = 1; i < month; i++) {
+            days += months[i];
+        }
+        //当年是闰年，加一天
+        if (month >= 3 && (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))) {
+            days++;
+        }
+        days += day;
+        //1970年12月31号，星期四，偏移4天，但是week是从0开始，实际偏移3
+        return week[(days + 3) % 7];
     }
 
 
