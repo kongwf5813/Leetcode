@@ -734,6 +734,32 @@ public class AllOfThem {
         }
     }
 
+    //[75].颜色分类
+    public void sortColors(int[] nums) {
+        //left为0存放的下一个位置，right为2存放的下一个位置
+        int left = 0, right = nums.length - 1;
+        int i = 0;
+        //只要遍历到2的位置即可，right可能是2，也可能不是2
+        while (i <= right) {
+            if (nums[i] == 0) {
+                //left控制最后一个0的位置，左边不能出现2
+                //i推进
+                swap(nums, i++, left++);
+            } else if (nums[i] == 1) {
+                i++;
+            } else {
+                //重新交换到i位置上的可能是0,1,2,如果是2，继续交换到right上。
+                swap(nums, i, right--);
+            }
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
     //[207].课程表
     public boolean canFinish(int numCourses, int[][] prerequisites) {
         //入度，找到入度为0的节点，然后依次遍历，减度数，如果为入度为0加入
@@ -2243,10 +2269,28 @@ public class AllOfThem {
         return dummy.next;
     }
 
-    //[82]删除排序链表中的重复元素 II
+    //[82].删除排序链表中的重复元素 II
     public ListNode deleteDuplicates2(ListNode head) {
-        ListNode slow = head, fast = head;
-        return null;
+        ListNode dummy = new ListNode(-1);
+        //建一个「虚拟头节点」dummy 以减少边界判断，往后的答案链表会接在 dummy 后面
+        //使用 tail 代表当前有效链表的结尾
+        //通过原输入的 head 指针进行链表扫描
+        ListNode tail = dummy;
+        while (head != null) {
+            if (head.next == null || head.val != head.next.val) {
+                tail.next = head;
+                tail = tail.next;
+            }
+            //如果head与下一节点值相同个，跳过相同节点
+            while (head.next != null && head.val == head.next.val) {
+                head = head.next;
+            }
+            //后一个节点就是需要的
+            head = head.next;
+        }
+        //置空
+        tail.next = null;
+        return dummy.next;
     }
 
     //[83].删除排序链表中的重复元素
