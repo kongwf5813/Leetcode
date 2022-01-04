@@ -2288,7 +2288,7 @@ public class AllOfThem {
             //后一个节点就是需要的
             head = head.next;
         }
-        //置空
+        //把不合法的删掉
         tail.next = null;
         return dummy.next;
     }
