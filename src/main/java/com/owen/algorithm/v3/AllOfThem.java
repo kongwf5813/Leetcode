@@ -374,6 +374,20 @@ public class AllOfThem {
         sb.deleteCharAt(sb.length() - 1);
     }
 
+    //[26].删除有序数组中的重复项
+    public int removeDuplicates(int[] nums) {
+        if (nums.length == 0) return 0;
+        //刚开始在一起， 当s与f的值不相等的时候，nums[++s] = nums[fast]
+        int slow = 0, fast = 0;
+        while (fast < nums.length) {
+            if (nums[slow] != nums[fast]) {
+                nums[++slow] = nums[fast];
+            }
+            fast++;
+        }
+        return slow + 1;
+    }
+
     //[27].移除元素
     public int removeElement(int[] nums, int val) {
         //等于val的时候，快针+1，不等于的时候，快针复制到慢针，并且快慢针都+1
@@ -504,6 +518,33 @@ public class AllOfThem {
         return sb.toString();
     }
 
+    //[43].字符串相乘
+    public String multiply(String num1, String num2) {
+        if (num1 == null || num2 == null) return "0";
+        int m = num1.length(), n = num2.length();
+        //最多有m+n位
+        int[] res = new int[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                int multiple = (num1.charAt(i) - '0') * (num2.charAt(j) - '0');
+                //乘积+ 进位信息
+                multiple += res[i + j + 1];
+                //低位信息直接覆盖
+                res[i + j + 1] = multiple % 10;
+                //进位信息要叠加
+                res[i + j] += multiple / 10;
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < res.length; i++) {
+            if (sb.length() == 0 && res[i] == 0) {
+                continue;
+            }
+            sb.append(res[i]);
+        }
+        return sb.length() == 0 ? "0" : sb.toString();
+    }
+
     //[46].全排列
     public List<List<Integer>> permute(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
@@ -595,6 +636,38 @@ public class AllOfThem {
             }
         }
         return dp[n - 1];
+    }
+
+    //[63].不同路径 II
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        int m = obstacleGrid.length, n = obstacleGrid[0].length;
+        if (m == 0 || n == 0) return 0;
+
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            if (obstacleGrid[i][0] == 0) {
+                dp[i][0] = 1;
+            } else {
+                break;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (obstacleGrid[0][i] == 0) {
+                dp[0][i] = 1;
+            } else {
+                break;
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (obstacleGrid[i][j] == 1) {
+                    dp[i][j] = 0;
+                } else {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
     }
 
     //[64].最小路径和
@@ -1346,7 +1419,7 @@ public class AllOfThem {
         }
     }
 
-
+    //[95].不同的二叉搜索树 II
     public List<TreeNode> generateTrees(int n) {
         if (n == 0) return null;
         return dfsForGenerateTrees(1, n);
@@ -2268,6 +2341,27 @@ public class AllOfThem {
         }
         return dummy.next;
     }
+
+    //[80].删除有序数组中的重复项 II
+    public int removeDuplicates2(int[] nums) {
+        int n = nums.length;
+        if (n <= 2) return n;
+//        int slow = 2, fast = 2;
+//        while (fast < nums.length) {
+//            if (nums[slow - 2] != nums[fast]) {
+//                nums[slow++] = nums[fast];
+//            }
+//            fast++;
+//        }
+//        return slow;
+        int k = 2;
+        int idx = 0;
+        for (int num : nums) {
+            if (idx < k || nums[idx - k] != num) nums[idx++] = num;
+        }
+        return idx;
+    }
+
 
     //[82].删除排序链表中的重复元素 II
     public ListNode deleteDuplicates2(ListNode head) {
