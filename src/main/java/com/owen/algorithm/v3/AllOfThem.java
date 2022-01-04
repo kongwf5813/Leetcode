@@ -5855,6 +5855,58 @@ public class AllOfThem {
         return week[(days + 3) % 7];
     }
 
+    public int catMouseGame(int[][] graph) {
+        int n = graph.length;
+        int[][][] memo = new int[n][n][2 * n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+
+        //dfs(i, j, k), i为鼠移动，j为猫移动，k为第几轮。 鼠刚开始在1，猫刚开始在2，k为0
+        return dfs(memo, 1, 2, 0, graph);
+    }
+
+    private int dfs(int[][][] memo, int mouse, int cat, int turns, int[][] graph) {
+        if (turns >= 2 * graph.length) return 0;
+        if (memo[mouse][cat][turns] != -1) return memo[mouse][cat][turns];
+        if (mouse == 0) return memo[mouse][cat][turns] = 1;
+        if (mouse == cat) return memo[mouse][cat][turns] = 2;
+        //鼠先动
+        if (turns % 2 == 0) {
+            //最坏的情况猫赢
+            int ans = 2;
+            for (int nexPos : graph[mouse]) {
+                int ansNext = dfs(memo, nexPos, cat, turns + 1, graph);
+                //优先取老鼠赢，再不济选平局，最后选择猫赢
+                if (ansNext == 1) {
+                    return memo[mouse][cat][turns] = 1;
+                } else if (ansNext == 0) {
+                    //平局，不返回，看最后结果
+                    ans = 0;
+                }
+            }
+            return memo[mouse][cat][turns] = ans;
+        } else {
+            //最坏的情况鼠赢
+            int ans = 1;
+            for (int nexPos : graph[cat]) {
+                //猫要优先选择的位置不能为洞，不然老鼠就赢了
+                if (nexPos != 0) {
+                    int ansNext = dfs(memo, mouse, nexPos, turns + 1, graph);
+                    //猫赢了，直接返回
+                    if (ansNext == 2) {
+                        return memo[mouse][cat][turns] = 2;
+                    } else if (ansNext == 0) {
+                        //平局，得看看其他
+                        ans = 0;
+                    }
+                }
+            }
+            return memo[mouse][cat][turns] = ans;
+        }
+    }
 
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
