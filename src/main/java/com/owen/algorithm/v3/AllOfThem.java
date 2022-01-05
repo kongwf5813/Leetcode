@@ -6002,6 +6002,23 @@ public class AllOfThem {
         }
     }
 
+    public static String modifyString(String s) {
+        int n = s.length();
+        StringBuilder sb = new StringBuilder(s);
+        for (int i = 0; i < n; i++) {
+            //前后都不相同，需要第三次猜测数字
+            for (int k = 0; k < 3 && sb.charAt(i) == '?'; k++) {
+                boolean ok = true;
+                char ch = (char) ('a' + k);
+                //问号也是不同的
+                if (i - 1 >= 0 && sb.charAt(i - 1) == ch) ok = false;
+                if (i + 1 < n && sb.charAt(i + 1) == ch) ok = false;
+                if (ok) sb.setCharAt(i, ch);
+            }
+        }
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
