@@ -604,6 +604,26 @@ public class AllOfThem {
         }
     }
 
+    //[49].字母异位词分组
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> group = new HashMap<>();
+
+        for (String str : strs) {
+            char[] array = str.toCharArray();
+            Arrays.sort(array);
+            String key = String.valueOf(array);
+            List<String> list = group.getOrDefault(key, new ArrayList<>());
+            list.add(str);
+
+            group.put(key, list);
+        }
+        List<List<String>> res = new ArrayList<>();
+
+        for(List<String> item : group.values()) {
+            res.add(item);
+        }
+        return res;
+    }
     //[53].最大子数组和
     public int maxSubArray(int[] nums) {
         int n = nums.length;
