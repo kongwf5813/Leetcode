@@ -1,5 +1,7 @@
 package com.owen.algorithm.v3;
 
+import com.owen.algorithm.Tree;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -853,6 +855,24 @@ public class AllOfThem {
         nums[j] = temp;
     }
 
+    //[94].二叉树的中序遍历
+    public List<Integer> inorderTraversalV2(Tree.TreeNode root) {
+        Stack<Tree.TreeNode> stack = new Stack<>();
+        Tree.TreeNode cur = root;
+        List<Integer> res = new ArrayList<>();
+        while(cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            } else {
+                cur = stack.pop();
+                res.add(cur.val);
+                cur = cur.right;
+            }
+        }
+        return res;
+    }
+
     //[207].课程表
     public boolean canFinish(int numCourses, int[][] prerequisites) {
         //入度，找到入度为0的节点，然后依次遍历，减度数，如果为入度为0加入
@@ -911,6 +931,18 @@ public class AllOfThem {
 
         }
         return index == numCourses ? res : new int[0];
+    }
+
+    //[226].翻转二叉树
+    public TreeNode invertTree(TreeNode root) {
+        if(root == null) return null;
+        TreeNode temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+
+        invertTree(root.left);
+        invertTree(root.right);
+        return root;
     }
 
     //[310].最小高度树
