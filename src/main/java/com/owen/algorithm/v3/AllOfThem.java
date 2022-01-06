@@ -621,11 +621,12 @@ public class AllOfThem {
         }
         List<List<String>> res = new ArrayList<>();
 
-        for(List<String> item : group.values()) {
+        for (List<String> item : group.values()) {
             res.add(item);
         }
         return res;
     }
+
     //[53].最大子数组和
     public int maxSubArray(int[] nums) {
         int n = nums.length;
@@ -855,12 +856,42 @@ public class AllOfThem {
         nums[j] = temp;
     }
 
+    //[93].复原 IP 地址
+    public List<String> restoreIpAddresses(String s) {
+        List<String> res = new ArrayList<>();
+        dfsForRestoreIpAddresses(s, 0, new LinkedList<>(), res);
+        return res;
+    }
+
+    private void dfsForRestoreIpAddresses(String s, int start, LinkedList<String> select, List<String> res) {
+        if (select.size() > 4) {
+            return;
+        }
+        if (select.size() >= 4 && start != s.length()) {
+            return;
+        }
+        if (start == s.length() && select.size() == 4) {
+            res.add(String.join(".", select));
+            return;
+        }
+
+        for (int i = start; i < s.length(); i++) {
+            String choice = s.substring(start, i + 1);
+            if (choice.length() > 3 || choice.startsWith("0") && choice.length() > 1 || Integer.parseInt(choice) > 255) {
+                return;
+            }
+            select.addLast(choice);
+            dfsForRestoreIpAddresses(s, i + 1, select, res);
+            select.removeLast();
+        }
+    }
+
     //[94].二叉树的中序遍历
     public List<Integer> inorderTraversalV2(Tree.TreeNode root) {
         Stack<Tree.TreeNode> stack = new Stack<>();
         Tree.TreeNode cur = root;
         List<Integer> res = new ArrayList<>();
-        while(cur != null || !stack.isEmpty()) {
+        while (cur != null || !stack.isEmpty()) {
             if (cur != null) {
                 stack.push(cur);
                 cur = cur.left;
@@ -933,9 +964,38 @@ public class AllOfThem {
         return index == numCourses ? res : new int[0];
     }
 
+    //[225].用队列实现栈
+    public class MyStack {
+        Queue<Integer> queue;
+
+        public MyStack() {
+            queue = new LinkedList<>();
+        }
+
+        public void push(int x) {
+            int size = queue.size();
+            queue.offer(x);
+            for (int i = 0; i < size; i++) {
+                queue.offer(queue.poll());
+            }
+        }
+
+        public int pop() {
+            return queue.poll();
+        }
+
+        public int top() {
+            return queue.peek();
+        }
+
+        public boolean empty() {
+            return queue.isEmpty();
+        }
+    }
+
     //[226].翻转二叉树
     public TreeNode invertTree(TreeNode root) {
-        if(root == null) return null;
+        if (root == null) return null;
         TreeNode temp = root.left;
         root.left = root.right;
         root.right = temp;
@@ -943,6 +1003,40 @@ public class AllOfThem {
         invertTree(root.left);
         invertTree(root.right);
         return root;
+    }
+
+    //[232].用栈实现队列
+    public class MyQueue {
+
+        Stack<Integer> out;
+        Stack<Integer> s2;
+        public MyQueue() {
+            out = new Stack<>();
+            s2 = new Stack<>();
+        }
+
+        public void push(int x) {
+            //每次out栈保持栈顶是第一个元素，借助s2，转储下
+            while (!out.isEmpty()) {
+                s2.push(out.pop());
+            }
+            out.push(x);
+            while (!s2.isEmpty()) {
+                out.push(s2.pop());
+            }
+        }
+
+        public int pop() {
+            return out.pop();
+        }
+
+        public int peek() {
+            return out.peek();
+        }
+
+        public boolean empty() {
+            return out.isEmpty();
+        }
     }
 
     //[310].最小高度树
@@ -2414,7 +2508,6 @@ public class AllOfThem {
         return idx;
     }
 
-
     //[82].删除排序链表中的重复元素 II
     public ListNode deleteDuplicates2(ListNode head) {
         ListNode dummy = new ListNode(-1);
@@ -2698,6 +2791,15 @@ public class AllOfThem {
             cur = next;
         }
         return pre;
+    }
+
+    //[223].矩形面积
+    public int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int total = (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1);
+        if (ax2 < bx1 || ax1 > bx2 || ay1 > by2 || by1 > ay2) {
+            return total;
+        }
+        return total - (Math.min(ay2, by2) - Math.max(ay1, by1)) * (Math.min(ax2, bx2) - Math.max(ax1, bx1));
     }
 
     //[234].回文链表
@@ -6229,6 +6331,9 @@ public class AllOfThem {
         System.out.println(new AllOfThem().removeElement(new int[]{1}, 1));
         System.out.println(new AllOfThem().removeElement(new int[]{1}, 0));
         System.out.println(new AllOfThem().addBinary("11", "1"));
+        System.out.println(new AllOfThem().restoreIpAddresses("25525511135"));
+        System.out.println(new AllOfThem().restoreIpAddresses("101023"));
+        System.out.println(new AllOfThem().restoreIpAddresses("010010"));
 
     }
 }
