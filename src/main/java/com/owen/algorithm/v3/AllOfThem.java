@@ -964,6 +964,37 @@ public class AllOfThem {
         return index == numCourses ? res : new int[0];
     }
 
+    //[217].存在重复元素
+    public boolean containsDuplicate(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            if (set.contains(num)) {
+                return true;
+            }
+            set.add(num);
+        }
+        return false;
+    }
+
+    //[219].存在重复元素 II
+    public boolean containsNearbyDuplicate(int[] nums, int k) {
+        Set<Integer> window = new HashSet<>();
+        //这个窗口每次只会增1， 缩窗口也只是每次减1，那么不需要两个指针
+        for (int j = 0; j < nums.length; j++) {
+            int num = nums[j];
+            if (window.contains(num)) {
+                return true;
+            }
+            window.add(num);
+            //window里面保留k个元素，和下一次contains比较，如果k的窗口内，有重复元素
+            if (window.size() > k) {
+                window.remove(nums[j - k]);
+            }
+        }
+        return false;
+    }
+
+
     //[225].用队列实现栈
     public class MyStack {
         Queue<Integer> queue;
@@ -1010,6 +1041,7 @@ public class AllOfThem {
 
         Stack<Integer> out;
         Stack<Integer> s2;
+
         public MyQueue() {
             out = new Stack<>();
             s2 = new Stack<>();
@@ -1130,6 +1162,62 @@ public class AllOfThem {
             left++;
             right--;
         }
+    }
+
+    //[406].根据身高重建队列
+    public int[][] reconstructQueue(int[][] people) {
+        //高的不影响矮的，高的优先放置，然后再放置矮的，k值就是需要插入的索引位置
+        //身高降序，位置升序
+        Arrays.sort(people, (a, b) -> a[0] != b[0] ? b[0] - a[0] : a[1] - b[1]);
+
+        List<int[]> res = new ArrayList<>();
+        for (int[] p : people) {
+            //按照相对位置插入即可。
+            res.add(p[1], p);
+        }
+        return res.toArray(new int[res.size()][]);
+    }
+
+    //[468].验证IP地址
+    public String validIPAddress(String queryIP) {
+        if (queryIP.contains(".")) {
+            String[] ipv4 = queryIP.split("\\.", -1);
+            if (ipv4.length != 4) {
+                return "Neither";
+            }
+            for (String ip : ipv4) {
+                if (ip.length() > 3 || ip.length() <= 0) {
+                    return "Neither";
+                }
+                for (char ch : ip.toCharArray()) {
+                    if (!Character.isDigit(ch)) {
+                        return "Neither";
+                    }
+                }
+                int num = Integer.parseInt(ip);
+                if (num > 255 || num < 0 || String.valueOf(num).length() != ip.length()) {
+                    return "Neither";
+                }
+            }
+            return "IPv4";
+        } else if (queryIP.contains(":")) {
+            String[] ipv6 = queryIP.split(":", -1);
+            if (ipv6.length != 8) {
+                return "Neither";
+            }
+            for (String ip : ipv6) {
+                if (ip.length() > 4 || ip.length() <= 0) {
+                    return "Neither";
+                }
+                for (char ch : ip.toCharArray()) {
+                    if (!Character.isDigit(ch) && !('a' <= ch && ch <= 'f') && !('A' <= ch && ch <= 'F')) {
+                        return "Neither";
+                    }
+                }
+            }
+            return "IPv6";
+        }
+        return "Neither";
     }
 
     //[743].网络延迟时间
@@ -6175,7 +6263,7 @@ public class AllOfThem {
 
     public int maxDepth(String s) {
         int count = 0, res = 0;
-        for (int i =0; i < s.length(); i++) {
+        for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == '(') count++;
             else if (s.charAt(i) == ')') count--;
             res = Math.max(count, res);
