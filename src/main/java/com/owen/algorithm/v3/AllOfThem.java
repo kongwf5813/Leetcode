@@ -6071,6 +6071,16 @@ public class AllOfThem {
         return sb.toString();
     }
 
+    public int maxDepth(String s) {
+        int count = 0, res = 0;
+        for (int i =0; i < s.length(); i++) {
+            if (s.charAt(i) == '(') count++;
+            else if (s.charAt(i) == ')') count--;
+            res = Math.max(count, res);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
         System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
