@@ -1825,9 +1825,9 @@ public class Others {
 //        System.out.println(trap(new int[]{4,2,0,3,2,5}));
 //
 //        [43].字符串相乘
-        System.out.println(multiply("123", "456"));
-        System.out.println(multiply("2", "3"));
-        System.out.println(multiply("123", "89"));
+//        System.out.println(multiply("123", "456"));
+//        System.out.println(multiply("2", "3"));
+//        System.out.println(multiply("123", "89"));
 
 //        [49].字母异位分组
 //        System.out.println(groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}));
