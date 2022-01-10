@@ -1108,7 +1108,7 @@ public class AllOfThem {
         int rightHeight = countLevel(root.right);
         //右边一定是满二叉树
         if (leftHeight > rightHeight) return 1 << rightHeight + countNodes(root.left);
-        //左边一定是满二叉树
+            //左边一定是满二叉树
         else return 1 << leftHeight + countNodes(root.right);
     }
 
@@ -1326,6 +1326,31 @@ public class AllOfThem {
         return res.toArray(new int[res.size()][]);
     }
 
+    //[429].N 叉树的层序遍历
+    public List<List<Integer>> levelOrder(Node root) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (root == null) return res;
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                Node cur = queue.poll();
+                level.add(cur.val);
+
+                if (cur.children != null) {
+                    for (Node child : cur.children) {
+                        queue.offer(child);
+                    }
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
     //[450].删除二叉搜索树中的节点
     public TreeNode deleteNode(TreeNode root, int key) {
         //可能搜不到，直到搜到叶子节点，直接返回
@@ -1399,6 +1424,26 @@ public class AllOfThem {
             return "IPv6";
         }
         return "Neither";
+    }
+
+    //[509].斐波那契数
+    public int fib(int n) {
+//        int[] dp = new int[n + 1];
+//        dp[0] = 0;
+//        dp[1] = 1;
+//        for (int i = 2; i <= n; i++) {
+//            dp[i] = dp[i - 1] + dp[i - 2];
+//        }
+//        return dp[n];
+        int dp_i_2 = 0;
+        int dp_i_1 = 1;
+        int dp_i = 0;
+        for (int i = 2; i <= n; i++) {
+            dp_i = dp_i_2 + dp_i_1;
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
     }
 
     //[542].01 矩阵
@@ -1492,6 +1537,44 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[700].二叉搜索树中的搜索
+    public TreeNode searchBST(TreeNode root, int val) {
+        if (root == null) return null;
+        while (root != null) {
+            if (root.val == val) {
+                return root;
+            }
+            root = root.val < val ? root.right : root.left;
+        }
+        return null;
+    }
+
+    //[701].二叉搜索树中的插入操作
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+//        TreeNode parent = null;
+//        while (root != null) {
+//            parent = root;
+//            if (root.val < val) {
+//                root = root.right;
+//            } else {
+//                root = root.left;
+//            }
+//        }
+//        if (parent.val < val) {
+//            parent.right = new TreeNode(val);
+//        } else {
+//            parent.left = new TreeNode(val);
+//        }
+//        return root;
+        //递归解法
+        //返回插入的头结点之后由上一次拼接完成
+        if (root == null) return new TreeNode(val);
+        if (root.val < val) root.right = insertIntoBST(root.right, val);
+        else root.left = insertIntoBST(root.left, val);
+        //返回头结点
+        return root;
     }
 
     //[743].网络延迟时间
