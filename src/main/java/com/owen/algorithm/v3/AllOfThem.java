@@ -5800,7 +5800,8 @@ public class AllOfThem {
     }
 
     private long selectNumber(String num, int start, int end) {
-        if (num.charAt(start) == '0') {
+        //单个0是一个累加序列合法值
+        if (start < end && num.charAt(start) == '0') {
             return -1;
         }
         long number = 0;
@@ -6897,6 +6898,5 @@ public class AllOfThem {
         System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbcbcac"));
         System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbbaccc"));
         System.out.println(new AllOfThem().isInterleave("", "", ""));
-
     }
 }
