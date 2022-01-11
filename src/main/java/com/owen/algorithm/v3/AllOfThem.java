@@ -1351,6 +1351,33 @@ public class AllOfThem {
         return res;
     }
 
+    //[445].两数相加 II
+    public ListNode addTwoNumbers2(ListNode l1, ListNode l2) {
+        Stack<Integer> s1 = new Stack<>();
+        Stack<Integer> s2 = new Stack<>();
+        while (l1 != null) {
+            s1.push(l1.val);
+            l1 = l1.next;
+        }
+        while (l2 != null) {
+            s2.push(l2.val);
+            l2 = l2.next;
+        }
+
+        int carry = 0;
+        ListNode dummy = new ListNode(-1);
+        while (!s1.isEmpty() || !s2.isEmpty() || carry != 0) {
+            int x = s1.isEmpty() ? 0 : s1.pop();
+            int y = s2.isEmpty() ? 0 : s2.pop();
+            int sum = x + y + carry;
+            ListNode cur = new ListNode(sum % 10);
+            carry = sum / 10;
+            cur.next = dummy.next;
+            dummy.next = cur;
+        }
+        return dummy.next;
+    }
+
     //[450].删除二叉搜索树中的节点
     public TreeNode deleteNode(TreeNode root, int key) {
         //可能搜不到，直到搜到叶子节点，直接返回
@@ -1424,6 +1451,45 @@ public class AllOfThem {
             return "IPv6";
         }
         return "Neither";
+    }
+
+    //[498].对角线遍历
+    public int[] findDiagonalOrder(int[][] mat) {
+        // 00 -> 0,1 -> 1,0 -> 2,0 -> 1,1 -> 0,2 -> 1,2 -> 2,1 -> 3,0
+        //x < 0   x = 0 y = y + 1
+        //y >= n  x = x+1, y = n-1
+        //y < 0   x=  x+1, y = 0
+        //x >= n  x = n-1,  y = y+1;
+        int m = mat.length, n = mat[0].length;
+        int r = 0, c = 0;
+        int[] res = new int[m * n];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = mat[r][c];
+            //偶数往上
+            if ((r + c) % 2 == 0) {
+                //优先判断是不是右边界超了，（上边界和右边界可能同时超，往下边走）
+                if (c == n - 1) {
+                    r++;
+                } else if (r == 0) {
+                    c++;
+                } else {
+                    r--;
+                    c++;
+                }
+            } else {
+                //奇数往下
+                //优先判断是不是下边界超了，（下边界和左边界可能同时超，往后边走）
+                if (r == m - 1) {
+                    c++;
+                } else if (c == 0) {
+                    r++;
+                } else {
+                    r++;
+                    c--;
+                }
+            }
+        }
+        return res;
     }
 
     //[509].斐波那契数
