@@ -855,6 +855,25 @@ public class AllOfThem {
         nums[j] = temp;
     }
 
+    //[88].合并两个有序数组
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        //因为数据是最后是往nums1中写入的，而且是从小到大，为了避免前面交互，所有从后往前遍历
+        int i = m - 1, j = n - 1, index = nums1.length - 1;
+        //我也可以先求公共的，然后再求剩下的
+        //或者通过判断条件，特殊判断来统一
+        while (i >= 0 || j >= 0) {
+            if (i == -1) {
+                nums1[index--] = nums2[j--];
+            } else if (j == -1) {
+                nums1[index--] = nums1[i--];
+            } else if (nums1[i] > nums2[j]) {
+                nums1[index--] = nums1[i--];
+            } else {
+                nums1[index--] = nums2[j--];
+            }
+        }
+    }
+
     //[93].复原 IP 地址
     public List<String> restoreIpAddresses(String s) {
         List<String> res = new ArrayList<>();
@@ -903,6 +922,74 @@ public class AllOfThem {
         return res;
     }
 
+    //[95].不同的二叉搜索树 II
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) return null;
+        return dfsForGenerateTrees(1, n);
+    }
+
+    private List<TreeNode> dfsForGenerateTrees(int start, int end) {
+        List<TreeNode> res = new ArrayList<>();
+        if (start > end) {
+            res.add(null);
+            return res;
+        }
+        for (int i = start; i <= end; i++) {
+            List<TreeNode> leftTree = dfsForGenerateTrees(start, i - 1);
+            List<TreeNode> rightTree = dfsForGenerateTrees(i + 1, end);
+            //始终都只有一个节点
+            for (TreeNode left : leftTree) {
+                for (TreeNode right : rightTree) {
+                    TreeNode root = new TreeNode(i);
+                    root.left = left;
+                    root.right = right;
+                    res.add(root);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[96].不同的二叉搜索树
+    public int numTrees(int n) {
+        //方法1 递归解决
+        //return dfsForNumTrees(new int[n + 1][n + 1], 1, n);
+
+        //方法2
+        // 1  1
+        // 2  2
+        // 3  2 + 1 + 2
+        // 4  5 + 1 * 2 + 2*1 + 5
+        //i个节点的数量，而不是前i个节点的数量
+        //dp[i] = dp[0] * dp [i - 1] + dp[1] * dp[i-2] + ... + dp[i-1]* dp[0]
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                dp[i] += dp[j] * dp[i - j - 1];
+            }
+        }
+        return dp[n];
+    }
+
+    private int dfsForNumTrees(int[][] memo, int start, int end) {
+        if (start > end) {
+            return 1;
+        }
+        if (memo[start][end] != 0) {
+            return memo[start][end];
+        }
+        int res = 0;
+        for (int i = start; i <= end; i++) {
+            int left = dfsForNumTrees(memo, start, i - 1);
+            int right = dfsForNumTrees(memo, i + 1, end);
+            res += left * right;
+        }
+        memo[start][end] = res;
+        return res;
+    }
+
     //[97].交错字符串
     public boolean isInterleave(String s1, String s2, String s3) {
         int m = s1.length(), n = s2.length();
@@ -923,6 +1010,364 @@ public class AllOfThem {
             }
         }
         return dp[m][n];
+    }
+
+    //[98].验证二叉搜索树
+    public boolean isValidBST(TreeNode root) {
+        return dfsIsValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private boolean dfsIsValidBST(TreeNode root, Long min, Long max) {
+        if (root == null) return true;
+        if (min < root.val && root.val < max) {
+            return dfsIsValidBST(root.left, min, (long) root.val) &&
+                    dfsIsValidBST(root.right, (long) root.val, max);
+        }
+        return false;
+    }
+
+    //[100].相同的树
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        return dfsIsSameTree(p, q);
+    }
+
+    private boolean dfsIsSameTree(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p.val != q.val) return false;
+        return dfsIsSameTree(p.left, q.left) && dfsIsSameTree(p.right, q.right);
+    }
+
+    //[101].对称二叉树
+    public boolean isSymmetric(TreeNode root) {
+        if (root == null) return true;
+        return dfsIsSymmetric(root.left, root.right);
+    }
+
+    private boolean dfsIsSymmetric(TreeNode p, TreeNode q) {
+        if (p == null && q == null) return true;
+        //是否为镜像，意味着，主节点相等， p的左节点 = q的右节点， p的右节点 = q的左节点
+        if (p == null && q != null) return false;
+        if (p != null && q == null) return false;
+        if (p.val != q.val) return false;
+        return dfsIsSymmetric(p.left, q.right) && dfsIsSymmetric(p.right, q.left);
+    }
+
+    //[102].二叉树的层序遍历
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        if (root == null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                level.add(cur.val);
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
+    //[103].二叉树的锯齿形层序遍历
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        if (root == null) return null;
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+        boolean flag = true;
+        List<List<Integer>> res = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            LinkedList<Integer> list = new LinkedList<>();
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                if (flag) {
+                    list.addLast(cur.val);
+                } else {
+                    list.addFirst(cur.val);
+                }
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(list);
+            flag = !flag;
+        }
+        return res;
+    }
+
+    //[104].二叉树的最大深度
+    public int maxDepth(TreeNode root) {
+        if (root == null) return 0;
+        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+    }
+
+    //[105].从前序与中序遍历序列构造二叉树
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        int pLen = preorder.length;
+        int iLen = inorder.length;
+        if (pLen != iLen) {
+            return null;
+        }
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree(preorder, inorder, 0, pLen - 1, 0, iLen - 1, indexMap);
+    }
+
+    private TreeNode dfsForBuildTree(int[] preorder, int[] inorder, int ps, int pe, int is, int ie, Map<Integer, Integer> indexMap) {
+        if (ps > pe || is > ie) return null;
+        int rootVal = preorder[ps];
+        TreeNode root = new TreeNode(rootVal);
+        int index = indexMap.get(rootVal);
+        TreeNode left = dfsForBuildTree(preorder, inorder, ps + 1, index - is + ps, is, index - 1, indexMap);
+        TreeNode right = dfsForBuildTree(preorder, inorder, index - is + ps + 1, pe, index + 1, ie, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[106].从中序与后序遍历序列构造二叉树
+    public TreeNode buildTree2(int[] inorder, int[] postorder) {
+        int iLen = inorder.length;
+        int pLen = postorder.length;
+        if (iLen != pLen) return null;
+        Map<Integer, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < iLen; i++) {
+            indexMap.put(inorder[i], i);
+        }
+        return dfsForBuildTree2(inorder, postorder, 0, iLen - 1, 0, pLen - 1, indexMap);
+    }
+
+    private TreeNode dfsForBuildTree2(int[] inorder, int[] postorder, int is, int ie, int ps, int pe, Map<Integer, Integer> indexMap) {
+        if (is > ie || ps > pe) {
+            return null;
+        }
+        int rootVal = postorder[pe];
+        TreeNode root = new TreeNode(rootVal);
+        int index = indexMap.get(rootVal);
+
+        TreeNode left = dfsForBuildTree2(inorder, postorder, is, index - 1, ps, ps + index - is - 1, indexMap);
+        TreeNode right = dfsForBuildTree2(inorder, postorder, index + 1, ie, ps + index - is, pe - 1, indexMap);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[107].二叉树的层序遍历 II
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> res = new LinkedList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        if (root != null) {
+            queue.offer(root);
+        }
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            List<Integer> level = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                TreeNode cur = queue.poll();
+                level.add(cur.val);
+
+                if (cur.left != null) {
+                    queue.offer(cur.left);
+                }
+                if (cur.right != null) {
+                    queue.offer(cur.right);
+                }
+            }
+            res.add(0, level);
+        }
+        return res;
+    }
+
+    //[108].将有序数组转换为二叉搜索树
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return dfsForSortedArrayToBST(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode dfsForSortedArrayToBST(int[] nums, int s, int e) {
+        if (s > e) return null;
+        int mid = s + (e - s) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        TreeNode left = dfsForSortedArrayToBST(nums, s, mid - 1);
+        TreeNode right = dfsForSortedArrayToBST(nums, mid + 1, e);
+        root.left = left;
+        root.right = right;
+        return root;
+    }
+
+    //[109].有序链表转换二叉搜索树
+    public TreeNode sortedListToBST(ListNode head) {
+        if (head == null) return null;
+        ListNode slow = head, fast = head, pre = null;
+        while (fast != null && fast.next != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        TreeNode root = new TreeNode(slow.val);
+        //只有一个节点了
+        if (pre == null) return root;
+
+        //断开前面一个节点
+        pre.next = null;
+        root.left = sortedListToBST(head);
+        root.right = sortedListToBST(slow.next);
+        return root;
+    }
+
+    //[110].平衡二叉树
+    public boolean isBalanced(TreeNode root) {
+        return dfsForIsBalanced(root) >= 0;
+    }
+
+    //不平衡就是-1， 否则返回高度
+    private int dfsForIsBalanced(TreeNode root) {
+        if (root == null) return 0;
+        int left = dfsForIsBalanced(root.left);
+        int right = dfsForIsBalanced(root.right);
+
+        if (left == -1 || right == -1 || Math.abs(left - right) > 1) {
+            return -1;
+        }
+        return Math.max(left, right) + 1;
+    }
+
+    //[111].二叉树的最小深度
+    public int minDepth(TreeNode root) {
+        if (root == null) return 0;
+        int left = minDepth(root.left);
+        int right = minDepth(root.right);
+        //有一棵子树没有，此时高度应该是2， 而不是下面的1，计算就会不对。
+        if (left == 0 || right == 0) {
+            return left + right + 1;
+        }
+        return Math.min(left, right) + 1;
+    }
+
+    //[112].路径总和
+    public boolean hasPathSum(TreeNode root, int targetSum) {
+        //一定不是叶子节点
+        if (root == null) return false;
+        //判断叶子节点标准
+        if (root.left == null && root.right == null) {
+            return targetSum == root.val;
+        }
+        return hasPathSum(root.left, targetSum - root.val)
+                || hasPathSum(root.right, targetSum - root.val);
+    }
+
+    //[113].路径总和 II
+    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
+        List<List<Integer>> res = new ArrayList<>();
+        dfsForPathSum(root, targetSum, new LinkedList<>(), res);
+        return res;
+    }
+
+    private void dfsForPathSum(TreeNode root, int targetSum, LinkedList<Integer> path, List<List<Integer>> res) {
+        if (root == null) return;
+
+        //前序遍历
+        path.addLast(root.val);
+        if (root.left == null && root.right == null && targetSum == root.val) {
+            res.add(new ArrayList<>(path));
+            //回溯撤销节点的，加了return，会导致叶子节点会有撤销成功，导致路径上少减少一次撤销，从而使得下一次的选择会多一个节点。
+            //主要取决于前序遍历顺序不能变更。
+        }
+
+        dfsForPathSum(root.left, targetSum - root.val, path, res);
+        dfsForPathSum(root.right, targetSum - root.val, path, res);
+        path.removeLast();
+    }
+
+    //[114].二叉树展开为链表
+    public void flatten(TreeNode root) {
+        if (root == null) return;
+
+        flatten(root.left);
+        flatten(root.right);
+
+        TreeNode left = root.left;
+        TreeNode right = root.right;
+
+        root.right = left;
+        root.left = null;
+
+        TreeNode cur = root;
+        //最后一个叶子节点
+        while (cur.right != null) {
+            cur = cur.right;
+        }
+        cur.right = right;
+    }
+
+    //[144].二叉树的前序遍历
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode cur = stack.pop();
+            res.add(cur.val);
+
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            if (cur.left != null) {
+                stack.push(cur.left);
+            }
+        }
+        return res;
+    }
+
+    //[145].二叉树的后序遍历
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            if (cur != null) {
+                res.add(0, cur.val);
+                stack.push(cur);
+                cur = cur.right;
+            } else {
+                cur = stack.pop();
+                cur = cur.left;
+            }
+        }
+        return res;
+    }
+
+    //[116].填充每个节点的下一个右侧节点指针
+    public Node connect(Node root) {
+        if (root == null) return null;
+        dfsForConnect(root.left, root.right);
+        return root;
+    }
+
+    private void dfsForConnect(Node left, Node right) {
+        if (left == null || right == null) {
+            return;
+        }
+        left.next = right;
+        dfsForConnect(left.left, left.right);
+        dfsForConnect(right.left, right.right);
+        dfsForConnect(left.right, right.left);
     }
 
     //[117].填充每个节点的下一个右侧节点指针 II
@@ -984,6 +1429,328 @@ public class AllOfThem {
             next = next.right;
         }
         return nextRight;
+    }
+
+    //[118].杨辉三角
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        for (int i = 0; i < numRows; i++) {
+            List<Integer> level = new ArrayList<>();
+            for (int j = 0; j <= i; j++) {
+                if (j == 0 || j == i) {
+                    level.add(1);
+                } else {
+                    level.add(res.get(i - 1).get(j - 1) + res.get(i - 1).get(j));
+                }
+            }
+            res.add(level);
+        }
+        return res;
+    }
+
+    //[119].杨辉三角 II
+    public List<Integer> getRow(int rowIndex) {
+        List<Integer> res = new ArrayList<>();
+        res.add(1);
+        for (int i = 1; i <= rowIndex; i++) {
+            res.add(0);
+            for (int j = i; j > 0; j--) {
+                res.set(j, res.get(j) + res.get(j - 1));
+            }
+        }
+        return res;
+    }
+
+    //[120].三角形最小路径和
+    public int minimumTotal(List<List<Integer>> triangle) {
+        int n = triangle.size();
+        //走到(i, j)点的最小路径和
+        int[][] dp = new int[n][n];
+        dp[0][0] = triangle.get(0).get(0);
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                if (j == 0) {
+                    dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
+                } else if (j == i) {
+                    dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
+                } else {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
+                }
+            }
+        }
+        int min = dp[n - 1][0];
+        for (int i = 1; i < n; i++) {
+            min = Math.min(min, dp[n - 1][i]);
+        }
+        return min;
+    }
+
+    //[120].三角形最小路径和（空间压缩）
+    public int minimumTotal2(List<List<Integer>> triangle) {
+        int n = triangle.size();
+        //到底层i的最短路径和
+        int[] dp = new int[n];
+        dp[0] = triangle.get(0).get(0);
+        int pre = 0, cur;
+        //  pre          cur, pre'     cur'
+        // (i-1, j-1)   (i-1, j)     (i-1, j+1)
+        //        ＼        ↓    ＼      ↓
+        //               (i, j)       (i, j+1)
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                cur = dp[j];
+                if (j == 0) {
+                    dp[j] = cur + triangle.get(i).get(j);
+                } else if (j == i) {
+                    dp[j] = pre + triangle.get(i).get(j);
+                } else {
+                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
+                }
+                pre = cur;
+            }
+        }
+        int min = dp[0];
+        for (int i = 1; i < n; i++) {
+            min = Math.min(min, dp[i]);
+        }
+        return min;
+    }
+
+    //[121].买卖股票的最佳时机
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        //到第i天，0表示不持股票，1表示持有股票
+        int[][] dp = new int[n][2];
+
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //不持股票，（昨天卖掉股票的利润，今天卖掉股票的利润）
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+
+            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
+            dp[i][1] = Math.max(dp[i - 1][1], -prices[i]);
+        }
+
+        return dp[n - 1][0];
+    }
+
+    //[121].买卖股票的最佳时机 优化版
+    public int maxProfit_y(int[] prices) {
+        int n = prices.length;
+        int dp_0 = 0;
+        int dp_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            //不持股票，（今天卖掉股票的利润，昨天卖掉股票的利润）
+            dp_0 = Math.max(dp_0, dp_1 + prices[i]);
+            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
+            dp_1 = Math.max(dp_1, -prices[i]);
+        }
+
+        return dp_0;
+    }
+
+    //[122].买卖股票的最佳时机 II
+    public int maxProfit2(int[] prices) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+
+    //[122].买卖股票的最佳时机 II 优化版
+    public int maxProfit2_y(int[] prices) {
+        int n = prices.length;
+        int dp_0 = 0;
+        int dp_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            int pre_dp_0 = dp_0;
+            int pre_dp_1 = dp_1;
+            dp_0 = Math.max(pre_dp_0, pre_dp_1 + prices[i]);
+            dp_1 = Math.max(pre_dp_1, pre_dp_0 - prices[i]);
+        }
+        return dp_0;
+    }
+
+    //[123].买卖股票的最佳时机 III
+    public int maxProfit3(int[] prices) {
+        // dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+        // dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+        int n = prices.length;
+        int[][][] dp = new int[n][3][2];
+        dp[0][1][0] = 0;
+        dp[0][2][0] = 0;
+        dp[0][1][1] = -prices[0];
+        dp[0][2][1] = -prices[0];
+
+        for (int i = 1; i < n; i++) {
+            dp[i][2][0] = Math.max(dp[i - 1][2][0], dp[i - 1][2][1] + prices[i]);
+            dp[i][2][1] = Math.max(dp[i - 1][2][1], dp[i - 1][1][0] - prices[i]);
+
+            dp[i][1][0] = Math.max(dp[i - 1][1][0], dp[i - 1][1][1] + prices[i]);
+            dp[i][1][1] = Math.max(dp[i - 1][1][1], -prices[i]);
+        }
+        return dp[n - 1][2][0];
+    }
+
+    //[123].买卖股票的最佳时机 III 优化版
+    public int maxProfit3_y(int[] prices) {
+        int n = prices.length;
+        int dp_1_0 = 0;
+        int dp_1_1 = -prices[0];
+        int dp_2_0 = 0;
+        int dp_2_1 = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp_2_0 = Math.max(dp_2_0, dp_2_1 + prices[i]);
+            dp_2_1 = Math.max(dp_2_1, dp_1_0 - prices[i]);
+            dp_1_0 = Math.max(dp_1_0, dp_1_1 + prices[i]);
+            dp_1_1 = Math.max(dp_1_1, -prices[i]);
+        }
+        return dp_2_0;
+    }
+
+    //[128].最长连续序列
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            set.add(num);
+        }
+        int res = 0;
+        for (int num : set) {
+            if (!set.contains(num - 1)) {
+                int cur = num;
+                int longest = 1;
+                while (set.contains(cur + 1)) {
+                    cur += 1;
+                    longest += 1;
+                }
+                res = Math.max(res, longest);
+            }
+        }
+        return res;
+    }
+
+    //[129].求根节点到叶节点数字之和
+    public int sumNumbers(TreeNode root) {
+        return dfsForSumNumbers(root, 0);
+    }
+
+    private int dfsForSumNumbers(TreeNode root, int preVal) {
+        if (root == null) return 0;
+        int cur = preVal * 10 + root.val;
+        if (root.left == null && root.right == null) {
+            return cur;
+        }
+        return dfsForSumNumbers(root.right, cur) + dfsForSumNumbers(root.left, cur);
+    }
+
+    //[131].分割回文串
+    public List<List<String>> partition(String s) {
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                //三个字符，并且收尾相等，就是回文
+                dp[i][j] = (dp[i + 1][j - 1] || j - i < 3) && s.charAt(i) == s.charAt(j);
+            }
+        }
+
+        List<List<String>> res = new ArrayList<>();
+        dfsForPartition(s, 0, res, new LinkedList<>(), dp);
+        return res;
+    }
+
+    private void dfsForPartition(String s, int start, List<List<String>> res, LinkedList<String> path, boolean[][] dp) {
+        if (start == s.length()) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = start; i < s.length(); i++) {
+            if (!dp[start][i]) {
+                continue;
+            }
+            path.addLast(s.substring(start, i + 1));
+            dfsForPartition(s, i + 1, res, path, dp);
+            path.removeLast();
+        }
+    }
+
+    //[133].克隆图
+    public Node cloneGraph(Node node) {
+        if (node == null) return null;
+        //hash赋值，同时充当访问标记
+        Map<Node, Node> cloneMap = new HashMap<>();
+        dfsForCloneGraph(node, cloneMap);
+        return cloneMap.get(node);
+    }
+
+    private void dfsForCloneGraph(Node node, Map<Node, Node> cloneMap) {
+        //已经创建过了，就不需要再次创建了
+        if (cloneMap.containsKey(node)) {
+            return;
+        }
+        Node clone = new Node(node.val);
+        cloneMap.put(node, clone);
+        if (node.neighbors != null && node.neighbors.size() > 0) {
+            clone.neighbors = new ArrayList<>();
+            for (Node neigh : node.neighbors) {
+                dfsForCloneGraph(neigh, cloneMap);
+                clone.neighbors.add(cloneMap.get(neigh));
+            }
+        }
+    }
+
+    //[134].加油站
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int left = 0, minLeft = Integer.MAX_VALUE;
+        int n = gas.length;
+        int start = 0;
+        for (int i = 0; i < n; i++) {
+            left += gas[i] - cost[i];
+            //剩余最小，更新位置
+            if (left < minLeft) {
+                minLeft = left;
+                start = i;
+            }
+        }
+        //下一个位置才是起始位置，并且可能超过数组长度，并且是环
+        return left >= 0 ? (start + 1) % n : -1;
+    }
+
+    //[136].只出现一次的数字
+    public int singleNumber(int[] nums) {
+        int res = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            res ^= nums[i];
+        }
+        return res;
+    }
+
+    //[137]只出现一次的数字 II
+    public int singleNumber2(int[] nums) {
+        int res = 0;
+        for (int i = 0; i < 32; i++) {
+            int count = 0;
+            int pos = 1 << i;
+            for (int num : nums) {
+                if ((pos & num) == pos) {
+                    count++;
+                }
+            }
+            if (count % 3 != 0) {
+                res |= 1 << i;
+            }
+        }
+        return res;
     }
 
     //[165].比较版本号
@@ -1275,6 +2042,23 @@ public class AllOfThem {
         //因为3是质数，所以3^19肯定是3^n的最大公约数。
         int max = (int) Math.pow(3, 19);
         return max % n == 0;
+    }
+
+    //[338].比特位计数
+    public int[] countBits(int n) {
+        ////0 --> 0
+        ////1 --> 1
+        ////2 --> 10
+        ////3 --> 11
+        ////4 --> 100
+        ////5 --> 101
+        //偶数一定等于dp[x >> 1], 奇数等于dp[x >> 1] +1
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            //奇数
+            dp[i] = dp[i >> 1] + ((i & 1) == 1 ? 1 : 0);
+        }
+        return dp;
     }
 
     //[342].4的幂
@@ -1641,6 +2425,22 @@ public class AllOfThem {
         else root.left = insertIntoBST(root.left, val);
         //返回头结点
         return root;
+    }
+
+    //[704].二分查找
+    public int search2(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return -1;
     }
 
     //[743].网络延迟时间
@@ -2074,754 +2874,6 @@ public class AllOfThem {
                 grid[x][y] = color;
             }
         }
-    }
-
-    //[95].不同的二叉搜索树 II
-    public List<TreeNode> generateTrees(int n) {
-        if (n == 0) return null;
-        return dfsForGenerateTrees(1, n);
-    }
-
-    private List<TreeNode> dfsForGenerateTrees(int start, int end) {
-        List<TreeNode> res = new ArrayList<>();
-        if (start > end) {
-            res.add(null);
-            return res;
-        }
-        for (int i = start; i <= end; i++) {
-            List<TreeNode> leftTree = dfsForGenerateTrees(start, i - 1);
-            List<TreeNode> rightTree = dfsForGenerateTrees(i + 1, end);
-            //始终都只有一个节点
-            for (TreeNode left : leftTree) {
-                for (TreeNode right : rightTree) {
-                    TreeNode root = new TreeNode(i);
-                    root.left = left;
-                    root.right = right;
-                    res.add(root);
-                }
-            }
-        }
-        return res;
-    }
-
-    //[96].不同的二叉搜索树
-    public int numTrees(int n) {
-        //方法1 递归解决
-        //return dfsForNumTrees(new int[n + 1][n + 1], 1, n);
-
-        //方法2
-        // 1  1
-        // 2  2
-        // 3  2 + 1 + 2
-        // 4  5 + 1 * 2 + 2*1 + 5
-        //i个节点的数量，而不是前i个节点的数量
-        //dp[i] = dp[0] * dp [i - 1] + dp[1] * dp[i-2] + ... + dp[i-1]* dp[0]
-        int[] dp = new int[n + 1];
-        dp[0] = 1;
-        dp[1] = 1;
-        for (int i = 2; i <= n; i++) {
-            for (int j = 0; j < i; j++) {
-                dp[i] += dp[j] * dp[i - j - 1];
-            }
-        }
-        return dp[n];
-    }
-
-    private int dfsForNumTrees(int[][] memo, int start, int end) {
-        if (start > end) {
-            return 1;
-        }
-        if (memo[start][end] != 0) {
-            return memo[start][end];
-        }
-        int res = 0;
-        for (int i = start; i <= end; i++) {
-            int left = dfsForNumTrees(memo, start, i - 1);
-            int right = dfsForNumTrees(memo, i + 1, end);
-            res += left * right;
-        }
-        memo[start][end] = res;
-        return res;
-    }
-
-    //[98].验证二叉搜索树
-    public boolean isValidBST(TreeNode root) {
-        return dfsIsValidBST(root, Long.MIN_VALUE, Long.MAX_VALUE);
-    }
-
-    private boolean dfsIsValidBST(TreeNode root, Long min, Long max) {
-        if (root == null) return true;
-        if (min < root.val && root.val < max) {
-            return dfsIsValidBST(root.left, min, (long) root.val) &&
-                    dfsIsValidBST(root.right, (long) root.val, max);
-        }
-        return false;
-    }
-
-    //[100].相同的树
-    public boolean isSameTree(TreeNode p, TreeNode q) {
-        return dfsIsSameTree(p, q);
-    }
-
-    private boolean dfsIsSameTree(TreeNode p, TreeNode q) {
-        if (p == null && q == null) return true;
-        if (p == null && q != null) return false;
-        if (p != null && q == null) return false;
-        if (p.val != q.val) return false;
-        return dfsIsSameTree(p.left, q.left) && dfsIsSameTree(p.right, q.right);
-    }
-
-    //[101].对称二叉树
-    public boolean isSymmetric(TreeNode root) {
-        if (root == null) return true;
-        return dfsIsSymmetric(root.left, root.right);
-    }
-
-    private boolean dfsIsSymmetric(TreeNode p, TreeNode q) {
-        if (p == null && q == null) return true;
-        //是否为镜像，意味着，主节点相等， p的左节点 = q的右节点， p的右节点 = q的左节点
-        if (p == null && q != null) return false;
-        if (p != null && q == null) return false;
-        if (p.val != q.val) return false;
-        return dfsIsSymmetric(p.left, q.right) && dfsIsSymmetric(p.right, q.left);
-    }
-
-    //[102].二叉树的层序遍历
-    public List<List<Integer>> levelOrder(TreeNode root) {
-        if (root == null) return null;
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-        List<List<Integer>> res = new ArrayList<>();
-        while (!queue.isEmpty()) {
-            int size = queue.size();
-            List<Integer> level = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                TreeNode cur = queue.poll();
-                level.add(cur.val);
-
-                if (cur.left != null) {
-                    queue.offer(cur.left);
-                }
-                if (cur.right != null) {
-                    queue.offer(cur.right);
-                }
-            }
-            res.add(level);
-        }
-        return res;
-    }
-
-    //[103].二叉树的锯齿形层序遍历
-    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
-        if (root == null) return null;
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.offer(root);
-        boolean flag = true;
-        List<List<Integer>> res = new ArrayList<>();
-        while (!queue.isEmpty()) {
-            LinkedList<Integer> list = new LinkedList<>();
-            int size = queue.size();
-            for (int i = 0; i < size; i++) {
-                TreeNode cur = queue.poll();
-                if (flag) {
-                    list.addLast(cur.val);
-                } else {
-                    list.addFirst(cur.val);
-                }
-
-                if (cur.left != null) {
-                    queue.offer(cur.left);
-                }
-                if (cur.right != null) {
-                    queue.offer(cur.right);
-                }
-            }
-            res.add(list);
-            flag = !flag;
-        }
-        return res;
-    }
-
-    //[104].二叉树的最大深度
-    public int maxDepth(TreeNode root) {
-        if (root == null) return 0;
-        return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
-    }
-
-    //[105].从前序与中序遍历序列构造二叉树
-    public TreeNode buildTree(int[] preorder, int[] inorder) {
-        int pLen = preorder.length;
-        int iLen = inorder.length;
-        if (pLen != iLen) {
-            return null;
-        }
-        Map<Integer, Integer> indexMap = new HashMap<>();
-        for (int i = 0; i < iLen; i++) {
-            indexMap.put(inorder[i], i);
-        }
-        return dfsForBuildTree(preorder, inorder, 0, pLen - 1, 0, iLen - 1, indexMap);
-    }
-
-    private TreeNode dfsForBuildTree(int[] preorder, int[] inorder, int ps, int pe, int is, int ie, Map<Integer, Integer> indexMap) {
-        if (ps > pe || is > ie) return null;
-        int rootVal = preorder[ps];
-        TreeNode root = new TreeNode(rootVal);
-        int index = indexMap.get(rootVal);
-        TreeNode left = dfsForBuildTree(preorder, inorder, ps + 1, index - is + ps, is, index - 1, indexMap);
-        TreeNode right = dfsForBuildTree(preorder, inorder, index - is + ps + 1, pe, index + 1, ie, indexMap);
-        root.left = left;
-        root.right = right;
-        return root;
-    }
-
-    //[106].从中序与后序遍历序列构造二叉树
-    public TreeNode buildTree2(int[] inorder, int[] postorder) {
-        int iLen = inorder.length;
-        int pLen = postorder.length;
-        if (iLen != pLen) return null;
-        Map<Integer, Integer> indexMap = new HashMap<>();
-        for (int i = 0; i < iLen; i++) {
-            indexMap.put(inorder[i], i);
-        }
-        return dfsForBuildTree2(inorder, postorder, 0, iLen - 1, 0, pLen - 1, indexMap);
-    }
-
-    private TreeNode dfsForBuildTree2(int[] inorder, int[] postorder, int is, int ie, int ps, int pe, Map<Integer, Integer> indexMap) {
-        if (is > ie || ps > pe) {
-            return null;
-        }
-        int rootVal = postorder[pe];
-        TreeNode root = new TreeNode(rootVal);
-        int index = indexMap.get(rootVal);
-
-        TreeNode left = dfsForBuildTree2(inorder, postorder, is, index - 1, ps, ps + index - is - 1, indexMap);
-        TreeNode right = dfsForBuildTree2(inorder, postorder, index + 1, ie, ps + index - is, pe - 1, indexMap);
-        root.left = left;
-        root.right = right;
-        return root;
-    }
-
-    //[107].二叉树的层序遍历 II
-    public List<List<Integer>> levelOrderBottom(TreeNode root) {
-        List<List<Integer>> res = new LinkedList<>();
-        Queue<TreeNode> queue = new LinkedList<>();
-        if (root != null) {
-            queue.offer(root);
-        }
-        while (!queue.isEmpty()) {
-            int size = queue.size();
-            List<Integer> level = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                TreeNode cur = queue.poll();
-                level.add(cur.val);
-
-                if (cur.left != null) {
-                    queue.offer(cur.left);
-                }
-                if (cur.right != null) {
-                    queue.offer(cur.right);
-                }
-            }
-            res.add(0, level);
-        }
-        return res;
-    }
-
-    //[108].将有序数组转换为二叉搜索树
-    public TreeNode sortedArrayToBST(int[] nums) {
-        return dfsForSortedArrayToBST(nums, 0, nums.length - 1);
-    }
-
-    private TreeNode dfsForSortedArrayToBST(int[] nums, int s, int e) {
-        if (s > e) return null;
-        int mid = s + (e - s) / 2;
-        TreeNode root = new TreeNode(nums[mid]);
-        TreeNode left = dfsForSortedArrayToBST(nums, s, mid - 1);
-        TreeNode right = dfsForSortedArrayToBST(nums, mid + 1, e);
-        root.left = left;
-        root.right = right;
-        return root;
-    }
-
-    //[109].有序链表转换二叉搜索树
-    public TreeNode sortedListToBST(ListNode head) {
-        if (head == null) return null;
-        ListNode slow = head, fast = head, pre = null;
-        while (fast != null && fast.next != null) {
-            pre = slow;
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-        TreeNode root = new TreeNode(slow.val);
-        //只有一个节点了
-        if (pre == null) return root;
-
-        //断开前面一个节点
-        pre.next = null;
-        root.left = sortedListToBST(head);
-        root.right = sortedListToBST(slow.next);
-        return root;
-    }
-
-    //[110].平衡二叉树
-    public boolean isBalanced(TreeNode root) {
-        return dfsForIsBalanced(root) >= 0;
-    }
-
-    //不平衡就是-1， 否则返回高度
-    private int dfsForIsBalanced(TreeNode root) {
-        if (root == null) return 0;
-        int left = dfsForIsBalanced(root.left);
-        int right = dfsForIsBalanced(root.right);
-
-        if (left == -1 || right == -1 || Math.abs(left - right) > 1) {
-            return -1;
-        }
-        return Math.max(left, right) + 1;
-    }
-
-    //[111].二叉树的最小深度
-    public int minDepth(TreeNode root) {
-        if (root == null) return 0;
-        int left = minDepth(root.left);
-        int right = minDepth(root.right);
-        //有一棵子树没有，此时高度应该是2， 而不是下面的1，计算就会不对。
-        if (left == 0 || right == 0) {
-            return left + right + 1;
-        }
-        return Math.min(left, right) + 1;
-    }
-
-    //[112].路径总和
-    public boolean hasPathSum(TreeNode root, int targetSum) {
-        //一定不是叶子节点
-        if (root == null) return false;
-        //判断叶子节点标准
-        if (root.left == null && root.right == null) {
-            return targetSum == root.val;
-        }
-        return hasPathSum(root.left, targetSum - root.val)
-                || hasPathSum(root.right, targetSum - root.val);
-    }
-
-    //[113].路径总和 II
-    public List<List<Integer>> pathSum(TreeNode root, int targetSum) {
-        List<List<Integer>> res = new ArrayList<>();
-        dfsForPathSum(root, targetSum, new LinkedList<>(), res);
-        return res;
-    }
-
-    private void dfsForPathSum(TreeNode root, int targetSum, LinkedList<Integer> path, List<List<Integer>> res) {
-        if (root == null) return;
-
-        //前序遍历
-        path.addLast(root.val);
-        if (root.left == null && root.right == null && targetSum == root.val) {
-            res.add(new ArrayList<>(path));
-            //回溯撤销节点的，加了return，会导致叶子节点会有撤销成功，导致路径上少减少一次撤销，从而使得下一次的选择会多一个节点。
-            //主要取决于前序遍历顺序不能变更。
-        }
-
-        dfsForPathSum(root.left, targetSum - root.val, path, res);
-        dfsForPathSum(root.right, targetSum - root.val, path, res);
-        path.removeLast();
-    }
-
-    //[114].二叉树展开为链表
-    public void flatten(TreeNode root) {
-        if (root == null) return;
-
-        flatten(root.left);
-        flatten(root.right);
-
-        TreeNode left = root.left;
-        TreeNode right = root.right;
-
-        root.right = left;
-        root.left = null;
-
-        TreeNode cur = root;
-        //最后一个叶子节点
-        while (cur.right != null) {
-            cur = cur.right;
-        }
-        cur.right = right;
-    }
-
-    //[144].二叉树的前序遍历
-    public List<Integer> preorderTraversal(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        stack.push(root);
-        while (!stack.isEmpty()) {
-            TreeNode cur = stack.pop();
-            res.add(cur.val);
-
-            if (cur.right != null) {
-                stack.push(cur.right);
-            }
-            if (cur.left != null) {
-                stack.push(cur.left);
-            }
-        }
-        return res;
-    }
-
-    //[145].二叉树的后序遍历
-    public List<Integer> postorderTraversal(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        TreeNode cur = root;
-        while (cur != null || !stack.isEmpty()) {
-            if (cur != null) {
-                res.add(0, cur.val);
-                stack.push(cur);
-                cur = cur.right;
-            } else {
-                cur = stack.pop();
-                cur = cur.left;
-            }
-        }
-        return res;
-    }
-
-    //[116].填充每个节点的下一个右侧节点指针
-    public Node connect(Node root) {
-        if (root == null) return null;
-        dfsForConnect(root.left, root.right);
-        return root;
-    }
-
-    private void dfsForConnect(Node left, Node right) {
-        if (left == null || right == null) {
-            return;
-        }
-        left.next = right;
-        dfsForConnect(left.left, left.right);
-        dfsForConnect(right.left, right.right);
-        dfsForConnect(left.right, right.left);
-    }
-
-    //[118].杨辉三角
-    public List<List<Integer>> generate(int numRows) {
-        List<List<Integer>> res = new ArrayList<>();
-        for (int i = 0; i < numRows; i++) {
-            List<Integer> level = new ArrayList<>();
-            for (int j = 0; j <= i; j++) {
-                if (j == 0 || j == i) {
-                    level.add(1);
-                } else {
-                    level.add(res.get(i - 1).get(j - 1) + res.get(i - 1).get(j));
-                }
-            }
-            res.add(level);
-        }
-        return res;
-    }
-
-    //[119].杨辉三角 II
-    public List<Integer> getRow(int rowIndex) {
-        List<Integer> res = new ArrayList<>();
-        res.add(1);
-        for (int i = 1; i <= rowIndex; i++) {
-            res.add(0);
-            for (int j = i; j > 0; j--) {
-                res.set(j, res.get(j) + res.get(j - 1));
-            }
-        }
-        return res;
-    }
-
-    //[120].三角形最小路径和
-    public int minimumTotal(List<List<Integer>> triangle) {
-        int n = triangle.size();
-        //走到(i, j)点的最小路径和
-        int[][] dp = new int[n][n];
-        dp[0][0] = triangle.get(0).get(0);
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j <= i; j++) {
-                if (j == 0) {
-                    dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
-                } else if (j == i) {
-                    dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
-                } else {
-                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
-                }
-            }
-        }
-        int min = dp[n - 1][0];
-        for (int i = 1; i < n; i++) {
-            min = Math.min(min, dp[n - 1][i]);
-        }
-        return min;
-    }
-
-    //[120].三角形最小路径和（空间压缩）
-    public int minimumTotal2(List<List<Integer>> triangle) {
-        int n = triangle.size();
-        //到底层i的最短路径和
-        int[] dp = new int[n];
-        dp[0] = triangle.get(0).get(0);
-        int pre = 0, cur;
-        //  pre          cur, pre'     cur'
-        // (i-1, j-1)   (i-1, j)     (i-1, j+1)
-        //        ＼        ↓    ＼      ↓
-        //               (i, j)       (i, j+1)
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j <= i; j++) {
-                cur = dp[j];
-                if (j == 0) {
-                    dp[j] = cur + triangle.get(i).get(j);
-                } else if (j == i) {
-                    dp[j] = pre + triangle.get(i).get(j);
-                } else {
-                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
-                }
-                pre = cur;
-            }
-        }
-        int min = dp[0];
-        for (int i = 1; i < n; i++) {
-            min = Math.min(min, dp[i]);
-        }
-        return min;
-    }
-
-    //[121].买卖股票的最佳时机
-    public int maxProfit(int[] prices) {
-        int n = prices.length;
-        //到第i天，0表示不持股票，1表示持有股票
-        int[][] dp = new int[n][2];
-
-        dp[0][0] = 0;
-        dp[0][1] = -prices[0];
-        for (int i = 1; i < n; i++) {
-            //不持股票，（昨天卖掉股票的利润，今天卖掉股票的利润）
-            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
-
-            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
-            dp[i][1] = Math.max(dp[i - 1][1], -prices[i]);
-        }
-
-        return dp[n - 1][0];
-    }
-
-    //[121].买卖股票的最佳时机 优化版
-    public int maxProfit_y(int[] prices) {
-        int n = prices.length;
-        int dp_0 = 0;
-        int dp_1 = -prices[0];
-        for (int i = 1; i < n; i++) {
-            //不持股票，（今天卖掉股票的利润，昨天卖掉股票的利润）
-            dp_0 = Math.max(dp_0, dp_1 + prices[i]);
-            //持有股票，（昨天持有股票的利润， 今天购入股票的利润）
-            dp_1 = Math.max(dp_1, -prices[i]);
-        }
-
-        return dp_0;
-    }
-
-    //[122].买卖股票的最佳时机 II
-    public int maxProfit2(int[] prices) {
-        int n = prices.length;
-        int[][] dp = new int[n][2];
-        dp[0][0] = 0;
-        dp[0][1] = -prices[0];
-        for (int i = 1; i < n; i++) {
-            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
-            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
-        }
-        return dp[n - 1][0];
-    }
-
-    //[122].买卖股票的最佳时机 II 优化版
-    public int maxProfit2_y(int[] prices) {
-        int n = prices.length;
-        int dp_0 = 0;
-        int dp_1 = -prices[0];
-        for (int i = 1; i < n; i++) {
-            int pre_dp_0 = dp_0;
-            int pre_dp_1 = dp_1;
-            dp_0 = Math.max(pre_dp_0, pre_dp_1 + prices[i]);
-            dp_1 = Math.max(pre_dp_1, pre_dp_0 - prices[i]);
-        }
-        return dp_0;
-    }
-
-    //[123].买卖股票的最佳时机 III
-    public int maxProfit3(int[] prices) {
-        // dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
-        // dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
-        int n = prices.length;
-        int[][][] dp = new int[n][3][2];
-        dp[0][1][0] = 0;
-        dp[0][2][0] = 0;
-        dp[0][1][1] = -prices[0];
-        dp[0][2][1] = -prices[0];
-
-        for (int i = 1; i < n; i++) {
-            dp[i][2][0] = Math.max(dp[i - 1][2][0], dp[i - 1][2][1] + prices[i]);
-            dp[i][2][1] = Math.max(dp[i - 1][2][1], dp[i - 1][1][0] - prices[i]);
-
-            dp[i][1][0] = Math.max(dp[i - 1][1][0], dp[i - 1][1][1] + prices[i]);
-            dp[i][1][1] = Math.max(dp[i - 1][1][1], -prices[i]);
-        }
-        return dp[n - 1][2][0];
-    }
-
-    //[123].买卖股票的最佳时机 III 优化版
-    public int maxProfit3_y(int[] prices) {
-        int n = prices.length;
-        int dp_1_0 = 0;
-        int dp_1_1 = -prices[0];
-        int dp_2_0 = 0;
-        int dp_2_1 = -prices[0];
-        for (int i = 1; i < n; i++) {
-            dp_2_0 = Math.max(dp_2_0, dp_2_1 + prices[i]);
-            dp_2_1 = Math.max(dp_2_1, dp_1_0 - prices[i]);
-            dp_1_0 = Math.max(dp_1_0, dp_1_1 + prices[i]);
-            dp_1_1 = Math.max(dp_1_1, -prices[i]);
-        }
-        return dp_2_0;
-    }
-
-    //[128].最长连续序列
-    public int longestConsecutive(int[] nums) {
-        Set<Integer> set = new HashSet<>();
-        for (int num : nums) {
-            set.add(num);
-        }
-        int res = 0;
-        for (int num : set) {
-            if (!set.contains(num - 1)) {
-                int cur = num;
-                int longest = 1;
-                while (set.contains(cur + 1)) {
-                    cur += 1;
-                    longest += 1;
-                }
-                res = Math.max(res, longest);
-            }
-        }
-        return res;
-    }
-
-    //[129].求根节点到叶节点数字之和
-    public int sumNumbers(TreeNode root) {
-        return dfsForSumNumbers(root, 0);
-    }
-
-    private int dfsForSumNumbers(TreeNode root, int preVal) {
-        if (root == null) return 0;
-        int cur = preVal * 10 + root.val;
-        if (root.left == null && root.right == null) {
-            return cur;
-        }
-        return dfsForSumNumbers(root.right, cur) + dfsForSumNumbers(root.left, cur);
-    }
-
-    //[131].分割回文串
-    public List<List<String>> partition(String s) {
-        int n = s.length();
-        boolean[][] dp = new boolean[n][n];
-        for (int i = 0; i < n; i++) {
-            dp[i][i] = true;
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            for (int j = i + 1; j < n; j++) {
-                //三个字符，并且收尾相等，就是回文
-                dp[i][j] = (dp[i + 1][j - 1] || j - i < 3) && s.charAt(i) == s.charAt(j);
-            }
-        }
-
-        List<List<String>> res = new ArrayList<>();
-        dfsForPartition(s, 0, res, new LinkedList<>(), dp);
-        return res;
-    }
-
-    private void dfsForPartition(String s, int start, List<List<String>> res, LinkedList<String> path, boolean[][] dp) {
-        if (start == s.length()) {
-            res.add(new ArrayList<>(path));
-            return;
-        }
-
-        for (int i = start; i < s.length(); i++) {
-            if (!dp[start][i]) {
-                continue;
-            }
-            path.addLast(s.substring(start, i + 1));
-            dfsForPartition(s, i + 1, res, path, dp);
-            path.removeLast();
-        }
-    }
-
-    //[133].克隆图
-    public Node cloneGraph(Node node) {
-        if (node == null) return null;
-        //hash赋值，同时充当访问标记
-        Map<Node, Node> cloneMap = new HashMap<>();
-        dfsForCloneGraph(node, cloneMap);
-        return cloneMap.get(node);
-    }
-
-    private void dfsForCloneGraph(Node node, Map<Node, Node> cloneMap) {
-        //已经创建过了，就不需要再次创建了
-        if (cloneMap.containsKey(node)) {
-            return;
-        }
-        Node clone = new Node(node.val);
-        cloneMap.put(node, clone);
-        if (node.neighbors != null && node.neighbors.size() > 0) {
-            clone.neighbors = new ArrayList<>();
-            for (Node neigh : node.neighbors) {
-                dfsForCloneGraph(neigh, cloneMap);
-                clone.neighbors.add(cloneMap.get(neigh));
-            }
-        }
-    }
-
-    //[134].加油站
-    public int canCompleteCircuit(int[] gas, int[] cost) {
-        int left = 0, minLeft = Integer.MAX_VALUE;
-        int n = gas.length;
-        int start = 0;
-        for (int i = 0; i < n; i++) {
-            left += gas[i] - cost[i];
-            //剩余最小，更新位置
-            if (left < minLeft) {
-                minLeft = left;
-                start = i;
-            }
-        }
-        //下一个位置才是起始位置，并且可能超过数组长度，并且是环
-        return left >= 0 ? (start + 1) % n : -1;
-    }
-
-    //[136].只出现一次的数字
-    public int singleNumber(int[] nums) {
-        int res = nums[0];
-        for (int i = 1; i < nums.length; i++) {
-            res ^= nums[i];
-        }
-        return res;
-    }
-
-    //[137]只出现一次的数字 II
-    public int singleNumber2(int[] nums) {
-        int res = 0;
-        for (int i = 0; i < 32; i++) {
-            int count = 0;
-            int pos = 1 << i;
-            for (int num : nums) {
-                if ((pos & num) == pos) {
-                    count++;
-                }
-            }
-            if (count % 3 != 0) {
-                res |= 1 << i;
-            }
-        }
-        return res;
     }
 
     //[19].删除链表的倒数第 N 个结点
