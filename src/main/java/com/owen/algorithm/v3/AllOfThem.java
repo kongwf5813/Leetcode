@@ -1,5 +1,7 @@
 package com.owen.algorithm.v3;
 
+import com.owen.algorithm.Tree;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AllOfThem {
     public static class ListNode {
@@ -71,6 +74,44 @@ public class AllOfThem {
             left = _left;
             right = _right;
             next = _next;
+        }
+    }
+
+    public static class Solution427 {
+        public static class Node {
+            public boolean val;
+            public boolean isLeaf;
+            public Node topLeft;
+            public Node topRight;
+            public Node bottomLeft;
+            public Node bottomRight;
+
+            public Node() {
+                this.val = false;
+                this.isLeaf = false;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf, Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = topLeft;
+                this.topRight = topRight;
+                this.bottomLeft = bottomLeft;
+                this.bottomRight = bottomRight;
+            }
         }
     }
 
@@ -2044,6 +2085,21 @@ public class AllOfThem {
         return max % n == 0;
     }
 
+    //[334].递增的三元子序列
+    public boolean increasingTriplet(int[] nums) {
+        int firstMin = Integer.MAX_VALUE, secondMin = Integer.MAX_VALUE;
+        for (int num : nums) {
+            if (num <= firstMin) {
+                firstMin = num;
+            } else if (num <= secondMin) {
+                secondMin = num;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //[338].比特位计数
     public int[] countBits(int n) {
         ////0 --> 0
@@ -2108,6 +2164,28 @@ public class AllOfThem {
             res.add(p[1], p);
         }
         return res.toArray(new int[res.size()][]);
+    }
+
+    //[427].建立四叉树
+    public Solution427.Node construct(int[][] grid) {
+        return helper(grid, 0, 0, grid.length);
+    }
+
+    private Solution427.Node helper(int[][] grid, int i, int j, int len) {
+        if (len == 1) {
+            return new Solution427.Node(grid[i][j] == 1, true);
+        }
+
+        int k = len / 2;
+        Solution427.Node tl = helper(grid, i, j, k);
+        Solution427.Node tr = helper(grid, i, j + k, k);
+        Solution427.Node bl = helper(grid, i + k, j, k);
+        Solution427.Node br = helper(grid, i + k, j + k, k);
+        if (tl.val == tr.val && bl.val == br.val && tl.val == bl.val && tl.isLeaf && tr.isLeaf && bl.isLeaf && br.isLeaf) {
+            return new Solution427.Node(tl.val, true);
+        } else {
+            return new Solution427.Node(true, false, tl, tr, bl, br);
+        }
     }
 
     //[429].N 叉树的层序遍历
@@ -2294,6 +2372,22 @@ public class AllOfThem {
             dp_i_1 = dp_i;
         }
         return dp_i;
+    }
+
+    //[538].把二叉搜索树转换为累加树
+    public TreeNode convertBST(TreeNode root) {
+        //右根左这样的递归顺序遍历
+        dfsForConvertBST(root, new AtomicInteger());
+        return root;
+    }
+
+    private void dfsForConvertBST(TreeNode root, AtomicInteger sum) {
+        if (root == null) return;
+        dfsForConvertBST(root.right, sum);
+        sum.addAndGet(root.val);
+
+        root.val = sum.get();
+        dfsForConvertBST(root.left, sum);
     }
 
     //[542].01 矩阵
@@ -6926,6 +7020,21 @@ public class AllOfThem {
             }
         }
         return keysPressed.charAt(idx);
+    }
+
+    //[747].至少是其他数字两倍的最大数
+    public int dominantIndex(int[] nums) {
+        if (nums.length == 1) return 0;
+        int maxIndex = 0, secondIndex = -1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] > nums[maxIndex]) {
+                secondIndex = maxIndex;
+                maxIndex = i;
+            } else if (secondIndex == -1 || nums[i] > nums[secondIndex]) {
+                secondIndex = i;
+            }
+        }
+        return nums[maxIndex] >= 2 * nums[secondIndex] ? maxIndex : -1;
     }
 
     public static void main(String[] args) {
