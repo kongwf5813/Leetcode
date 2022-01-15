@@ -1,7 +1,5 @@
 package com.owen.algorithm.v3;
 
-import com.owen.algorithm.Tree;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +75,16 @@ public class AllOfThem {
         }
     }
 
+    private class TrieNode {
+        TrieNode[] children;
+        boolean isEnd;
+
+        public TrieNode() {
+            children = new TrieNode[26];
+            isEnd = false;
+        }
+    }
+
     public static class Solution427 {
         public static class Node {
             public boolean val;
@@ -112,6 +120,38 @@ public class AllOfThem {
                 this.bottomLeft = bottomLeft;
                 this.bottomRight = bottomRight;
             }
+        }
+    }
+
+    class Difference {
+        int[] diffSum;
+
+        public Difference(int[] nums) {
+            int n = nums.length;
+            diffSum = new int[n];
+            int temp = 0;
+            for (int i = 0; i < n; i++) {
+                diffSum[i] = nums[i] - temp;
+                temp = nums[i];
+            }
+        }
+
+        public void insert(int i, int j, int num) {
+            diffSum[i] += num;
+            //数组会超过
+            if (j + 1 < diffSum.length) {
+                diffSum[j + 1] -= num;
+            }
+        }
+
+        public int[] result() {
+            int[] nums = new int[diffSum.length];
+            int sum = 0;
+            for (int i = 0; i < diffSum.length; i++) {
+                sum += diffSum[i];
+                nums[i] = sum;
+            }
+            return nums;
         }
     }
 
@@ -369,6 +409,54 @@ public class AllOfThem {
         return strs[0];
     }
 
+    //[17].电话号码的字母组合
+    public List<String> letterCombinations(String digits) {
+        List<String> res = new ArrayList<>();
+        if (digits.length() == 0) return res;
+        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        backtraceForLetterCombinations(digits, 0, res, new StringBuilder(), numbers);
+        return res;
+    }
+
+    private void backtraceForLetterCombinations(String digits, int s, List<String> res, StringBuilder sb, String[] numbers) {
+        if (s == digits.length()) {
+            res.add(sb.toString());
+            return;
+        }
+        char ch = digits.charAt(s);
+        for (char choice : numbers[ch - '0'].toCharArray()) {
+            sb.append(choice);
+            backtraceForLetterCombinations(digits, s + 1, res, sb, numbers);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+
+    //[19].删除链表的倒数第 N 个结点
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode slow = head, fast = head;
+        int count = 0;
+        while (count < n) {
+            fast = fast.next;
+            count++;
+        }
+        ListNode pre = null;
+        while (fast != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        //第一个节点
+        if (pre == null) {
+            pre = slow.next;
+            slow.next = null;
+            return pre;
+        } else {
+            pre.next = slow.next;
+            return head;
+        }
+    }
+
     //[20].有效的括号
     public boolean isValid(String s) {
         Stack<Character> stack = new Stack<>();
@@ -388,6 +476,30 @@ public class AllOfThem {
             }
         }
         return stack.isEmpty();
+    }
+
+    //[21].合并两个有序链表
+    public ListNode mergeTwoList(ListNode first, ListNode second) {
+        ListNode dummyHead = new ListNode(-1), p = dummyHead;
+        ListNode p1 = first, p2 = second;
+        while (p1 != null && p2 != null) {
+            if (p1.val < p2.val) {
+                p.next = p1;
+                p1 = p1.next;
+            } else {
+                p.next = p2;
+                p2 = p2.next;
+            }
+            p = p.next;
+        }
+
+        if (p1 != null) {
+            p.next = p1;
+        }
+        if (p2 != null) {
+            p.next = p2;
+        }
+        return dummyHead.next;
     }
 
     //[22].括号生成
@@ -414,6 +526,68 @@ public class AllOfThem {
         sb.append(')');
         backtraceForGenerateParenthesis(left, right - 1, res, sb);
         sb.deleteCharAt(sb.length() - 1);
+    }
+
+    //[23].合并K个升序链表
+    public ListNode mergeKLists(ListNode[] lists) {
+        //小顶堆
+        Queue<ListNode> queue = new PriorityQueue<>((a, b) -> a.val - b.val);
+        for (ListNode node : lists) {
+            if (node != null) {
+                queue.offer(node);
+            }
+        }
+        ListNode dummyHead = new ListNode(-1), h = dummyHead;
+        while (!queue.isEmpty()) {
+            ListNode cur = queue.poll();
+            h.next = cur;
+
+            if (cur.next != null) {
+                queue.offer(cur.next);
+            }
+            h = h.next;
+        }
+        return dummyHead.next;
+    }
+
+    //[24].两两交换链表中的节点
+    public ListNode swapPairs(ListNode head) {
+        if (head == null || head.next == null) return head;
+        ListNode first = head, second = head.next;
+        ListNode next = second.next;
+
+        second.next = first;
+        first.next = swapPairs(next);
+        return second;
+    }
+
+    //[25].K个一组翻转链表
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null) return null;
+        ListNode p = head;
+        for (int i = 0; i < k; i++) {
+            if (p == null) return head;
+            p = p.next;
+        }
+        ListNode newHead = reverse(head, p);
+        ListNode last = reverseKGroup(p.next, k);
+        head.next = last;
+        return newHead;
+    }
+
+    private ListNode reverse(ListNode head, ListNode end) {
+        ListNode dummy = new ListNode(-1);
+        ListNode p = head;
+        while (p != end) {
+            ListNode next = p.next;
+            p.next = dummy.next;
+            dummy.next = p;
+            p = next;
+        }
+
+        end.next = dummy.next;
+        dummy.next = end;
+        return dummy.next;
     }
 
     //[26].删除有序数组中的重复项
@@ -500,6 +674,176 @@ public class AllOfThem {
         }
     }
 
+    //[33].搜索旋转排序数组
+    public int search(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return mid;
+            }
+
+            //说明left到mid是严格递增
+            if (nums[mid] > nums[right]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    //mid肯定不等于target
+                    left = mid + 1;
+                }
+            } else {
+                //说明mid到right是严格递增
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    //mid肯定不等于target
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+
+    //[34].在排序数组中查找元素的第一个和最后一个位置
+    public int[] searchRange(int[] nums, int target) {
+        int leftBound = findIndex(nums, target, true);
+        int rightBound = findIndex(nums, target, false);
+        return new int[]{leftBound, rightBound};
+    }
+
+    private int findIndex(int[] nums, int target, boolean isLeft) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                if (isLeft) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (isLeft) {
+            if (left >= nums.length || nums[left] != target) return -1;
+            return left;
+        } else {
+            if (right < 0 || nums[right] != target) return -1;
+            return right;
+        }
+    }
+
+    private int findLeftIndex(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (target == nums[mid]) {
+                right = mid - 1;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (target < nums[mid]) {
+                right = mid - 1;
+            }
+        }
+
+        if (left >= nums.length || nums[left] != target) return -1;
+        return left;
+    }
+
+    private int findRightIndex(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (target == nums[mid]) {
+                left = mid + 1;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else if (target < nums[mid]) {
+                right = mid - 1;
+            }
+        }
+
+        if (right < 0 || nums[right] != target) return -1;
+        return right;
+    }
+
+    //版本2
+    private int findLeftIndex2(int[] nums, int target) {
+        //左边界，大于等于target
+        //对于不存在的数而言，找的是大于它的第一个数
+        //对于存在的多个数而言，找的是等于它的第一个数
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            //mid偏左
+            int mid = left + (right - left) / 2;
+            if (nums[mid] >= target) {
+                //大于等于，可能是该值
+                right = mid;
+            } else {
+                //值在右边，排除左边界
+                left = mid + 1;
+            }
+        }
+//        return nums[left] == target ? left : -1;
+        return left;
+    }
+
+    //版本2
+    private int findRightIndexV2(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        //右边界，小于等于target
+        //对于不存在的数而言，找的是小于它的最后一个数
+        //对于存在的多个数而言，找的是等于它的最后一个数
+        while (left < right) {
+            //mid偏右
+            int mid = left + (right - left + 1) / 2;
+            if (nums[mid] <= target) {
+                //小于等于，可能是该值
+                left = mid;
+            } else {
+                //值在左边，排除右边界
+                right = mid - 1;
+            }
+        }
+//        return nums[left] == target ? left : -1;
+        return left;
+    }
+
+    //这确实是个右边界算法
+    private int findRightIndexV3(int[] nums, int target) {
+        //对于不存在和存在的数而言，找的是大于它的第一个数
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    //[35].搜索插入位置
+    public int searchInsert(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return left;
+    }
+
     //[36].有效的数独
     public boolean isValidSudoku(char[][] board) {
         //判断是否有重复值，可以用hash，减少时间复杂度
@@ -541,6 +885,44 @@ public class AllOfThem {
         return true;
     }
 
+    //[37].解数独
+    public void solveSudoku(char[][] board) {
+        backtraceSolveSudoku(board, 0, 0);
+    }
+
+    private boolean backtraceSolveSudoku(char[][] board, int x, int y) {
+        if (y == 9) {
+            return backtraceSolveSudoku(board, x + 1, 0);
+        }
+
+        //已经第10行了
+        if (x == 9) {
+            return true;
+        }
+
+        if (board[x][y] != '.') {
+            return backtraceSolveSudoku(board, x, y + 1);
+        }
+        for (char i = '1'; i <= '9'; i++) {
+            if (!isValidSudoku(board, x, y, i)) {
+                continue;
+            }
+            board[x][y] = i;
+            if (backtraceSolveSudoku(board, x, y + 1)) return true;
+            board[x][y] = '.';
+        }
+        return false;
+    }
+
+    private boolean isValidSudoku(char[][] board, int x, int y, char ch) {
+        for (int i = 0; i < 9; i++) {
+            if (board[x][i] == ch) return false;
+            if (board[i][y] == ch) return false;
+            if (board[(x / 3) * 3 + i / 3][(y / 3) * 3 + i % 3] == ch) return false;
+        }
+        return true;
+    }
+
     //[38].外观数列
     public String countAndSay(int n) {
         if (n == 1) return "1";
@@ -558,6 +940,60 @@ public class AllOfThem {
         }
         sb.append(count).append(pre.charAt(pre.length() - 1));
         return sb.toString();
+    }
+    
+    //[39].组合总和
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) return res;
+        backtraceForCombinationSum(candidates, 0, target, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombinationSum(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i < candidates.length; i++) {
+            if (candidates[i] > target) {
+                continue;
+            }
+            select.addLast(candidates[i]);
+            backtraceForCombinationSum(candidates, i, target - candidates[i], res, select);
+            select.removeLast();
+        }
+    }
+
+    //[40]组合总和 II
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) return res;
+        Arrays.sort(candidates);
+        backtraceForCombinationSum2(candidates, 0, target, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombinationSum2(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (target == 0) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i < candidates.length; i++) {
+            //本层如果有重复的话，只选第一个，后面的直接跳过
+            if (i > s && candidates[i] == candidates[i - 1]) {
+                continue;
+            }
+            if (candidates[i] > target) {
+                continue;
+            }
+            select.addLast(candidates[i]);
+            //元素不能重复选择，只能从下一个选择
+            backtraceForCombinationSum2(candidates, i + 1, target - candidates[i], res, select);
+            select.removeLast();
+        }
     }
 
     //[43].字符串相乘
@@ -585,6 +1021,51 @@ public class AllOfThem {
             sb.append(res[i]);
         }
         return sb.length() == 0 ? "0" : sb.toString();
+    }
+
+    //[42].接雨水
+    public int trap(int[] height) {
+        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
+        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
+        int res = 0;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < height.length; i++) {
+            //   |   |
+            //   | | |
+            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
+            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
+                int cur = stack.pop();
+                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                // 左右位置，并有左右位置得出「宽度」和「高度」
+                int l = stack.peek(), r = i;
+                int w = r - l + 1 - 2;
+                int h = Math.min(height[l], height[r]) - height[cur];
+                res += w * h;
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
+    //[45].跳跃游戏 II
+    public int jump(int[] nums) {
+        int n = nums.length;
+        //刚开始为-1，防止多计数
+        int res = -1, nextMaxIndex = 0, end = 0;
+        for (int i = 0; i < n; i++) {
+            nextMaxIndex = Math.max(i + nums[i], nextMaxIndex);
+            //到达最远地方
+            if (i == end) {
+                //更新最远距离
+                end = nextMaxIndex;
+                //计数
+                res++;
+            }
+        }
+        return res;
     }
 
     //[46].全排列
@@ -646,6 +1127,31 @@ public class AllOfThem {
         }
     }
 
+    //[48].旋转图像
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        //对角线翻转
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+
+        //左右互换
+        for (int i = 0; i < n; i++) {
+            int left = 0, right = n - 1;
+            while (left < right) {
+                int temp = matrix[i][left];
+                matrix[i][left] = matrix[i][right];
+                matrix[i][right] = temp;
+                left++;
+                right--;
+            }
+        }
+    }
+
     //[49].字母异位词分组
     public List<List<String>> groupAnagrams(String[] strs) {
         Map<String, List<String>> group = new HashMap<>();
@@ -667,6 +1173,77 @@ public class AllOfThem {
         return res;
     }
 
+    //[50].Pow(x, n)
+    public double myPow(double x, int n) {
+        if (n == 0) return 1;
+        if (n == 1) return x;
+        if (n == -1) return 1 / x;
+
+        double half = myPow(x, n / 2);
+        double left = myPow(x, n % 2);
+        return half * half * left;
+    }
+
+    //[51].N皇后
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> res = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            sb.append('.');
+        }
+        LinkedList select = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            select.add(sb.toString());
+        }
+        backtraceForSolveNQueens(n, 0, res, select);
+        return res;
+    }
+
+    private void backtraceForSolveNQueens(int n, int row, List<List<String>> res, LinkedList<String> select) {
+        if (row == n) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+        char[] arr = select.get(row).toCharArray();
+        for (int col = 0; col < n; col++) {
+            if (!isValid(select, row, col)) {
+                continue;
+            }
+            arr[col] = 'Q';
+            select.set(row, new String(arr));
+
+            backtraceForSolveNQueens(n, row + 1, res, select);
+
+            arr[col] = '.';
+            select.set(row, new String(arr));
+        }
+    }
+
+    private boolean isValid(LinkedList<String> select, int row, int col) {
+        int n = select.get(row).length();
+        //每次行上是一个选择，所以不需要判断行是否合法，因为肯定合法
+        //列不合法
+        for (int i = 0; i < n; i++) {
+            if (select.get(i).charAt(col) == 'Q') {
+                return false;
+            }
+        }
+        //左上不合法
+        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (select.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+
+        //右上不合法
+        for (int i = row, j = col; i >= 0 && j < n; i--, j++) {
+            if (select.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     //[53].最大子数组和
     public int maxSubArray(int[] nums) {
         int n = nums.length;
@@ -683,6 +1260,167 @@ public class AllOfThem {
             res = Math.max(res, dp[i]);
         }
         return res;
+    }
+
+    //[54].螺旋矩阵
+    public List<Integer> spiralOrder(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int top = 0, bottom = m - 1;
+        int left = 0, right = n - 1;
+        List<Integer> res = new ArrayList<>();
+        while (res.size() < m * n) {
+            if (top <= bottom) {
+                for (int i = left; i <= right; i++) {
+                    res.add(matrix[top][i]);
+                }
+                top++;
+            }
+            if (left <= right) {
+                for (int i = top; i <= bottom; i++) {
+                    res.add(matrix[i][right]);
+                }
+                right--;
+            }
+
+            if (top <= bottom) {
+                for (int i = right; i >= left; i--) {
+                    res.add(matrix[bottom][i]);
+                }
+                bottom--;
+            }
+
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    res.add(matrix[i][left]);
+                }
+                left++;
+            }
+        }
+        return res;
+    }
+
+    //[55].跳跃游戏
+    public boolean canJump(int[] nums) {
+        int n = nums.length;
+        int maxIndex = 0;
+        //最后一个需要排除掉，因为可能正好相等
+        for (int i = 0; i < n - 1; i++) {
+            maxIndex = Math.max(maxIndex, nums[i] + i);
+            if (maxIndex <= i) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[56].合并区间
+    public int[][] merge(int[][] intervals) {
+        //1 2  1 5  3 6  7 9
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        LinkedList<int[]> res = new LinkedList<>();
+        res.addLast(intervals[0]);
+        for (int i = 1; i < intervals.length; i++) {
+            int[] last = res.getLast();
+            if (intervals[i][0] <= last[1]) {
+                last[1] = Math.max(last[1], intervals[i][1]);
+            } else {
+                res.addLast(intervals[i]);
+            }
+        }
+        return res.toArray(new int[res.size()][]);
+    }
+
+    //[57].插入区间
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        if (newInterval.length == 0) return intervals;
+        LinkedList<int[]> res = new LinkedList<>();
+        int left = newInterval[0], right = newInterval[1];
+        for (int i = 0; i < intervals.length; i++) {
+            int[] interval = intervals[i];
+            if (interval[0] > right) {
+                res.add(new int[]{left, right});
+                //在插入区间右侧，且不相交，则添加插入区域
+                //同时更新插入区域，保证下一次添加为插入区域
+                left = interval[0];
+                right = interval[1];
+            } else if (left > interval[1]) {
+                //在插入区间左侧，且不相交，则添加左侧区域
+                res.add(interval);
+            } else {
+                //相交，维护区域
+                left = Math.min(interval[0], left);
+                right = Math.max(interval[1], right);
+            }
+        }
+        //还剩最后一个区域需要添加
+        res.add(new int[]{left, right});
+        return res.toArray(new int[][]{});
+    }
+
+    //[59].螺旋矩阵 II
+    public int[][] generateMatrix(int n) {
+        int top = 0, bottom = n - 1;
+        int left = 0, right = n - 1;
+        int num = 0;
+        int[][] res = new int[n][n];
+        //每个都从1开始计数，那么当num == n平方就是结束条件，能够正常退出
+        while (num < n * n) {
+            if (top <= bottom) {
+                for (int i = left; i <= right; i++) {
+                    res[top][i] = ++num;
+                }
+                top++;
+            }
+
+            if (left <= right) {
+                for (int i = top; i <= bottom; i++) {
+                    res[i][right] = ++num;
+                }
+                right--;
+            }
+
+            if (top <= bottom) {
+                for (int i = right; i >= left; i--) {
+                    res[bottom][i] = ++num;
+                }
+                bottom--;
+            }
+
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    res[i][left] = ++num;
+                }
+                left++;
+            }
+        }
+        return res;
+    }
+
+    //[61].旋转链表
+    public ListNode rotateRight(ListNode head, int k) {
+        int count = 0;
+        ListNode p = head, last = null;
+        while (p != null) {
+            last = p;
+            p = p.next;
+            count++;
+        }
+        int realK;
+        if (count == 0 || count == 1 || (realK = k % count) == 0) return head;
+
+        ListNode slow = head, fast = head;
+        for (int i = 0; i < realK; i++) {
+            fast = fast.next;
+        }
+        ListNode pre = null;
+        while (fast != null) {
+            pre = slow;
+            slow = slow.next;
+            fast = fast.next;
+        }
+        pre.next = null;
+        last.next = head;
+        return slow;
     }
 
     //[62].不同路径
@@ -819,6 +1557,27 @@ public class AllOfThem {
         return dp[n];
     }
 
+    //[71].简化路径
+    public String simplifyPath(String path) {
+        String[] strings = path.split("/");
+        Stack<String> stack = new Stack<>();
+        for (String str : strings) {
+            if (!stack.isEmpty() && str.equals("..")) {
+                stack.pop();
+            } else if (!str.equals("") && !str.equals(".") && !str.equals("..")) {
+                //两个//中间就是空串
+                stack.push(str);
+            }
+        }
+        if (stack.isEmpty()) return "/";
+
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.insert(0, "/" + stack.pop());
+        }
+        return sb.toString();
+    }
+
     //[73].矩阵置零
     public void setZeroes(int[][] matrix) {
         int m = matrix.length, n = matrix[0].length;
@@ -870,6 +1629,25 @@ public class AllOfThem {
         }
     }
 
+    //[74].搜索二维矩阵
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int left = 0, right = m * n - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            int x = mid / m;
+            int y = mid % m;
+            if (matrix[x][y] == target) {
+                return true;
+            } else if (matrix[x][y] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return false;
+    }
+
     //[75].颜色分类
     public void sortColors(int[] nums) {
         //left为0存放的下一个位置，right为2存放的下一个位置
@@ -895,6 +1673,194 @@ public class AllOfThem {
         nums[i] = nums[j];
         nums[j] = temp;
     }
+   
+    //[77].组合
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForCombine(n, k, 1, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombine(int n, int k, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() == k) {
+            res.add(new ArrayList<>(select));
+            return;
+        }
+
+        for (int i = s; i <= n; i++) {
+            select.addLast(i);
+            backtraceForCombine(n, k, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+    
+    //[78].子集
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForSubsets(nums, 0, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForSubsets(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        //1 2 3
+        res.add(new ArrayList<>(select));
+        for (int i = s; i < nums.length; i++) {
+            select.addLast(nums[i]);
+            backtraceForSubsets(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+    //[79].单词搜索
+    public boolean exist(char[][] board, String word) {
+        int m = board.length;
+        int n = board[0].length;
+        boolean[][] visit = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (backtraceForExist(board, i, j, word, 0, visit)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean backtraceForExist(char[][] board, int x, int y, String word, int s, boolean[][] visit) {
+        if (board[x][y] != word.charAt(s)) {
+            return false;
+        }
+        if (s == word.length() - 1) {
+            return true;
+        }
+
+        visit[x][y] = true;
+        int[][] direct = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        int m = board.length;
+        int n = board[0].length;
+        for (int[] di : direct) {
+            int newX = x + di[0];
+            int newY = y + di[1];
+            if (newX >= 0 && newX < m
+                    && newY >= 0 && newY < n
+                    && !visit[newX][newY]
+                    && backtraceForExist(board, newX, newY, word, s + 1, visit)) {
+                return true;
+            }
+        }
+
+        visit[x][y] = false;
+        return false;
+    }
+
+    //[80].删除有序数组中的重复项 II
+    public int removeDuplicates2(int[] nums) {
+        int n = nums.length;
+        if (n <= 2) return n;
+//        int slow = 2, fast = 2;
+//        while (fast < nums.length) {
+//            if (nums[slow - 2] != nums[fast]) {
+//                nums[slow++] = nums[fast];
+//            }
+//            fast++;
+//        }
+//        return slow;
+        int k = 2;
+        int idx = 0;
+        for (int num : nums) {
+            if (idx < k || nums[idx - k] != num) nums[idx++] = num;
+        }
+        return idx;
+    }
+
+    //[81].搜索旋转排序数组 II
+    public boolean search3(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                return true;
+            }
+
+            //10111 11101 这两种情况中，没办法判断递增区间走向，所以砍掉左边的相同的
+            if (nums[mid] == nums[left]) {
+                left++;
+            } else if (nums[mid] > nums[right]) {
+                if (nums[left] <= target && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (nums[mid] < target && target <= nums[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return false;
+    }
+
+    //[82].删除排序链表中的重复元素 II
+    public ListNode deleteDuplicates2(ListNode head) {
+        ListNode dummy = new ListNode(-1);
+        //建一个「虚拟头节点」dummy 以减少边界判断，往后的答案链表会接在 dummy 后面
+        //使用 tail 代表当前有效链表的结尾
+        //通过原输入的 head 指针进行链表扫描
+        ListNode tail = dummy;
+        while (head != null) {
+            if (head.next == null || head.val != head.next.val) {
+                tail.next = head;
+                tail = tail.next;
+            }
+            //如果head与下一节点值相同个，跳过相同节点
+            while (head.next != null && head.val == head.next.val) {
+                head = head.next;
+            }
+            //后一个节点就是需要的
+            head = head.next;
+        }
+        //把不合法的删掉
+        tail.next = null;
+        return dummy.next;
+    }
+
+    //[83].删除排序链表中的重复元素
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null) {
+            if (slow.val != fast.val) {
+                slow.next = fast;
+                slow = slow.next;
+            }
+            fast = fast.next;
+        }
+        slow.next = null;
+        return head;
+    }
+
+    //[86].分隔链表
+    public ListNode partition(ListNode head, int x) {
+        ListNode sDummy = new ListNode(-1), fDummy = new ListNode(-1), cur = head, s = sDummy, f = fDummy;
+        while (cur != null) {
+            ListNode next = cur.next;
+            if (cur.val < x) {
+                s.next = cur;
+                s = s.next;
+            } else {
+                f.next = cur;
+                f = f.next;
+            }
+            //每次都断掉防止麻烦
+            cur.next = null;
+            cur = next;
+        }
+        s.next = fDummy.next;
+        return sDummy.next;
+    }
 
     //[88].合并两个有序数组
     public void merge(int[] nums1, int m, int[] nums2, int n) {
@@ -913,6 +1879,76 @@ public class AllOfThem {
                 nums1[index--] = nums2[j--];
             }
         }
+    }
+
+    //[89].格雷编码
+    public List<Integer> grayCode(int n) {
+        boolean[] visit = new boolean[1 << n];
+        LinkedList<Integer> select = new LinkedList<>();
+        backtraceForGrayCode(n, 0, visit, select);
+        return select;
+    }
+
+    private boolean backtraceForGrayCode(int n, int cur, boolean[] visit, LinkedList<Integer> select) {
+        if (select.size() == 1 << n) {
+            return true;
+        }
+
+        select.add(cur);
+        visit[cur] = true;
+        for (int i = 0; i < n; i++) {
+            //异或保证有一位不相同其他都相同
+            int next = cur ^ 1 << i;
+            if (!visit[next] && backtraceForGrayCode(n, next, visit, select)) {
+                return true;
+            }
+        }
+        //肯定有唯一解，不需要撤销
+        return false;
+    }
+
+    //[90].子集 II
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        Arrays.sort(nums);
+        backtraceForSubsetsWithDup(nums, 0, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForSubsetsWithDup(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        res.add(new ArrayList<>(select));
+        for (int i = s; i < nums.length; i++) {
+            //本层中有重复的，则跳过，永远直选第一个
+            if (i > s && nums[i] == nums[i - 1]) {
+                continue;
+            }
+
+            select.addLast(nums[i]);
+            backtraceForSubsetsWithDup(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+
+    //[92].反转链表 II
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode pre = dummy;
+        for (int i = 0; i < left - 1; i++) {
+            pre = pre.next;
+        }
+        ListNode cur = pre.next;
+        ListNode next;
+        for (int i = 0; i < right - left; i++) {
+            next = cur.next;
+            //移动的永远是cur
+            cur.next = next.next;
+            //此处的cur是会变动的，所以接的是pre.next节点
+            next.next = pre.next;
+            pre.next = next;
+        }
+        return dummy.next;
     }
 
     //[93].复原 IP 地址
@@ -1065,6 +2101,34 @@ public class AllOfThem {
                     dfsIsValidBST(root.right, (long) root.val, max);
         }
         return false;
+    }
+
+    //[99].恢复二叉搜索树
+    private TreeNode preNode,firstMax,lastMin;
+    public void recoverTree(TreeNode root) {
+        dfsForRecoverTree(root);
+        if (firstMax != null && lastMin != null) {
+            int temp = firstMax.val;
+            firstMax.val = lastMin.val;
+            lastMin.val = temp;
+        }
+    }
+
+    private void dfsForRecoverTree(TreeNode root) {
+        if (root == null) return;
+        dfsForRecoverTree(root.left);
+
+        //中序遍历性质应用
+        //左右子树交换会有两段，1 2 8 4 5 6 7 3
+        //第一次前节点大于后节点，第一次前节点是交换节点，最后一次的前节点大于后节点，最后一次后节点是交换节点
+        if (preNode != null && preNode.val > root.val) {
+            //第一次赋值
+            if (firstMax == null) firstMax = preNode;
+            //每次赋值，直到最后一次后节点
+            lastMin = root;
+        }
+        preNode = root;
+        dfsForRecoverTree(root.right);
     }
 
     //[100].相同的树
@@ -1355,43 +2419,6 @@ public class AllOfThem {
             cur = cur.right;
         }
         cur.right = right;
-    }
-
-    //[144].二叉树的前序遍历
-    public List<Integer> preorderTraversal(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        stack.push(root);
-        while (!stack.isEmpty()) {
-            TreeNode cur = stack.pop();
-            res.add(cur.val);
-
-            if (cur.right != null) {
-                stack.push(cur.right);
-            }
-            if (cur.left != null) {
-                stack.push(cur.left);
-            }
-        }
-        return res;
-    }
-
-    //[145].二叉树的后序遍历
-    public List<Integer> postorderTraversal(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        Stack<TreeNode> stack = new Stack<>();
-        TreeNode cur = root;
-        while (cur != null || !stack.isEmpty()) {
-            if (cur != null) {
-                res.add(0, cur.val);
-                stack.push(cur);
-                cur = cur.right;
-            } else {
-                cur = stack.pop();
-                cur = cur.left;
-            }
-        }
-        return res;
     }
 
     //[116].填充每个节点的下一个右侧节点指针
@@ -1690,6 +2717,48 @@ public class AllOfThem {
         return dfsForSumNumbers(root.right, cur) + dfsForSumNumbers(root.left, cur);
     }
 
+    //[130].被围绕的区域
+    public void solve(char[][] board) {
+        int m = board.length, n = board[0].length;
+        //从边界出发找到O的替换掉
+        for (int i = 0; i < m; i++) {
+            dfsForSolve(board, i, 0);
+            dfsForSolve(board, i, n - 1);
+        }
+        for (int j = 0; j < m; j++) {
+            dfsForSolve(board, 0, j);
+            dfsForSolve(board, m - 1, j);
+        }
+        //把边界的O修改成X
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 'O') {
+                    board[i][j] = 'X';
+                } else if (board[i][j] == 'Y') {
+                    board[i][j] = 'O';
+                }
+            }
+        }
+
+    }
+
+    private void dfsForSolve(char[][] board, int x, int y) {
+        int m = board.length, n = board[0].length;
+        if (x < 0 || y < 0 || x > m - 1 || y > n - 1) {
+            return;
+        }
+        //不是水
+        if (board[x][y] != 'O') {
+            return;
+        }
+        //淹掉它
+        board[x][y] = 'Y';
+        dfsForSolve(board, x - 1, y);
+        dfsForSolve(board, x + 1, y);
+        dfsForSolve(board, x, y - 1);
+        dfsForSolve(board, x, y + 1);
+    }
+
     //[131].分割回文串
     public List<List<String>> partition(String s) {
         int n = s.length();
@@ -1776,7 +2845,7 @@ public class AllOfThem {
         return res;
     }
 
-    //[137]只出现一次的数字 II
+    //[137].只出现一次的数字 II
     public int singleNumber2(int[] nums) {
         int res = 0;
         for (int i = 0; i < 32; i++) {
@@ -1792,6 +2861,342 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[138].复制带随机指针的链表
+    public Node copyRandomList(Node head) {
+        if (head == null) return null;
+        //旧 + 新的
+        Map<Node, Node> map = new HashMap<>();
+        Node newHead = new Node(head.val);
+        map.put(head, newHead);
+
+        Node cur = head;
+        while (cur != null) {
+            Node copy = map.get(cur);
+
+            if (cur.random != null) {
+                map.putIfAbsent(cur.random, new Node(cur.random.val));
+                copy.random = map.get(cur.random);
+            }
+
+            if (cur.next != null) {
+                map.putIfAbsent(cur.next, new Node(cur.next.val));
+                copy.next = map.get(cur.next);
+            }
+
+            cur = cur.next;
+        }
+        return newHead;
+    }
+
+    //[139].单词拆分
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int n = s.length();
+        //前i个字母是否可以拆分
+        boolean[] dp = new boolean[n + 1];
+        //后续的状态依赖dp[0]这个状态位，所以得修改语义为个数，而不是结尾
+        dp[0] = true;
+        for (int i = 1; i <= n; i++) {
+            for (int j = i - 1; j >= 0; j--) {
+                dp[i] = dp[j] && wordDict.contains(s.substring(j, i));
+                if (dp[i]) break;
+            }
+        }
+        return dp[n];
+    }
+
+    //[141].环形链表
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) return true;
+        }
+        return false;
+    }
+
+    //[142].环形链表 II
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (slow == fast) {
+                break;
+            }
+        }
+        if (fast == null || fast.next == null) return null;
+
+        slow = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return slow;
+    }
+
+    //[143].重排链表
+    public void reorderList(ListNode head) {
+        if (head == null) return;
+        ListNode slow = head, fast = head, mid = null;
+        while (fast != null && fast.next != null) {
+            mid = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+
+        //奇数节点需要重置下
+        if (fast != null) {
+            mid = slow;
+        }
+
+        ListNode q = reverseList(mid.next);
+        mid.next = null;
+        ListNode p = head;
+        while (q != null) {
+            ListNode qNext = q.next;
+            ListNode pNext = p.next;
+            q.next = pNext;
+            p.next = q;
+            q = qNext;
+            p = pNext;
+        }
+    }
+
+    //[144].二叉树的前序遍历
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            TreeNode cur = stack.pop();
+            res.add(cur.val);
+
+            if (cur.right != null) {
+                stack.push(cur.right);
+            }
+            if (cur.left != null) {
+                stack.push(cur.left);
+            }
+        }
+        return res;
+    }
+
+    //[145].二叉树的后序遍历
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+//        TreeNode cur = root;
+//        while (cur != null || !stack.isEmpty()) {
+//            if (cur != null) {
+//                res.add(0, cur.val);
+//                stack.push(cur);
+//                cur = cur.right;
+//            } else {
+//                cur = stack.pop();
+//                cur = cur.left;
+//            }
+//        }
+
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            root = stack.pop();
+            //根右左，利用栈的后进先出能力，到下左右即可
+            res.add(0, root.val);
+            if (root.left != null) {
+                stack.push(root.left);
+            }
+            if (root.right != null) {
+                stack.push(root.right);
+            }
+        }
+        return res;
+    }
+
+    //[147].对链表进行插入排序
+    public ListNode insertionSortList(ListNode head) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode cur = head.next, lastSorted = head;
+        while (cur != null) {
+            //维护最后排序好的指针
+            if (lastSorted.val <= cur.val) {
+                lastSorted = lastSorted.next;
+            } else {
+                //肯定要从头开始找
+                ListNode pre = dummy;
+                while (pre.next.val < cur.val) {
+                    pre = pre.next;
+                }
+                //lastSorted后继节点指向cur后面的节点，因为cur之前都是排序好的
+                lastSorted.next = cur.next;
+
+                //pre的后面一个节点比较大，插入到pre后面
+                cur.next = pre.next;
+                pre.next = cur;
+            }
+            cur = lastSorted.next;
+        }
+        return dummy.next;
+    }
+
+    //[148].排序链表
+    public ListNode sortList(ListNode head) {
+        if (head == null || head.next == null) return head;
+        ListNode fast = head, slow = head, pre = null;
+        while (fast != null && fast.next != null) {
+            pre = slow;
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        pre.next = null;
+
+        //奇数情况，左边少一个， 右边多一个
+        ListNode left = sortList(head);
+        ListNode right = sortList(slow);
+        return merge(left, right);
+    }
+
+    private ListNode merge(ListNode left, ListNode right) {
+        ListNode dummy = new ListNode(-1), cur = dummy;
+        while (left != null && right != null) {
+            if (left.val < right.val) {
+                cur.next = left;
+                left = left.next;
+            } else {
+                cur.next = right;
+                right = right.next;
+            }
+            cur = cur.next;
+        }
+
+        cur.next = left == null ? right : left;
+        return dummy.next;
+    }
+
+    //[150].逆波兰表达式求值
+    public int evalRPN(String[] tokens) {
+        Stack<String> stack = new Stack<>();
+        for (String token : tokens) {
+            if (token.equals("+")
+                    || token.equals("-")
+                    || token.equals("*")
+                    || token.equals("/")) {
+                int second = Integer.parseInt(stack.pop());
+                int first = Integer.parseInt(stack.pop());
+                if (token.equals("+")) {
+                    stack.push("" + (second + first));
+                } else if (token.equals("-")) {
+                    stack.push("" + (first - second));
+                } else if (token.equals("*")) {
+                    stack.push("" + (first * second));
+                } else {
+                    stack.push("" + (first / second));
+                }
+            } else {
+                stack.push(token);
+            }
+        }
+        return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
+    }
+
+    //[151].翻转字符串里的单词
+    public String reverseWords(String s) {
+        StringBuilder sb = new StringBuilder();
+        int len = s.length();
+        int left = 0;
+        while (s.charAt(left) == ' ') {
+            left++;
+        }
+
+        for (int i = len - 1; i >= left; i--) {
+            int j = i;
+            while (i >= left && s.charAt(i) != ' ') {
+                i--;
+            }
+
+            if (i != j) {
+                sb.append(s.substring(i + 1, j + 1));
+                if (i > left) {
+                    sb.append(" ");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    //[152].乘积最大子数组
+    public int maxProduct(int[] nums) {
+        int n = nums.length;
+        //以[i][0]为结尾的最大乘积,以[i][1]为结尾的最小乘积
+        int[][] dp = new int[n][2];
+        dp[0][0] = nums[0];
+        dp[0][1] = nums[0];
+        int max = nums[0];
+        for (int i = 1; i < n; i++) {
+            int num = nums[i];
+            //因为是“连续”子数组，所以i位置只取决于i-1位置
+            if (num > 0) {
+                dp[i][0] = Math.max(dp[i - 1][0] * num, num);
+                dp[i][1] = Math.min(dp[i - 1][1] * num, num);
+            } else {
+                dp[i][0] = Math.max(dp[i - 1][1] * num, num);
+                dp[i][1] = Math.min(dp[i - 1][0] * num, num);
+            }
+            max = Math.max(max, dp[i][0]);
+        }
+        return max;
+    }
+
+    //[153].寻找旋转排序数组中的最小值
+    public int findMin(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return nums[left];
+    }
+
+    //[160].相交链表
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        ListNode p1 = headA, p2 = headB;
+        while (p1 != p2) {
+            if (p1 != null) {
+                p1 = p1.next;
+            } else {
+                p1 = headB;
+            }
+
+            if (p2 != null) {
+                p2 = p2.next;
+            } else {
+                p2 = headA;
+            }
+        }
+        return p1;
+    }
+
+    //[162].寻找峰值
+    public int findPeakElement(int[] nums) {
+        int left = 0, right = nums.length - 1;
+        //因为需要判断后一个值，所以此处是left < right
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] > nums[mid + 1]) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
     }
 
     //[165].比较版本号
@@ -1817,6 +3222,170 @@ public class AllOfThem {
             }
         }
         return 0;
+    }
+
+    //[172].阶乘后的零
+    public int trailingZeroes(int n) {
+        int res = 0;
+        long d = 5;
+        while (n >= d) {
+            res += n / d;
+            d *= 5;
+        }
+        return res;
+    }
+
+    //[187].重复的DNA序列
+    public List<String> findRepeatedDnaSequences(String s) {
+        List<String> res = new ArrayList<>();
+        if (s.length() < 10) return res;
+//        Map<String, Integer> dnaMap = new HashMap<>();
+//        for (int i = 10; i < s.length(); i++) {
+//            String subDna = s.substring(i - 10, i);
+//            dnaMap.put(subDna, dnaMap.getOrDefault(subDna, 0) + 1);
+//            //这是不是也是一个思路改进呢？？
+//            if (dnaMap.get(subDna) == 2) {
+//                res.add(subDna);
+//            }
+//        }
+
+        Map<Character, Integer> map = new HashMap<>();
+        map.put('A', 0);
+        map.put('C', 1);
+        map.put('T', 2);
+        map.put('G', 3);
+        //前10位先构造出来，一共需要20位，理论上够的
+        int x = 0;
+        for (int i = 0; i < 9; i++) {
+            x = (x << 2) | map.get(s.charAt(i));
+        }
+        int n = s.length();
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int i = 0; i <= n - 10; i++) {
+            //前面算了9位，从index 9开始算
+            x = ((x << 2) | map.get(s.charAt(i + 9))) & ((1 << 20) - 1);
+            count.put(x, count.getOrDefault(x, 0) + 1);
+            if (count.get(x) == 2) {
+                res.add(s.substring(i, i + 10));
+            }
+        }
+        return res;
+    }
+
+    //[198].打家劫舍
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 0) return 0;
+        if (n == 1) return nums[0];
+
+        //dp[i] 从第i间房打劫的最大金额
+        int[] dp = new int[n + 1];
+        dp[n - 1] = nums[n - 1];
+        //因为i需要从倒数第二个位置开始，所以需要n+1个空间
+        for (int i = n - 2; i >= 0; i--) {
+            dp[i] = Math.max(dp[i + 2] + nums[i], dp[i + 1]);
+        }
+        return dp[0];
+    }
+
+    //[199].二叉树的右视图
+    public List<Integer> rightSideView(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        if (root == null) return res;
+        dfsForRightSideView(root, 0, res);
+        return res;
+    }
+
+    private void dfsForRightSideView(TreeNode root, int depth, List<Integer> res) {
+        if (root == null) return;
+        if (res.size() == depth) {
+            res.add(root.val);
+        }
+        dfsForRightSideView(root.right, depth + 1, res);
+        dfsForRightSideView(root.left, depth + 1, res);
+    }
+
+    //[200].岛屿数量
+    public int numIslands(char[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    res++;
+                    dfsForIslands(grid, i, j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private void dfsForIslands(char[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || x > m - 1 || y < 0 || y > n - 1) {
+            return;
+        }
+
+        if (grid[x][y] == '0') {
+            return;
+        }
+        //是陆地就淹掉它
+        grid[x][y] = '0';
+        dfsForIslands(grid, x - 1, y);
+        dfsForIslands(grid, x + 1, y);
+        dfsForIslands(grid, x, y - 1);
+        dfsForIslands(grid, x, y + 1);
+    }
+
+    //[201].数字范围按位与
+    public int rangeBitwiseAnd(int left, int right) {
+        int m = left, n = right;
+        int count = 0;
+        while (m < n) {
+            count++;
+            m >>= 1;
+            n >>= 1;
+        }
+        return m << count;
+    }
+
+
+    //[203].移除链表元素
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode slow = dummy, fast = head;
+        while (fast != null) {
+            if (fast.val == val) {
+                slow.next = fast.next;
+            } else {
+                slow = fast;
+            }
+            fast = fast.next;
+        }
+        return dummy.next;
+    }
+
+    //[206].反转链表
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) return head;
+
+        ListNode last = reverseList(head.next);
+        head.next.next = head;
+        head.next = null;
+        return last;
+    }
+
+    //[206].反转链表 迭代
+    private ListNode reverseList2(ListNode head) {
+        ListNode cur = head, pre = null;
+        while (cur != null) {
+            ListNode next = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = next;
+        }
+        return pre;
     }
 
     //[207].课程表
@@ -1850,6 +3419,80 @@ public class AllOfThem {
         return count == numCourses;
     }
 
+    //[208].实现 Trie (前缀树)
+    public static class Trie {
+
+        private Trie[] children;
+        private boolean isEnd;
+
+        public Trie() {
+            children = new Trie[26];
+            isEnd = false;
+        }
+
+        public void insert(String word) {
+            Trie cur = this;
+            for (int i = 0; i < word.length(); i++) {
+                int ch = word.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    cur.children[ch] = new Trie();
+                }
+                cur = cur.children[ch];
+            }
+            cur.isEnd = true;
+        }
+
+        public boolean search(String word) {
+            if (word == null || word.length() == 0) return false;
+            Trie cur = this;
+            for (int i = 0; i < word.length(); i++) {
+                int ch = word.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    return false;
+                }
+                cur = cur.children[ch];
+            }
+            return cur.isEnd;
+        }
+
+        public boolean startsWith(String prefix) {
+            if (prefix == null || prefix.length() == 0) return false;
+            Trie cur = this;
+            for (int i = 0; i < prefix.length(); i++) {
+                int ch = prefix.charAt(i) - 'a';
+                if (cur.children[ch] == null) {
+                    return false;
+                }
+                cur = cur.children[ch];
+            }
+            return true;
+        }
+    }
+
+    //[209].长度最小的子数组
+    public int minSubArrayLen(int target, int[] nums) {
+        //2,3,1,2,4, 3
+        //2 5 6 8 12 15
+        int n = nums.length;
+        int[] preSum = new int[n + 1];
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+            preSum[i + 1] = sum;
+        }
+        int left = 0, right = 0, res = Integer.MAX_VALUE;
+        while (right < nums.length) {
+            right++;
+            //找到合理的，就缩
+            while (preSum[right] - preSum[left] >= target) {
+                res = Math.min(res, right - left);
+                left++;
+            }
+
+        }
+        return res == Integer.MAX_VALUE ? 0 : res;
+    }
+
     //[210].课程表 II
     public int[] findOrder(int numCourses, int[][] prerequisites) {
         int[] indeg = new int[numCourses];
@@ -1877,6 +3520,77 @@ public class AllOfThem {
 
         }
         return index == numCourses ? res : new int[0];
+    }
+
+    //[213].打家劫舍 II
+    public int rob2(int[] nums) {
+        int len = nums.length;
+        if (len == 0) return 0;
+        if (len == 1) return nums[0];
+        return Math.max(rob2(nums, 0, len - 2), rob2(nums, 1, len - 1));
+    }
+
+    private int rob2(int[] nums, int start, int end) {
+        int dp_i = 0, dp_i_2 = 0, dp_i_1 = 0;
+        for (int i = end; i >= start; i--) {
+            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
+            dp_i_2 = dp_i_1;
+            dp_i_1 = dp_i;
+        }
+        return dp_i;
+    }
+
+    //[215].数组中的第K个最大元素
+    public int findKthLargest(int[] nums, int k) {
+        //第K大意味着是从小到大是第n-k位
+        return quickSort(nums, 0, nums.length - 1, nums.length - k);
+    }
+
+    private int quickSort(int[] nums, int left, int right, int targetIndex) {
+        int l = left, r = right;
+        int pivot = nums[l];
+        while (l < r) {
+            while (l < r && pivot <= nums[r]) r--;
+            nums[l] = nums[r];
+
+            while (l < r && nums[l] <= pivot) l++;
+            nums[r] = nums[l];
+        }
+        nums[l] = pivot;
+
+        if (l == targetIndex) {
+            return nums[l];
+        } else if (l < targetIndex) {
+            return quickSort(nums, l + 1, right, targetIndex);
+        } else {
+            return quickSort(nums, left, l - 1, targetIndex);
+        }
+    }
+
+    //[216].组合总和 III
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (n < 0) return res;
+        backtraceForCombinationSum3(k, n, 1, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForCombinationSum3(int k, int n, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() == k) {
+            if (n == 0) {
+                res.add(new ArrayList<>(select));
+            }
+            return;
+        }
+
+        for (int i = s; i <= 9; i++) {
+            if (i > n) {
+                continue;
+            }
+            select.addLast(i);
+            backtraceForCombinationSum3(k, n - i, i + 1, res, select);
+            select.removeLast();
+        }
     }
 
     //[217].存在重复元素
@@ -1909,6 +3623,27 @@ public class AllOfThem {
         return false;
     }
 
+    //[221].最大正方形
+    public int maximalSquare(char[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        //以i,j为终点的能构成正方形的最大边长
+        int[][] dp = new int[m][n];
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    if (i == 0 || j == 0) {
+                        dp[i][j] = 1;
+                    } else {
+                        dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                    }
+                    res = Math.max(dp[i][j], res);
+                }
+            }
+        }
+        return res * res;
+    }
+
     //[222].完全二叉树的节点个数
     public int countNodes(TreeNode root) {
         if (root == null) return 0;
@@ -1930,6 +3665,15 @@ public class AllOfThem {
             left = left.left;
         }
         return level;
+    }
+
+    //[223].矩形面积
+    public int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int total = (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1);
+        if (ax2 < bx1 || ax1 > bx2 || ay1 > by2 || by1 > ay2) {
+            return total;
+        }
+        return total - (Math.min(ay2, by2) - Math.max(ay1, by1)) * (Math.min(ax2, bx2) - Math.max(ax1, bx1));
     }
 
     //[225].用队列实现栈
@@ -1992,6 +3736,23 @@ public class AllOfThem {
         return ans;
     }
 
+    //[230].二叉搜索树中第K小的元素
+    public int kthSmallest(TreeNode root, int k) {
+        Stack<TreeNode> stack = new Stack<>();
+        while (root != null || !stack.isEmpty()) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
+            root = stack.pop();
+            if (--k == 0) {
+                break;
+            }
+            root = root.right;
+        }
+        return root.val;
+    }
+
     //[232].用栈实现队列
     public class MyQueue {
 
@@ -2025,6 +3786,407 @@ public class AllOfThem {
         public boolean empty() {
             return out.isEmpty();
         }
+    }
+
+    //[234].回文链表
+    private ListNode left;
+    public boolean isPalindrome(ListNode head) {
+        left = head;
+        return helperIsPalindrome(head);
+    }
+
+    private boolean helperIsPalindrome(ListNode right) {
+        if (right == null) return true;
+        boolean res = helperIsPalindrome(right.next);
+        res = res && (left.val == right.val);
+        left = left.next;
+        return res;
+    }
+
+    //[235].二叉搜索树的最近公共祖先
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root.val > q.val && root.val > p.val) return lowestCommonAncestor(root.left, p, q);
+        else if (root.val < p.val && root.val < q.val)
+            return lowestCommonAncestor(root.right, p, q);
+        else return root;
+    }
+
+    //[236].二叉树的最近公共祖先
+    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) return root;
+        //只要有一个节点跟父节点相等，就认为找到了一个潜在的祖先节点
+        if (root == p) return root;
+        if (root == q) return root;
+        TreeNode leftCommon = lowestCommonAncestor2(root.left, p, q);
+        TreeNode rightCommon = lowestCommonAncestor2(root.right, p, q);
+        if (leftCommon == null) return rightCommon;
+        if (rightCommon == null) return leftCommon;
+        //左右两个祖先的时候，父节点才是公共祖先
+        return root;
+    }
+
+    //[237].删除链表中的节点
+    public void deleteNode(ListNode node) {
+        //不知道前面的节点，那只能去复制，删掉下一个节点
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+
+    //[238].除自身以外数组的乘积
+    public int[] productExceptSelf(int[] nums) {
+        int n = nums.length;
+        int[] left = new int[n + 1];
+        int[] right = new int[n + 1];
+        left[0] = 1;
+        right[n] = 1;
+        for (int i = 0; i < n; i++) {
+            left[i + 1] = left[i] * nums[i];
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            right[i] = right[i + 1] * nums[i];
+        }
+
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = left[i] * right[i + 1];
+        }
+        return res;
+    }
+
+    //[240].搜索二维矩阵 II
+    public boolean searchMatrix2(int[][] matrix, int target) {
+        int m = matrix.length, n = matrix[0].length;
+        int x = 0, y = n - 1;
+
+        while (x >= 0 && x < m && y >= 0 && y < n) {
+            if (matrix[x][y] == target) {
+                return true;
+            } else if (matrix[x][y] < target) {
+                x++;
+            } else {
+                y--;
+            }
+        }
+        return false;
+    }
+
+    //[257].二叉树的所有路径
+    public List<String> binaryTreePaths(TreeNode root) {
+        List<String> res = new ArrayList<>();
+        //这道题目其实讲解了回溯的本质，每次递归之后，变量都需要回滚一次。回到递归之前的那个状态
+//        dfsForBinaryTreePaths(root, new LinkedList<>(), res);
+        //而用一个不可变量，形参不会发生改变，所以不需要回滚状态
+        dfsForBinaryTreePaths(root, "", res);
+        return res;
+    }
+
+    private void dfsForBinaryTreePaths(TreeNode root, LinkedList<String> select, List<String> res) {
+        if (root == null) {
+            return;
+        }
+        select.addLast(root.val + "");
+        //叶子结点肯定退出
+        if (root.left == null && root.right == null) {
+            res.add(String.join("->", select));
+            return;
+        }
+        //所以removeLast可以多次执行，只要递归多少次，就得删多少次
+        //左子树不为空遍历
+        if (root.left != null) {
+            dfsForBinaryTreePaths(root.left, select, res);
+            //删除的是退出递归的前一个元素
+            select.removeLast();
+        }
+        //右子树不为空遍历
+        if (root.right != null) {
+            dfsForBinaryTreePaths(root.right, select, res);
+            //删除的是退出递归的前一个元素
+            select.removeLast();
+        }
+    }
+
+    private void dfsForBinaryTreePaths(TreeNode root, String path, List<String> res) {
+        if (root == null) return;
+
+        path += root.val;
+        if (root.left == null && root.right == null) {
+            res.add(path);
+            return;
+        }
+
+        dfsForBinaryTreePaths(root.left, path + "->", res);
+        dfsForBinaryTreePaths(root.right, path + "->", res);
+    }
+
+    //[261].以图判树
+    public boolean validTree(int n, int[][] edges) {
+        UnionFind uf = new UnionFind(n);
+        for (int[] edge : edges) {
+            if (uf.connect(edge[0], edge[1])) {
+                return false;
+            }
+            uf.union(edge[0], edge[1]);
+        }
+        return uf.count == 1;
+    }
+
+    //[263].丑数
+    public boolean isUgly(int num) {
+        if (num < 0) return false;
+        int remain = num;
+        while (remain != 1) {
+            if (remain % 2 == 0) {
+                remain /= 2;
+            } else if (remain % 3 == 0) {
+                remain /= 3;
+            } else if (remain % 5 == 0) {
+                remain /= 5;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[264].丑数 II
+    public int nthUglyNumber(int n) {
+        //2 3 5 就是不用动态规划
+        int[] factors = new int[]{2, 3, 5};
+        PriorityQueue<Long> queue = new PriorityQueue<>();
+        Set<Long> set = new HashSet<>();
+        queue.offer(1L);
+        set.add(1L);
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            long min = queue.poll();
+            res = (int) min;
+            for (int factor : factors) {
+                long value = min * factor;
+                if (!set.contains(value)) {
+                    set.add(value);
+                    queue.offer(value);
+                }
+            }
+        }
+        return res;
+    }
+
+    //[274].H 指数
+    public int hIndex1(int[] citations) {
+        //0 1 3 5 6
+        Arrays.sort(citations);
+        int count = 0, n = citations.length;
+        while (count < n && citations[n - count - 1] > count) {
+            count++;
+        }
+        return count;
+    }
+
+    //[275].H 指数 II
+    public int hIndex(int[] citations) {
+        int n = citations.length;
+        int left = 0, right = n - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            //引用次数小于论文篇数(不满足共h篇论文引用次数不少于h)，往右边走
+            if (citations[mid] < n - mid) {
+                left = mid + 1;
+            } else {
+                //引用次数>=论文篇数，还应该往左边走走，找到更大的论文篇数
+                right = mid;
+            }
+        }
+        //h指数
+        return n - left;
+    }
+
+    //[279].完全平方数
+    public int numSquares(int n) {
+        if (n <= 0) return 0;
+        int[] dp = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            dp[i] = Integer.MAX_VALUE;
+            for (int j = 1; j * j <= i; j++) {
+                dp[i] = Math.min(dp[i - j * j] + 1, dp[i]);
+            }
+        }
+        return dp[n];
+    }
+
+    //[283].移动零
+    public void moveZeroes(int[] nums) {
+        int n = nums.length;
+        int left = 0;
+        for (int right = 0; right < n; right++) {
+            if (nums[right] != 0) {
+                nums[left] = nums[right];
+                left++;
+            }
+        }
+        //减少交换次数
+        while (left < n) {
+            nums[left++] = 0;
+        }
+    }
+
+    //[297]二叉树的序列化与反序列化
+    public class Codec {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "#";
+            //先序遍历
+            return root.val + "," + serialize(root.left) + "," + serialize(root.right);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            LinkedList<String> list = new LinkedList<>();
+            String[] items = data.split(",");
+            for (String item : items) {
+                list.addLast(item);
+            }
+            return dfsForDeserialize(list);
+        }
+
+        private TreeNode dfsForDeserialize(LinkedList<String> list) {
+            if (list.isEmpty()) return null;
+            String first = list.removeFirst();
+            if (first.equals("#")) {
+                return null;
+            }
+            TreeNode root = new TreeNode(Integer.parseInt(first));
+            root.left = dfsForDeserialize(list);
+            root.right = dfsForDeserialize(list);
+            return root;
+        }
+    }
+
+    //[300].最长递增子序列
+    public int lengthOfLIS(int[] nums) {
+        int size = nums.length;
+        if (size == 0) return 0;
+        int[] dp = new int[size];
+        int length = 1;
+        for (int i = 0; i < size; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            length = Math.max(length, dp[i]);
+        }
+        return length;
+    }
+    private int lengthOfLIS2(int[] nums) {
+        int size = nums.length;
+        if (size == 0) return 0;
+        //最大递增子序列
+        int[] dp = new int[size];
+        //最大默认有0堆
+        int maxLen = 0;
+        for (int num : nums) {
+            //右侧边界，大于的模版
+            int left = 0, right = maxLen;
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (dp[mid] <= num) {
+                    left = mid + 1;
+                } else {
+                    right = mid;
+                }
+            }
+            //放最顶上去
+            dp[left] = num;
+            //需要新建一个堆
+            if (maxLen == left) {
+                maxLen++;
+            }
+        }
+        return maxLen;
+    }
+
+    //[303].区域和检索 - 数组不可变
+    public static class NumArray {
+
+        //preSum[i]代表nums[0...i-1]的和
+        int[] preSum;
+
+        public NumArray(int[] nums) {
+            preSum = new int[nums.length + 1];
+            int sum = 0;
+            for (int i = 0; i < nums.length; i++) {
+                sum += nums[i];
+                preSum[i + 1] = sum;
+            }
+        }
+
+        public int sumRange(int left, int right) {
+            return preSum[right + 1] - preSum[left];
+        }
+    }
+
+    //[304].二维区域和检索 - 矩阵不可变
+    public static class NumMatrix {
+        int[][] preSum;
+
+        public NumMatrix(int[][] matrix) {
+            int m = matrix.length;
+            int n = matrix[0].length;
+            preSum = new int[m + 1][n + 1];
+
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    preSum[i + 1][j + 1] = preSum[i][j + 1] + preSum[i + 1][j] - preSum[i][j] + matrix[i][j];
+                }
+            }
+        }
+
+        public int sumRegion(int row1, int col1, int row2, int col2) {
+            //减数据的时候，要结合图理解下，应该是外面的一格坐标才行
+            return preSum[row2 + 1][col2 + 1] - preSum[row2 + 1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
+        }
+    }
+
+    //[306].累加数
+    public boolean isAdditiveNumber(String num) {
+        //199100199
+        //选择，前导0不能选择，需要知道之前两个数是什么，只能从前往后选择
+        return dfsForIsAdditiveNumber(num, 0, 0, 0, 0);
+    }
+
+    private boolean dfsForIsAdditiveNumber(String num, int start, long first, long second, int k) {
+        if (start == num.length()) {
+            return k > 2;
+        }
+
+        for (int i = start; i < num.length(); i++) {
+            long cur = selectNumber(num, start, i);
+            if (cur == -1) {
+                continue;
+            }
+            if (k >= 2 && first + second != cur) {
+                continue;
+            }
+
+            if (dfsForIsAdditiveNumber(num, i + 1, second, cur, k + 1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private long selectNumber(String num, int start, int end) {
+        //单个0是一个累加序列合法值
+        if (start < end && num.charAt(start) == '0') {
+            return -1;
+        }
+        long number = 0;
+        for (int i = start; i <= end; i++) {
+            number = number * 10 + (num.charAt(i) - '0');
+        }
+        return number;
     }
 
     //[310].最小高度树
@@ -2070,6 +4232,29 @@ public class AllOfThem {
         return res;
     }
 
+    //[313].超级丑数
+    public int nthSuperUglyNumber(int n, int[] primes) {
+        int k = primes.length;
+        //质数的指针
+        int[] pointers = new int[k];
+        int[] dp = new int[n];
+        dp[0] = 1;
+        for (int i = 1; i < n; i++) {
+            int min = Integer.MAX_VALUE;
+            for (int j = 0; j < k; j++) {
+                min = Math.min(dp[pointers[j]] * primes[j], min);
+            }
+            dp[i] = min;
+
+            for (int j = 0; j < k; j++) {
+                if (dp[pointers[j]] * primes[j] == min) {
+                    pointers[j]++;
+                }
+            }
+        }
+        return dp[n - 1];
+    }
+
     //[326].3的幂
     public boolean isPowerOfThree(int n) {
         if (n <= 0) return false;
@@ -2085,6 +4270,27 @@ public class AllOfThem {
         return max % n == 0;
     }
 
+    //[328].奇偶链表
+    public ListNode oddEvenList(ListNode head) {
+        ListNode oddHead = new ListNode(-1);
+        ListNode evenHead = new ListNode(-1);
+        ListNode cur = head, odd = oddHead, even = evenHead;
+        for (int i = 1; cur != null; i++) {
+            ListNode next = cur.next;
+            if (i % 2 != 0) {
+                odd.next = cur;
+                odd = odd.next;
+            } else {
+                even.next = cur;
+                even = even.next;
+            }
+            cur.next = null;
+            cur = next;
+        }
+        odd.next = evenHead.next;
+        return oddHead.next;
+    }
+
     //[334].递增的三元子序列
     public boolean increasingTriplet(int[] nums) {
         int firstMin = Integer.MAX_VALUE, secondMin = Integer.MAX_VALUE;
@@ -2098,6 +4304,20 @@ public class AllOfThem {
             }
         }
         return false;
+    }
+
+    //[337].打家劫舍 III
+    private Map<TreeNode, Integer> map = new HashMap<>();
+    public int rob(TreeNode root) {
+        if (root == null) return 0;
+        if (map.containsKey(root)) return map.get(root);
+        int rob_it = root.val +
+                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
+                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
+        int rob_not = rob(root.left) + rob(root.right);
+        int res = Math.max(rob_it, rob_not);
+        map.put(root, res);
+        return res;
     }
 
     //[338].比特位计数
@@ -2152,6 +4372,162 @@ public class AllOfThem {
         }
     }
 
+    //[354].俄罗斯套娃信封问题
+    public int maxEnvelopes(int[][] envelopes) {
+        int n = envelopes.length;
+        Arrays.sort(envelopes, (a, b) -> {
+            if (a[0] == b[0]) return b[1] - a[1];
+            else return a[0] - b[0];
+        });
+        int[] height = new int[n];
+        for (int i = 0; i < n; i++) {
+            height[i] = envelopes[i][1];
+        }
+        return lengthOfLIS(height);
+    }
+
+    //[372].超级次方
+    public int superPow(int a, int[] b) {
+        return dfsForSuperPow(a, b, b.length - 1);
+    }
+
+    private int dfsForSuperPow(int a, int[] b, int index) {
+        if (index < 0) {
+            return 1;
+        }
+        int base = 1337;
+        int part1 = myPow(a, b[index]);
+        int part2 = myPow(dfsForSuperPow(a, b, index - 1), 10);
+        return part1 * part2 % base;
+    }
+
+    //快速幂
+    private int myPow(int a, int b) {
+        if (b == 0) return 1;
+        int base = 1337;
+        a %= base;
+
+        if (b % 2 == 0) {
+            int half = myPow(a, b / 2);
+            return half * half % base;
+        } else {
+            return a * myPow(a, b - 1) % base;
+        }
+    }
+
+    //[373].查找和最小的 K 对数字
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (nums1.length == 0 || nums2.length == 0) return res;
+        //和作为排序依据
+        PriorityQueue<int[]> queue = new PriorityQueue<>(Comparator.comparingInt(o -> nums1[o[0]] + nums2[o[1]]));
+        for (int i = 0; i < Math.min(nums1.length, k); i++) {
+            queue.offer(new int[]{i, 0});
+        }
+        while (k > 0 && !queue.isEmpty()) {
+            int[] top = queue.poll();
+            res.add(Arrays.asList(nums1[top[0]], nums2[top[1]]));
+            if (top[1] + 1 < nums2.length) {
+                queue.offer(new int[]{top[0], top[1] + 1});
+            }
+            k--;
+        }
+        return res;
+    }
+
+    //[383].赎金信
+    public boolean canConstruct(String ransomNote, String magazine) {
+        if (ransomNote.length() > magazine.length()) return false;
+        int[] count = new int[26];
+        for (int i = 0; i < magazine.length(); i++) {
+            count[magazine.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < ransomNote.length(); i++) {
+            if (--count[ransomNote.charAt(i) - 'a'] < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[384].打乱数组
+    class Solution384 {
+        int[] original;
+
+        public Solution384(int[] nums) {
+            original = nums;
+        }
+
+        public int[] reset() {
+            return original;
+        }
+
+        public int[] shuffle() {
+            int[] res = original.clone();
+            Random random = new Random();
+            //请认真思考下，等概率是什么。第一次被选中 * 第二次被选中的概率 = 1/n
+            for (int i = 0; i < res.length; i++) {
+                //[i, n) => [0, n - i) + i
+                int j = random.nextInt(res.length - i) + i;
+                int temp = res[i];
+                res[i] = res[j];
+                res[j] = temp;
+            }
+            return res;
+        }
+    }
+
+    //[390].消除游戏
+    public int lastRemaining(int n) {
+        //1 2 3 4  => 2 从左到右删除剩下2
+        //1 2 3 4  => 3 从右到左删除剩下3
+
+        //1 2 3 4 5 => 2 从左到右删剩下2
+        //1 2 3 4 5 => 4 从右到左删除剩下4
+        //f(i) + f'(i) = i + 1
+
+        //1 2 3 4 5 => 从左到右删除
+        //2 4       => 5/2 = 2从右往左删除
+        //f(i) = 2 * f'(i/2)
+
+        //由公式可得：
+        //f(i) = 2* (i/2 + 1 - f(i/2))
+        return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
+    }
+
+    //[392].判断子序列
+    public boolean isSubsequence(String s, String t) {
+        int i = 0, j = 0;
+        while (i < s.length() && j < t.length()) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+                j++;
+            }
+            j++;
+        }
+        return i == s.length();
+    }
+
+    //[398].随机数索引
+    public class Solution398 {
+        int[] nums;
+
+        public Solution398(int[] nums) {
+            this.nums = nums;
+        }
+
+        public int pick(int target) {
+            List<Integer> res = new ArrayList<>();
+            for (int i = 0; i < nums.length; i++) {
+                if (target == nums[i]) {
+                    res.add(i);
+                }
+            }
+            Random random = new Random();
+            return res.get(random.nextInt(res.size()));
+        }
+    }
+
     //[406].根据身高重建队列
     public int[][] reconstructQueue(int[][] people) {
         //高的不影响矮的，高的优先放置，然后再放置矮的，k值就是需要插入的索引位置
@@ -2164,6 +4540,68 @@ public class AllOfThem {
             res.add(p[1], p);
         }
         return res.toArray(new int[res.size()][]);
+    }
+
+    //[419].甲板上的战舰
+    public int countBattleships(char[][] board) {
+        //X就改变成.，往下面和右边扩大范围
+        int m = board.length, n = board[0].length;
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] != 'X') {
+                    continue;
+                }
+                board[i][j] = '-';
+                for (int k = i + 1; k < m && board[k][j] == 'X'; k++) board[k][j] = '-';
+                for (int k = j + 1; k < n && board[i][k] == 'X'; k++) board[i][k] = '-';
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    private int countBattleshipsV2(char[][] board) {
+        //X就改变成.，往下面和右边扩大范围
+        int m = board.length, n = board[0].length;
+        int ans = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                //除了最左边和最上边的边界情况，只计算最左上角的战舰个数
+                if (i > 0 && board[i - 1][j] == 'X') continue;
+                if (j > 0 && board[i][j - 1] == 'X') continue;
+                if (board[i][j] == 'X') {
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+
+    //[423].从英文中重建数字
+    public String originalDigits(String s) {
+        //z 0, w 2, g 8, x 6, u 4, r 3, f 5, s 7, i 9, o 1
+        //优先根据唯一字符干掉前面的字符，剩下的字符再取唯一字符，构建序列不唯一。
+        String[] numbers = new String[]{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+        int[] priority = new int[]{0, 2, 8, 6, 4, 3, 5, 7, 9, 1};
+        int[] cnts = new int[26];
+        for (char ch : s.toCharArray()) {
+            cnts[ch - 'a']++;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int p : priority) {
+            //探索出来需要多少次个相同的数字，times可能为0
+            int times = Integer.MAX_VALUE;
+            for (char ch : numbers[p].toCharArray()) times = Math.min(times, cnts[ch - 'a']);
+            if (times > 0) {
+                for (char ch : numbers[p].toCharArray()) cnts[ch - 'a'] -= times;
+                while (times-- > 0) sb.append(p);
+            }
+        }
+
+        char[] cs = sb.toString().toCharArray();
+        Arrays.sort(cs);
+        return String.valueOf(cs);
     }
 
     //[427].建立四叉树
@@ -2213,6 +4651,58 @@ public class AllOfThem {
         return res;
     }
 
+    //[435].无重叠区间
+    public int eraseOverlapIntervals(int[][] intervals) {
+        int n = intervals.length;
+        int overlap = 0;
+        //1,2  2,3  3,4  1,3
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        int end = intervals[0][1];
+        for (int i = 1; i < n; i++) {
+            int[] cur = intervals[i];
+            if (cur[0] < end) {
+                overlap++;
+                //默认保留最短的，长的覆盖范围更大，所以删除
+                end = Math.min(end, cur[1]);
+            } else {
+                end = cur[1];
+            }
+        }
+        return overlap;
+    }
+
+    //[436].寻找右区间
+    public int[] findRightInterval(int[][] intervals) {
+        int n = intervals.length;
+        int[][] sort = new int[n][2];
+        //第一个索引 + 真实索引
+        for (int i = 0; i < n; i++) {
+            sort[i] = new int[]{intervals[i][0], i};
+        }
+
+        int[] res = new int[n];
+        //保证最小排序
+        Arrays.sort(sort, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        //找到一个大于等于它的最小值就是左边界, labuladong模版
+        for (int i = 0; i < n; i++) {
+            int v = intervals[i][1];
+            int left = 0, right = n - 1;
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                if (sort[mid][0] == v) {
+                    right = mid - 1;
+                } else if (sort[mid][0] > v) {
+                    right = mid - 1;
+                } else if (sort[mid][0] < v) {
+                    left = mid + 1;
+                }
+            }
+            //额外的补充条件
+            res[i] = left > n - 1 || sort[left][0] < v ? -1 : sort[left][1];
+        }
+        return res;
+    }
+
     //[445].两数相加 II
     public ListNode addTwoNumbers2(ListNode l1, ListNode l2) {
         Stack<Integer> s1 = new Stack<>();
@@ -2238,6 +4728,49 @@ public class AllOfThem {
             dummy.next = cur;
         }
         return dummy.next;
+    }
+
+    //[449].序列化和反序列化二叉搜索树
+    public class Codec2 {
+
+        // Encodes a tree to a single string.
+        public String serialize(TreeNode root) {
+            if (root == null) return "";
+            StringBuilder sb = new StringBuilder();
+            dfsForSerialize(root, sb);
+            return sb.deleteCharAt(sb.length() - 1).toString();
+        }
+
+        private void dfsForSerialize(TreeNode root, StringBuilder sb) {
+            if (root == null) return;
+            sb.append(root.val).append(',');
+            dfsForSerialize(root.left, sb);
+            dfsForSerialize(root.right, sb);
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(String data) {
+            if (data == null || data.length() == 0) return null;
+            String[] items = data.split(",");
+            return dfsForDeserialize(items, 0, items.length - 1);
+        }
+
+        private TreeNode dfsForDeserialize(String[] list, int start, int end) {
+            if (start > end) return null;
+            String val = list[start];
+            TreeNode root = new TreeNode(Integer.parseInt(val));
+
+            int index = end + 1;
+            for (int i = start + 1; i <= end; i++) {
+                if (Integer.parseInt(list[i]) > Integer.parseInt(val)) {
+                    index = i;
+                    break;
+                }
+            }
+            root.left = dfsForDeserialize(list, start + 1, index - 1);
+            root.right = dfsForDeserialize(list, index, end);
+            return root;
+        }
     }
 
     //[450].删除二叉搜索树中的节点
@@ -2271,6 +4804,62 @@ public class AllOfThem {
             cur = cur.left;
         }
         return cur;
+    }
+
+    //[456].132 模式
+    public boolean find132pattern(int[] nums) {
+        int n = nums.length;
+        if (n <= 2) return false;
+        //[3,5,0,3,4]
+        Stack<Integer> stack = new Stack<>();
+        //维护是一个单调递减栈
+        int maxRight = Integer.MIN_VALUE;
+        for (int i = n - 1; i >= 0; i--) {
+            if (nums[i] < maxRight) {
+                return true;
+            }
+            while (!stack.isEmpty() && nums[i] > stack.peek()) {
+                maxRight = Math.max(maxRight, stack.pop());
+            }
+            stack.push(nums[i]);
+        }
+        return false;
+    }
+
+    //[463].岛屿的周长
+    public int islandPerimeter(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        //1是岛屿，0是水
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    //题目说了只有一个
+                    return dfsForIslandPerimeter(grid, i, j);
+                }
+            }
+        }
+        return 0;
+    }
+
+    private int dfsForIslandPerimeter(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        //遇到边界就+1
+        if (x < 0 || y < 0 || x >= m || y >= n) {
+            return 1;
+        }
+        //遇到水域+1
+        if (grid[x][y] == 0) {
+            return 1;
+        }
+        //已经遍历过了，计数为0
+        if (grid[x][y] == 2) {
+            return 0;
+        }
+        grid[x][y] = 2;
+        return dfsForIslandPerimeter(grid, x - 1, y)
+                + dfsForIslandPerimeter(grid, x + 1, y)
+                + dfsForIslandPerimeter(grid, x, y - 1)
+                + dfsForIslandPerimeter(grid, x, y + 1);
     }
 
     //[468].验证IP地址
@@ -2315,6 +4904,137 @@ public class AllOfThem {
         return "Neither";
     }
 
+    //[472].连接词
+    public List<String> findAllConcatenatedWordsInADict(String[] words) {
+        TrieNode trie = new TrieNode();
+        List<String> res = new ArrayList<>();
+        //首先是短的在前面，长的在后面，用长的去匹配短，如果能到结尾，说明是成功的，否则是不成功的。
+        Arrays.sort(words, Comparator.comparingInt(String::length));
+        //一个单词的匹配需要从头到尾逐一匹配前面的单词，所以有选择，避免不了用深度优先遍历
+        for (String word : words) {
+            if (word.length() == 0) continue;
+            if (dfsForFindAllConcatenateWordsInADict(trie, word, 0)) {
+                res.add(word);
+            } else {
+                insertToTrie(trie, word);
+            }
+        }
+        return res;
+    }
+
+    private boolean dfsForFindAllConcatenateWordsInADict(TrieNode root, String word, int start) {
+        if (start == word.length()) return true;
+        TrieNode cur = root;
+        //这么多选择
+        for (int i = start; i < word.length(); i++) {
+            int ch = word.charAt(i) - 'a';
+            cur = cur.children[ch];
+            if (cur == null) {
+                return false;
+            }
+            //一定要终结了才可以选择下一个位置
+            if (cur.isEnd) {
+                //传root，从头开始匹配
+                if (dfsForFindAllConcatenateWordsInADict(root, word, i + 1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void insertToTrie(TrieNode root, String word) {
+        TrieNode cur = root;
+        for (int i = 0; i < word.length(); i++) {
+            int ch = word.charAt(i) - 'a';
+            if (cur.children[ch] == null) {
+                cur.children[ch] = new TrieNode();
+            }
+            cur = cur.children[ch];
+        }
+        cur.isEnd = true;
+    }
+
+    //[475].供暖器
+    public static int findRadius(int[] houses, int[] heaters) {
+        Arrays.sort(heaters);
+        int ans = 0, n = heaters.length;
+        for (int house : houses) {
+            int left = findRightIndex(heaters, house, n);
+            int right = left + 1;
+            int leftRadius = left < 0 ? Integer.MAX_VALUE : house - heaters[left];
+            int rightRadius = right >= n ? Integer.MAX_VALUE : heaters[right] - house;
+            ans = Math.max(ans, Math.min(leftRadius, rightRadius));
+        }
+        return ans;
+    }
+
+    private static int findRightIndex(int[] heaters, int house, int n) {
+        //1,2,4
+        //找到位置小于等于house的heater
+        //如果没有相等的，那么就找到小于它的，如果有相等的，找它自己
+        int left = 0, right = n - 1;
+        while (left < right) {
+            int mid = left + (right - left + 1) / 2;
+            if (heaters[mid] <= house) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        if (heaters[left] > house) {
+            return -1;
+        }
+        return left;
+    }
+
+    //[491].递增子序列
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForFindSubsequences(nums, 0, res, new LinkedList<>());
+        return res;
+    }
+
+    private void backtraceForFindSubsequences(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
+        if (select.size() >= 2) {
+            res.add(new ArrayList<>(select));
+        }
+
+        Set<Integer> set = new HashSet<>();
+        for (int i = s; i < nums.length; i++) {
+            if (set.contains(nums[i])) {
+                continue;
+            }
+            if (select.size() > 0 && nums[i] < select.getLast()) {
+                continue;
+            }
+
+            set.add(nums[i]);
+            select.addLast(nums[i]);
+            backtraceForFindSubsequences(nums, i + 1, res, select);
+            select.removeLast();
+        }
+    }
+
+    //[496].下一个更大元素I
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        Map<Integer, Integer> numberMap = new HashMap<>();
+        Stack<Integer> stack = new Stack<>();
+        for (int i = nums2.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums2[i] >= nums2[stack.peek()]) {
+                stack.pop();
+            }
+            numberMap.put(nums2[i], stack.isEmpty() ? -1 : nums2[stack.peek()]);
+            stack.push(i);
+        }
+
+        int[] res = new int[nums1.length];
+        for (int i = 0; i < nums1.length; i++) {
+            res[i] = numberMap.get(nums1[i]);
+        }
+        return res;
+    }
+
     //[498].对角线遍历
     public int[] findDiagonalOrder(int[][] mat) {
         // 00 -> 0,1 -> 1,0 -> 2,0 -> 1,1 -> 0,2 -> 1,2 -> 2,1 -> 3,0
@@ -2354,6 +5074,63 @@ public class AllOfThem {
         return res;
     }
 
+    //[503].下一个更大的元素II
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 2 * n - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums[i % n] >= stack.peek()) {
+                stack.pop();
+            }
+
+            res[i % n] = stack.isEmpty() ? -1 : stack.peek();
+            stack.push(nums[i % n]);
+        }
+        return res;
+    }
+
+    //[506].相对名次
+    public String[] findRelativeRanks(int[] score) {
+        int n = score.length;
+        int[] clone = score.clone();
+        Arrays.sort(clone);
+        Map<Integer, Integer> order = new HashMap<>();
+        for (int i = 1; i <= n; i++) {
+            order.put(clone[i - 1], n - i + 1);
+        }
+
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            int no = order.get(score[i]);
+            if (no == 1) {
+                ans[i] = "Gold Medal";
+            } else if (no == 2) {
+                ans[i] = "Silver Medal";
+            } else if (no == 3) {
+                ans[i] = "Bronze Medal";
+            } else {
+                ans[i] = String.valueOf(no);
+            }
+        }
+        return ans;
+    }
+
+    //[507].完美数
+    public boolean checkPerfectNumber(int num) {
+        if (num == 1) return false;
+        int sum = 1;
+        //36以6为界，左边从2到6，就是右边18到6，计算的时候1排除在外
+        //1 2 3 4 6 9 12 18
+        for (int i = 2; i <= num / i; i++) {
+            if (num % i == 0) {
+                sum += i;
+                sum += num / i;
+            }
+        }
+        return sum == num;
+    }
+
     //[509].斐波那契数
     public int fib(int n) {
 //        int[] dp = new int[n + 1];
@@ -2372,6 +5149,84 @@ public class AllOfThem {
             dp_i_1 = dp_i;
         }
         return dp_i;
+    }
+
+    //[523].连续的子数组和
+    public boolean checkSubarraySum(int[] nums, int k) {
+        if (nums.length < 2) return false;
+
+        //[23,2,4,6,7], k = 6
+        //子数组和，需要的是快速定位区间和，另外需要判断连续子数组，已知一个值和结果，那么就可以用hash来判断，跟两数之和类似
+        //k的倍数， (preSum[j] - preSum[i]) % k == 0; 即前后两个前缀和取余数相等就是判断条件！！！
+        Map<Integer, Integer> preSumMap = new HashMap<>();
+        preSumMap.put(0, -1);
+        int preSum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            preSum += nums[i];
+
+            int reminder = preSum % k;
+            if (preSumMap.containsKey(reminder)) {
+                if (i - preSumMap.get(reminder) > 1) {
+                    return true;
+                }
+            } else {
+                preSumMap.put(reminder, i);
+            }
+        }
+        return false;
+    }
+
+    //[525].连续数组
+    public int findMaxLength(int[] nums) {
+        //首先求解是连续数组，所以需要构造区间统计0和1的个数，可以0的时候前缀和-1， 1的时候前缀和+1
+        //当某个前缀和再次出现的时候，一定代表0和1是相等的。
+        Map<Integer, Integer> preSumMap = new HashMap<>();
+        preSumMap.put(0, -1);
+        int preSum = 0, res = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == 1) {
+                preSum++;
+            } else {
+                preSum--;
+            }
+            if (preSumMap.containsKey(preSum)) {
+                res = Math.max(res, i - preSumMap.get(preSum));
+            } else {
+                preSumMap.put(preSum, i);
+            }
+        }
+        return res;
+    }
+
+    //[528].按权重随机选择
+    public static class Solution528 {
+        int[] preSum;
+
+        public Solution528(int[] w) {
+            int n = w.length;
+            preSum = new int[n];
+            preSum[0] = w[0];
+            for (int i = 1; i < n; i++) {
+                preSum[i] = preSum[i - 1] + w[i];
+            }
+        }
+
+        public int pickIndex() {
+            int n = preSum.length;
+            //选择[1, total]之间的值
+            int w = new Random().nextInt(preSum[n - 1]) + 1;
+            //左边界算法
+            int left = 0, right = n - 1;
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (preSum[mid] >= w) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            return left;
+        }
     }
 
     //[538].把二叉搜索树转换为累加树
@@ -2447,6 +5302,48 @@ public class AllOfThem {
         return maxChildDepth + 1;
     }
 
+    //[560].和为 K 的子数组
+    public int subarraySum(int[] nums, int k) {
+        //[1,1,1]
+        int preSum = 0, res = 0;
+        Map<Integer, Integer> preSumCount = new HashMap<>();
+        //当只有一个元素满足k的时候，需要统计为1
+        preSumCount.put(0, 1);
+        for (int i = 0; i < nums.length; i++) {
+            preSum += nums[i];
+            //preSum比k大
+            if (preSumCount.containsKey(preSum - k)) {
+                res += preSumCount.get(preSum - k);
+            }
+            preSumCount.put(preSum, preSumCount.getOrDefault(preSum, 0) + 1);
+        }
+        return res;
+    }
+
+    //[581].最短无序连续子数组
+    public int findUnsortedSubarray(int[] nums) {
+        int right = 0;
+        int left = nums.length - 1;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = nums.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) {
+                right = Math.max(right, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        //一个栈没办法同时找到左右边界
+        stack.clear();
+        for (int i = 0; i < nums.length; i++) {
+            while (!stack.isEmpty() && nums[i] < nums[stack.peek()]) {
+                left = Math.min(left, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        return right > left ? right - left + 1 : 0;
+    }
+
     //[589].N 叉树的前序遍历
     public List<Integer> preorder(Node root) {
         Stack<Node> stack = new Stack<>();
@@ -2481,6 +5378,122 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[630].课程表 III
+    public int scheduleCourse(int[][] courses) {
+        //将课程按照最后的截止日期从小到大，起始时间从小到大排序
+        Arrays.sort(courses, (a, b) -> a[1] == b[1] ? a[0] - b[0] : a[1] - b[1]);
+        //大根堆，如果当前课程可以正常结束，则更新结束时间; 如果当前课程不可以正常结束，替换掉之前持续时间比它大的已经选入的课程，并更新结束时间
+        PriorityQueue<Integer> queue = new PriorityQueue<>((a, b) -> b - a);
+        int finishAt = 0;
+        for (int[] course : courses) {
+            if (finishAt + course[0] <= course[1]) {
+                finishAt += course[0];
+                queue.offer(course[0]);
+            } else if (!queue.isEmpty() && queue.peek() > course[0]) {
+                finishAt -= queue.poll() - course[0];
+                queue.offer(course[0]);
+            }
+        }
+        return queue.size();
+    }
+
+    //[674].最长连续递增序列
+    public int findLengthOfLCIS(int[] nums) {
+        //1 2 5 4 7
+        int n = nums.length;
+        if (n == 1) return 1;
+        int left = 0, right = 1, res = 0;
+        while (right < n) {
+            if (nums[right - 1] >= nums[right]) {
+                left = right;
+            }
+            res = Math.max(res, right - left + 1);
+            right++;
+        }
+        return res;
+    }
+
+    //[686].重复叠加字符串匹配
+    public static int repeatedStringMatch(String a, String b) {
+        StringBuilder sb = new StringBuilder();
+        //最多遍历 (b/a + 2)a => b + 2a 长度
+        int res = 0;
+        while (sb.length() < b.length() + 2 * a.length()) {
+            sb.append(a);
+            res++;
+            if (sb.toString().contains(b)) {
+                return res;
+            }
+        }
+        return -1;
+    }
+
+    //[689].三个无重叠子数组的最大和
+    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
+        int[] res = new int[3];
+        int sum1 = 0, maxSum1 = 0, maxIdx1 = 0;
+        int sum2 = 0, maxSum12 = 0, maxIdx21 = 0, maxIdx22 = 0;
+        int sum3 = 0, maxSum123 = 0;
+
+        for (int i = 2 * k; i < nums.length; i++) {
+            sum1 += nums[i - 2 * k];
+            sum2 += nums[i - k];
+            sum3 += nums[i];
+            if (i >= 3 * k - 1) {
+                if (sum1 > maxSum1) {
+                    maxSum1 = sum1;
+                    maxIdx1 = i - 3 * k + 1;
+                }
+                if (sum2 + maxSum1 > maxSum12) {
+                    maxSum12 = sum2 + maxSum1;
+                    maxIdx21 = maxIdx1;
+                    maxIdx22 = i - 2 * k + 1;
+                }
+                if (sum3 + maxSum12 > maxSum123) {
+                    maxSum123 = sum3 + maxSum12;
+                    res[0] = maxIdx21;
+                    res[1] = maxIdx22;
+                    res[2] = i - k + 1;
+                }
+
+                sum1 -= nums[i - 3 * k + 1];
+                sum2 -= nums[i - 2 * k + 1];
+                sum3 -= nums[i - k + 1];
+            }
+        }
+        return res;
+    }
+
+    //[695].岛屿的最大面积
+    public int maxAreaOfIsland(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        int res = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    int area = dfsForMaxAreaOfIsland(grid, i, j);
+                    res = Math.max(res, area);
+                }
+            }
+        }
+        return res;
+    }
+
+    private int dfsForMaxAreaOfIsland(int[][] grid, int x, int y) {
+        int m = grid.length, n = grid[0].length;
+        if (x < 0 || y < 0 || x >= m || y >= n) {
+            return 0;
+        }
+        if (grid[x][y] == 0) {
+            return 0;
+        }
+        grid[x][y] = 0;
+        return dfsForMaxAreaOfIsland(grid, x - 1, y)
+                + dfsForMaxAreaOfIsland(grid, x + 1, y)
+                + dfsForMaxAreaOfIsland(grid, x, y - 1)
+                + dfsForMaxAreaOfIsland(grid, x, y + 1) + 1;
     }
 
     //[700].二叉搜索树中的搜索
@@ -2537,6 +5550,35 @@ public class AllOfThem {
         return -1;
     }
 
+    //[709].转换成小写字母
+    public String toLowerCase(String s) {
+        StringBuilder sb = new StringBuilder();
+        char[] chars = s.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'A' && ch <= 'Z') {
+                ch |= 32;
+            }
+            sb.append(ch);
+        }
+        return sb.toString();
+    }
+
+    //[739].每日温度
+    public int[] dailyTemperatures(int[] temperatures) {
+        int[] res = new int[temperatures.length];
+        Stack<Integer> stack = new Stack<>();
+        //单调递增减栈，遇到小的压掉它
+        for (int i = temperatures.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
+                stack.pop();
+            }
+
+            res[i] = stack.isEmpty() ? 0 : stack.peek() - i;
+            stack.push(i);
+        }
+        return res;
+    }
+
     //[743].网络延迟时间
     public int networkDelayTime(int[][] times, int n, int k) {
         //最短路径
@@ -2551,6 +5593,7 @@ public class AllOfThem {
         return res;
     }
 
+    //dijkstra算法
     private int[] dijkstra(int[][] times, int start, int n) {
         List<int[]>[] graph = new LinkedList[n + 1];
         for (int i = 1; i < n + 1; i++) {
@@ -2586,16 +5629,447 @@ public class AllOfThem {
         return distTo;
     }
 
-    //[261].以图判树
-    public boolean validTree(int n, int[][] edges) {
-        UnionFind uf = new UnionFind(n);
-        for (int[] edge : edges) {
-            if (uf.connect(edge[0], edge[1])) {
-                return false;
+    //[747].至少是其他数字两倍的最大数
+    public int dominantIndex(int[] nums) {
+        if (nums.length == 1) return 0;
+        int maxIndex = 0, secondIndex = -1;
+        for (int i = 1; i < nums.length; i++) {
+            if (nums[i] > nums[maxIndex]) {
+                secondIndex = maxIndex;
+                maxIndex = i;
+            } else if (secondIndex == -1 || nums[i] > nums[secondIndex]) {
+                secondIndex = i;
             }
-            uf.union(edge[0], edge[1]);
         }
-        return uf.count == 1;
+        return nums[maxIndex] >= 2 * nums[secondIndex] ? maxIndex : -1;
+    }
+
+    //[748].最短补全词
+    public String shortestCompletingWord(String licensePlate, String[] words) {
+        int[] need = new int[26];
+        for (int i = 0; i < licensePlate.length(); i++) {
+            char ch = licensePlate.charAt(i);
+            if (Character.isLetter(ch)) {
+                need[Character.toLowerCase(ch) - 'a']++;
+            }
+        }
+
+        int index = -1;
+        for (int i = 0; i < words.length; i++) {
+            int[] cnt = new int[26];
+            String word = words[i];
+            for (int j = 0; j < word.length(); j++) {
+                char ch = word.charAt(j);
+                cnt[ch - 'a']++;
+            }
+            boolean valid = true;
+            for (int j = 0; j < 26; j++) {
+                if (cnt[j] < need[j]) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid && (index == -1 || words[i].length() < words[index].length())) {
+                index = i;
+            }
+        }
+        return words[index];
+    }
+
+    //[794].有效的井字游戏
+    public boolean validTicTacToe(String[] board) {
+        int xCount = 0, oCount = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i].charAt(j) == 'X') {
+                    xCount++;
+                } else if (board[i].charAt(j) == 'O') {
+                    oCount++;
+                }
+            }
+        }
+        if (xCount < oCount || xCount - oCount > 1) {
+            return false;
+        }
+        if (win(board, 'X') && xCount - oCount != 1) {
+            return false;
+        }
+        if (win(board, 'O') && xCount != oCount) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean win(String[] board, char ch) {
+        for (int i = 0; i < 3; i++) {
+            if (board[i].charAt(0) == board[i].charAt(1) && board[i].charAt(1) == board[i].charAt(2) && board[i].charAt(0) == ch)
+                return true;
+            if (board[0].charAt(i) == board[1].charAt(i) && board[1].charAt(i) == board[2].charAt(i) && board[0].charAt(i) == ch)
+                return true;
+        }
+
+        if (board[0].charAt(0) == board[1].charAt(1) && board[0].charAt(0) == board[2].charAt(2) && board[2].charAt(2) == ch)
+            return true;
+        if (board[0].charAt(2) == board[1].charAt(1) && board[0].charAt(2) == board[2].charAt(0) && board[2].charAt(0) == ch)
+            return true;
+        return false;
+    }
+
+    //[802].找到最终的安全状态
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        //存反图之后，那么入度为0的节点就是安全节点，而且不用顺序遍历
+        //以出度为0的节点优先加入队列中，队列中的节点的邻居节点扣减出度，如果为0，加入队列。当队列为空，剩下的节点都是不合法节点。
+        int n = graph.length;
+        int[] outDegree = new int[n];
+        List<Integer>[] inDegreeMap = new List[n];
+        for (int i = 0; i < n; i++) {
+            inDegreeMap[i] = new LinkedList<>();
+        }
+        for (int i = 0; i < n; i++) {
+            int[] neighbors = graph[i];
+            for (int neighbor : neighbors) {
+                inDegreeMap[neighbor].add(i);
+                outDegree[i]++;
+            }
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (outDegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        List<Integer> ans = new ArrayList<>();
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            ans.add(cur);
+            //访问邻居节点，减出度
+            for (int neighbor : inDegreeMap[cur]) {
+                if (--outDegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+        Collections.sort(ans);
+        return ans;
+    }
+
+    //[807].保持城市天际线
+    public int maxIncreaseKeepingSkyline(int[][] grid) {
+        // 0 1 1
+        // 2 1 1
+        int n = grid.length;
+        int[] left = new int[n];
+        int[] upper = new int[n];
+        for (int i = 0; i < n; i++) {
+            upper[i] = Integer.MIN_VALUE;
+            left[i] = Integer.MIN_VALUE;
+            for (int j = 0; j < n; j++) {
+                left[i] = Math.max(left[i], grid[i][j]);
+                upper[i] = Math.max(upper[i], grid[j][i]);
+            }
+        }
+
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                res += Math.min(upper[j], left[i]) - grid[i][j];
+            }
+        }
+        return res;
+    }
+
+    //[825].适龄的朋友
+    public int numFriendRequests(int[] ages) {
+        Arrays.sort(ages);
+        int n = ages.length, ans = 0;
+        for (int k = 0, i = 0, j = 0; k < n; k++) {
+            //20,30,100,110,120
+            //计算要么是全进来的，要么是全出去的，即计算进来，又计算出去，肯定有重复计算的数量
+            //左边能到k的关系，i k
+            while (i < k && !firstSelected(ages[i], ages[k])) i++;
+            if (j < k) j = k;
+            //右边能到k的关系，k j
+            while (j < n && firstSelected(ages[j], ages[k])) j++;
+            if (i < j) {
+                //相同的情况多扣1
+                ans += j - i - 1;
+            }
+        }
+        return ans;
+    }
+
+    private boolean firstSelected(int x, int y) {
+        if (y <= x * 0.5 + 7) return false;
+        if (y > x) return false;
+        if (y > 100 && x < 100) return false;
+        return true;
+    }
+
+    //[846].一手顺子
+    public static boolean isNStraightHand(int[] hand, int groupSize) {
+        int n = hand.length;
+        if (n < groupSize) return false;
+        Arrays.sort(hand);
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int poker : hand) {
+            count.put(poker, count.getOrDefault(poker, 0) + 1);
+        }
+
+        //从小到大，选择最小的牌
+        for (int start : hand) {
+            //后面的牌被用掉了，可以继续找次小的牌
+            if (count.get(start) == 0) continue;
+            //连续选择后面牌，如果数量为0，则断牌了。
+            for (int i = 0; i < groupSize; i++) {
+                int target = start + i;
+                if (count.getOrDefault(target, 0) == 0) {
+                    return false;
+                }
+                count.put(target, count.get(target) - 1);
+            }
+        }
+        return true;
+    }
+
+    //[851].喧闹和富有
+    public int[] loudAndRich(int[][] richer, int[] quiet) {
+        int n = quiet.length;
+        //有钱->没钱 的邻接表， 从入度为0开始入队(从最有钱的开始遍历)，只有当前节点的比邻接点更安静，则更新邻接点的位置
+        int[] ans = new int[n];
+        List<Integer>[] graph = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            graph[i] = new ArrayList<>();
+        }
+        int[] indegree = new int[n];
+        for (int[] rich : richer) {
+            graph[rich[0]].add(rich[1]);
+            indegree[rich[1]]++;
+        }
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            //初始值为本身
+            ans[i] = i;
+            //入度为0，都是些最有钱的人
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            for (int next : graph[cur]) {
+                //当前人找到的那个最安静的人 < 邻接人找到的那个最安静的人的时候，则更新。
+                if (quiet[ans[cur]] < quiet[ans[next]]) {
+                    ans[next] = ans[cur];
+                }
+                //加不进去没关系，但是度得维护下
+                if (--indegree[next] == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+        return ans;
+    }
+
+    //[875].爱吃香蕉的珂珂
+    public int minEatingSpeed(int[] piles, int h) {
+        int left = 1, right = Arrays.stream(piles).max().getAsInt();
+        //首先肯定是左侧边界
+        //hours(x) 是单调递减函数，不能死背模板
+        // \
+        //  \___   h
+        //      \
+        //        x (横轴)
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (hours(piles, mid) == h) {
+                right = mid;
+            } else if (hours(piles, mid) > h) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return left;
+    }
+
+    private int hours(int[] piles, int speed) {
+        int res = 0;
+        for (int pile : piles) {
+            if (pile % speed == 0) {
+                res += pile / speed;
+            } else {
+                res += pile / speed + 1;
+            }
+        }
+        return res;
+    }
+
+    //[876].链表的中间结点
+    public ListNode middleNode(ListNode head) {
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+    //[911].在线选举
+    public static class TopVotedCandidate {
+        int[] successor;
+        int[] times;
+
+        public TopVotedCandidate(int[] persons, int[] times) {
+            int n = persons.length;
+            successor = new int[n];
+            Map<Integer, Integer> voteCounts = new HashMap<>();
+            int topP = -1;
+            for (int i = 0; i < n; i++) {
+                int p = persons[i];
+
+                voteCounts.put(p, voteCounts.getOrDefault(p, 0) + 1);
+                //相等，也需要更新最新的领先者
+                if (!voteCounts.containsKey(topP) || voteCounts.get(p) >= voteCounts.get(topP)) {
+                    topP = p;
+                }
+                successor[i] = topP;
+            }
+            this.times = times;
+        }
+
+        public int q(int t) {
+            //找到<=t 的时间
+            int left = 0, right = times.length - 1;
+            while (left < right) {
+                int mid = left + (right - left + 1) / 2;
+                if (times[mid] <= t) {
+                    left = mid;
+                } else {
+                    right = mid - 1;
+                }
+            }
+            return successor[left];
+        }
+    }
+
+    //[913].猫和老鼠
+    public int catMouseGame(int[][] graph) {
+        int n = graph.length;
+        int[][][] memo = new int[n][n][2 * n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                Arrays.fill(memo[i][j], -1);
+            }
+        }
+
+        //dfs(i, j, k), i为鼠移动，j为猫移动，k为第几轮。 鼠刚开始在1，猫刚开始在2，k为0
+        return dfs(memo, 1, 2, 0, graph);
+    }
+
+    private int dfs(int[][][] memo, int mouse, int cat, int turns, int[][] graph) {
+        if (turns >= 2 * graph.length) return 0;
+        if (memo[mouse][cat][turns] != -1) return memo[mouse][cat][turns];
+        if (mouse == 0) return memo[mouse][cat][turns] = 1;
+        if (mouse == cat) return memo[mouse][cat][turns] = 2;
+        //鼠先动
+        if (turns % 2 == 0) {
+            //最坏的情况猫赢
+            int ans = 2;
+            for (int nexPos : graph[mouse]) {
+                int ansNext = dfs(memo, nexPos, cat, turns + 1, graph);
+                //优先取老鼠赢，再不济选平局，最后选择猫赢
+                if (ansNext == 1) {
+                    return memo[mouse][cat][turns] = 1;
+                } else if (ansNext == 0) {
+                    //平局，不返回，看最后结果
+                    ans = 0;
+                }
+            }
+            return memo[mouse][cat][turns] = ans;
+        } else {
+            //最坏的情况鼠赢
+            int ans = 1;
+            for (int nexPos : graph[cat]) {
+                //猫要优先选择的位置不能为洞，不然老鼠就赢了
+                if (nexPos != 0) {
+                    int ansNext = dfs(memo, mouse, nexPos, turns + 1, graph);
+                    //猫赢了，直接返回
+                    if (ansNext == 2) {
+                        return memo[mouse][cat][turns] = 2;
+                    } else if (ansNext == 0) {
+                        //平局，得看看其他
+                        ans = 0;
+                    }
+                }
+            }
+            return memo[mouse][cat][turns] = ans;
+        }
+    }
+
+    //[915].分割数组
+    public int partitionDisjoint(int[] nums) {
+        int n = nums.length;
+        //左边的最大值 <= 右边的最小值
+        int[] leftMax = new int[n];
+        int[] rightMin = new int[n];
+        int leftM = nums[0], rightM = nums[n - 1];
+        for (int i = 0; i < n; i++) {
+            if (nums[i] >= leftM) {
+                leftM = nums[i];
+            }
+            leftMax[i] = leftM;
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            if (nums[i] <= rightM) {
+                rightM = nums[i];
+            }
+            rightMin[i] = rightM;
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            //左边的比右边的大的时候，可以继续扩，知道找到边界， 左边最大<=右边最小为止
+            if (leftMax[i] <= rightMin[i + 1]) {
+                return i + 1;
+            }
+        }
+        return -1;
+    }
+
+    //[986].区间列表的交集
+    public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
+        List<int[]> res = new ArrayList<>();
+        int i = 0, j = 0;
+        while (i < firstList.length && j < secondList.length) {
+            int[] first = firstList[i];
+            int[] second = secondList[j];
+            //相交
+            if (first[1] >= second[0] && second[1] >= first[0]) {
+                res.add(new int[]{Math.max(first[0], second[0]), Math.min(first[1], second[1])});
+            }
+
+            if (first[1] > second[1]) {
+                j++;
+            } else {
+                i++;
+            }
+        }
+        return res.toArray(new int[][]{});
+    }
+
+    //[997].找到小镇的法官
+    public int findJudge(int n, int[][] trust) {
+        int[] outDegree = new int[n + 1];
+        int[] inDegree = new int[n + 1];
+        for (int[] item : trust) {
+            outDegree[item[0]]++;
+            inDegree[item[1]]++;
+        }
+        for (int i = 1; i <= n; i++) {
+            if (inDegree[i] == n - 1 && outDegree[i] == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     //[1135].最低成本联通所有城市
@@ -2682,146 +6156,6 @@ public class AllOfThem {
             }
             count--;
         }
-    }
-
-    //[130].被围绕的区域
-    public void solve(char[][] board) {
-        int m = board.length, n = board[0].length;
-        //从边界出发找到O的替换掉
-        for (int i = 0; i < m; i++) {
-            dfsForSolve(board, i, 0);
-            dfsForSolve(board, i, n - 1);
-        }
-        for (int j = 0; j < m; j++) {
-            dfsForSolve(board, 0, j);
-            dfsForSolve(board, m - 1, j);
-        }
-        //把边界的O修改成X
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (board[i][j] == 'O') {
-                    board[i][j] = 'X';
-                } else if (board[i][j] == 'Y') {
-                    board[i][j] = 'O';
-                }
-            }
-        }
-
-    }
-
-    private void dfsForSolve(char[][] board, int x, int y) {
-        int m = board.length, n = board[0].length;
-        if (x < 0 || y < 0 || x > m - 1 || y > n - 1) {
-            return;
-        }
-        //不是水
-        if (board[x][y] != 'O') {
-            return;
-        }
-        //淹掉它
-        board[x][y] = 'Y';
-        dfsForSolve(board, x - 1, y);
-        dfsForSolve(board, x + 1, y);
-        dfsForSolve(board, x, y - 1);
-        dfsForSolve(board, x, y + 1);
-    }
-
-    //[200].岛屿数量
-    public int numIslands(char[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        int res = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == '1') {
-                    res++;
-                    dfsForIslands(grid, i, j);
-                }
-            }
-        }
-        return res;
-    }
-
-    private void dfsForIslands(char[][] grid, int x, int y) {
-        int m = grid.length, n = grid[0].length;
-        if (x < 0 || x > m - 1 || y < 0 || y > n - 1) {
-            return;
-        }
-
-        if (grid[x][y] == '0') {
-            return;
-        }
-        //是陆地就淹掉它
-        grid[x][y] = '0';
-        dfsForIslands(grid, x - 1, y);
-        dfsForIslands(grid, x + 1, y);
-        dfsForIslands(grid, x, y - 1);
-        dfsForIslands(grid, x, y + 1);
-    }
-
-    //[463].岛屿的周长
-    public int islandPerimeter(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        //1是岛屿，0是水
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
-                    //题目说了只有一个
-                    return dfsForIslandPerimeter(grid, i, j);
-                }
-            }
-        }
-        return 0;
-    }
-
-    private int dfsForIslandPerimeter(int[][] grid, int x, int y) {
-        int m = grid.length, n = grid[0].length;
-        //遇到边界就+1
-        if (x < 0 || y < 0 || x >= m || y >= n) {
-            return 1;
-        }
-        //遇到水域+1
-        if (grid[x][y] == 0) {
-            return 1;
-        }
-        //已经遍历过了，计数为0
-        if (grid[x][y] == 2) {
-            return 0;
-        }
-        grid[x][y] = 2;
-        return dfsForIslandPerimeter(grid, x - 1, y)
-                + dfsForIslandPerimeter(grid, x + 1, y)
-                + dfsForIslandPerimeter(grid, x, y - 1)
-                + dfsForIslandPerimeter(grid, x, y + 1);
-    }
-
-    //[695].岛屿的最大面积
-    public int maxAreaOfIsland(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        int res = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
-                    int area = dfsForMaxAreaOfIsland(grid, i, j);
-                    res = Math.max(res, area);
-                }
-            }
-        }
-        return res;
-    }
-
-    private int dfsForMaxAreaOfIsland(int[][] grid, int x, int y) {
-        int m = grid.length, n = grid[0].length;
-        if (x < 0 || y < 0 || x >= m || y >= n) {
-            return 0;
-        }
-        if (grid[x][y] == 0) {
-            return 0;
-        }
-        grid[x][y] = 0;
-        return dfsForMaxAreaOfIsland(grid, x - 1, y)
-                + dfsForMaxAreaOfIsland(grid, x + 1, y)
-                + dfsForMaxAreaOfIsland(grid, x, y - 1)
-                + dfsForMaxAreaOfIsland(grid, x, y + 1) + 1;
     }
 
     //[1254].统计封闭岛屿的数目
@@ -2970,145 +6304,6 @@ public class AllOfThem {
         }
     }
 
-    //[19].删除链表的倒数第 N 个结点
-    public ListNode removeNthFromEnd(ListNode head, int n) {
-        ListNode slow = head, fast = head;
-        int count = 0;
-        while (count < n) {
-            fast = fast.next;
-            count++;
-        }
-        ListNode pre = null;
-        while (fast != null) {
-            pre = slow;
-            slow = slow.next;
-            fast = fast.next;
-        }
-
-        //第一个节点
-        if (pre == null) {
-            pre = slow.next;
-            slow.next = null;
-            return pre;
-        } else {
-            pre.next = slow.next;
-            return head;
-        }
-    }
-
-    //[21].合并两个有序链表
-    public ListNode mergeTwoList(ListNode first, ListNode second) {
-        ListNode dummyHead = new ListNode(-1), p = dummyHead;
-        ListNode p1 = first, p2 = second;
-        while (p1 != null && p2 != null) {
-            if (p1.val < p2.val) {
-                p.next = p1;
-                p1 = p1.next;
-            } else {
-                p.next = p2;
-                p2 = p2.next;
-            }
-            p = p.next;
-        }
-
-        if (p1 != null) {
-            p.next = p1;
-        }
-        if (p2 != null) {
-            p.next = p2;
-        }
-        return dummyHead.next;
-    }
-
-    //[23].合并K个升序链表
-    public ListNode mergeKLists(ListNode[] lists) {
-        //小顶堆
-        Queue<ListNode> queue = new PriorityQueue<>((a, b) -> a.val - b.val);
-        for (ListNode node : lists) {
-            if (node != null) {
-                queue.offer(node);
-            }
-        }
-        ListNode dummyHead = new ListNode(-1), h = dummyHead;
-        while (!queue.isEmpty()) {
-            ListNode cur = queue.poll();
-            h.next = cur;
-
-            if (cur.next != null) {
-                queue.offer(cur.next);
-            }
-            h = h.next;
-        }
-        return dummyHead.next;
-    }
-
-    //[24].两两交换链表中的节点
-    public ListNode swapPairs(ListNode head) {
-        if (head == null || head.next == null) return head;
-        ListNode first = head, second = head.next;
-        ListNode next = second.next;
-
-        second.next = first;
-        first.next = swapPairs(next);
-        return second;
-    }
-
-    //[25].K个一组翻转链表
-    public ListNode reverseKGroup(ListNode head, int k) {
-        if (head == null) return null;
-        ListNode p = head;
-        for (int i = 0; i < k; i++) {
-            if (p == null) return head;
-            p = p.next;
-        }
-        ListNode newHead = reverse(head, p);
-        ListNode last = reverseKGroup(p.next, k);
-        head.next = last;
-        return newHead;
-    }
-
-    private ListNode reverse(ListNode head, ListNode end) {
-        ListNode dummy = new ListNode(-1);
-        ListNode p = head;
-        while (p != end) {
-            ListNode next = p.next;
-            p.next = dummy.next;
-            dummy.next = p;
-            p = next;
-        }
-
-        end.next = dummy.next;
-        dummy.next = end;
-        return dummy.next;
-    }
-
-    //[61].旋转链表
-    public ListNode rotateRight(ListNode head, int k) {
-        int count = 0;
-        ListNode p = head, last = null;
-        while (p != null) {
-            last = p;
-            p = p.next;
-            count++;
-        }
-        int realK;
-        if (count == 0 || count == 1 || (realK = k % count) == 0) return head;
-
-        ListNode slow = head, fast = head;
-        for (int i = 0; i < realK; i++) {
-            fast = fast.next;
-        }
-        ListNode pre = null;
-        while (fast != null) {
-            pre = slow;
-            slow = slow.next;
-            fast = fast.next;
-        }
-        pre.next = null;
-        last.next = head;
-        return slow;
-    }
-
     //[2074].反转偶数长度组的节点
     public ListNode reverseEvenLengthGroups(ListNode head) {
         int count = 0;
@@ -3145,1367 +6340,6 @@ public class AllOfThem {
         return dummy.next;
     }
 
-    //[80].删除有序数组中的重复项 II
-    public int removeDuplicates2(int[] nums) {
-        int n = nums.length;
-        if (n <= 2) return n;
-//        int slow = 2, fast = 2;
-//        while (fast < nums.length) {
-//            if (nums[slow - 2] != nums[fast]) {
-//                nums[slow++] = nums[fast];
-//            }
-//            fast++;
-//        }
-//        return slow;
-        int k = 2;
-        int idx = 0;
-        for (int num : nums) {
-            if (idx < k || nums[idx - k] != num) nums[idx++] = num;
-        }
-        return idx;
-    }
-
-    //[82].删除排序链表中的重复元素 II
-    public ListNode deleteDuplicates2(ListNode head) {
-        ListNode dummy = new ListNode(-1);
-        //建一个「虚拟头节点」dummy 以减少边界判断，往后的答案链表会接在 dummy 后面
-        //使用 tail 代表当前有效链表的结尾
-        //通过原输入的 head 指针进行链表扫描
-        ListNode tail = dummy;
-        while (head != null) {
-            if (head.next == null || head.val != head.next.val) {
-                tail.next = head;
-                tail = tail.next;
-            }
-            //如果head与下一节点值相同个，跳过相同节点
-            while (head.next != null && head.val == head.next.val) {
-                head = head.next;
-            }
-            //后一个节点就是需要的
-            head = head.next;
-        }
-        //把不合法的删掉
-        tail.next = null;
-        return dummy.next;
-    }
-
-    //[83].删除排序链表中的重复元素
-    public ListNode deleteDuplicates(ListNode head) {
-        ListNode slow = head, fast = head;
-
-        while (fast != null) {
-            if (slow.val != fast.val) {
-                slow.next = fast;
-                slow = slow.next;
-            }
-            fast = fast.next;
-        }
-        slow.next = null;
-        return head;
-    }
-
-    //[86].分隔链表
-    public ListNode partition(ListNode head, int x) {
-        ListNode sDummy = new ListNode(-1), fDummy = new ListNode(-1), cur = head, s = sDummy, f = fDummy;
-        while (cur != null) {
-            ListNode next = cur.next;
-            if (cur.val < x) {
-                s.next = cur;
-                s = s.next;
-            } else {
-                f.next = cur;
-                f = f.next;
-            }
-            //每次都断掉防止麻烦
-            cur.next = null;
-            cur = next;
-        }
-        s.next = fDummy.next;
-        return sDummy.next;
-    }
-
-    //[92].反转链表 II
-    public ListNode reverseBetween(ListNode head, int left, int right) {
-        ListNode dummy = new ListNode(-1);
-        dummy.next = head;
-        ListNode pre = dummy;
-        for (int i = 0; i < left - 1; i++) {
-            pre = pre.next;
-        }
-        ListNode cur = pre.next;
-        ListNode next;
-        for (int i = 0; i < right - left; i++) {
-            next = cur.next;
-            //移动的永远是cur
-            cur.next = next.next;
-            //此处的cur是会变动的，所以接的是pre.next节点
-            next.next = pre.next;
-            pre.next = next;
-        }
-        return dummy.next;
-    }
-
-    //[138].复制带随机指针的链表
-    public Node copyRandomList(Node head) {
-        if (head == null) return null;
-        //旧 + 新的
-        Map<Node, Node> map = new HashMap<>();
-        Node newHead = new Node(head.val);
-        map.put(head, newHead);
-
-        Node cur = head;
-        while (cur != null) {
-            Node copy = map.get(cur);
-
-            if (cur.random != null) {
-                map.putIfAbsent(cur.random, new Node(cur.random.val));
-                copy.random = map.get(cur.random);
-            }
-
-            if (cur.next != null) {
-                map.putIfAbsent(cur.next, new Node(cur.next.val));
-                copy.next = map.get(cur.next);
-            }
-
-            cur = cur.next;
-        }
-        return newHead;
-    }
-
-    //[141].环形链表
-    public boolean hasCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) return true;
-        }
-        return false;
-    }
-
-    //[142].环形链表 II
-    public ListNode detectCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-            if (slow == fast) {
-                break;
-            }
-        }
-        if (fast == null || fast.next == null) return null;
-
-        slow = head;
-        while (slow != fast) {
-            slow = slow.next;
-            fast = fast.next;
-        }
-        return slow;
-    }
-
-    //[143].重排链表
-    public void reorderList(ListNode head) {
-        if (head == null) return;
-        ListNode slow = head, fast = head, mid = null;
-        while (fast != null && fast.next != null) {
-            mid = slow;
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-
-        //奇数节点需要重置下
-        if (fast != null) {
-            mid = slow;
-        }
-
-        ListNode q = reverseList(mid.next);
-        mid.next = null;
-        ListNode p = head;
-        while (q != null) {
-            ListNode qNext = q.next;
-            ListNode pNext = p.next;
-            q.next = pNext;
-            p.next = q;
-            q = qNext;
-            p = pNext;
-        }
-    }
-
-    //[147].对链表进行插入排序
-    public ListNode insertionSortList(ListNode head) {
-        ListNode dummy = new ListNode(-1);
-        dummy.next = head;
-        ListNode cur = head.next, lastSorted = head;
-        while (cur != null) {
-            //维护最后排序好的指针
-            if (lastSorted.val <= cur.val) {
-                lastSorted = lastSorted.next;
-            } else {
-                //肯定要从头开始找
-                ListNode pre = dummy;
-                while (pre.next.val < cur.val) {
-                    pre = pre.next;
-                }
-                //lastSorted后继节点指向cur后面的节点，因为cur之前都是排序好的
-                lastSorted.next = cur.next;
-
-                //pre的后面一个节点比较大，插入到pre后面
-                cur.next = pre.next;
-                pre.next = cur;
-            }
-            cur = lastSorted.next;
-        }
-        return dummy.next;
-    }
-
-    //[148].排序链表
-    public ListNode sortList(ListNode head) {
-        if (head == null || head.next == null) return head;
-        ListNode fast = head, slow = head, pre = null;
-        while (fast != null && fast.next != null) {
-            pre = slow;
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-        pre.next = null;
-
-        //奇数情况，左边少一个， 右边多一个
-        ListNode left = sortList(head);
-        ListNode right = sortList(slow);
-        return merge(left, right);
-    }
-
-    private ListNode merge(ListNode left, ListNode right) {
-        ListNode dummy = new ListNode(-1), cur = dummy;
-        while (left != null && right != null) {
-            if (left.val < right.val) {
-                cur.next = left;
-                left = left.next;
-            } else {
-                cur.next = right;
-                right = right.next;
-            }
-            cur = cur.next;
-        }
-
-        cur.next = left == null ? right : left;
-        return dummy.next;
-    }
-
-    //[160].相交链表
-    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
-        ListNode p1 = headA, p2 = headB;
-        while (p1 != p2) {
-            if (p1 != null) {
-                p1 = p1.next;
-            } else {
-                p1 = headB;
-            }
-
-            if (p2 != null) {
-                p2 = p2.next;
-            } else {
-                p2 = headA;
-            }
-        }
-        return p1;
-    }
-
-    //[203].移除链表元素
-    public ListNode removeElements(ListNode head, int val) {
-        ListNode dummy = new ListNode(-1);
-        dummy.next = head;
-        ListNode slow = dummy, fast = head;
-        while (fast != null) {
-            if (fast.val == val) {
-                slow.next = fast.next;
-            } else {
-                slow = fast;
-            }
-            fast = fast.next;
-        }
-        return dummy.next;
-    }
-
-    //[206].反转链表
-    public ListNode reverseList(ListNode head) {
-        if (head == null || head.next == null) return head;
-
-        ListNode last = reverseList(head.next);
-        head.next.next = head;
-        head.next = null;
-        return last;
-    }
-
-    //[206].反转链表 迭代
-    public ListNode reverseList2(ListNode head) {
-        ListNode cur = head, pre = null;
-        while (cur != null) {
-            ListNode next = cur.next;
-            cur.next = pre;
-            pre = cur;
-            cur = next;
-        }
-        return pre;
-    }
-
-    //[223].矩形面积
-    public int computeArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
-        int total = (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1);
-        if (ax2 < bx1 || ax1 > bx2 || ay1 > by2 || by1 > ay2) {
-            return total;
-        }
-        return total - (Math.min(ay2, by2) - Math.max(ay1, by1)) * (Math.min(ax2, bx2) - Math.max(ax1, bx1));
-    }
-
-    //[234].回文链表
-    private ListNode left;
-
-    public boolean isPalindrome(ListNode head) {
-        left = head;
-        return helperIsPalindrome(head);
-    }
-
-    private boolean helperIsPalindrome(ListNode right) {
-        if (right == null) return true;
-        boolean res = helperIsPalindrome(right.next);
-        res = res && (left.val == right.val);
-        left = left.next;
-        return res;
-    }
-
-    //[235].二叉搜索树的最近公共祖先
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-        if (root.val > q.val && root.val > p.val) return lowestCommonAncestor(root.left, p, q);
-        else if (root.val < p.val && root.val < q.val)
-            return lowestCommonAncestor(root.right, p, q);
-        else return root;
-    }
-
-    //[236].二叉树的最近公共祖先
-    public TreeNode lowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q) {
-        if (root == null) return root;
-        //只要有一个节点跟父节点相等，就认为找到了一个潜在的祖先节点
-        if (root == p) return root;
-        if (root == q) return root;
-        TreeNode leftCommon = lowestCommonAncestor2(root.left, p, q);
-        TreeNode rightCommon = lowestCommonAncestor2(root.right, p, q);
-        if (leftCommon == null) return rightCommon;
-        if (rightCommon == null) return leftCommon;
-        //左右两个祖先的时候，父节点才是公共祖先
-        return root;
-    }
-
-    //[237].删除链表中的节点
-    public void deleteNode(ListNode node) {
-        //不知道前面的节点，那只能去复制，删掉下一个节点
-        node.val = node.next.val;
-        node.next = node.next.next;
-    }
-
-    //[328].奇偶链表
-    public ListNode oddEvenList(ListNode head) {
-        ListNode oddHead = new ListNode(-1);
-        ListNode evenHead = new ListNode(-1);
-        ListNode cur = head, odd = oddHead, even = evenHead;
-        for (int i = 1; cur != null; i++) {
-            ListNode next = cur.next;
-            if (i % 2 != 0) {
-                odd.next = cur;
-                odd = odd.next;
-            } else {
-                even.next = cur;
-                even = even.next;
-            }
-            cur.next = null;
-            cur = next;
-        }
-        odd.next = evenHead.next;
-        return oddHead.next;
-    }
-
-    //[876].链表的中间结点
-    public ListNode middleNode(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-        return slow;
-    }
-
-    //[198].打家劫舍
-    public int rob(int[] nums) {
-        int n = nums.length;
-        if (n == 0) return 0;
-        if (n == 1) return nums[0];
-
-        //dp[i] 从第i间房打劫的最大金额
-        int[] dp = new int[n + 1];
-        dp[n - 1] = nums[n - 1];
-        //因为i需要从倒数第二个位置开始，所以需要n+1个空间
-        for (int i = n - 2; i >= 0; i--) {
-            dp[i] = Math.max(dp[i + 2] + nums[i], dp[i + 1]);
-        }
-        return dp[0];
-    }
-
-    //[213].打家劫舍 II
-    public int rob2(int[] nums) {
-        int len = nums.length;
-        if (len == 0) return 0;
-        if (len == 1) return nums[0];
-        return Math.max(rob2(nums, 0, len - 2), rob2(nums, 1, len - 1));
-    }
-
-    private int rob2(int[] nums, int start, int end) {
-        int dp_i = 0, dp_i_2 = 0, dp_i_1 = 0;
-        for (int i = end; i >= start; i--) {
-            dp_i = Math.max(dp_i_2 + nums[i], dp_i_1);
-            dp_i_2 = dp_i_1;
-            dp_i_1 = dp_i;
-        }
-        return dp_i;
-    }
-
-    //[337].打家劫舍 III
-    private Map<TreeNode, Integer> map = new HashMap<>();
-
-    public int rob(TreeNode root) {
-        if (root == null) return 0;
-        if (map.containsKey(root)) return map.get(root);
-        int rob_it = root.val +
-                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
-                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
-        int rob_not = rob(root.left) + rob(root.right);
-        int res = Math.max(rob_it, rob_not);
-        map.put(root, res);
-        return res;
-    }
-
-    //[146].LRU 缓存机制
-    class LRUCache {
-
-        public LRUCache(int capacity) {
-
-        }
-
-        public int get(int key) {
-            return 0;
-        }
-
-        public void put(int key, int value) {
-
-        }
-    }
-
-    //[150].逆波兰表达式求值
-    public int evalRPN(String[] tokens) {
-        Stack<String> stack = new Stack<>();
-        for (String token : tokens) {
-            if (token.equals("+")
-                    || token.equals("-")
-                    || token.equals("*")
-                    || token.equals("/")) {
-                int second = Integer.parseInt(stack.pop());
-                int first = Integer.parseInt(stack.pop());
-                if (token.equals("+")) {
-                    stack.push("" + (second + first));
-                } else if (token.equals("-")) {
-                    stack.push("" + (first - second));
-                } else if (token.equals("*")) {
-                    stack.push("" + (first * second));
-                } else {
-                    stack.push("" + (first / second));
-                }
-            } else {
-                stack.push(token);
-            }
-        }
-        return stack.isEmpty() ? 0 : Integer.parseInt(stack.pop());
-    }
-
-    //[151].翻转字符串里的单词
-    public String reverseWords(String s) {
-        StringBuilder sb = new StringBuilder();
-        int len = s.length();
-        int left = 0;
-        while (s.charAt(left) == ' ') {
-            left++;
-        }
-
-        for (int i = len - 1; i >= left; i--) {
-            int j = i;
-            while (i >= left && s.charAt(i) != ' ') {
-                i--;
-            }
-
-            if (i != j) {
-                sb.append(s.substring(i + 1, j + 1));
-                if (i > left) {
-                    sb.append(" ");
-                }
-            }
-        }
-        return sb.toString();
-    }
-
-    //[33].搜索旋转排序数组
-    public int search(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] == target) {
-                return mid;
-            }
-
-            //说明left到mid是严格递增
-            if (nums[mid] > nums[right]) {
-                if (nums[left] <= target && target < nums[mid]) {
-                    right = mid - 1;
-                } else {
-                    //mid肯定不等于target
-                    left = mid + 1;
-                }
-            } else {
-                //说明mid到right是严格递增
-                if (nums[mid] < target && target <= nums[right]) {
-                    left = mid + 1;
-                } else {
-                    //mid肯定不等于target
-                    right = mid - 1;
-                }
-            }
-        }
-        return -1;
-    }
-
-    //[34].在排序数组中查找元素的第一个和最后一个位置
-    public int[] searchRange(int[] nums, int target) {
-        int leftBound = findIndex(nums, target, true);
-        int rightBound = findIndex(nums, target, false);
-        return new int[]{leftBound, rightBound};
-    }
-
-    private int findIndex(int[] nums, int target, boolean isLeft) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] == target) {
-                if (isLeft) {
-                    right = mid - 1;
-                } else {
-                    left = mid + 1;
-                }
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        if (isLeft) {
-            if (left >= nums.length || nums[left] != target) return -1;
-            return left;
-        } else {
-            if (right < 0 || nums[right] != target) return -1;
-            return right;
-        }
-    }
-
-    private int findLeftIndex(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (target == nums[mid]) {
-                right = mid - 1;
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else if (target < nums[mid]) {
-                right = mid - 1;
-            }
-        }
-
-        if (left >= nums.length || nums[left] != target) return -1;
-        return left;
-    }
-
-    private int findRightIndex(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (target == nums[mid]) {
-                left = mid + 1;
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else if (target < nums[mid]) {
-                right = mid - 1;
-            }
-        }
-
-        if (right < 0 || nums[right] != target) return -1;
-        return right;
-    }
-
-    //版本2
-    private int findLeftIndex2(int[] nums, int target) {
-        //左边界，大于等于target
-        //对于不存在的数而言，找的是大于它的第一个数
-        //对于存在的多个数而言，找的是等于它的第一个数
-        int left = 0, right = nums.length - 1;
-        while (left < right) {
-            //mid偏左
-            int mid = left + (right - left) / 2;
-            if (nums[mid] >= target) {
-                //大于等于，可能是该值
-                right = mid;
-            } else {
-                //值在右边，排除左边界
-                left = mid + 1;
-            }
-        }
-//        return nums[left] == target ? left : -1;
-        return left;
-    }
-
-    //版本2
-    private int findRightIndexV2(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        //右边界，小于等于target
-        //对于不存在的数而言，找的是小于它的最后一个数
-        //对于存在的多个数而言，找的是等于它的最后一个数
-        while (left < right) {
-            //mid偏右
-            int mid = left + (right - left + 1) / 2;
-            if (nums[mid] <= target) {
-                //小于等于，可能是该值
-                left = mid;
-            } else {
-                //值在左边，排除右边界
-                right = mid - 1;
-            }
-        }
-//        return nums[left] == target ? left : -1;
-        return left;
-    }
-
-    //这确实是个右边界算法
-    private int findRightIndexV3(int[] nums, int target) {
-        //对于不存在和存在的数而言，找的是大于它的第一个数
-        int left = 0, right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] <= target) {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
-        }
-        return left;
-    }
-
-    //[35].搜索插入位置
-    public int searchInsert(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-
-            if (nums[mid] == target) {
-                return mid;
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return left;
-    }
-
-    //[74].搜索二维矩阵
-    public boolean searchMatrix(int[][] matrix, int target) {
-        int m = matrix.length, n = matrix[0].length;
-        int left = 0, right = m * n - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            int x = mid / m;
-            int y = mid % m;
-            if (matrix[x][y] == target) {
-                return true;
-            } else if (matrix[x][y] < target) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return false;
-    }
-
-    //[81].搜索旋转排序数组 II
-    public boolean search3(int[] nums, int target) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-
-            if (nums[mid] == target) {
-                return true;
-            }
-
-            //10111 11101 这两种情况中，没办法判断递增区间走向，所以砍掉左边的相同的
-            if (nums[mid] == nums[left]) {
-                left++;
-            } else if (nums[mid] > nums[right]) {
-                if (nums[left] <= target && target < nums[mid]) {
-                    right = mid - 1;
-                } else {
-                    left = mid + 1;
-                }
-            } else {
-                if (nums[mid] < target && target <= nums[right]) {
-                    left = mid + 1;
-                } else {
-                    right = mid - 1;
-                }
-            }
-        }
-        return false;
-    }
-
-    //[240].搜索二维矩阵 II
-    public boolean searchMatrix2(int[][] matrix, int target) {
-        int m = matrix.length, n = matrix[0].length;
-        int x = 0, y = n - 1;
-
-        while (x >= 0 && x < m && y >= 0 && y < n) {
-            if (matrix[x][y] == target) {
-                return true;
-            } else if (matrix[x][y] < target) {
-                x++;
-            } else {
-                y--;
-            }
-        }
-        return false;
-    }
-
-    //[153].寻找旋转排序数组中的最小值
-    public int findMin(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[right]) {
-                left = mid + 1;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return nums[left];
-    }
-
-    //[162].寻找峰值
-    public int findPeakElement(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        //因为需要判断后一个值，所以此处是left < right
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[mid + 1]) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
-    //[37].解数独
-    public void solveSudoku(char[][] board) {
-        backtraceSolveSudoku(board, 0, 0);
-    }
-
-    private boolean backtraceSolveSudoku(char[][] board, int x, int y) {
-        if (y == 9) {
-            return backtraceSolveSudoku(board, x + 1, 0);
-        }
-
-        //已经第10行了
-        if (x == 9) {
-            return true;
-        }
-
-        if (board[x][y] != '.') {
-            return backtraceSolveSudoku(board, x, y + 1);
-        }
-        for (char i = '1'; i <= '9'; i++) {
-            if (!isValidSudoku(board, x, y, i)) {
-                continue;
-            }
-            board[x][y] = i;
-            if (backtraceSolveSudoku(board, x, y + 1)) return true;
-            board[x][y] = '.';
-        }
-        return false;
-    }
-
-    private boolean isValidSudoku(char[][] board, int x, int y, char ch) {
-        for (int i = 0; i < 9; i++) {
-            if (board[x][i] == ch) return false;
-            if (board[i][y] == ch) return false;
-            if (board[(x / 3) * 3 + i / 3][(y / 3) * 3 + i % 3] == ch) return false;
-        }
-        return true;
-    }
-
-    //[17].电话号码的字母组合
-    public List<String> letterCombinations(String digits) {
-        List<String> res = new ArrayList<>();
-        if (digits.length() == 0) return res;
-        String[] numbers = new String[]{"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        backtraceForLetterCombinations(digits, 0, res, new StringBuilder(), numbers);
-        return res;
-    }
-
-    private void backtraceForLetterCombinations(String digits, int s, List<String> res, StringBuilder sb, String[] numbers) {
-        if (s == digits.length()) {
-            res.add(sb.toString());
-            return;
-        }
-        char ch = digits.charAt(s);
-        for (char choice : numbers[ch - '0'].toCharArray()) {
-            sb.append(choice);
-            backtraceForLetterCombinations(digits, s + 1, res, sb, numbers);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-    }
-
-    //[39].组合总和
-    public List<List<Integer>> combinationSum(int[] candidates, int target) {
-        List<List<Integer>> res = new ArrayList<>();
-        if (candidates.length == 0) return res;
-        backtraceForCombinationSum(candidates, 0, target, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForCombinationSum(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (target == 0) {
-            res.add(new ArrayList<>(select));
-            return;
-        }
-
-        for (int i = s; i < candidates.length; i++) {
-            if (candidates[i] > target) {
-                continue;
-            }
-            select.addLast(candidates[i]);
-            backtraceForCombinationSum(candidates, i, target - candidates[i], res, select);
-            select.removeLast();
-        }
-    }
-
-    //[40]组合总和 II
-    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
-        List<List<Integer>> res = new ArrayList<>();
-        if (candidates.length == 0) return res;
-        Arrays.sort(candidates);
-        backtraceForCombinationSum2(candidates, 0, target, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForCombinationSum2(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (target == 0) {
-            res.add(new ArrayList<>(select));
-            return;
-        }
-
-        for (int i = s; i < candidates.length; i++) {
-            //本层如果有重复的话，只选第一个，后面的直接跳过
-            if (i > s && candidates[i] == candidates[i - 1]) {
-                continue;
-            }
-            if (candidates[i] > target) {
-                continue;
-            }
-            select.addLast(candidates[i]);
-            //元素不能重复选择，只能从下一个选择
-            backtraceForCombinationSum2(candidates, i + 1, target - candidates[i], res, select);
-            select.removeLast();
-        }
-    }
-
-    //[216].组合总和 III
-    public List<List<Integer>> combinationSum3(int k, int n) {
-        List<List<Integer>> res = new ArrayList<>();
-        if (n < 0) return res;
-        backtraceForCombinationSum3(k, n, 1, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForCombinationSum3(int k, int n, int s, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (select.size() == k) {
-            if (n == 0) {
-                res.add(new ArrayList<>(select));
-            }
-            return;
-        }
-
-        for (int i = s; i <= 9; i++) {
-            if (i > n) {
-                continue;
-            }
-            select.addLast(i);
-            backtraceForCombinationSum3(k, n - i, i + 1, res, select);
-            select.removeLast();
-        }
-    }
-
-    //[51].N皇后
-    public List<List<String>> solveNQueens(int n) {
-        List<List<String>> res = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            sb.append('.');
-        }
-        LinkedList select = new LinkedList<>();
-        for (int i = 0; i < n; i++) {
-            select.add(sb.toString());
-        }
-        backtraceForSolveNQueens(n, 0, res, select);
-        return res;
-    }
-
-    private void backtraceForSolveNQueens(int n, int row, List<List<String>> res, LinkedList<String> select) {
-        if (row == n) {
-            res.add(new ArrayList<>(select));
-            return;
-        }
-        char[] arr = select.get(row).toCharArray();
-        for (int col = 0; col < n; col++) {
-            if (!isValid(select, row, col)) {
-                continue;
-            }
-            arr[col] = 'Q';
-            select.set(row, new String(arr));
-
-            backtraceForSolveNQueens(n, row + 1, res, select);
-
-            arr[col] = '.';
-            select.set(row, new String(arr));
-        }
-    }
-
-    private boolean isValid(LinkedList<String> select, int row, int col) {
-        int n = select.get(row).length();
-        //每次行上是一个选择，所以不需要判断行是否合法，因为肯定合法
-        //列不合法
-        for (int i = 0; i < n; i++) {
-            if (select.get(i).charAt(col) == 'Q') {
-                return false;
-            }
-        }
-        //左上不合法
-        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
-            if (select.get(i).charAt(j) == 'Q') {
-                return false;
-            }
-        }
-
-        //右上不合法
-        for (int i = row, j = col; i >= 0 && j < n; i--, j++) {
-            if (select.get(i).charAt(j) == 'Q') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //[77].组合
-    public List<List<Integer>> combine(int n, int k) {
-        List<List<Integer>> res = new ArrayList<>();
-        backtraceForCombine(n, k, 1, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForCombine(int n, int k, int s, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (select.size() == k) {
-            res.add(new ArrayList<>(select));
-            return;
-        }
-
-        for (int i = s; i <= n; i++) {
-            select.addLast(i);
-            backtraceForCombine(n, k, i + 1, res, select);
-            select.removeLast();
-        }
-    }
-
-    //[78].子集
-    public List<List<Integer>> subsets(int[] nums) {
-        List<List<Integer>> res = new ArrayList<>();
-        backtraceForSubsets(nums, 0, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForSubsets(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
-        //1 2 3
-        res.add(new ArrayList<>(select));
-        for (int i = s; i < nums.length; i++) {
-            select.addLast(nums[i]);
-            backtraceForSubsets(nums, i + 1, res, select);
-            select.removeLast();
-        }
-    }
-
-    //[90].子集 II
-    public List<List<Integer>> subsetsWithDup(int[] nums) {
-        List<List<Integer>> res = new ArrayList<>();
-        Arrays.sort(nums);
-        backtraceForSubsetsWithDup(nums, 0, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForSubsetsWithDup(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
-        res.add(new ArrayList<>(select));
-        for (int i = s; i < nums.length; i++) {
-            //本层中有重复的，则跳过，永远直选第一个
-            if (i > s && nums[i] == nums[i - 1]) {
-                continue;
-            }
-
-            select.addLast(nums[i]);
-            backtraceForSubsetsWithDup(nums, i + 1, res, select);
-            select.removeLast();
-        }
-    }
-
-    //[79].单词搜索
-    public boolean exist(char[][] board, String word) {
-        int m = board.length;
-        int n = board[0].length;
-        boolean[][] visit = new boolean[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (backtraceForExist(board, i, j, word, 0, visit)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean backtraceForExist(char[][] board, int x, int y, String word, int s, boolean[][] visit) {
-        if (board[x][y] != word.charAt(s)) {
-            return false;
-        }
-        if (s == word.length() - 1) {
-            return true;
-        }
-
-        visit[x][y] = true;
-        int[][] direct = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        int m = board.length;
-        int n = board[0].length;
-        for (int[] di : direct) {
-            int newX = x + di[0];
-            int newY = y + di[1];
-            if (newX >= 0 && newX < m
-                    && newY >= 0 && newY < n
-                    && !visit[newX][newY]
-                    && backtraceForExist(board, newX, newY, word, s + 1, visit)) {
-                return true;
-            }
-        }
-
-        visit[x][y] = false;
-        return false;
-    }
-
-    //[89].格雷编码
-    public List<Integer> grayCode(int n) {
-        boolean[] visit = new boolean[1 << n];
-        LinkedList<Integer> select = new LinkedList<>();
-        backtraceForGrayCode(n, 0, visit, select);
-        return select;
-    }
-
-    private boolean backtraceForGrayCode(int n, int cur, boolean[] visit, LinkedList<Integer> select) {
-        if (select.size() == 1 << n) {
-            return true;
-        }
-
-        select.add(cur);
-        visit[cur] = true;
-        for (int i = 0; i < n; i++) {
-            //异或保证有一位不相同其他都相同
-            int next = cur ^ 1 << i;
-            if (!visit[next] && backtraceForGrayCode(n, next, visit, select)) {
-                return true;
-            }
-        }
-        //肯定有唯一解，不需要撤销
-        return false;
-    }
-
-    //[42].接雨水
-    public int trap(int[] height) {
-        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
-        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
-        int res = 0;
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < height.length; i++) {
-            //   |   |
-            //   | | |
-            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
-            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
-                int cur = stack.pop();
-                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
-                if (stack.isEmpty()) {
-                    continue;
-                }
-                // 左右位置，并有左右位置得出「宽度」和「高度」
-                int l = stack.peek(), r = i;
-                int w = r - l + 1 - 2;
-                int h = Math.min(height[l], height[r]) - height[cur];
-                res += w * h;
-            }
-            stack.push(i);
-        }
-        return res;
-    }
-
-    //[456].132 模式
-    public boolean find132pattern(int[] nums) {
-        int n = nums.length;
-        if (n <= 2) return false;
-        //[3,5,0,3,4]
-        Stack<Integer> stack = new Stack<>();
-        //维护是一个单调递减栈
-        int maxRight = Integer.MIN_VALUE;
-        for (int i = n - 1; i >= 0; i--) {
-            if (nums[i] < maxRight) {
-                return true;
-            }
-            while (!stack.isEmpty() && nums[i] > stack.peek()) {
-                maxRight = Math.max(maxRight, stack.pop());
-            }
-            stack.push(nums[i]);
-        }
-        return false;
-    }
-
-    //[496].下一个更大元素I
-    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
-        Map<Integer, Integer> numberMap = new HashMap<>();
-        Stack<Integer> stack = new Stack<>();
-        for (int i = nums2.length - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && nums2[i] >= nums2[stack.peek()]) {
-                stack.pop();
-            }
-            numberMap.put(nums2[i], stack.isEmpty() ? -1 : nums2[stack.peek()]);
-            stack.push(i);
-        }
-
-        int[] res = new int[nums1.length];
-        for (int i = 0; i < nums1.length; i++) {
-            res[i] = numberMap.get(nums1[i]);
-        }
-        return res;
-    }
-
-    //[383].赎金信
-    public boolean canConstruct(String ransomNote, String magazine) {
-        if (ransomNote.length() > magazine.length()) return false;
-        int[] count = new int[26];
-        for (int i = 0; i < magazine.length(); i++) {
-            count[magazine.charAt(i) - 'a']++;
-        }
-        for (int i = 0; i < ransomNote.length(); i++) {
-            if (--count[ransomNote.charAt(i) - 'a'] < 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //[372].超级次方
-    public int superPow(int a, int[] b) {
-        return dfsForSuperPow(a, b, b.length - 1);
-    }
-
-    private int dfsForSuperPow(int a, int[] b, int index) {
-        if (index < 0) {
-            return 1;
-        }
-        int base = 1337;
-        int part1 = myPow(a, b[index]);
-        int part2 = myPow(dfsForSuperPow(a, b, index - 1), 10);
-        return part1 * part2 % base;
-    }
-
-    //快速幂
-    private int myPow(int a, int b) {
-        if (b == 0) return 1;
-        int base = 1337;
-        a %= base;
-
-        if (b % 2 == 0) {
-            int half = myPow(a, b / 2);
-            return half * half % base;
-        } else {
-            return a * myPow(a, b - 1) % base;
-        }
-    }
-
-    //[50].Pow(x, n)
-    public double myPow(double x, int n) {
-        if (n == 0) return 1;
-        if (n == 1) return x;
-        if (n == -1) return 1 / x;
-
-        double half = myPow(x, n / 2);
-        double left = myPow(x, n % 2);
-        return half * half * left;
-    }
-
-    //[581].最短无序连续子数组
-    public int findUnsortedSubarray(int[] nums) {
-        int right = 0;
-        int left = nums.length - 1;
-        Stack<Integer> stack = new Stack<>();
-        for (int i = nums.length - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && nums[i] > nums[stack.peek()]) {
-                right = Math.max(right, stack.pop());
-            }
-            stack.push(i);
-        }
-
-        //一个栈没办法同时找到左右边界
-        stack.clear();
-        for (int i = 0; i < nums.length; i++) {
-            while (!stack.isEmpty() && nums[i] < nums[stack.peek()]) {
-                left = Math.min(left, stack.pop());
-            }
-            stack.push(i);
-        }
-
-        return right > left ? right - left + 1 : 0;
-    }
-
-    //[739].每日温度
-    public int[] dailyTemperatures(int[] temperatures) {
-        int[] res = new int[temperatures.length];
-        Stack<Integer> stack = new Stack<>();
-        //单调递增减栈，遇到小的压掉它
-        for (int i = temperatures.length - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
-                stack.pop();
-            }
-
-            res[i] = stack.isEmpty() ? 0 : stack.peek() - i;
-            stack.push(i);
-        }
-        return res;
-    }
-
-    //[503].下一个更大的元素II
-    public int[] nextGreaterElements(int[] nums) {
-        int n = nums.length;
-        int[] res = new int[n];
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 2 * n - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && nums[i % n] >= stack.peek()) {
-                stack.pop();
-            }
-
-            res[i % n] = stack.isEmpty() ? -1 : stack.peek();
-            stack.push(nums[i % n]);
-        }
-        return res;
-    }
-
-    //[300].最长递增子序列
-    public int lengthOfLIS(int[] nums) {
-        int size = nums.length;
-        if (size == 0) return 0;
-        int[] dp = new int[size];
-        int length = 1;
-        for (int i = 0; i < size; i++) {
-            dp[i] = 1;
-            for (int j = 0; j < i; j++) {
-                if (nums[i] > nums[j]) {
-                    dp[i] = Math.max(dp[i], dp[j] + 1);
-                }
-            }
-            length = Math.max(length, dp[i]);
-        }
-
-        return length;
-    }
-
-    //[354].俄罗斯套娃信封问题
-    public int maxEnvelopes(int[][] envelopes) {
-        int n = envelopes.length;
-        Arrays.sort(envelopes, (a, b) -> {
-            if (a[0] == b[0]) return b[1] - a[1];
-            else return a[0] - b[0];
-        });
-        int[] height = new int[n];
-        for (int i = 0; i < n; i++) {
-            height[i] = envelopes[i][1];
-        }
-        return lengthOfLIS(height);
-    }
-
-    //[392].判断子序列
-    public boolean isSubsequence(String s, String t) {
-        int i = 0, j = 0;
-        while (i < s.length() && j < t.length()) {
-            if (s.charAt(i) == t.charAt(j)) {
-                i++;
-                j++;
-            }
-            j++;
-        }
-        return i == s.length();
-    }
-
-    //[172].阶乘后的零
-    public int trailingZeroes(int n) {
-        int res = 0;
-        long d = 5;
-        while (n >= d) {
-            res += n / d;
-            d *= 5;
-        }
-        return res;
-    }
-
-    //[199].二叉树的右视图
-    public List<Integer> rightSideView(TreeNode root) {
-        List<Integer> res = new ArrayList<>();
-        if (root == null) return res;
-        dfsForRightSideView(root, 0, res);
-        return res;
-    }
-
-    private void dfsForRightSideView(TreeNode root, int depth, List<Integer> res) {
-        if (root == null) return;
-        if (res.size() == depth) {
-            res.add(root.val);
-        }
-        dfsForRightSideView(root.right, depth + 1, res);
-        dfsForRightSideView(root.left, depth + 1, res);
-    }
-
-    //[201].数字范围按位与
-    public int rangeBitwiseAnd(int left, int right) {
-        int m = left, n = right;
-        int count = 0;
-        while (m < n) {
-            count++;
-            m >>= 1;
-            n >>= 1;
-        }
-        return m << count;
-    }
-
     //[1816].截断句子
     public String truncateSentence(String s, int k) {
         int count = 0, end = 0;
@@ -4519,171 +6353,6 @@ public class AllOfThem {
             }
         }
         return s.substring(0, end);
-    }
-
-    //[491].递增子序列
-    public List<List<Integer>> findSubsequences(int[] nums) {
-        List<List<Integer>> res = new ArrayList<>();
-        backtraceForFindSubsequences(nums, 0, res, new LinkedList<>());
-        return res;
-    }
-
-    private void backtraceForFindSubsequences(int[] nums, int s, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (select.size() >= 2) {
-            res.add(new ArrayList<>(select));
-        }
-
-        Set<Integer> set = new HashSet<>();
-        for (int i = s; i < nums.length; i++) {
-            if (set.contains(nums[i])) {
-                continue;
-            }
-            if (select.size() > 0 && nums[i] < select.getLast()) {
-                continue;
-            }
-
-            set.add(nums[i]);
-            select.addLast(nums[i]);
-            backtraceForFindSubsequences(nums, i + 1, res, select);
-            select.removeLast();
-        }
-    }
-
-    //[209].长度最小的子数组
-    public int minSubArrayLen(int target, int[] nums) {
-        //2,3,1,2,4, 3
-        //2 5 6 8 12 15
-        int n = nums.length;
-        int[] preSum = new int[n + 1];
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            sum += nums[i];
-            preSum[i + 1] = sum;
-        }
-        int left = 0, right = 0, res = Integer.MAX_VALUE;
-        while (right < nums.length) {
-            right++;
-            //找到合理的，就缩
-            while (preSum[right] - preSum[left] >= target) {
-                res = Math.min(res, right - left);
-                left++;
-            }
-
-        }
-        return res == Integer.MAX_VALUE ? 0 : res;
-    }
-
-    //[674].最长连续递增序列
-    public int findLengthOfLCIS(int[] nums) {
-        //1 2 5 4 7
-        int n = nums.length;
-        if (n == 1) return 1;
-        int left = 0, right = 1, res = 0;
-        while (right < n) {
-            if (nums[right - 1] >= nums[right]) {
-                left = right;
-            }
-            res = Math.max(res, right - left + 1);
-            right++;
-        }
-        return res;
-    }
-
-    //[56].合并区间
-    public int[][] merge(int[][] intervals) {
-        //1 2  1 5  3 6  7 9
-        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
-        LinkedList<int[]> res = new LinkedList<>();
-        res.addLast(intervals[0]);
-        for (int i = 1; i < intervals.length; i++) {
-            int[] last = res.getLast();
-            if (intervals[i][0] <= last[1]) {
-                last[1] = Math.max(last[1], intervals[i][1]);
-            } else {
-                res.addLast(intervals[i]);
-            }
-        }
-        return res.toArray(new int[res.size()][]);
-    }
-
-    //[57].插入区间
-    public int[][] insert(int[][] intervals, int[] newInterval) {
-        if (newInterval.length == 0) return intervals;
-        LinkedList<int[]> res = new LinkedList<>();
-        int left = newInterval[0], right = newInterval[1];
-        for (int i = 0; i < intervals.length; i++) {
-            int[] interval = intervals[i];
-            if (interval[0] > right) {
-                res.add(new int[]{left, right});
-                //在插入区间右侧，且不相交，则添加插入区域
-                //同时更新插入区域，保证下一次添加为插入区域
-                left = interval[0];
-                right = interval[1];
-            } else if (left > interval[1]) {
-                //在插入区间左侧，且不相交，则添加左侧区域
-                res.add(interval);
-            } else {
-                //相交，维护区域
-                left = Math.min(interval[0], left);
-                right = Math.max(interval[1], right);
-            }
-        }
-        //还剩最后一个区域需要添加
-        res.add(new int[]{left, right});
-        return res.toArray(new int[][]{});
-    }
-
-    //[436].寻找右区间
-    public int[] findRightInterval(int[][] intervals) {
-        int n = intervals.length;
-        int[][] sort = new int[n][2];
-        //第一个索引 + 真实索引
-        for (int i = 0; i < n; i++) {
-            sort[i] = new int[]{intervals[i][0], i};
-        }
-
-        int[] res = new int[n];
-        //保证最小排序
-        Arrays.sort(sort, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
-        //找到一个大于等于它的最小值就是左边界, labuladong模版
-        for (int i = 0; i < n; i++) {
-            int v = intervals[i][1];
-            int left = 0, right = n - 1;
-            while (left <= right) {
-                int mid = left + (right - left) / 2;
-                if (sort[mid][0] == v) {
-                    right = mid - 1;
-                } else if (sort[mid][0] > v) {
-                    right = mid - 1;
-                } else if (sort[mid][0] < v) {
-                    left = mid + 1;
-                }
-            }
-            //额外的补充条件
-            res[i] = left > n - 1 || sort[left][0] < v ? -1 : sort[left][1];
-        }
-        return res;
-    }
-
-    //[986].区间列表的交集
-    public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
-        List<int[]> res = new ArrayList<>();
-        int i = 0, j = 0;
-        while (i < firstList.length && j < secondList.length) {
-            int[] first = firstList[i];
-            int[] second = secondList[j];
-            //相交
-            if (first[1] >= second[0] && second[1] >= first[0]) {
-                res.add(new int[]{Math.max(first[0], second[0]), Math.min(first[1], second[1])});
-            }
-
-            if (first[1] > second[1]) {
-                j++;
-            } else {
-                i++;
-            }
-        }
-        return res.toArray(new int[][]{});
     }
 
     //[1288].删除被覆盖的区间
@@ -4701,228 +6370,6 @@ public class AllOfThem {
             }
         }
         return intervals.length - res;
-    }
-
-    //[689].三个无重叠子数组的最大和
-    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
-        int[] res = new int[3];
-        int sum1 = 0, maxSum1 = 0, maxIdx1 = 0;
-        int sum2 = 0, maxSum12 = 0, maxIdx21 = 0, maxIdx22 = 0;
-        int sum3 = 0, maxSum123 = 0;
-
-        for (int i = 2 * k; i < nums.length; i++) {
-            sum1 += nums[i - 2 * k];
-            sum2 += nums[i - k];
-            sum3 += nums[i];
-            if (i >= 3 * k - 1) {
-                if (sum1 > maxSum1) {
-                    maxSum1 = sum1;
-                    maxIdx1 = i - 3 * k + 1;
-                }
-                if (sum2 + maxSum1 > maxSum12) {
-                    maxSum12 = sum2 + maxSum1;
-                    maxIdx21 = maxIdx1;
-                    maxIdx22 = i - 2 * k + 1;
-                }
-                if (sum3 + maxSum12 > maxSum123) {
-                    maxSum123 = sum3 + maxSum12;
-                    res[0] = maxIdx21;
-                    res[1] = maxIdx22;
-                    res[2] = i - k + 1;
-                }
-
-                sum1 -= nums[i - 3 * k + 1];
-                sum2 -= nums[i - 2 * k + 1];
-                sum3 -= nums[i - k + 1];
-            }
-        }
-        return res;
-    }
-
-    //[435].无重叠区间
-    public int eraseOverlapIntervals(int[][] intervals) {
-        int n = intervals.length;
-        int overlap = 0;
-        //1,2  2,3  3,4  1,3
-        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
-        int end = intervals[0][1];
-        for (int i = 1; i < n; i++) {
-            int[] cur = intervals[i];
-            if (cur[0] < end) {
-                overlap++;
-                //默认保留最短的，长的覆盖范围更大，所以删除
-                end = Math.min(end, cur[1]);
-            } else {
-                end = cur[1];
-            }
-        }
-        return overlap;
-    }
-
-    //[215].数组中的第K个最大元素
-    public int findKthLargest(int[] nums, int k) {
-        //第K大意味着是从小到大是第n-k位
-        return quickSort(nums, 0, nums.length - 1, nums.length - k);
-    }
-
-    private int quickSort(int[] nums, int left, int right, int targetIndex) {
-        int l = left, r = right;
-        int pivot = nums[l];
-        while (l < r) {
-            while (l < r && pivot <= nums[r]) r--;
-            nums[l] = nums[r];
-
-            while (l < r && nums[l] <= pivot) l++;
-            nums[r] = nums[l];
-        }
-        nums[l] = pivot;
-
-        if (l == targetIndex) {
-            return nums[l];
-        } else if (l < targetIndex) {
-            return quickSort(nums, l + 1, right, targetIndex);
-        } else {
-            return quickSort(nums, left, l - 1, targetIndex);
-        }
-    }
-
-    //[221].最大正方形
-    public int maximalSquare(char[][] matrix) {
-        int m = matrix.length, n = matrix[0].length;
-        //以i,j为终点的能构成正方形的最大边长
-        int[][] dp = new int[m][n];
-        int res = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (matrix[i][j] == '1') {
-                    if (i == 0 || j == 0) {
-                        dp[i][j] = 1;
-                    } else {
-                        dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
-                    }
-                    res = Math.max(dp[i][j], res);
-                }
-            }
-        }
-        return res * res;
-    }
-
-    //[279].完全平方数
-    public int numSquares(int n) {
-        if (n <= 0) return 0;
-        int[] dp = new int[n + 1];
-        for (int i = 1; i <= n; i++) {
-            dp[i] = Integer.MAX_VALUE;
-            for (int j = 1; j * j <= i; j++) {
-                dp[i] = Math.min(dp[i - j * j] + 1, dp[i]);
-            }
-        }
-        return dp[n];
-    }
-
-    //[794].有效的井字游戏
-    public boolean validTicTacToe(String[] board) {
-        int xCount = 0, oCount = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (board[i].charAt(j) == 'X') {
-                    xCount++;
-                } else if (board[i].charAt(j) == 'O') {
-                    oCount++;
-                }
-            }
-        }
-        if (xCount < oCount || xCount - oCount > 1) {
-            return false;
-        }
-        if (win(board, 'X') && xCount - oCount != 1) {
-            return false;
-        }
-        if (win(board, 'O') && xCount != oCount) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean win(String[] board, char ch) {
-        for (int i = 0; i < 3; i++) {
-            if (board[i].charAt(0) == board[i].charAt(1) && board[i].charAt(1) == board[i].charAt(2) && board[i].charAt(0) == ch)
-                return true;
-            if (board[0].charAt(i) == board[1].charAt(i) && board[1].charAt(i) == board[2].charAt(i) && board[0].charAt(i) == ch)
-                return true;
-        }
-
-        if (board[0].charAt(0) == board[1].charAt(1) && board[0].charAt(0) == board[2].charAt(2) && board[2].charAt(2) == ch)
-            return true;
-        if (board[0].charAt(2) == board[1].charAt(1) && board[0].charAt(2) == board[2].charAt(0) && board[2].charAt(0) == ch)
-            return true;
-        return false;
-    }
-
-    //[748].最短补全词
-    public String shortestCompletingWord(String licensePlate, String[] words) {
-        int[] need = new int[26];
-        for (int i = 0; i < licensePlate.length(); i++) {
-            char ch = licensePlate.charAt(i);
-            if (Character.isLetter(ch)) {
-                need[Character.toLowerCase(ch) - 'a']++;
-            }
-        }
-
-        int index = -1;
-        for (int i = 0; i < words.length; i++) {
-            int[] cnt = new int[26];
-            String word = words[i];
-            for (int j = 0; j < word.length(); j++) {
-                char ch = word.charAt(j);
-                cnt[ch - 'a']++;
-            }
-            boolean valid = true;
-            for (int j = 0; j < 26; j++) {
-                if (cnt[j] < need[j]) {
-                    valid = false;
-                    break;
-                }
-            }
-            if (valid && (index == -1 || words[i].length() < words[index].length())) {
-                index = i;
-            }
-        }
-        return words[index];
-    }
-
-    //[875].爱吃香蕉的珂珂
-    public int minEatingSpeed(int[] piles, int h) {
-        int left = 1, right = Arrays.stream(piles).max().getAsInt();
-        //首先肯定是左侧边界
-        //hours(x) 是单调递减函数，不能死背模板
-        // \
-        //  \___   h
-        //      \
-        //        x (横轴)
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (hours(piles, mid) == h) {
-                right = mid;
-            } else if (hours(piles, mid) > h) {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
-        }
-        return left;
-    }
-
-    private int hours(int[] piles, int speed) {
-        int res = 0;
-        for (int pile : piles) {
-            if (pile % speed == 0) {
-                res += pile / speed;
-            } else {
-                res += pile / speed + 1;
-            }
-        }
-        return res;
     }
 
     //[1011].在 D 天内送达包裹的能力
@@ -4959,110 +6406,6 @@ public class AllOfThem {
         return res;
     }
 
-    //[45].跳跃游戏 II
-    public int jump(int[] nums) {
-        int n = nums.length;
-        //刚开始为-1，防止多计数
-        int res = -1, nextMaxIndex = 0, end = 0;
-        for (int i = 0; i < n; i++) {
-            nextMaxIndex = Math.max(i + nums[i], nextMaxIndex);
-            //到达最远地方
-            if (i == end) {
-                //更新最远距离
-                end = nextMaxIndex;
-                //计数
-                res++;
-            }
-        }
-        return res;
-    }
-
-    //[55].跳跃游戏
-    public boolean canJump(int[] nums) {
-        int n = nums.length;
-        int maxIndex = 0;
-        //最后一个需要排除掉，因为可能正好相等
-        for (int i = 0; i < n - 1; i++) {
-            maxIndex = Math.max(maxIndex, nums[i] + i);
-            if (maxIndex <= i) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //[71].简化路径
-    public String simplifyPath(String path) {
-        String[] strings = path.split("/");
-        Stack<String> stack = new Stack<>();
-        for (String str : strings) {
-            if (!stack.isEmpty() && str.equals("..")) {
-                stack.pop();
-            } else if (!str.equals("") && !str.equals(".") && !str.equals("..")) {
-                //两个//中间就是空串
-                stack.push(str);
-            }
-        }
-        if (stack.isEmpty()) return "/";
-
-        StringBuilder sb = new StringBuilder();
-        while (!stack.isEmpty()) {
-            sb.insert(0, "/" + stack.pop());
-        }
-        return sb.toString();
-    }
-
-    //[911].在线选举
-    public static class TopVotedCandidate {
-        int[] successor;
-        int[] times;
-
-        public TopVotedCandidate(int[] persons, int[] times) {
-            int n = persons.length;
-            successor = new int[n];
-            Map<Integer, Integer> voteCounts = new HashMap<>();
-            int topP = -1;
-            for (int i = 0; i < n; i++) {
-                int p = persons[i];
-
-                voteCounts.put(p, voteCounts.getOrDefault(p, 0) + 1);
-                //相等，也需要更新最新的领先者
-                if (!voteCounts.containsKey(topP) || voteCounts.get(p) >= voteCounts.get(topP)) {
-                    topP = p;
-                }
-                successor[i] = topP;
-            }
-            this.times = times;
-        }
-
-        public int q(int t) {
-            //找到<=t 的时间
-            int left = 0, right = times.length - 1;
-            while (left < right) {
-                int mid = left + (right - left + 1) / 2;
-                if (times[mid] <= t) {
-                    left = mid;
-                } else {
-                    right = mid - 1;
-                }
-            }
-            return successor[left];
-        }
-    }
-
-    //[709].转换成小写字母
-    public String toLowerCase(String s) {
-        StringBuilder sb = new StringBuilder();
-        char[] chars = s.toCharArray();
-        for (char ch : chars) {
-            if (ch >= 'A' && ch <= 'Z') {
-                ch |= 32;
-            }
-            sb.append(ch);
-        }
-        return sb.toString();
-    }
-
     //[2073].买票需要的时间
     public int timeRequiredToBuy(int[] tickets, int k) {
         int need = tickets[k];
@@ -5076,35 +6419,6 @@ public class AllOfThem {
             }
         }
         return res;
-    }
-
-    //[915].分割数组
-    public int partitionDisjoint(int[] nums) {
-        int n = nums.length;
-        //左边的最大值 <= 右边的最小值
-        int[] leftMax = new int[n];
-        int[] rightMin = new int[n];
-        int leftM = nums[0], rightM = nums[n - 1];
-        for (int i = 0; i < n; i++) {
-            if (nums[i] >= leftM) {
-                leftM = nums[i];
-            }
-            leftMax[i] = leftM;
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            if (nums[i] <= rightM) {
-                rightM = nums[i];
-            }
-            rightMin[i] = rightM;
-        }
-
-        for (int i = 0; i < n - 1; i++) {
-            //左边的比右边的大的时候，可以继续扩，知道找到边界， 左边最大<=右边最小为止
-            if (leftMax[i] <= rightMin[i + 1]) {
-                return i + 1;
-            }
-        }
-        return -1;
     }
 
     //[面试题 17.12].BiNode
@@ -5124,329 +6438,6 @@ public class AllOfThem {
         root.left = null;
         convertBiNode(root.right);
         return head;
-    }
-
-    //[807].保持城市天际线
-    public int maxIncreaseKeepingSkyline(int[][] grid) {
-        // 0 1 1
-        // 2 1 1
-        int n = grid.length;
-        int[] left = new int[n];
-        int[] upper = new int[n];
-        for (int i = 0; i < n; i++) {
-            upper[i] = Integer.MIN_VALUE;
-            left[i] = Integer.MIN_VALUE;
-            for (int j = 0; j < n; j++) {
-                left[i] = Math.max(left[i], grid[i][j]);
-                upper[i] = Math.max(upper[i], grid[j][i]);
-            }
-        }
-
-        int res = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                res += Math.min(upper[j], left[i]) - grid[i][j];
-            }
-        }
-        return res;
-    }
-
-    //[48].旋转图像
-    public void rotate(int[][] matrix) {
-        int n = matrix.length;
-        //对角线翻转
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < i; j++) {
-                int temp = matrix[i][j];
-                matrix[i][j] = matrix[j][i];
-                matrix[j][i] = temp;
-            }
-        }
-
-        //左右互换
-        for (int i = 0; i < n; i++) {
-            int left = 0, right = n - 1;
-            while (left < right) {
-                int temp = matrix[i][left];
-                matrix[i][left] = matrix[i][right];
-                matrix[i][right] = temp;
-                left++;
-                right--;
-            }
-        }
-    }
-
-    //[54].螺旋矩阵
-    public List<Integer> spiralOrder(int[][] matrix) {
-        int m = matrix.length, n = matrix[0].length;
-        int top = 0, bottom = m - 1;
-        int left = 0, right = n - 1;
-        List<Integer> res = new ArrayList<>();
-        while (res.size() < m * n) {
-            if (top <= bottom) {
-                for (int i = left; i <= right; i++) {
-                    res.add(matrix[top][i]);
-                }
-                top++;
-            }
-            if (left <= right) {
-                for (int i = top; i <= bottom; i++) {
-                    res.add(matrix[i][right]);
-                }
-                right--;
-            }
-
-            if (top <= bottom) {
-                for (int i = right; i >= left; i--) {
-                    res.add(matrix[bottom][i]);
-                }
-                bottom--;
-            }
-
-            if (left <= right) {
-                for (int i = bottom; i >= top; i--) {
-                    res.add(matrix[i][left]);
-                }
-                left++;
-            }
-        }
-        return res;
-    }
-
-    //[59].螺旋矩阵 II
-    public int[][] generateMatrix(int n) {
-        int top = 0, bottom = n - 1;
-        int left = 0, right = n - 1;
-        int num = 0;
-        int[][] res = new int[n][n];
-        //每个都从1开始计数，那么当num == n平方就是结束条件，能够正常退出
-        while (num < n * n) {
-            if (top <= bottom) {
-                for (int i = left; i <= right; i++) {
-                    res[top][i] = ++num;
-                }
-                top++;
-            }
-
-            if (left <= right) {
-                for (int i = top; i <= bottom; i++) {
-                    res[i][right] = ++num;
-                }
-                right--;
-            }
-
-            if (top <= bottom) {
-                for (int i = right; i >= left; i--) {
-                    res[bottom][i] = ++num;
-                }
-                bottom--;
-            }
-
-            if (left <= right) {
-                for (int i = bottom; i >= top; i--) {
-                    res[i][left] = ++num;
-                }
-                left++;
-            }
-        }
-        return res;
-    }
-
-    //[630].课程表 III
-    public int scheduleCourse(int[][] courses) {
-        //将课程按照最后的截止日期从小到大，起始时间从小到大排序
-        Arrays.sort(courses, (a, b) -> a[1] == b[1] ? a[0] - b[0] : a[1] - b[1]);
-        //大根堆，如果当前课程可以正常结束，则更新结束时间; 如果当前课程不可以正常结束，替换掉之前持续时间比它大的已经选入的课程，并更新结束时间
-        PriorityQueue<Integer> queue = new PriorityQueue<>((a, b) -> b - a);
-        int finishAt = 0;
-        for (int[] course : courses) {
-            if (finishAt + course[0] <= course[1]) {
-                finishAt += course[0];
-                queue.offer(course[0]);
-            } else if (!queue.isEmpty() && queue.peek() > course[0]) {
-                finishAt -= queue.poll() - course[0];
-                queue.offer(course[0]);
-            }
-        }
-        return queue.size();
-    }
-
-    //[238].除自身以外数组的乘积
-    public int[] productExceptSelf(int[] nums) {
-        int n = nums.length;
-        int[] left = new int[n + 1];
-        int[] right = new int[n + 1];
-        left[0] = 1;
-        right[n] = 1;
-        for (int i = 0; i < n; i++) {
-            left[i + 1] = left[i] * nums[i];
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            right[i] = right[i + 1] * nums[i];
-        }
-
-        int[] res = new int[n];
-        for (int i = 0; i < n; i++) {
-            res[i] = left[i] * right[i + 1];
-        }
-        return res;
-    }
-
-    //[303].区域和检索 - 数组不可变
-    public static class NumArray {
-
-        //preSum[i]代表nums[0...i-1]的和
-        int[] preSum;
-
-        public NumArray(int[] nums) {
-            preSum = new int[nums.length + 1];
-            int sum = 0;
-            for (int i = 0; i < nums.length; i++) {
-                sum += nums[i];
-                preSum[i + 1] = sum;
-            }
-        }
-
-        public int sumRange(int left, int right) {
-            return preSum[right + 1] - preSum[left];
-        }
-    }
-
-    //[304].二维区域和检索 - 矩阵不可变
-    public static class NumMatrix {
-        int[][] preSum;
-
-        public NumMatrix(int[][] matrix) {
-            int m = matrix.length;
-            int n = matrix[0].length;
-            preSum = new int[m + 1][n + 1];
-
-            for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                    preSum[i + 1][j + 1] = preSum[i][j + 1] + preSum[i + 1][j] - preSum[i][j] + matrix[i][j];
-                }
-            }
-        }
-
-        public int sumRegion(int row1, int col1, int row2, int col2) {
-            //减数据的时候，要结合图理解下，应该是外面的一格坐标才行
-            return preSum[row2 + 1][col2 + 1] - preSum[row2 + 1][col1] - preSum[row1][col2 + 1] + preSum[row1][col1];
-        }
-    }
-
-    //[384].打乱数组
-    class Solution384 {
-        int[] original;
-
-        public Solution384(int[] nums) {
-            original = nums;
-        }
-
-        public int[] reset() {
-            return original;
-        }
-
-        public int[] shuffle() {
-            int[] res = original.clone();
-            Random random = new Random();
-            //请认真思考下，等概率是什么。第一次被选中 * 第二次被选中的概率 = 1/n
-            for (int i = 0; i < res.length; i++) {
-                //[i, n) => [0, n - i) + i
-                int j = random.nextInt(res.length - i) + i;
-                int temp = res[i];
-                res[i] = res[j];
-                res[j] = temp;
-            }
-            return res;
-        }
-    }
-
-    //[528].按权重随机选择
-    public static class Solution528 {
-        int[] preSum;
-
-        public Solution528(int[] w) {
-            int n = w.length;
-            preSum = new int[n];
-            preSum[0] = w[0];
-            for (int i = 1; i < n; i++) {
-                preSum[i] = preSum[i - 1] + w[i];
-            }
-        }
-
-        public int pickIndex() {
-            int n = preSum.length;
-            //选择[1, total]之间的值
-            int w = new Random().nextInt(preSum[n - 1]) + 1;
-            //左边界算法
-            int left = 0, right = n - 1;
-            while (left < right) {
-                int mid = left + (right - left) / 2;
-                if (preSum[mid] >= w) {
-                    right = mid;
-                } else {
-                    left = mid + 1;
-                }
-            }
-            return left;
-        }
-    }
-
-    //[560].和为 K 的子数组
-    public int subarraySum(int[] nums, int k) {
-        //[1,1,1]
-        int preSum = 0, res = 0;
-        Map<Integer, Integer> preSumCount = new HashMap<>();
-        //当只有一个元素满足k的时候，需要统计为1
-        preSumCount.put(0, 1);
-        for (int i = 0; i < nums.length; i++) {
-            preSum += nums[i];
-            //preSum比k大
-            if (preSumCount.containsKey(preSum - k)) {
-                res += preSumCount.get(preSum - k);
-            }
-            preSumCount.put(preSum, preSumCount.getOrDefault(preSum, 0) + 1);
-        }
-        return res;
-    }
-
-    //[851].喧闹和富有
-    public int[] loudAndRich(int[][] richer, int[] quiet) {
-        int n = quiet.length;
-        //有钱->没钱 的邻接表， 从入度为0开始入队(从最有钱的开始遍历)，只有当前节点的比邻接点更安静，则更新邻接点的位置
-        int[] ans = new int[n];
-        List<Integer>[] graph = new ArrayList[n];
-        for (int i = 0; i < n; i++) {
-            graph[i] = new ArrayList<>();
-        }
-        int[] indegree = new int[n];
-        for (int[] rich : richer) {
-            graph[rich[0]].add(rich[1]);
-            indegree[rich[1]]++;
-        }
-        Queue<Integer> queue = new LinkedList<>();
-        for (int i = 0; i < n; i++) {
-            //初始值为本身
-            ans[i] = i;
-            //入度为0，都是些最有钱的人
-            if (indegree[i] == 0) {
-                queue.offer(i);
-            }
-        }
-        while (!queue.isEmpty()) {
-            int cur = queue.poll();
-            for (int next : graph[cur]) {
-                //当前人找到的那个最安静的人 < 邻接人找到的那个最安静的人的时候，则更新。
-                if (quiet[ans[cur]] < quiet[ans[next]]) {
-                    ans[next] = ans[cur];
-                }
-                //加不进去没关系，但是度得维护下
-                if (--indegree[next] == 0) {
-                    queue.offer(next);
-                }
-            }
-        }
-        return ans;
     }
 
     //[1610].可见点的最大数目
@@ -5499,38 +6490,6 @@ public class AllOfThem {
         return bottles;
     }
 
-    class Difference {
-        int[] diffSum;
-
-        public Difference(int[] nums) {
-            int n = nums.length;
-            diffSum = new int[n];
-            int temp = 0;
-            for (int i = 0; i < n; i++) {
-                diffSum[i] = nums[i] - temp;
-                temp = nums[i];
-            }
-        }
-
-        public void insert(int i, int j, int num) {
-            diffSum[i] += num;
-            //数组会超过
-            if (j + 1 < diffSum.length) {
-                diffSum[j + 1] -= num;
-            }
-        }
-
-        public int[] result() {
-            int[] nums = new int[diffSum.length];
-            int sum = 0;
-            for (int i = 0; i < diffSum.length; i++) {
-                sum += diffSum[i];
-                nums[i] = sum;
-            }
-            return nums;
-        }
-    }
-
     //[1109].航班预订统计
     public int[] corpFlightBookings(int[][] bookings, int n) {
         Difference difference = new Difference(new int[n]);
@@ -5555,126 +6514,6 @@ public class AllOfThem {
             }
         }
         return true;
-    }
-
-    //[523].连续的子数组和
-    public boolean checkSubarraySum(int[] nums, int k) {
-        if (nums.length < 2) return false;
-
-        //[23,2,4,6,7], k = 6
-        //子数组和，需要的是快速定位区间和，另外需要判断连续子数组，已知一个值和结果，那么就可以用hash来判断，跟两数之和类似
-        //k的倍数， (preSum[j] - preSum[i]) % k == 0; 即前后两个前缀和取余数相等就是判断条件！！！
-        Map<Integer, Integer> preSumMap = new HashMap<>();
-        preSumMap.put(0, -1);
-        int preSum = 0;
-        for (int i = 0; i < nums.length; i++) {
-            preSum += nums[i];
-
-            int reminder = preSum % k;
-            if (preSumMap.containsKey(reminder)) {
-                if (i - preSumMap.get(reminder) > 1) {
-                    return true;
-                }
-            } else {
-                preSumMap.put(reminder, i);
-            }
-        }
-        return false;
-    }
-
-    //[525].连续数组
-    public int findMaxLength(int[] nums) {
-        //首先求解是连续数组，所以需要构造区间统计0和1的个数，可以0的时候前缀和-1， 1的时候前缀和+1
-        //当某个前缀和再次出现的时候，一定代表0和1是相等的。
-        Map<Integer, Integer> preSumMap = new HashMap<>();
-        preSumMap.put(0, -1);
-        int preSum = 0, res = 0;
-        for (int i = 0; i < nums.length; i++) {
-            if (nums[i] == 1) {
-                preSum++;
-            } else {
-                preSum--;
-            }
-            if (preSumMap.containsKey(preSum)) {
-                res = Math.max(res, i - preSumMap.get(preSum));
-            } else {
-                preSumMap.put(preSum, i);
-            }
-        }
-        return res;
-    }
-
-    //[419].甲板上的战舰
-    public int countBattleships(char[][] board) {
-        //X就改变成.，往下面和右边扩大范围
-        int m = board.length, n = board[0].length;
-        int ans = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (board[i][j] != 'X') {
-                    continue;
-                }
-                board[i][j] = '-';
-                for (int k = i + 1; k < m && board[k][j] == 'X'; k++) board[k][j] = '-';
-                for (int k = j + 1; k < n && board[i][k] == 'X'; k++) board[i][k] = '-';
-                ans++;
-            }
-        }
-        return ans;
-    }
-
-    private int countBattleshipsV2(char[][] board) {
-        //X就改变成.，往下面和右边扩大范围
-        int m = board.length, n = board[0].length;
-        int ans = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                //除了最左边和最上边的边界情况，只计算最左上角的战舰个数
-                if (i > 0 && board[i - 1][j] == 'X') continue;
-                if (j > 0 && board[i][j - 1] == 'X') continue;
-                if (board[i][j] == 'X') {
-                    ans++;
-                }
-            }
-        }
-        return ans;
-    }
-
-    //[187].重复的DNA序列
-    public List<String> findRepeatedDnaSequences(String s) {
-        List<String> res = new ArrayList<>();
-        if (s.length() < 10) return res;
-//        Map<String, Integer> dnaMap = new HashMap<>();
-//        for (int i = 10; i < s.length(); i++) {
-//            String subDna = s.substring(i - 10, i);
-//            dnaMap.put(subDna, dnaMap.getOrDefault(subDna, 0) + 1);
-//            //这是不是也是一个思路改进呢？？
-//            if (dnaMap.get(subDna) == 2) {
-//                res.add(subDna);
-//            }
-//        }
-
-        Map<Character, Integer> map = new HashMap<>();
-        map.put('A', 0);
-        map.put('C', 1);
-        map.put('T', 2);
-        map.put('G', 3);
-        //前10位先构造出来，一共需要20位，理论上够的
-        int x = 0;
-        for (int i = 0; i < 9; i++) {
-            x = (x << 2) | map.get(s.charAt(i));
-        }
-        int n = s.length();
-        Map<Integer, Integer> count = new HashMap<>();
-        for (int i = 0; i <= n - 10; i++) {
-            //前面算了9位，从index 9开始算
-            x = ((x << 2) | map.get(s.charAt(i + 9))) & ((1 << 20) - 1);
-            count.put(x, count.getOrDefault(x, 0) + 1);
-            if (count.get(x) == 2) {
-                res.add(s.substring(i, i + 10));
-            }
-        }
-        return res;
     }
 
     //[1375].二进制字符串前缀一致的次数
@@ -5713,22 +6552,6 @@ public class AllOfThem {
             j--;
         }
         return sb.delete(j + 1, sb.length()).toString();
-    }
-
-    //[997].找到小镇的法官
-    public int findJudge(int n, int[][] trust) {
-        int[] outDegree = new int[n + 1];
-        int[] inDegree = new int[n + 1];
-        for (int[] item : trust) {
-            outDegree[item[0]]++;
-            inDegree[item[1]]++;
-        }
-        for (int i = 1; i <= n; i++) {
-            if (inDegree[i] == n - 1 && outDegree[i] == 0) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     //[5956].找出数组中的第一个回文字符串
@@ -5821,84 +6644,6 @@ public class AllOfThem {
         return ans;
     }
 
-    //[475].供暖器
-    public static int findRadius(int[] houses, int[] heaters) {
-        Arrays.sort(heaters);
-        int ans = 0, n = heaters.length;
-        for (int house : houses) {
-            int left = findRightIndex(heaters, house, n);
-            int right = left + 1;
-            int leftRadius = left < 0 ? Integer.MAX_VALUE : house - heaters[left];
-            int rightRadius = right >= n ? Integer.MAX_VALUE : heaters[right] - house;
-            ans = Math.max(ans, Math.min(leftRadius, rightRadius));
-        }
-        return ans;
-    }
-
-    private static int findRightIndex(int[] heaters, int house, int n) {
-        //1,2,4
-        //找到位置小于等于house的heater
-        //如果没有相等的，那么就找到小于它的，如果有相等的，找它自己
-        int left = 0, right = n - 1;
-        while (left < right) {
-            int mid = left + (right - left + 1) / 2;
-            if (heaters[mid] <= house) {
-                left = mid;
-            } else {
-                right = mid - 1;
-            }
-        }
-        if (heaters[left] > house) {
-            return -1;
-        }
-        return left;
-    }
-
-    //[274].H 指数
-    public int hIndex1(int[] citations) {
-        //0 1 3 5 6
-        Arrays.sort(citations);
-        int count = 0, n = citations.length;
-        while (count < n && citations[n - count - 1] > count) {
-            count++;
-        }
-        return count;
-    }
-
-    //[275].H 指数 II
-    public int hIndex(int[] citations) {
-        int n = citations.length;
-        int left = 0, right = n - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            //引用次数小于论文篇数(不满足共h篇论文引用次数不少于h)，往右边走
-            if (citations[mid] < n - mid) {
-                left = mid + 1;
-            } else {
-                //引用次数>=论文篇数，还应该往左边走走，找到更大的论文篇数
-                right = mid;
-            }
-        }
-        //h指数
-        return n - left;
-    }
-
-    //[283].移动零
-    public void moveZeroes(int[] nums) {
-        int n = nums.length;
-        int left = 0;
-        for (int right = 0; right < n; right++) {
-            if (nums[right] != 0) {
-                nums[left] = nums[right];
-                left++;
-            }
-        }
-        //减少交换次数
-        while (left < n) {
-            nums[left++] = 0;
-        }
-    }
-
     //[1154].一年中的第几天
     public static int dayOfYear(String date) {
         String[] vars = date.split("-");
@@ -5914,40 +6659,6 @@ public class AllOfThem {
             ans += days[i];
         }
         return ans + day;
-    }
-
-    private TreeNode preNode, leftMax, rightMin;
-
-    public void recoverTree(TreeNode root) {
-        helper(root);
-        if (leftMax != null && rightMin != null) {
-            int temp = leftMax.val;
-            leftMax.val = rightMin.val;
-            rightMin.val = temp;
-        }
-    }
-
-    private void helper(TreeNode root) {
-        if (root == null) {
-            return;
-        }
-        helper(root.left);
-        if (preNode == null) {
-            preNode = root;
-        } else {
-            //左右子树交换会有两段，1 2 8 4 5 6 7 3
-            //前面一个节点大于后面节点，前面一个节点是交换节点
-            if (preNode.val > root.val) {
-                //只能取第一个
-                if (leftMax == null) {
-                    leftMax = preNode;
-                }
-                //可以一直覆盖
-                rightMin = root;
-            }
-            preNode = root;
-        }
-        helper(root.right);
     }
 
     //Morris遍历
@@ -5973,137 +6684,6 @@ public class AllOfThem {
                 }
             }
         }
-    }
-
-    //[686].重复叠加字符串匹配
-    public static int repeatedStringMatch(String a, String b) {
-        StringBuilder sb = new StringBuilder();
-        //最多遍历 (b/a + 2)a => b + 2a 长度
-        int res = 0;
-        while (sb.length() < b.length() + 2 * a.length()) {
-            sb.append(a);
-            res++;
-            if (sb.toString().contains(b)) {
-                return res;
-            }
-        }
-        return -1;
-    }
-
-    //[449].序列化和反序列化二叉搜索树
-    public class Codec2 {
-
-        // Encodes a tree to a single string.
-        public String serialize(TreeNode root) {
-            if (root == null) return "";
-            StringBuilder sb = new StringBuilder();
-            dfsForSerialize(root, sb);
-            return sb.deleteCharAt(sb.length() - 1).toString();
-        }
-
-        private void dfsForSerialize(TreeNode root, StringBuilder sb) {
-            if (root == null) return;
-            sb.append(root.val).append(',');
-            dfsForSerialize(root.left, sb);
-            dfsForSerialize(root.right, sb);
-        }
-
-        // Decodes your encoded data to tree.
-        public TreeNode deserialize(String data) {
-            if (data == null || data.length() == 0) return null;
-            String[] items = data.split(",");
-            return dfsForDeserialize(items, 0, items.length - 1);
-        }
-
-        private TreeNode dfsForDeserialize(String[] list, int start, int end) {
-            if (start > end) return null;
-            String val = list[start];
-            TreeNode root = new TreeNode(Integer.parseInt(val));
-
-            int index = end + 1;
-            for (int i = start + 1; i <= end; i++) {
-                if (Integer.parseInt(list[i]) > Integer.parseInt(val)) {
-                    index = i;
-                    break;
-                }
-            }
-            root.left = dfsForDeserialize(list, start + 1, index - 1);
-            root.right = dfsForDeserialize(list, index, end);
-            return root;
-        }
-    }
-
-    //[297]二叉树的序列化与反序列化
-    public class Codec {
-
-        // Encodes a tree to a single string.
-        public String serialize(TreeNode root) {
-            if (root == null) return "#";
-            //先序遍历
-            return root.val + "," + serialize(root.left) + "," + serialize(root.right);
-        }
-
-        // Decodes your encoded data to tree.
-        public TreeNode deserialize(String data) {
-            LinkedList<String> list = new LinkedList<>();
-            String[] items = data.split(",");
-            for (String item : items) {
-                list.addLast(item);
-            }
-            return dfsForDeserialize(list);
-        }
-
-        private TreeNode dfsForDeserialize(LinkedList<String> list) {
-            if (list.isEmpty()) return null;
-            String first = list.removeFirst();
-            if (first.equals("#")) {
-                return null;
-            }
-            TreeNode root = new TreeNode(Integer.parseInt(first));
-            root.left = dfsForDeserialize(list);
-            root.right = dfsForDeserialize(list);
-            return root;
-        }
-    }
-
-    //[306].累加数
-    public boolean isAdditiveNumber(String num) {
-        //199100199
-        //选择，前导0不能选择，需要知道之前两个数是什么，只能从前往后选择
-        return dfsForIsAdditiveNumber(num, 0, 0, 0, 0);
-    }
-
-    private boolean dfsForIsAdditiveNumber(String num, int start, long first, long second, int k) {
-        if (start == num.length()) {
-            return k > 2;
-        }
-
-        for (int i = start; i < num.length(); i++) {
-            long cur = selectNumber(num, start, i);
-            if (cur == -1) {
-                continue;
-            }
-            if (k >= 2 && first + second != cur) {
-                continue;
-            }
-
-            if (dfsForIsAdditiveNumber(num, i + 1, second, cur, k + 1)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private long selectNumber(String num, int start, int end) {
-        //单个0是一个累加序列合法值
-        if (start < end && num.charAt(start) == '0') {
-            return -1;
-        }
-        long number = 0;
-        for (int i = start; i <= end; i++) {
-            number = number * 10 + (num.charAt(i) - '0');
-        }
-        return number;
     }
 
     //[1044].最长重复子串
@@ -6143,70 +6723,6 @@ public class AllOfThem {
             }
         }
         return "";
-    }
-
-    //[313].超级丑数
-    public int nthSuperUglyNumber(int n, int[] primes) {
-        int k = primes.length;
-        //质数的指针
-        int[] pointers = new int[k];
-        int[] dp = new int[n];
-        dp[0] = 1;
-        for (int i = 1; i < n; i++) {
-            int min = Integer.MAX_VALUE;
-            for (int j = 0; j < k; j++) {
-                min = Math.min(dp[pointers[j]] * primes[j], min);
-            }
-            dp[i] = min;
-
-            for (int j = 0; j < k; j++) {
-                if (dp[pointers[j]] * primes[j] == min) {
-                    pointers[j]++;
-                }
-            }
-        }
-        return dp[n - 1];
-    }
-
-    //[263].丑数
-    public boolean isUgly(int num) {
-        if (num < 0) return false;
-        int remain = num;
-        while (remain != 1) {
-            if (remain % 2 == 0) {
-                remain /= 2;
-            } else if (remain % 3 == 0) {
-                remain /= 3;
-            } else if (remain % 5 == 0) {
-                remain /= 5;
-            } else {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //[264].丑数 II
-    public int nthUglyNumber(int n) {
-        //2 3 5 就是不用动态规划
-        int[] factors = new int[]{2, 3, 5};
-        PriorityQueue<Long> queue = new PriorityQueue<>();
-        Set<Long> set = new HashSet<>();
-        queue.offer(1L);
-        set.add(1L);
-        int res = 0;
-        for (int i = 0; i < n; i++) {
-            long min = queue.poll();
-            res = (int) min;
-            for (int factor : factors) {
-                long value = min * factor;
-                if (!set.contains(value)) {
-                    set.add(value);
-                    queue.offer(value);
-                }
-            }
-        }
-        return res;
     }
 
     //[1705].吃苹果的最大数目
@@ -6256,44 +6772,6 @@ public class AllOfThem {
         if (root.right != null && !dfsForIsEvenOddTree(root.right, level + 1, levelMap))
             return false;
         return true;
-    }
-
-    //[802].找到最终的安全状态
-    public List<Integer> eventualSafeNodes(int[][] graph) {
-        //存反图之后，那么入度为0的节点就是安全节点，而且不用顺序遍历
-        //以出度为0的节点优先加入队列中，队列中的节点的邻居节点扣减出度，如果为0，加入队列。当队列为空，剩下的节点都是不合法节点。
-        int n = graph.length;
-        int[] outDegree = new int[n];
-        List<Integer>[] inDegreeMap = new List[n];
-        for (int i = 0; i < n; i++) {
-            inDegreeMap[i] = new LinkedList<>();
-        }
-        for (int i = 0; i < n; i++) {
-            int[] neighbors = graph[i];
-            for (int neighbor : neighbors) {
-                inDegreeMap[neighbor].add(i);
-                outDegree[i]++;
-            }
-        }
-        Queue<Integer> queue = new LinkedList<>();
-        for (int i = 0; i < n; i++) {
-            if (outDegree[i] == 0) {
-                queue.offer(i);
-            }
-        }
-        List<Integer> ans = new ArrayList<>();
-        while (!queue.isEmpty()) {
-            int cur = queue.poll();
-            ans.add(cur);
-            //访问邻居节点，减出度
-            for (int neighbor : inDegreeMap[cur]) {
-                if (--outDegree[neighbor] == 0) {
-                    queue.offer(neighbor);
-                }
-            }
-        }
-        Collections.sort(ans);
-        return ans;
     }
 
     //[1169].查询无效交易
@@ -6440,143 +6918,6 @@ public class AllOfThem {
         return res;
     }
 
-    //[825].适龄的朋友
-    public int numFriendRequests(int[] ages) {
-        Arrays.sort(ages);
-        int n = ages.length, ans = 0;
-        for (int k = 0, i = 0, j = 0; k < n; k++) {
-            //20,30,100,110,120
-            //计算要么是全进来的，要么是全出去的，即计算进来，又计算出去，肯定有重复计算的数量
-            //左边能到k的关系，i k
-            while (i < k && !firstSelected(ages[i], ages[k])) i++;
-            if (j < k) j = k;
-            //右边能到k的关系，k j
-            while (j < n && firstSelected(ages[j], ages[k])) j++;
-            if (i < j) {
-                //相同的情况多扣1
-                ans += j - i - 1;
-            }
-        }
-        return ans;
-    }
-
-    private boolean firstSelected(int x, int y) {
-        if (y <= x * 0.5 + 7) return false;
-        if (y > x) return false;
-        if (y > 100 && x < 100) return false;
-        return true;
-    }
-
-    //[472].连接词
-    public List<String> findAllConcatenatedWordsInADict(String[] words) {
-        TrieNode trie = new TrieNode();
-        List<String> res = new ArrayList<>();
-        //首先是短的在前面，长的在后面，用长的去匹配短，如果能到结尾，说明是成功的，否则是不成功的。
-        Arrays.sort(words, Comparator.comparingInt(String::length));
-        //一个单词的匹配需要从头到尾逐一匹配前面的单词，所以有选择，避免不了用深度优先遍历
-        for (String word : words) {
-            if (word.length() == 0) continue;
-            if (dfsForFindAllConcatenateWordsInADict(trie, word, 0)) {
-                res.add(word);
-            } else {
-                insertToTrie(trie, word);
-            }
-        }
-        return res;
-    }
-
-    private class TrieNode {
-        TrieNode[] children;
-        boolean isEnd;
-
-        public TrieNode() {
-            children = new TrieNode[26];
-            isEnd = false;
-        }
-    }
-
-    private boolean dfsForFindAllConcatenateWordsInADict(TrieNode root, String word, int start) {
-        if (start == word.length()) return true;
-        TrieNode cur = root;
-        //这么多选择
-        for (int i = start; i < word.length(); i++) {
-            int ch = word.charAt(i) - 'a';
-            cur = cur.children[ch];
-            if (cur == null) {
-                return false;
-            }
-            //一定要终结了才可以选择下一个位置
-            if (cur.isEnd) {
-                //传root，从头开始匹配
-                if (dfsForFindAllConcatenateWordsInADict(root, word, i + 1)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private void insertToTrie(TrieNode root, String word) {
-        TrieNode cur = root;
-        for (int i = 0; i < word.length(); i++) {
-            int ch = word.charAt(i) - 'a';
-            if (cur.children[ch] == null) {
-                cur.children[ch] = new TrieNode();
-            }
-            cur = cur.children[ch];
-        }
-        cur.isEnd = true;
-    }
-
-    public static class Trie {
-
-        private Trie[] children;
-        private boolean isEnd;
-
-        public Trie() {
-            children = new Trie[26];
-            isEnd = false;
-        }
-
-        public void insert(String word) {
-            Trie cur = this;
-            for (int i = 0; i < word.length(); i++) {
-                int ch = word.charAt(i) - 'a';
-                if (cur.children[ch] == null) {
-                    cur.children[ch] = new Trie();
-                }
-                cur = cur.children[ch];
-            }
-            cur.isEnd = true;
-        }
-
-        public boolean search(String word) {
-            if (word == null || word.length() == 0) return false;
-            Trie cur = this;
-            for (int i = 0; i < word.length(); i++) {
-                int ch = word.charAt(i) - 'a';
-                if (cur.children[ch] == null) {
-                    return false;
-                }
-                cur = cur.children[ch];
-            }
-            return cur.isEnd;
-        }
-
-        public boolean startsWith(String prefix) {
-            if (prefix == null || prefix.length() == 0) return false;
-            Trie cur = this;
-            for (int i = 0; i < prefix.length(); i++) {
-                int ch = prefix.charAt(i) - 'a';
-                if (cur.children[ch] == null) {
-                    return false;
-                }
-                cur = cur.children[ch];
-            }
-            return true;
-        }
-    }
-
     //[1995].统计特殊四元组
     public int countQuadruplets(int[] nums) {
         //a + b = d - c, 以b逆序遍历，a从0到b-1， d从b+1到n-1
@@ -6593,47 +6934,6 @@ public class AllOfThem {
             }
         }
         return ans;
-    }
-
-    //[846].一手顺子
-    public static boolean isNStraightHand(int[] hand, int groupSize) {
-        int n = hand.length;
-        if (n < groupSize) return false;
-        Arrays.sort(hand);
-        Map<Integer, Integer> count = new HashMap<>();
-        for (int poker : hand) {
-            count.put(poker, count.getOrDefault(poker, 0) + 1);
-        }
-
-        //从小到大，选择最小的牌
-        for (int start : hand) {
-            //后面的牌被用掉了，可以继续找次小的牌
-            if (count.get(start) == 0) continue;
-            //连续选择后面牌，如果数量为0，则断牌了。
-            for (int i = 0; i < groupSize; i++) {
-                int target = start + i;
-                if (count.getOrDefault(target, 0) == 0) {
-                    return false;
-                }
-                count.put(target, count.get(target) - 1);
-            }
-        }
-        return true;
-    }
-
-    //[507].完美数
-    public boolean checkPerfectNumber(int num) {
-        if (num == 1) return false;
-        int sum = 1;
-        //36以6为界，左边从2到6，就是右边18到6，计算的时候1排除在外
-        //1 2 3 4 6 9 12 18
-        for (int i = 2; i <= num / i; i++) {
-            if (num % i == 0) {
-                sum += i;
-                sum += num / i;
-            }
-        }
-        return sum == num;
     }
 
     //[1446].连续字符
@@ -6659,32 +6959,6 @@ public class AllOfThem {
             left = right;
         }
         return res;
-    }
-
-    //[506].相对名次
-    public String[] findRelativeRanks(int[] score) {
-        int n = score.length;
-        int[] clone = score.clone();
-        Arrays.sort(clone);
-        Map<Integer, Integer> order = new HashMap<>();
-        for (int i = 1; i <= n; i++) {
-            order.put(clone[i - 1], n - i + 1);
-        }
-
-        String[] ans = new String[n];
-        for (int i = 0; i < n; i++) {
-            int no = order.get(score[i]);
-            if (no == 1) {
-                ans[i] = "Gold Medal";
-            } else if (no == 2) {
-                ans[i] = "Silver Medal";
-            } else if (no == 3) {
-                ans[i] = "Bronze Medal";
-            } else {
-                ans[i] = String.valueOf(no);
-            }
-        }
-        return ans;
     }
 
     //[1005].K 次取反后最大化的数组和
@@ -6726,24 +7000,6 @@ public class AllOfThem {
         return res;
     }
 
-    //[390].消除游戏
-    public int lastRemaining(int n) {
-        //1 2 3 4  => 2 从左到右删除剩下2
-        //1 2 3 4  => 3 从右到左删除剩下3
-
-        //1 2 3 4 5 => 2 从左到右删剩下2
-        //1 2 3 4 5 => 4 从右到左删除剩下4
-        //f(i) + f'(i) = i + 1
-
-        //1 2 3 4 5 => 从左到右删除
-        //2 4       => 5/2 = 2从右往左删除
-        //f(i) = 2 * f'(i/2)
-
-        //由公式可得：
-        //f(i) = 2* (i/2 + 1 - f(i/2))
-        return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
-    }
-
     //[1185].一周中的第几天
     public String dayOfTheWeek(int day, int month, int year) {
         String[] week = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
@@ -6760,60 +7016,6 @@ public class AllOfThem {
         days += day;
         //1970年12月31号，星期四，偏移4天，但是week是从0开始，实际偏移3
         return week[(days + 3) % 7];
-    }
-
-    //[913].猫和老鼠
-    public int catMouseGame(int[][] graph) {
-        int n = graph.length;
-        int[][][] memo = new int[n][n][2 * n];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                Arrays.fill(memo[i][j], -1);
-            }
-        }
-
-        //dfs(i, j, k), i为鼠移动，j为猫移动，k为第几轮。 鼠刚开始在1，猫刚开始在2，k为0
-        return dfs(memo, 1, 2, 0, graph);
-    }
-
-    private int dfs(int[][][] memo, int mouse, int cat, int turns, int[][] graph) {
-        if (turns >= 2 * graph.length) return 0;
-        if (memo[mouse][cat][turns] != -1) return memo[mouse][cat][turns];
-        if (mouse == 0) return memo[mouse][cat][turns] = 1;
-        if (mouse == cat) return memo[mouse][cat][turns] = 2;
-        //鼠先动
-        if (turns % 2 == 0) {
-            //最坏的情况猫赢
-            int ans = 2;
-            for (int nexPos : graph[mouse]) {
-                int ansNext = dfs(memo, nexPos, cat, turns + 1, graph);
-                //优先取老鼠赢，再不济选平局，最后选择猫赢
-                if (ansNext == 1) {
-                    return memo[mouse][cat][turns] = 1;
-                } else if (ansNext == 0) {
-                    //平局，不返回，看最后结果
-                    ans = 0;
-                }
-            }
-            return memo[mouse][cat][turns] = ans;
-        } else {
-            //最坏的情况鼠赢
-            int ans = 1;
-            for (int nexPos : graph[cat]) {
-                //猫要优先选择的位置不能为洞，不然老鼠就赢了
-                if (nexPos != 0) {
-                    int ansNext = dfs(memo, mouse, nexPos, turns + 1, graph);
-                    //猫赢了，直接返回
-                    if (ansNext == 2) {
-                        return memo[mouse][cat][turns] = 2;
-                    } else if (ansNext == 0) {
-                        //平局，得看看其他
-                        ans = 0;
-                    }
-                }
-            }
-            return memo[mouse][cat][turns] = ans;
-        }
     }
 
     //[1576].替换所有的问号
@@ -7022,19 +7224,15 @@ public class AllOfThem {
         return keysPressed.charAt(idx);
     }
 
-    //[747].至少是其他数字两倍的最大数
-    public int dominantIndex(int[] nums) {
-        if (nums.length == 1) return 0;
-        int maxIndex = 0, secondIndex = -1;
-        for (int i = 1; i < nums.length; i++) {
-            if (nums[i] > nums[maxIndex]) {
-                secondIndex = maxIndex;
-                maxIndex = i;
-            } else if (secondIndex == -1 || nums[i] > nums[secondIndex]) {
-                secondIndex = i;
-            }
-        }
-        return nums[maxIndex] >= 2 * nums[secondIndex] ? maxIndex : -1;
+    //[1716].计算力扣银行的钱
+    public int totalMoney(int n) {
+        int weekNum = n / 7;
+        int dayOfWeek = n % 7;
+        //星期有多少天，每增加一周，增加7天，第三周为14天，等差数列求和
+        int moneyOfWeeks = weekNum > 0 ? 28 * weekNum + 7 * weekNum * (weekNum - 1) / 2 : 0;
+        //第几个星期，首项就是多少
+        int moneyOfDays = dayOfWeek * (weekNum + 1) + dayOfWeek * (dayOfWeek - 1) / 2;
+        return moneyOfDays + moneyOfWeeks;
     }
 
     public static void main(String[] args) {
