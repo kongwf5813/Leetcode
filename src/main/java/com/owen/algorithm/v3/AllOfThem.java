@@ -1,20 +1,6 @@
 package com.owen.algorithm.v3;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AllOfThem {
@@ -941,7 +927,7 @@ public class AllOfThem {
         sb.append(count).append(pre.charAt(pre.length() - 1));
         return sb.toString();
     }
-    
+
     //[39].组合总和
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         List<List<Integer>> res = new ArrayList<>();
@@ -1673,7 +1659,7 @@ public class AllOfThem {
         nums[i] = nums[j];
         nums[j] = temp;
     }
-   
+
     //[77].组合
     public List<List<Integer>> combine(int n, int k) {
         List<List<Integer>> res = new ArrayList<>();
@@ -1693,7 +1679,7 @@ public class AllOfThem {
             select.removeLast();
         }
     }
-    
+
     //[78].子集
     public List<List<Integer>> subsets(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
@@ -2104,7 +2090,8 @@ public class AllOfThem {
     }
 
     //[99].恢复二叉搜索树
-    private TreeNode preNode,firstMax,lastMin;
+    private TreeNode preNode, firstMax, lastMin;
+
     public void recoverTree(TreeNode root) {
         dfsForRecoverTree(root);
         if (firstMax != null && lastMin != null) {
@@ -3016,6 +3003,42 @@ public class AllOfThem {
         return res;
     }
 
+    //[146].LRU 缓存
+    public class LRUCache {
+        LinkedHashMap<Integer, Integer> cache;
+        int capacity;
+
+        public LRUCache(int capacity) {
+            this.capacity = capacity;
+            this.cache = new LinkedHashMap<>();
+        }
+
+        public int get(int key) {
+            if (!cache.containsKey(key)) {
+                return -1;
+            }
+            int val = cache.get(key);
+            cache.remove(key);
+            cache.put(key, val);
+            return val;
+        }
+
+        public void put(int key, int value) {
+            if (cache.containsKey(key)) {
+                int val = cache.get(key);
+                cache.remove(key);
+                cache.put(key, val);
+            } else {
+                if (cache.size() >= capacity) {
+                    cache.remove(cache.keySet().iterator().next());
+                    cache.put(key, value);
+                } else {
+                    cache.put(key, value);
+                }
+            }
+        }
+    }
+
     //[147].对链表进行插入排序
     public ListNode insertionSortList(ListNode head) {
         ListNode dummy = new ListNode(-1);
@@ -3222,6 +3245,23 @@ public class AllOfThem {
             }
         }
         return 0;
+    }
+
+    //[169].多数元素
+    public int majorityElement(int[] nums) {
+        int candidate = -1;
+        int count = 0;
+        for (int num : nums) {
+            if (count == 0) {
+                candidate = num;
+            }
+            if (candidate != num) {
+                count--;
+            } else {
+                count++;
+            }
+        }
+        return candidate;
     }
 
     //[172].阶乘后的零
@@ -3790,6 +3830,7 @@ public class AllOfThem {
 
     //[234].回文链表
     private ListNode left;
+
     public boolean isPalindrome(ListNode head) {
         left = head;
         return helperIsPalindrome(head);
@@ -4079,6 +4120,7 @@ public class AllOfThem {
         }
         return length;
     }
+
     private int lengthOfLIS2(int[] nums) {
         int size = nums.length;
         if (size == 0) return 0;
@@ -4308,6 +4350,7 @@ public class AllOfThem {
 
     //[337].打家劫舍 III
     private Map<TreeNode, Integer> map = new HashMap<>();
+
     public int rob(TreeNode root) {
         if (root == null) return 0;
         if (map.containsKey(root)) return map.get(root);
@@ -4433,6 +4476,73 @@ public class AllOfThem {
             k--;
         }
         return res;
+    }
+
+    //[380].O(1) 时间插入、删除和获取随机元素
+    public class RandomizedSet {
+        //只要是获取随机需要提前知道大小并且能根据index直接获取
+        Map<Integer, Integer> map;
+        List<Integer> list;
+        Random random = new Random();
+        public RandomizedSet() {
+            map = new HashMap<>();
+            list = new ArrayList<>();
+        }
+
+        public boolean insert(int val) {
+            if (map.containsKey(val)) return false;
+
+            map.put(val, list.size());
+            list.add(list.size(), val);
+            return true;
+        }
+
+        public boolean remove(int val) {
+            if (!map.containsKey(val)) return false;
+
+            int lastIdx = list.size() -1;
+            int lastVal = list.get(lastIdx);
+            int idx = map.get(val);
+
+            //交换最后一个值到idx上
+            list.set(idx, lastVal);
+            //修改最新元素索引
+            map.put(lastVal, idx);
+
+            //删除最后一个元素
+            list.remove(lastIdx);
+            //删除该元素
+            map.remove(val);
+            return true;
+        }
+
+        public int getRandom() {
+            int idx = random.nextInt(list.size());
+            return list.get(idx);
+        }
+    }
+
+    //[382].链表随机节点
+    public class Solution382 {
+        ListNode head;
+
+        public Solution382(ListNode head) {
+            this.head = head;
+        }
+
+        public int getRandom() {
+            ListNode cur = head;
+            int idx = 0, ans = 0;
+            Random random = new Random();
+            while (cur != null) {
+                //蓄水池抽样：未知的规模中等概率选择样本， 从[0,i)选择一个元素
+                if (random.nextInt(++idx) == 0) {
+                    ans = cur.val;
+                }
+                cur = cur.next;
+            }
+            return ans;
+        }
     }
 
     //[383].赎金信
@@ -4904,6 +5014,25 @@ public class AllOfThem {
         return "Neither";
     }
 
+    //[470].用 Rand7() 实现 Rand10()
+    class Solution470 {
+        //虚拟方法
+        int rand7() {
+            return 0;
+        }
+
+        public int rand10() {
+            while (true) {
+                //转化为7进制，覆盖范围为[0, 48]
+                int rand = (rand7() - 1) * 7 + (rand7() - 1);
+                //扩大为倍数，每个数都是等概率的，然后扩大到[1,10]的最大的倍数4，较少rand7的调用次数
+                if (1 <= rand && rand <= 40)
+                    //rand % 10 取值范围是[0,9] + 1 => [1, 10]
+                    return rand % 10 + 1;
+            }
+        }
+    }
+
     //[472].连接词
     public List<String> findAllConcatenatedWordsInADict(String[] words) {
         TrieNode trie = new TrieNode();
@@ -4986,6 +5115,34 @@ public class AllOfThem {
             return -1;
         }
         return left;
+    }
+
+    //[478].在圆内随机生成点
+    public class Solution478 {
+        double rad;
+        double x;
+        double y;
+
+        public Solution478(double radius, double x_center, double y_center) {
+            rad = radius;
+            x = x_center;
+            y = y_center;
+        }
+
+        public double[] randPoint() {
+            //左下角的位置为原始点
+            double x0 = x - rad;
+            double y0 = y - rad;
+            while (true) {
+                //分别取x，y的随机点，原始点 + 2 * radius * [0, 1]随机值
+                double nx = x0 + Math.random() * 2 * rad;
+                double ny = y0 + Math.random() * 2 * rad;
+                //如果采样不在圈内，表示概率不相等继续选择
+                if (Math.sqrt(Math.pow(nx - x, 2) + Math.pow(ny - y, 2)) <= rad) {
+                    return new double[]{nx, ny};
+                }
+            }
+        }
     }
 
     //[491].递增子序列
@@ -7235,176 +7392,239 @@ public class AllOfThem {
         return moneyOfDays + moneyOfWeeks;
     }
 
+    //[5980].将字符串拆分为若干长度为 k 的组
+    public static String[] divideString(String s, int k, char fill) {
+        int g = s.length() / k;
+        int n = (s.length() % k == 0) ? g : g + 1;
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            if (s.length() >= (k * (i + 1))) {
+                ans[i] = s.substring(k * i, k * (i + 1));
+            } else {
+                int count = k * (i + 1) - s.length();
+                StringBuilder sb = new StringBuilder(s.substring(k * i));
+                while (count-- > 0) {
+                    sb.append(fill);
+                }
+                ans[i] = sb.toString();
+            }
+        }
+        return ans;
+    }
+
+    //[5194].得到目标值的最少行动次数
+    public static int minMoves(int target, int maxDoubles) {
+        int ans = 0;
+        //当时脑子短路，居然用动态规划来做，优先想O(n)的办法哇
+        //奇数一定是+1，偶数一定是优先通过倍数来搞
+        while (target > 1) {
+            if (maxDoubles == 0) {
+                return ans + target - 1;
+            }
+            if (target % 2 == 0) {
+                target /= 2;
+                maxDoubles--;
+                ans++;
+            } else {
+                target -= 1;
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    //[5982].解决智力问题
+    public static long mostPoints(int[][] questions) {
+        int n = questions.length;
+        //以i到n-1的范围所获得最大分数
+        long[] dp = new long[n];
+        dp[n - 1] = questions[n - 1][0];
+        for (int i = n - 2; i >= 0; i--) {
+            int j = questions[i][1] + i + 1;
+            //不做该题
+            long selectNot = dp[i + 1];
+            //做该题
+            long select = j < n ? dp[j] + questions[i][0] : questions[i][0];
+            dp[i] = Math.max(selectNot, select);
+        }
+        return dp[0];
+    }
+
     public static void main(String[] args) {
-
-        System.out.println(new AllOfThem().wordCount(new String[]{"ant", "act", "tack"}, new String[]{"tack", "act", "acti"}));
-        System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
-        System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
-        System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
-
-        System.out.println(new AllOfThem().findMinHeightTrees(2, new int[][]{{0, 1}}));
-        System.out.println(new AllOfThem().findMinHeightTrees(6, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {5, 4}}));
-        System.out.println(new AllOfThem().numTrees(3));
-        System.out.println(new AllOfThem().generate(5));
-        System.out.println(new AllOfThem().getRow(4));
-        System.out.println(new AllOfThem().partition("aabc"));
-        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 4));
-        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 3));
-        System.out.println(new AllOfThem().convert("A", 1));
-
-        System.out.println(new AllOfThem().reverse(120));
-        System.out.println(new AllOfThem().reverse(-123));
-        System.out.println(new AllOfThem().singleNumber(new int[]{1, 2, 1}));
-        System.out.println(new AllOfThem().singleNumber(new int[]{4, 1, 2, 1, 2}));
-        System.out.println(new AllOfThem().singleNumber2(new int[]{0, 1, 0, 1, 0, 1, -99}));
-        ListNode list = new ListNode(1);
-        list.next = new ListNode(2);
-        list.next.next = new ListNode(3);
-        list.next.next.next = new ListNode(4);
-        ListNode r1 = new AllOfThem().swapPairs(list);
-
-        ListNode second = new ListNode(1);
-        second.next = new ListNode(2);
-        second.next.next = new ListNode(3);
-        ListNode result = new AllOfThem().mergeTwoList(list, second);
-
-        ListNode l61 = new ListNode(1);
-        l61.next = new ListNode(2);
-        l61.next.next = new ListNode(3);
-        l61.next.next.next = new ListNode(4);
-        l61.next.next.next.next = new ListNode(5);
-        ListNode r61 = new AllOfThem().rotateRight(l61, 2);
-
-        ListNode l141 = new ListNode(1);
-        l141.next = new ListNode(2);
-        l141.next.next = new ListNode(3);
-        l141.next.next.next = new ListNode(4);
-//        l141.next.next.next.next = new ListNode(5);
-        new AllOfThem().reorderList(l141);
-
-
-        ListNode l328 = new ListNode(1);
-        l328.next = new ListNode(2);
-        l328.next.next = new ListNode(3);
-        l328.next.next.next = new ListNode(4);
-        ListNode r328 = new AllOfThem().oddEvenList(l328);
-
-        System.out.println(new AllOfThem().reverseWords("  Bob    Loves  Alice   "));
-
-        System.out.println(new AllOfThem().findLeftIndex(new int[]{1}, 5));
-        System.out.println(new AllOfThem().searchInsert(new int[]{1}, 5));
-        System.out.println(new AllOfThem().search3(new int[]{1, 0, 1, 1, 1}, 0));
-
-        System.out.println(new AllOfThem().letterCombinations("23"));
-        System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
-        System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
-        System.out.println(new AllOfThem().combinationSum3(3, 9));
-        System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
-        System.out.println(new AllOfThem().subsetsWithDup(new int[]{1, 2, 2}));
-        System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
-        System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
-        System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[]{4, 1, 2}, new int[]{1, 3, 4, 2})));
-        System.out.println(new AllOfThem().combine(4, 2));
-        System.out.println(new AllOfThem().solveNQueens(4));
-//        System.out.println(new AllOfThem().find132pattern(new int[]{1,2,3,4}));
-//        System.out.println(new AllOfThem().find132pattern(new int[]{3,1,4,2}));
-        System.out.println(new AllOfThem().find132pattern(new int[]{-1, 3, 2, 0}));
-//        System.out.println(new AllOfThem().find132pattern(new int[]{3, 5, 0, 3, 4}));
-        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{30, 60, 90})));
-        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
-        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73})));
-        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{2, 6, 4, 8, 10, 9, 15}));
-        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 4}));
-        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 3, 3}));
-        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1}));
-        System.out.println(new AllOfThem().grayCode(3));
-        System.out.println(new AllOfThem().superPow(2, new int[]{1, 0}));
-        System.out.println(new AllOfThem().trailingZeroes(10000));
-
-        TreeNode t199 = new TreeNode(1);
-        t199.left = new TreeNode(2);
-        t199.right = new TreeNode(3);
-        t199.left.right = new TreeNode(5);
-        t199.right.left = new TreeNode(4);
-        System.out.println(new AllOfThem().rightSideView(t199));
-        System.out.println(new AllOfThem().merge(new int[][]{{1, 4}, {1, 4}}));
-
-        System.out.println(new AllOfThem().numSquares(12));
-
-        TopVotedCandidate candidate = new AllOfThem.TopVotedCandidate(new int[]{0, 1, 1, 0, 0, 1, 0}, new int[]{0, 5, 10, 15, 20, 25, 30});
-        System.out.println(candidate.q(3));
-        System.out.println(candidate.q(12));
-        System.out.println(candidate.q(25));
-        System.out.println(candidate.q(15));
-        System.out.println(candidate.q(24));
-        System.out.println(candidate.q(8));
-        System.out.println(new AllOfThem().jump(new int[]{2, 3, 1, 1, 4}));
-
-        System.out.println(new AllOfThem().simplifyPath("../"));
-        System.out.println(new AllOfThem().timeRequiredToBuy(new int[]{2, 3, 4, 1}, 1));
-        System.out.println(new AllOfThem().minEatingSpeed(new int[]{30, 11, 23, 4, 20}, 6));
-        System.out.println(new AllOfThem().shipWithinDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5));
-        System.out.println(new AllOfThem().mySqrt(2147395599));
-
-        TreeNode t1712 = new TreeNode(4);
-        t1712.left = new TreeNode(2);
-        t1712.right = new TreeNode(5);
-        t1712.left.left = new TreeNode(1);
-        t1712.left.right = new TreeNode(3);
-        t1712.right.right = new TreeNode(6);
-        t1712.left.left.left = new TreeNode(0);
-
-        new AllOfThem().convertBiNode(t1712);
-
-        System.out.println(new AllOfThem().spiralOrder(new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}));
-        System.out.println(new AllOfThem().generateMatrix(3));
-
-        NumArray numArray = new NumArray(new int[]{-2, 0, 3, -5, 2, -1});
-        System.out.println(numArray.sumRange(0, 2));
-        System.out.println(numArray.sumRange(2, 5));
-        System.out.println(numArray.sumRange(0, 5));
-
-        System.out.println(Arrays.toString(new AllOfThem().corpFlightBookings(new int[][]{{1, 2, 10}, {2, 3, 20}, {2, 5, 25}}, 5)));
-        System.out.println(new AllOfThem().countBattleships(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
-        System.out.println(new AllOfThem().countBattleshipsV2(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
-        System.out.println(new AllOfThem().findRepeatedDnaSequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"));
-        System.out.println(new AllOfThem().decodeCiphertext("ch   ie   pr", 3));
-        System.out.println(new AllOfThem().decodeCiphertext("coding", 1));
-        System.out.println(new AllOfThem().getDescentPeriods(new int[]{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 3, 10, 9, 8, 7}));
-        System.out.println(new AllOfThem().kIncreasing(new int[]{5, 5, 5, 5, 4}, 1));
-        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 2));
-        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 3));
-        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 2));
-        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 3));
-        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 2));
-        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
-        System.out.println(new AllOfThem().isAdditiveNumber("199100199"));
-
-        System.out.println(new AllOfThem().nthUglyNumber(10));
-
-        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2}, {2, 3}, {5}, {0}, {5}, {}, {}}));
-        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2, 3, 4}, {1, 2}, {3, 4}, {0, 4}, {}}));
-        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv"}));
-        System.out.println(new AllOfThem().countGoodSubstrings("xyzzaz"));
-        System.out.println(new AllOfThem().countGoodSubstrings("aababcabc"));
-        System.out.println(new AllOfThem().intToRoman(3));
-        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
-        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
-        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 2, 3, 6}));
-        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 1, 1, 3, 5}));
-        System.out.println(new AllOfThem().removeElement(new int[]{1}, 1));
-        System.out.println(new AllOfThem().removeElement(new int[]{1}, 0));
-        System.out.println(new AllOfThem().addBinary("11", "1"));
-        System.out.println(new AllOfThem().restoreIpAddresses("25525511135"));
-        System.out.println(new AllOfThem().restoreIpAddresses("101023"));
-        System.out.println(new AllOfThem().restoreIpAddresses("010010"));
-        System.out.println(new AllOfThem().findCircleNum(new int[][]{{1, 1, 0}, {1, 1, 0}, {0, 0, 1}}));
-        System.out.println(new AllOfThem().grayCode(3));
-        System.out.println(new AllOfThem().minSwaps(new int[]{0, 1, 0, 1, 1, 0, 0}));
-        System.out.println(new AllOfThem().minSwaps(new int[]{0, 1, 1, 1, 0, 0, 1, 1, 0}));
-        System.out.println(new AllOfThem().minSwaps(new int[]{1, 1, 0, 0, 1}));
-        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbcbcac"));
-        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbbaccc"));
-        System.out.println(new AllOfThem().isInterleave("", "", ""));
+//        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
+//        System.out.println(mostPoints(new int[][]{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}));
+//        System.out.println(Arrays.toString(divideString("abcdefghij", 3, 'x')));
+//        System.out.println(minMoves(5, 0));
+//        System.out.println(minMoves(19, 2));
+//        System.out.println(minMoves(10, 4));
+//        System.out.println(new AllOfThem().wordCount(new String[]{"ant", "act", "tack"}, new String[]{"tack", "act", "acti"}));
+//        System.out.println(Arrays.toString(new AllOfThem().executeInstructions(3, new int[]{0, 1}, "RRDDLU")));
+//        System.out.println(new AllOfThem().permute(new int[]{1, 2, 3}));
+//        System.out.println(new AllOfThem().permuteUnique(new int[]{1, 1, 2}));
+//
+//        System.out.println(new AllOfThem().findMinHeightTrees(2, new int[][]{{0, 1}}));
+//        System.out.println(new AllOfThem().findMinHeightTrees(6, new int[][]{{3, 0}, {3, 1}, {3, 2}, {3, 4}, {5, 4}}));
+//        System.out.println(new AllOfThem().numTrees(3));
+//        System.out.println(new AllOfThem().generate(5));
+//        System.out.println(new AllOfThem().getRow(4));
+//        System.out.println(new AllOfThem().partition("aabc"));
+//        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 4));
+//        System.out.println(new AllOfThem().convert("PAYPALISHIRING", 3));
+//        System.out.println(new AllOfThem().convert("A", 1));
+//
+//        System.out.println(new AllOfThem().reverse(120));
+//        System.out.println(new AllOfThem().reverse(-123));
+//        System.out.println(new AllOfThem().singleNumber(new int[]{1, 2, 1}));
+//        System.out.println(new AllOfThem().singleNumber(new int[]{4, 1, 2, 1, 2}));
+//        System.out.println(new AllOfThem().singleNumber2(new int[]{0, 1, 0, 1, 0, 1, -99}));
+//        ListNode list = new ListNode(1);
+//        list.next = new ListNode(2);
+//        list.next.next = new ListNode(3);
+//        list.next.next.next = new ListNode(4);
+//        ListNode r1 = new AllOfThem().swapPairs(list);
+//
+//        ListNode second = new ListNode(1);
+//        second.next = new ListNode(2);
+//        second.next.next = new ListNode(3);
+//        ListNode result = new AllOfThem().mergeTwoList(list, second);
+//
+//        ListNode l61 = new ListNode(1);
+//        l61.next = new ListNode(2);
+//        l61.next.next = new ListNode(3);
+//        l61.next.next.next = new ListNode(4);
+//        l61.next.next.next.next = new ListNode(5);
+//        ListNode r61 = new AllOfThem().rotateRight(l61, 2);
+//
+//        ListNode l141 = new ListNode(1);
+//        l141.next = new ListNode(2);
+//        l141.next.next = new ListNode(3);
+//        l141.next.next.next = new ListNode(4);
+////        l141.next.next.next.next = new ListNode(5);
+//        new AllOfThem().reorderList(l141);
+//
+//
+//        ListNode l328 = new ListNode(1);
+//        l328.next = new ListNode(2);
+//        l328.next.next = new ListNode(3);
+//        l328.next.next.next = new ListNode(4);
+//        ListNode r328 = new AllOfThem().oddEvenList(l328);
+//
+//        System.out.println(new AllOfThem().reverseWords("  Bob    Loves  Alice   "));
+//
+//        System.out.println(new AllOfThem().findLeftIndex(new int[]{1}, 5));
+//        System.out.println(new AllOfThem().searchInsert(new int[]{1}, 5));
+//        System.out.println(new AllOfThem().search3(new int[]{1, 0, 1, 1, 1}, 0));
+//
+//        System.out.println(new AllOfThem().letterCombinations("23"));
+//        System.out.println(new AllOfThem().combinationSum(new int[]{2, 3, 4, 7}, 7));
+//        System.out.println(new AllOfThem().combinationSum2(new int[]{10, 1, 2, 7, 6, 1, 5}, 8));
+//        System.out.println(new AllOfThem().combinationSum3(3, 9));
+//        System.out.println(new AllOfThem().subsets(new int[]{1, 2, 3, 4}));
+//        System.out.println(new AllOfThem().subsetsWithDup(new int[]{1, 2, 2}));
+//        System.out.println(new AllOfThem().trap(new int[]{0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1}));
+//        System.out.println(new AllOfThem().trap(new int[]{4, 2, 0, 3, 2, 5}));
+//        System.out.println(Arrays.toString(new AllOfThem().nextGreaterElement(new int[]{4, 1, 2}, new int[]{1, 3, 4, 2})));
+//        System.out.println(new AllOfThem().combine(4, 2));
+//        System.out.println(new AllOfThem().solveNQueens(4));
+////        System.out.println(new AllOfThem().find132pattern(new int[]{1,2,3,4}));
+////        System.out.println(new AllOfThem().find132pattern(new int[]{3,1,4,2}));
+//        System.out.println(new AllOfThem().find132pattern(new int[]{-1, 3, 2, 0}));
+////        System.out.println(new AllOfThem().find132pattern(new int[]{3, 5, 0, 3, 4}));
+//        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{30, 60, 90})));
+//        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73, 74, 75, 71, 69, 72, 76, 73})));
+//        System.out.println(Arrays.toString(new AllOfThem().dailyTemperatures(new int[]{73})));
+//        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{2, 6, 4, 8, 10, 9, 15}));
+//        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 4}));
+//        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1, 2, 3, 3, 3}));
+//        System.out.println(new AllOfThem().findUnsortedSubarray(new int[]{1}));
+//        System.out.println(new AllOfThem().grayCode(3));
+//        System.out.println(new AllOfThem().superPow(2, new int[]{1, 0}));
+//        System.out.println(new AllOfThem().trailingZeroes(10000));
+//
+//        TreeNode t199 = new TreeNode(1);
+//        t199.left = new TreeNode(2);
+//        t199.right = new TreeNode(3);
+//        t199.left.right = new TreeNode(5);
+//        t199.right.left = new TreeNode(4);
+//        System.out.println(new AllOfThem().rightSideView(t199));
+//        System.out.println(new AllOfThem().merge(new int[][]{{1, 4}, {1, 4}}));
+//
+//        System.out.println(new AllOfThem().numSquares(12));
+//
+//        TopVotedCandidate candidate = new AllOfThem.TopVotedCandidate(new int[]{0, 1, 1, 0, 0, 1, 0}, new int[]{0, 5, 10, 15, 20, 25, 30});
+//        System.out.println(candidate.q(3));
+//        System.out.println(candidate.q(12));
+//        System.out.println(candidate.q(25));
+//        System.out.println(candidate.q(15));
+//        System.out.println(candidate.q(24));
+//        System.out.println(candidate.q(8));
+//        System.out.println(new AllOfThem().jump(new int[]{2, 3, 1, 1, 4}));
+//
+//        System.out.println(new AllOfThem().simplifyPath("../"));
+//        System.out.println(new AllOfThem().timeRequiredToBuy(new int[]{2, 3, 4, 1}, 1));
+//        System.out.println(new AllOfThem().minEatingSpeed(new int[]{30, 11, 23, 4, 20}, 6));
+//        System.out.println(new AllOfThem().shipWithinDays(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 5));
+//        System.out.println(new AllOfThem().mySqrt(2147395599));
+//
+//        TreeNode t1712 = new TreeNode(4);
+//        t1712.left = new TreeNode(2);
+//        t1712.right = new TreeNode(5);
+//        t1712.left.left = new TreeNode(1);
+//        t1712.left.right = new TreeNode(3);
+//        t1712.right.right = new TreeNode(6);
+//        t1712.left.left.left = new TreeNode(0);
+//
+//        new AllOfThem().convertBiNode(t1712);
+//
+//        System.out.println(new AllOfThem().spiralOrder(new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}));
+//        System.out.println(new AllOfThem().generateMatrix(3));
+//
+//        NumArray numArray = new NumArray(new int[]{-2, 0, 3, -5, 2, -1});
+//        System.out.println(numArray.sumRange(0, 2));
+//        System.out.println(numArray.sumRange(2, 5));
+//        System.out.println(numArray.sumRange(0, 5));
+//
+//        System.out.println(Arrays.toString(new AllOfThem().corpFlightBookings(new int[][]{{1, 2, 10}, {2, 3, 20}, {2, 5, 25}}, 5)));
+//        System.out.println(new AllOfThem().countBattleships(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
+//        System.out.println(new AllOfThem().countBattleshipsV2(new char[][]{{'X', '.', '.'}, {'X', 'X', 'X'}, {'X', '.', '.'}}));
+//        System.out.println(new AllOfThem().findRepeatedDnaSequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"));
+//        System.out.println(new AllOfThem().decodeCiphertext("ch   ie   pr", 3));
+//        System.out.println(new AllOfThem().decodeCiphertext("coding", 1));
+//        System.out.println(new AllOfThem().getDescentPeriods(new int[]{12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 4, 3, 10, 9, 8, 7}));
+//        System.out.println(new AllOfThem().kIncreasing(new int[]{5, 5, 5, 5, 4}, 1));
+//        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 2));
+//        System.out.println(new AllOfThem().findLeftIndex2(new int[]{1, 2, 2, 4}, 3));
+//        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 2));
+//        System.out.println(new AllOfThem().findRightIndexV2(new int[]{1, 2, 2, 4}, 3));
+//        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 2));
+//        System.out.println(new AllOfThem().findRightIndexV3(new int[]{1, 2, 2, 4}, 3));
+//        System.out.println(new AllOfThem().isAdditiveNumber("199100199"));
+//
+//        System.out.println(new AllOfThem().nthUglyNumber(10));
+//
+//        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2}, {2, 3}, {5}, {0}, {5}, {}, {}}));
+//        System.out.println(new AllOfThem().eventualSafeNodes(new int[][]{{1, 2, 3, 4}, {1, 2}, {3, 4}, {0, 4}, {}}));
+//        System.out.println(new AllOfThem().invalidTransactions(new String[]{"alice,20,1220,mtv", "alice,20,1220,mtv"}));
+//        System.out.println(new AllOfThem().countGoodSubstrings("xyzzaz"));
+//        System.out.println(new AllOfThem().countGoodSubstrings("aababcabc"));
+//        System.out.println(new AllOfThem().intToRoman(3));
+//        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"flower", "flow", "flight"}));
+//        System.out.println(new AllOfThem().longestCommonPrefix(new String[]{"dog", "racecar", "car"}));
+//        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 2, 3, 6}));
+//        System.out.println(new AllOfThem().countQuadruplets(new int[]{1, 1, 1, 3, 5}));
+//        System.out.println(new AllOfThem().removeElement(new int[]{1}, 1));
+//        System.out.println(new AllOfThem().removeElement(new int[]{1}, 0));
+//        System.out.println(new AllOfThem().addBinary("11", "1"));
+//        System.out.println(new AllOfThem().restoreIpAddresses("25525511135"));
+//        System.out.println(new AllOfThem().restoreIpAddresses("101023"));
+//        System.out.println(new AllOfThem().restoreIpAddresses("010010"));
+//        System.out.println(new AllOfThem().findCircleNum(new int[][]{{1, 1, 0}, {1, 1, 0}, {0, 0, 1}}));
+//        System.out.println(new AllOfThem().grayCode(3));
+//        System.out.println(new AllOfThem().minSwaps(new int[]{0, 1, 0, 1, 1, 0, 0}));
+//        System.out.println(new AllOfThem().minSwaps(new int[]{0, 1, 1, 1, 0, 0, 1, 1, 0}));
+//        System.out.println(new AllOfThem().minSwaps(new int[]{1, 1, 0, 0, 1}));
+//        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbcbcac"));
+//        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbbaccc"));
+//        System.out.println(new AllOfThem().isInterleave("", "", ""));
     }
 }
