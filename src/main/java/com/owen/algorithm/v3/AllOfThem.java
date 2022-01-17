@@ -4484,6 +4484,7 @@ public class AllOfThem {
         Map<Integer, Integer> map;
         List<Integer> list;
         Random random = new Random();
+
         public RandomizedSet() {
             map = new HashMap<>();
             list = new ArrayList<>();
@@ -4500,7 +4501,7 @@ public class AllOfThem {
         public boolean remove(int val) {
             if (!map.containsKey(val)) return false;
 
-            int lastIdx = list.size() -1;
+            int lastIdx = list.size() - 1;
             int lastVal = list.get(lastIdx);
             int idx = map.get(val);
 
@@ -5387,6 +5388,7 @@ public class AllOfThem {
     }
 
     //[538].把二叉搜索树转换为累加树
+    //[1038].把二叉搜索树转换为累加树
     public TreeNode convertBST(TreeNode root) {
         //右根左这样的递归顺序遍历
         dfsForConvertBST(root, new AtomicInteger());
@@ -5501,6 +5503,30 @@ public class AllOfThem {
         return right > left ? right - left + 1 : 0;
     }
 
+    //[583].两个字符串的删除操作
+    public int minDistance(String word1, String word2) {
+//        int common = longestCommonSubsequence(word1, word2);
+//        return word1.length() + word2.length() - 2 * common;
+
+        int m = word1.length(), n = word2.length();
+        //字符串，定义为长度为i的word1，长度为j的word2的最小删除操作数
+        int[][] dp = new int[m + 1][n + 1];
+        //长度为0，另一个的编辑距离递增
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int i = 0; i <= n; i++) dp[0][i] = i;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    //不相等，砍掉两个字符删除数就+2，砍掉一个字符删除数就+1。
+                    dp[i][j] = Math.min(dp[i - 1][j - 1] + 2, Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
     //[589].N 叉树的前序遍历
     public List<Integer> preorder(Node root) {
         Stack<Node> stack = new Stack<>();
@@ -5554,6 +5580,22 @@ public class AllOfThem {
             }
         }
         return queue.size();
+    }
+
+    //[633].平方数之和
+    public boolean judgeSquareSum(int c) {
+        int left = 0, right = (int) Math.sqrt(c);
+        while (left <= right) {
+            int sum = left * left + right * right;
+            if (sum == c) {
+                return true;
+            } else if (sum < c) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        return false;
     }
 
     //[674].最长连续递增序列
@@ -6243,6 +6285,26 @@ public class AllOfThem {
             res += connect[2];
         }
         return uf.count == 2 ? res : -1;
+    }
+
+    //[1143].最长公共子序列
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(), n = text2.length();
+        //长度为i的text1和长度为j的text2的最长公共子序列
+        //字符串dp题目，以长度作为dp定义比较合适
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                //这边是结尾字符的索引
+                if (text1.charAt(i - 1) == text2.charAt(i - 1)) {
+                    //这边的是长度
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m][n];
     }
 
     //[1584].连接所有点的最小费用
@@ -7411,8 +7473,9 @@ public class AllOfThem {
         // 每个元音 'o' 后面只能跟着 'i' 或者是 'u'
         // 每个元音 'u' 后面只能跟着 'a'
         int MOD = (int) 1e9 + 7;
+        //以i开头的字符串，以元音字母结尾的字符数量
         long[][] dp = new long[n][5];
-        Arrays.fill(dp[n-1], 1);
+        Arrays.fill(dp[n - 1], 1);
         for (int i = n - 2; i >= 0; i--) {
             //以a开头
             dp[i][0] = dp[i + 1][1];
@@ -7432,7 +7495,50 @@ public class AllOfThem {
         for (int i = 0; i < 5; i++) {
             ans += dp[0][i];
         }
-        return (int)(ans % MOD);
+        return (int) (ans % MOD);
+    }
+
+    //[1220].统计元音字母序列的数量(矩阵快速幂)
+    private int countVowelPermutation2(int n) {
+        int MOD = (int) 1e9 + 7;
+        long[][] mat = new long[][]{
+                {0, 1, 0, 0, 0},
+                {1, 0, 1, 0, 0},
+                {1, 1, 0, 1, 1},
+                {0, 0, 1, 0, 1},
+                {1, 0, 0, 0, 0}};
+        long[][] ans = new long[][]{{1}, {1}, {1}, {1}, {1}};
+
+        //矩阵快速幂
+        int x = n - 1;
+        while (x != 0) {
+            //注意是mat在前面
+            if ((x & 1) != 0) ans = mul(mat, ans);
+            mat = mul(mat, mat);
+            x >>= 1;
+        }
+
+        long res = 0;
+        for (int i = 0; i < 5; i++) {
+            res += ans[i][0];
+        }
+        return (int) (res % MOD);
+    }
+
+    //矩阵快速幂
+    private long[][] mul(long[][] a, long[][] b) {
+        int MOD = (int) 1e9 + 7;
+        int r = a.length, c = b[0].length, z = b.length;
+        long[][] res = new long[r][c];
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                for (int k = 0; k < z; k++) {
+                    res[i][j] += a[i][k] * b[k][j];
+                    res[i][j] %= MOD;
+                }
+            }
+        }
+        return res;
     }
 
     //[1629].按键持续时间最长的键
