@@ -7157,6 +7157,42 @@ public class AllOfThem {
         return res;
     }
 
+    //[1036].逃离大迷宫
+    public boolean isEscapePossible(int[][] blocked, int[] source, int[] target) {
+        int n = blocked.length;
+        Set<Long> vis = new HashSet<>();
+        for (int[] p : blocked) {
+            vis.add(p[0] * 131l + p[1]);
+        }
+        //最优的情况下，利用边界使得包围圈最大化，最多只有n-1 + n-2 + ... + 1。斜的n个不算，超过一个就是可以逃离。
+        int MAX = (n - 1) * n / 2;
+        return check(source, target, MAX, vis) && check(target, source, MAX, vis);
+    }
+
+    private boolean check(int[] source, int[] target, int n, Set<Long> vis) {
+        Set<Long> set = new HashSet<>();
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(source);
+        set.add(source[0] * 131l + source[1]);
+
+        int[][] dir = new int[][]{{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        while (!queue.isEmpty() && set.size() <= n) {
+            int[] cur = queue.poll();
+            if (cur[0] == target[0] && cur[1] == target[1]) return true;
+            for (int[] d : dir) {
+                int nextX = cur[0] + d[0];
+                int nextY = cur[1] + d[1];
+                if (nextX < 0 || nextY < 0 || nextX >= (int) 1e6 || nextY >= (int) 1e6) continue;
+                long hash = nextX * 131l + nextY;
+                if (vis.contains(hash)) continue;
+                if (set.contains(hash)) continue;
+                set.add(hash);
+                queue.offer(new int[]{nextX, nextY});
+            }
+        }
+        return set.size() > n;
+    }
+
     //[1185].一周中的第几天
     public String dayOfTheWeek(int day, int month, int year) {
         String[] week = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
@@ -7364,6 +7400,39 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[1220].统计元音字母序列的数量
+    public int countVowelPermutation(int n) {
+        // 字符串中的每个字符都应当是小写元音字母（'a', 'e', 'i', 'o', 'u'）
+        // 每个元音 'a' 后面都只能跟着 'e'
+        // 每个元音 'e' 后面只能跟着 'a' 或者是 'i'
+        // 每个元音 'i' 后面 不能 再跟着另一个 'i'
+        // 每个元音 'o' 后面只能跟着 'i' 或者是 'u'
+        // 每个元音 'u' 后面只能跟着 'a'
+        int MOD = (int) 1e9 + 7;
+        long[][] dp = new long[n][5];
+        Arrays.fill(dp[n-1], 1);
+        for (int i = n - 2; i >= 0; i--) {
+            //以a开头
+            dp[i][0] = dp[i + 1][1];
+            //以e开头
+            dp[i][1] = dp[i + 1][0] + dp[i + 1][2];
+            //以i开头
+            dp[i][2] = dp[i + 1][0] + dp[i + 1][1] + dp[i + 1][3] + dp[i + 1][4];
+            //以o开头
+            dp[i][3] = dp[i + 1][2] + dp[i + 1][4];
+            //以u开头
+            dp[i][4] = dp[i + 1][0];
+            for (int j = 0; j < 5; j++) {
+                dp[i][j] %= MOD;
+            }
+        }
+        long ans = 0;
+        for (int i = 0; i < 5; i++) {
+            ans += dp[0][i];
+        }
+        return (int)(ans % MOD);
     }
 
     //[1629].按键持续时间最长的键
