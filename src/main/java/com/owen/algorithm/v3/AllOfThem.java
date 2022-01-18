@@ -1343,6 +1343,15 @@ public class AllOfThem {
         return res.toArray(new int[][]{});
     }
 
+    //[58].最后一个单词的长度
+    public int lengthOfLastWord(String s) {
+        int end = s.length() - 1;
+        while (end >= 0 && s.charAt(end) == ' ') end--;
+        int start = end;
+        while (start >= 0 && s.charAt(start) != ' ') start--;
+        return end - start;
+    }
+
     //[59].螺旋矩阵 II
     public int[][] generateMatrix(int n) {
         int top = 0, bottom = n - 1;
@@ -5404,6 +5413,29 @@ public class AllOfThem {
         dfsForConvertBST(root.left, sum);
     }
 
+    //[539].最小时间差
+    public int findMinDifference(List<String> timePoints) {
+        //抽屉原理，总时间为1440，超过必然有一个重复的
+        if (timePoints.size() > 1440) return 0;
+        int[] cnts = new int[1440 * 2];
+        for (String timePoint : timePoints) {
+            String[] vals = timePoint.split(":");
+            int time = Integer.parseInt(vals[0]) * 60 + Integer.parseInt(vals[1]);
+            cnts[time]++;
+            //将最小的时间扩展到下一天
+            cnts[time + 1440]++;
+        }
+        int ans = 1440, idx = -1;
+        for (int i = 0; i < 1440 * 2 && ans != 0; i++) {
+            if (cnts[i] == 0) continue;
+            if (cnts[i] > 1) return 0;
+            //相同间隔逐一比较，尤其是数量为1的情况
+            if (idx != -1) ans = Math.min(ans, i - idx);
+            idx = i;
+        }
+        return ans;
+    }
+
     //[542].01 矩阵
     public int[][] updateMatrix(int[][] mat) {
         int m = mat.length, n = mat[0].length;
@@ -7623,6 +7655,33 @@ public class AllOfThem {
             dp[i] = Math.max(selectNot, select);
         }
         return dp[0];
+    }
+
+    //[166].分数到小数
+    public String fractionToDecimal(int numerator, int denominator) {
+        //模拟除法
+        return null;
+    }
+
+    //[173].二叉搜索树迭代器
+    public class BSTIterator {
+
+        public BSTIterator(TreeNode root) {
+
+        }
+
+        public int next() {
+            return 0;
+        }
+
+        public boolean hasNext() {
+            return false;
+        }
+    }
+
+    //[179].最大数
+    public String largestNumber(int[] nums) {
+        return null;
     }
 
     public static void main(String[] args) {
