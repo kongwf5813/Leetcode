@@ -7797,14 +7797,41 @@ public class AllOfThem {
         //单调队列
         return null;
     }
+
     //[331].验证二叉树的前序序列化
     public boolean isValidSerialization(String preorder) {
         //用a##替换成一个#, 最后只会剩下一个#
         return false;
     }
 
+    //[623].在二叉树中增加一行
+    public TreeNode addOneRow(TreeNode root, int val, int depth) {
+        helperForAddOneRow(root, val, depth, 0);
+        return root;
+    }
+
+    private void helperForAddOneRow(TreeNode root, int val, int depth, int level) {
+        if (root == null) return;
+        if (level == depth) {
+            if (root.left != null) {
+                TreeNode left = new TreeNode(val);
+                left.left = root.left;
+                root.left = left;
+            }
+            if (root.right != null) {
+                TreeNode right = new TreeNode(val);
+                right.right = root.right;
+                root.right = right;
+            }
+            return;
+        }
+
+        helperForAddOneRow(root.left, val, depth, level + 1);
+        helperForAddOneRow(root.right, val, depth, level + 1);
+    }
+
     public static void main(String[] args) {
-        System.out.println(maxSlidingWindow(new int[] {1,3,-1,-3,5,3,6,7}, 3));
+        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
 //        System.out.println(mostPoints(new int[][]{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}));
 //        System.out.println(Arrays.toString(divideString("abcdefghij", 3, 'x')));
