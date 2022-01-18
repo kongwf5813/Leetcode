@@ -1,5 +1,7 @@
 package com.owen.algorithm.v3;
 
+import com.owen.algorithm.Tree;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -3256,6 +3258,42 @@ public class AllOfThem {
         return 0;
     }
 
+    //[166].分数到小数
+    public String fractionToDecimal(int numerator, int denominator) {
+        if (numerator == 0) return "0";
+        long remain = Math.abs(numerator);
+        long div = Math.abs(denominator);
+        StringBuilder sb = new StringBuilder();
+        if (numerator < 0 ^ denominator < 0) {
+            sb.append('-');
+        }
+        //先做整数部分的除法操作
+        sb.append(remain / div);
+        remain %= div;
+        if (remain == 0) return sb.toString();
+        sb.append('.');
+
+        //再做小数部分的除法操作
+        Map<Long, Integer> index = new HashMap<>();
+        while (remain != 0) {
+            //涉及到分数的运算了，所以直接可以通过有没有来判断
+            if (index.containsKey(remain)) {
+                int idx = index.get(remain);
+                sb.insert(idx, '(');
+                sb.append(')');
+                break;
+            } else {
+                //每次都是余数数字，记录需要插入的位置
+                index.put(remain, sb.length());
+                //每次都要扩10倍，模拟竖式除法
+                remain *= 10;
+                sb.append(remain / div);
+                remain %= div;
+            }
+        }
+        return sb.toString();
+    }
+
     //[169].多数元素
     public int majorityElement(int[] nums) {
         int candidate = -1;
@@ -3282,6 +3320,47 @@ public class AllOfThem {
             d *= 5;
         }
         return res;
+    }
+
+    //[173].二叉搜索树迭代器
+    public class BSTIterator {
+        Stack<TreeNode> stack;
+
+        public BSTIterator(TreeNode root) {
+            stack = new Stack<>();
+            TreeNode cur = root;
+            //中序遍历的迭代算法拆成了两半，前半段压栈，后半段弹栈
+            while (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            }
+        }
+
+        public int next() {
+            TreeNode cur = stack.pop();
+            cur = cur.right;
+            while (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
+            }
+            return cur.val;
+        }
+
+        public boolean hasNext() {
+            return !stack.isEmpty();
+        }
+    }
+
+    //[179].最大数
+    public String largestNumber(int[] nums) {
+        int n = nums.length;
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = String.valueOf(nums[i]);
+        }
+        Arrays.sort(ans, (a, b) -> (b + a).compareTo(a + b));
+        if (ans[0].equals("0")) return "0";
+        return String.join("", ans);
     }
 
     //[187].重复的DNA序列
@@ -4304,6 +4383,62 @@ public class AllOfThem {
             }
         }
         return dp[n - 1];
+    }
+
+    //[316].去除重复字母
+    public String removeDuplicateLetters(String s) {
+        int[] cnts = new int[26];
+        for (char ch : s.toCharArray()) {
+            cnts[ch - 'a']++;
+        }
+
+        Stack<Character> stack = new Stack<>();
+        boolean[] instack = new boolean[26];
+        for (char ch : s.toCharArray()) {
+            cnts[ch - 'a']--;
+            //重复的情况，在这里就被处理掉了
+            if (instack[ch - 'a']) {
+                continue;
+            }
+            while (!stack.isEmpty() && stack.peek() > ch) {
+                if (cnts[stack.peek() - 'a'] == 0) {
+                    break;
+                }
+                instack[stack.pop() - 'a'] = false;
+                ;
+            }
+
+            stack.push(ch);
+            instack[ch - 'a'] = true;
+        }
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.insert(0, stack.pop());
+        }
+        return sb.toString();
+    }
+
+    //[318].最大单词长度乘积
+    public int maxProduct(String[] words) {
+        int n = words.length;
+        if (n == 0) return 0;
+        int[] hashs = new int[n];
+        for (int i = 0; i < n; i++) {
+            int hash = 0;
+            for (char ch : words[i].toCharArray()) {
+                hash |= 1 << (ch - 'a');
+            }
+            hashs[i] = hash;
+        }
+        int ans = 0;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if ((hashs[i] & hashs[j]) == 0) {
+                    ans = Math.max(ans, words[i].length() * words[j].length());
+                }
+            }
+        }
+        return ans;
     }
 
     //[326].3的幂
@@ -7657,71 +7792,19 @@ public class AllOfThem {
         return dp[0];
     }
 
-    //[166].分数到小数
-    public String fractionToDecimal(int numerator, int denominator) {
-        if (numerator == 0) return "0";
-        long remain = Math.abs(numerator);
-        long div = Math.abs(denominator);
-        StringBuilder sb = new StringBuilder();
-        if (numerator < 0 ^ denominator < 0) {
-            sb.append('-');
-        }
-        //先做整数部分的除法操作
-        sb.append(remain / div);
-        remain %= div;
-        if (remain == 0) return sb.toString();
-        sb.append('.');
-
-        //再做小数部分的除法操作
-        Map<Long, Integer> index = new HashMap<>();
-        while (remain != 0) {
-            //涉及到分数的运算了，所以直接可以通过有没有来判断
-            if (index.containsKey(remain)) {
-                int idx = index.get(remain);
-                sb.insert(idx, '(');
-                sb.append(')');
-                break;
-            } else {
-                //每次都是余数数字，记录需要插入的位置
-                index.put(remain, sb.length());
-                //每次都要扩10倍，模拟竖式除法
-                remain *= 10;
-                sb.append(remain / div);
-                remain %= div;
-            }
-        }
-        return sb.toString();
+    //[239].滑动窗口最大值
+    public static int[] maxSlidingWindow(int[] nums, int k) {
+        //单调队列
+        return null;
     }
-
-    //[173].二叉搜索树迭代器
-    public class BSTIterator {
-
-        public BSTIterator(TreeNode root) {
-
-        }
-
-        public int next() {
-            return 0;
-        }
-
-        public boolean hasNext() {
-            return false;
-        }
-    }
-
-    //[179].最大数
-    public String largestNumber(int[] nums) {
-        int n = nums.length;
-        String[] ans = new String[n];
-        for (int i = 0; i < n; i++) {
-            ans[i] = String.valueOf(nums[i]);
-        }
-        Arrays.sort(ans, (a, b) -> (b + a).compareTo(a + b));
-        if (ans[0].equals("0")) return "0";
-        return String.join("", ans);
+    //[331].验证二叉树的前序序列化
+    public boolean isValidSerialization(String preorder) {
+        //用a##替换成一个#, 最后只会剩下一个#
+        return false;
     }
 
     public static void main(String[] args) {
+        System.out.println(maxSlidingWindow(new int[] {1,3,-1,-3,5,3,6,7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
 //        System.out.println(mostPoints(new int[][]{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}}));
 //        System.out.println(Arrays.toString(divideString("abcdefghij", 3, 'x')));
