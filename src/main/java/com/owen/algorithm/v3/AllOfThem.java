@@ -7659,8 +7659,38 @@ public class AllOfThem {
 
     //[166].分数到小数
     public String fractionToDecimal(int numerator, int denominator) {
-        //模拟除法
-        return null;
+        if (numerator == 0) return "0";
+        long remain = Math.abs(numerator);
+        long div = Math.abs(denominator);
+        StringBuilder sb = new StringBuilder();
+        if (numerator < 0 ^ denominator < 0) {
+            sb.append('-');
+        }
+        //先做整数部分的除法操作
+        sb.append(remain / div);
+        remain %= div;
+        if (remain == 0) return sb.toString();
+        sb.append('.');
+
+        //再做小数部分的除法操作
+        Map<Long, Integer> index = new HashMap<>();
+        while (remain != 0) {
+            //涉及到分数的运算了，所以直接可以通过有没有来判断
+            if (index.containsKey(remain)) {
+                int idx = index.get(remain);
+                sb.insert(idx, '(');
+                sb.append(')');
+                break;
+            } else {
+                //每次都是余数数字，记录需要插入的位置
+                index.put(remain, sb.length());
+                //每次都要扩10倍，模拟竖式除法
+                remain *= 10;
+                sb.append(remain / div);
+                remain %= div;
+            }
+        }
+        return sb.toString();
     }
 
     //[173].二叉搜索树迭代器
@@ -7681,7 +7711,14 @@ public class AllOfThem {
 
     //[179].最大数
     public String largestNumber(int[] nums) {
-        return null;
+        int n = nums.length;
+        String[] ans = new String[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = String.valueOf(nums[i]);
+        }
+        Arrays.sort(ans, (a, b) -> (b + a).compareTo(a + b));
+        if (ans[0].equals("0")) return "0";
+        return String.join("", ans);
     }
 
     public static void main(String[] args) {
