@@ -7834,6 +7834,28 @@ public class AllOfThem {
         helperForAddOneRow(root.right, val, depth, level + 1);
     }
 
+    //[438].
+    public List<Integer> findAnagrams(String s, String p) {
+        int[] cnts = new int[26];
+        int diffP = 0;
+        for (char ch : p.toCharArray()) cnts[ch-'a']++;
+        for (int cnt : cnts) {
+            if (cnt > 0) diffP++;
+        }
+        //abc
+        List<Integer> res = new ArrayList<>();
+        for (int l = 0, r = 0, diffA = 0; r < s.length(); r++) {
+            //扣减操作，如果一个字符数量为0，说明有匹配的一个字符，需要增加一个字符计数
+            if (--cnts[s.charAt(r) - 'a'] == 0) diffA++;
+            if (r - l + 1 > p.length()) {
+                //当恢复操作，发现一个字符变为了1，说明之前有匹配的字符，需要减掉一个字符计数
+                if (++cnts[s.charAt(l++) - 'a'] == 1) diffA--;
+            }
+            if (diffA == diffP) res.add(l);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
