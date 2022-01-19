@@ -7806,23 +7806,27 @@ public class AllOfThem {
 
     //[623].在二叉树中增加一行
     public TreeNode addOneRow(TreeNode root, int val, int depth) {
-        helperForAddOneRow(root, val, depth, 0);
+        //细节点1
+        if (depth == 1) {
+            TreeNode n = new TreeNode(val);
+            n.left = root;
+            return n;
+        }
+        helperForAddOneRow(root, val, depth, 1);
         return root;
     }
 
     private void helperForAddOneRow(TreeNode root, int val, int depth, int level) {
         if (root == null) return;
-        if (level == depth) {
-            if (root.left != null) {
-                TreeNode left = new TreeNode(val);
-                left.left = root.left;
-                root.left = left;
-            }
-            if (root.right != null) {
-                TreeNode right = new TreeNode(val);
-                right.right = root.right;
-                root.right = right;
-            }
+        if (level == depth -1) {
+            //细节点2
+            TreeNode left = new TreeNode(val);
+            left.left = root.left;
+            root.left = left;
+
+            TreeNode right = new TreeNode(val);
+            right.right = root.right;
+            root.right = right;
             return;
         }
 
@@ -8007,5 +8011,13 @@ public class AllOfThem {
 //        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbcbcac"));
 //        System.out.println(new AllOfThem().isInterleave("aabcc", "dbbca", "aadbbbaccc"));
 //        System.out.println(new AllOfThem().isInterleave("", "", ""));
+        TreeNode t623 = new TreeNode(4);
+        t623.left = new TreeNode(2);
+        t623.left.left = new TreeNode(3);
+        t623.left.right = new TreeNode(1);
+        t623.right = new TreeNode(6);
+        t623.right.left = new TreeNode(5);
+
+        System.out.println(new AllOfThem().addOneRow(t623, 1, 2));
     }
 }
