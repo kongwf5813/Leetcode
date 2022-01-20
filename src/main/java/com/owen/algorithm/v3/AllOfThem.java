@@ -7941,6 +7941,19 @@ public class AllOfThem {
         return ans;
     }
 
+    //[2029].石子游戏 IX
+    public boolean stoneGameIX(int[] stones) {
+        return false;
+    }
+
+    //[224].基本计算器
+    public int calculate(String s) {
+        //(1+(4+5+2)-3)+(6+8)
+        //s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
+        //s 表示一个有效的表达式 
+        return 1;
+    }
+
     public static void main(String[] args) {
         System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 ////        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
