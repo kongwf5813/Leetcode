@@ -3743,12 +3743,56 @@ public class AllOfThem {
                 return true;
             }
             window.add(num);
-            //window里面保留k个元素，和下一次contains比较，如果k的窗口内，有重复元素
-            if (window.size() > k) {
+            //绝对差值为k，意味着窗口有k+1个元素，刚达到窗口边界，就需要缩左边界
+            if (window.size() >= k + 1) {
                 window.remove(nums[j - k]);
             }
         }
         return false;
+    }
+
+    //[220].存在重复元素 III
+    public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+//        int n = nums.length;
+//        TreeSet<Long> set = new TreeSet<>();
+//        for (int i = 0; i < n; i++) {
+//            //这边先操作，当i == k的时候
+//            Long u = nums[i] * 1L;
+//            Long l = set.floor(u);
+//            Long r = set.ceiling(u);
+//            if (l != null && u - l <= t) return true;
+//            if (r != null && r - u <= t) return true;
+//            set.add(u);
+//            //下一次操作的时候，需要保证窗口内少一个元素，临界条件就是刚满足窗口就需要缩左边界
+//            if (i >= k) set.remove(nums[i - k] * 1L);
+//        }
+//        return false;
+
+        //桶排序思想来做
+        //[0,1,2,3] t = 3 => 用t+1来划分桶号
+        //[-4,-3,-2,-1] t = 3 => 用 ((nums[i] + 1) / (t + 1)) -1
+        long size = t + 1L;
+        int n = nums.length;
+        Map<Long, Long> map = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            long num = nums[i] * 1L;
+            long idx = getIdx(num, size);
+            if (map.containsKey(idx)) return true;
+            long l = idx - 1, r = idx + 1;
+            if (map.containsKey(l) && num - map.get(l) <= t) return true;
+            if (map.containsKey(r) && map.get(r) - num <= t) return true;
+
+            map.put(idx, num);
+
+            if (i >= k) map.remove(getIdx(nums[i - k], size));
+        }
+        return false;
+    }
+
+    private long getIdx(long num, long size) {
+        if (num >= 0) return num / (size + 1);
+        //+1使得负数往右边偏移一格，然后除以size，-3 ~ 0范围，又因为0被处理过，所以-1往左边偏移
+        return ((num + 1) / size - 1);
     }
 
     //[221].最大正方形
@@ -4156,6 +4200,24 @@ public class AllOfThem {
         while (left < n) {
             nums[left++] = 0;
         }
+    }
+
+    //[287].寻找重复数
+    public int findDuplicate(int[] nums) {
+        //这个题目与442区分开，287只有一个数是重复数，题目不允许修改数组；442是有多个数，可以修改数组来标记是否重复
+        //把slow当成是链表看待
+        int slow = 0, fast = 0;
+        do {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        } while (slow != fast);
+
+        slow = 0;
+        while (slow != fast) {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
     }
 
     //[297]二叉树的序列化与反序列化
@@ -7941,6 +8003,14 @@ public class AllOfThem {
         return ans;
     }
 
+    //[224].基本计算器
+    public int calculate(String s) {
+        //(1+(4+5+2)-3)+(6+8)
+        //s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
+        //s 表示一个有效的表达式
+        return 1;
+    }
+
     //[2029].石子游戏 IX
     public boolean stoneGameIX(int[] stones) {
         int cnt0 = 0, cnt1 = 0, cnt2 = 0;
@@ -7949,23 +8019,15 @@ public class AllOfThem {
             else if (stone % 3 == 1) cnt1++;
             else if (stone % 3 == 2) cnt2++;
         }
-        //11212121
-        //22121212
-        //偶数, 3的倍数，等于没有3，
+        //11212121 => 1122, 12, 11222都是A能赢
+        //22121212 => 2211, 21, 22111都是A能赢
+        //偶数, A只要选择数量较小的必赢(前提1和2都不为0)
         if (cnt0 % 2 == 0) {
-            //A要赢，只需要从最少的1和2中选，必定能赢，条件是只要
-            return cnt1 >=1 && cnt2 >=1;
+            return cnt1 >= 1 && cnt2 >= 1;
         }
-        //奇数, 可以选择置换一次
+        //奇数，相当于有一次先手交换，B一定是想先交换掉然后选择最优的情况
+        //A只要选择较多的，去抵消一次，B要赢一定是较小数量的，所以A的数量超过2，较多的抵消之后，还会比较少的多1，导致A必赢
         return cnt1 - cnt2 > 2 || cnt2 - cnt1 > 2;
-    }
-
-    //[224].基本计算器
-    public int calculate(String s) {
-        //(1+(4+5+2)-3)+(6+8)
-        //s 由数字、'+'、'-'、'('、')'、和 ' ' 组成
-        //s 表示一个有效的表达式 
-        return 1;
     }
 
     public static void main(String[] args) {
