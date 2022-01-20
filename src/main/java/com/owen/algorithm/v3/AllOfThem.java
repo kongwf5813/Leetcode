@@ -7943,7 +7943,21 @@ public class AllOfThem {
 
     //[2029].石子游戏 IX
     public boolean stoneGameIX(int[] stones) {
-        return false;
+        int cnt0 = 0, cnt1 = 0, cnt2 = 0;
+        for (int stone : stones) {
+            if (stone % 3 == 0) cnt0++;
+            else if (stone % 3 == 1) cnt1++;
+            else if (stone % 3 == 2) cnt2++;
+        }
+        //11212121
+        //22121212
+        //偶数, 3的倍数，等于没有3，
+        if (cnt0 % 2 == 0) {
+            //A要赢，只需要从最少的1和2中选，必定能赢，条件是只要
+            return cnt1 >=1 && cnt2 >=1;
+        }
+        //奇数, 可以选择置换一次
+        return cnt1 - cnt2 > 2 || cnt2 - cnt1 > 2;
     }
 
     //[224].基本计算器
