@@ -8030,6 +8030,46 @@ public class AllOfThem {
         return cnt1 - cnt2 > 2 || cnt2 - cnt1 > 2;
     }
 
+    public static int minJumps(int[] arr) {
+        //通过bfs，将最近的元素入队，从距离最近开始，每遍历一层，距离+1，有三种选择，左边，右边，相同节点。对于所有节点，只有第一次赋值的时候才是最短距离
+        //对于相同节点，需要用哈希表，遍历到该节点需要更新所有节点的距离为+1，然后就可以把该哈希表删除(已经是最短距离了，减少遍历次数)，优先选择最远的的，因为可能最后一个节点可以通过相同来实现最短距离跳跃。
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        int n = arr.length;
+        int[] dis = new int[n];
+        Arrays.fill(dis, Integer.MAX_VALUE);
+        for (int i = n - 1; i >= 0; i--) {
+            List<Integer> list = map.getOrDefault(arr[i], new ArrayList<>());
+            list.add(i);
+            map.put(arr[i], list);
+        }
+        LinkedList<Integer> queue = new LinkedList<>();
+        queue.offer(0);
+        dis[0] = 0;
+        while (!queue.isEmpty()) {
+            int idx = queue.poll(), step = dis[idx];
+            if (idx == n - 1) return step;
+            int l = idx - 1, r = idx + 1;
+            if (r < n && dis[r] == Integer.MAX_VALUE) {
+                dis[r] = step + 1;
+                queue.offer(r);
+            }
+            if (l >= 0 && dis[l] == Integer.MAX_VALUE) {
+                dis[l] = step + 1;
+                queue.offer(l);
+            }
+            List<Integer> same = map.getOrDefault(arr[idx], new ArrayList<>());
+            for (int ne : same) {
+                if (dis[ne] == Integer.MAX_VALUE) {
+                    dis[ne] = step + 1;
+                    queue.offer(ne);
+                }
+            }
+            //加速，等值跳只需要第一次更新，后面可以用来剪枝。
+            map.remove(arr[idx]);
+        }
+        return -1;
+    }
+
     public static void main(String[] args) {
         System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 ////        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
