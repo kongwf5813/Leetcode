@@ -2999,7 +2999,7 @@ public class Others {
         }
         int res1 = 0, res2 = 0;
         for (int num : nums) {
-            if ((num & bit) == 1) {
+            if ((num & bit) == 0) {
                 res1 ^= num;
             } else {
                 res2 ^= num;
