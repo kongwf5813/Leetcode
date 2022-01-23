@@ -1,5 +1,7 @@
 package com.owen.algorithm.v3;
 
+import com.owen.algorithm.Tree;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -4805,6 +4807,23 @@ public class AllOfThem {
         return lengthOfLIS(height);
     }
 
+    //[371].两整数之和
+    public int getSum(int a, int b) {
+        //正负数相加没关系，运算是通过补码实现的。
+        //正整数的补码等于原码，负整数的补码 = 符号位不变，其他位反码 + 1
+        //异或为非进位相加，与为进位
+        //指导进位为0，循环结束
+        while (b != 0) {
+            //非进位相加
+            int xor = a ^ b;
+            //进位信息
+            int carry = (a & b) << 1;
+            a = xor;
+            b = carry;
+        }
+        return a;
+    }
+
     //[372].超级次方
     public int superPow(int a, int[] b) {
         return dfsForSuperPow(a, b, b.length - 1);
@@ -5001,7 +5020,7 @@ public class AllOfThem {
             int cnt = stack.peek() + str.length() - level + 1;
             stack.push(cnt);
             if (str.contains(".")) {
-                res = Math.max(res, cnt -1);
+                res = Math.max(res, cnt - 1);
             }
         }
         return res;
@@ -5580,6 +5599,64 @@ public class AllOfThem {
         cur.isEnd = true;
     }
 
+    //[474].一和零
+    public int findMaxForm(String[] strs, int m, int n) {
+        //dp[k][i][j] 前k的物品，0的容量为i，1的容量为j的最大子集个数
+//        int s = strs.length;
+//        int[][][] dp = new int[s + 1][m + 1][n + 1];
+//        for (int k = 1; k <= s; k++) {
+//            String str = strs[k - 1];
+//            int zero = 0, one = 0;
+//            for (int z = 0; z < str.length(); z++) {
+//                if (str.charAt(z) == '0') zero++;
+//                else one++;
+//            }
+//
+//            for (int i = 0; i <= m; i++) {
+//                for (int j = 0; j <= n; j++) {
+//                    //容量够，选择 和 不选择
+//                    if (i >= zero && j >= one) {
+//                        //选择，更新子集数+1
+//                        dp[k][i][j] = Math.max(dp[k - 1][i][j], dp[k - 1][i - zero][j - one] + 1);
+//                    } else {
+//                        //太小装不下
+//                        dp[k][i][j] = dp[k-1][i][j];
+//                    }
+//                }
+//            }
+//        }
+//        return dp[s][m][n];
+
+        //因为dp[k][i][j] 依赖于 dp[k-1][i][j]和dp[k - 1][i - zero][j - one]，一个左上方，一个正上方，而dp[s][m][n]就是答案
+        //压缩掉物品维度后，dp[i][j] 依赖上一次的dp[i][j]和dp[i-zero][j-one]，
+        //如果正序遍历，dp[i-zero][j-one]会影响dp[i][j]结果，就是前面的结果造成了后面结果的覆盖，会导致重复计算。
+        //如果倒序遍历，就避免了滚动数组的覆盖问题。
+        int s = strs.length;
+        int[][] dp = new int[m + 1][n + 1];
+        for (int k = 1; k <= s; k++) {
+            String str = strs[k - 1];
+            int zero = 0, one = 0;
+            for (int z = 0; z < str.length(); z++) {
+                if (str.charAt(z) == '0') zero++;
+                else one++;
+            }
+
+            for (int i = m; i >= 0; i--) {
+                for (int j = n; j >= 0; j--) {
+                    //容量够，选择 和 不选择
+                    if (i >= zero && j >= one) {
+                        //选择，更新子集数+1
+                        dp[i][j] = Math.max(dp[i][j], dp[i - zero][j - one] + 1);
+                    } else {
+                        //太小装不下
+                        dp[i][j] = dp[i][j];
+                    }
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
     //[475].供暖器
     public static int findRadius(int[] houses, int[] heaters) {
         Arrays.sort(heaters);
@@ -5667,6 +5744,19 @@ public class AllOfThem {
             backtraceForFindSubsequences(nums, i + 1, res, select);
             select.removeLast();
         }
+    }
+
+    //[495].提莫攻击
+    public int findPoisonedDuration(int[] timeSeries, int duration) {
+        //注意第0秒需要考虑到， last标记为上一次攻击的结束时间
+        //如果last < s 没重合，+duration；如果last >=s 有重合，+ e - last
+        int ans = 0, last = -1;
+        for (int s : timeSeries) {
+            int e = s + duration - 1;
+            ans += last < s ? duration : e - last;
+            last = e;
+        }
+        return ans;
     }
 
     //[496].下一个更大元素I
@@ -5804,6 +5894,46 @@ public class AllOfThem {
         return dp_i;
     }
 
+    //[513].找树左下角的值
+    private int maxDepth = -1, leftValue = -1;
+
+    public int findBottomLeftValue(TreeNode root) {
+        dfsForFindBottomLeftValue(root, 0);
+        return leftValue;
+    }
+
+    private void dfsForFindBottomLeftValue(TreeNode root, int depth) {
+        if (root == null) return;
+        if (root.left == null && root.right == null) {
+            if (depth > maxDepth) {
+                leftValue = root.val;
+                maxDepth = depth;
+            }
+        }
+        dfsForFindBottomLeftValue(root.left, depth + 1);
+        dfsForFindBottomLeftValue(root.right, depth + 1);
+    }
+
+    //[515].在每个树行中找最大值
+    private List<Integer> res = new ArrayList<>();
+    public List<Integer> largestValues(TreeNode root) {
+        dfsForLargestValues(root, 0);
+        return res;
+    }
+
+    private void dfsForLargestValues(TreeNode root, int depth) {
+        if (root == null) return;
+        if (res.size() == depth) {
+            res.add(root.val);
+        } else {
+            int cur = res.get(depth);
+            res.set(depth, Math.max(cur, root.val));
+        }
+
+        dfsForLargestValues(root.left, depth + 1);
+        dfsForLargestValues(root.right, depth + 1);
+    }
+
     //[519].随机翻转矩阵
     public class Solution519 {
         //首先这个题目需要优化空间，二维转一维，
@@ -5917,6 +6047,50 @@ public class AllOfThem {
         }
     }
 
+    //[535].TinyURL 的加密与解密
+    public class Codec535 {
+        String encode = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Map<String, String> shortLong = new HashMap<>();
+        Random random = new Random();
+
+        // Encodes a URL to a shortened URL.
+        public String encode(String longUrl) {
+            String key = getKey();
+            while (shortLong.containsKey(key)) {
+                key = getKey();
+            }
+
+            shortLong.put(key, longUrl);
+            return "http://tinyurl.com/" + key;
+        }
+
+        // Decodes a shortened URL to its original URL.
+        public String decode(String shortUrl) {
+            String key = shortUrl.replace("http://tinyurl.com/", "");
+            return shortLong.get(key);
+        }
+
+        private String getKey() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 6; i++) {
+                sb.append(encode.charAt(random.nextInt(encode.length())));
+            }
+            return sb.toString();
+        }
+    }
+
+    //[537].复数乘法
+    public String complexNumberMultiply(String num1, String num2) {
+        String[] sp1 = num1.split("\\+");
+        String[] sp2 = num2.split("\\+");
+        int s1 = Integer.parseInt(sp1[0]);
+        int x1 = Integer.parseInt(sp1[1].replace("i", ""));
+
+        int s2 = Integer.parseInt(sp2[0]);
+        int x2 = Integer.parseInt(sp2[1].replace("i", ""));
+        return s1 * s2 - x1 * x2 + "+" + (s1 * x2 + s2 * x1) + "i";
+    }
+
     //[538].把二叉搜索树转换为累加树
     //[1038].把二叉搜索树转换为累加树
     public TreeNode convertBST(TreeNode root) {
@@ -5955,6 +6129,32 @@ public class AllOfThem {
             idx = i;
         }
         return ans;
+    }
+
+    //[540].有序数组中的单一元素
+    public int singleNonDuplicate(int[] nums) {
+        int n = nums.length;
+        int l = 0, r = n - 1;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            boolean halfOdd = ((r - mid) % 2 == 0);
+            if (nums[mid - 1] == nums[mid]) {
+                if (halfOdd) {
+                    r = mid - 2;
+                } else {
+                    l = mid + 1;
+                }
+            } else if (nums[mid + 1] == nums[mid]) {
+                if (halfOdd) {
+                    l = mid + 2;
+                } else {
+                    r = mid - 1;
+                }
+            } else {
+                return nums[mid];
+            }
+        }
+        return nums[l];
     }
 
     //[542].01 矩阵
@@ -6430,6 +6630,29 @@ public class AllOfThem {
             sb.append(ch);
         }
         return sb.toString();
+    }
+
+    //[712].两个字符串的最小ASCII删除和
+    public int minimumDeleteSum(String s1, String s2) {
+        //求解最小ASCII删除和，可以转化为求最大公共子序列的和
+        int m = s1.length(), n = s2.length();
+        //长度为i的s1和长度为j的s2的最大公共子序列和
+        int[][] dp = new int[m + 1][n + 1];
+        int sum = 0;
+        for (int i = 0; i < m; i++) sum += s1.charAt(i);
+        for (int i = 0; i < n; i++) sum += s2.charAt(i);
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1.charAt(i - 1) == s2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + (int) s1.charAt(i - 1);
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return sum - dp[m][n] * 2;
     }
 
     //[739].每日温度
@@ -8365,6 +8588,97 @@ public class AllOfThem {
         return 1;
     }
 
+    //[2034].股票价格波动
+    public class StockPrice {
+
+        int maxTimestamp;
+        Map<Integer, Integer> timestampStock;
+        TreeMap<Integer, Integer> priceCount;
+
+        public StockPrice() {
+            timestampStock = new HashMap<>();
+            maxTimestamp = 0;
+            priceCount = new TreeMap<>();
+        }
+
+        public void update(int timestamp, int price) {
+            maxTimestamp = Math.max(maxTimestamp, price);
+            int oldPrice = timestampStock.getOrDefault(timestamp, 0);
+            if (oldPrice > 0) {
+                priceCount.put(oldPrice, priceCount.getOrDefault(oldPrice, 0) - 1);
+                if (priceCount.get(oldPrice) == 0) {
+                    priceCount.remove(oldPrice);
+                }
+            }
+
+            timestampStock.put(timestamp, price);
+            priceCount.put(price, priceCount.getOrDefault(price, 0) + 1);
+        }
+
+        public int current() {
+            return timestampStock.get(maxTimestamp);
+        }
+
+        public int maximum() {
+            //需要获取最大的价格，需要有序能够直接获得，但是因为有修改，所以价格涉及到删除操作，考虑红黑树
+            //又因为相同的价格，可能在不同的时间戳被设值，那么需要记录count值，更新操作的时候，如果老价格数量为0，那么就将老价格记录删除掉
+            return priceCount.lastKey();
+        }
+
+        public int minimum() {
+            return priceCount.firstKey();
+        }
+    }
+
+    //[5989].元素计数
+    public static int countElements(int[] nums) {
+        TreeSet<Integer> set = new TreeSet<>();
+        for (int num : nums) {
+            set.add(num);
+        }
+        int count = 0;
+        for (int num : nums) {
+            Integer ceiling = set.higher(num);
+            Integer floor = set.lower(num);
+            if (ceiling != null && floor != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    //[5991].按符号重排数组
+    public int[] rearrangeArray(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        int l = 0, f = 1;
+        for (int i = 0; i < n; i++) {
+            if (nums[i] > 0) {
+                res[l] = nums[i];
+                l += 2;
+            } else {
+                res[f] = nums[i];
+                f += 2;
+            }
+        }
+        return res;
+    }
+
+    //[5990].找出数组中的所有孤独数字
+    public List<Integer> findLonely(int[] nums) {
+        HashMap<Integer, Integer> set = new HashMap<>();
+        for (int num : nums) {
+            set.put(num, set.getOrDefault(num, 0) + 1);
+        }
+
+        List<Integer> res = new ArrayList<>();
+        for (int num : nums) {
+            if (set.get(num) == 1 && !set.containsKey(num - 1) && !set.containsKey(num + 1)) {
+                res.add(num);
+            }
+        }
+        return res;
+    }
 
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
@@ -8558,6 +8872,6 @@ public class AllOfThem {
 //        System.out.println(findNthDigit(3));
 
 //        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
-        System.out.println(lengthLongestPath("file1.txt\nfile2.txt\nlongfile.txt"));
+//        System.out.println(lengthLongestPath("file1.txt\nfile2.txt\nlongfile.txt"));
     }
 }
