@@ -5916,6 +5916,7 @@ public class AllOfThem {
 
     //[515].在每个树行中找最大值
     private List<Integer> res = new ArrayList<>();
+
     public List<Integer> largestValues(TreeNode root) {
         dfsForLargestValues(root, 0);
         return res;
@@ -8678,6 +8679,28 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[2045].到达目的地的第二短时间
+    public int secondMinimum(int n, int[][] edges, int time, int change) {
+
+        //最短路径
+        int[] dist1 = new int[n + 1];
+        //次短路径
+        int[] dist2 = new int[n + 1];
+        //step/change 是奇数， +等待时间 = change - (step % change)
+
+        return 0;
+    }
+
+    //[524].通过删除字母匹配到字典里最长单词
+    public String findLongestWord(String s, List<String> dictionary) {
+        return null;
+    }
+
+    //[477].汉明距离总和
+    public int totalHammingDistance(int[] nums) {
+        return 0;
     }
 
     public static void main(String[] args) {
