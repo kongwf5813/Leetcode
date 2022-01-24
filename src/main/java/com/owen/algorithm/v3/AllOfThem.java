@@ -5057,6 +5057,25 @@ public class AllOfThem {
         return i == s.length();
     }
 
+    //[397].整数替换
+    public int integerReplacement(int n) {
+        int ans = 0;
+        long num = n;
+        //偶数肯定是除以2，奇数二进制低位出现连续的1的时候考虑+1， 只有01这种考虑-1操作，11是个特例，可以-1
+        while (num != 1) {
+            if (num % 2 == 0) {
+                num >>= 1;
+                //已经是奇数了，右移1为还是1，并且不等于3就说明了低二进制出现了可以+1的最优选择
+            } else if (num != 3 && (num >> 1 & 1) == 1) {
+                num++;
+            } else {
+                num--;
+            }
+            ans++;
+        }
+        return ans;
+    }
+
     //[398].随机数索引
     public class Solution398 {
         int[] nums;
@@ -8683,14 +8702,58 @@ public class AllOfThem {
 
     //[2045].到达目的地的第二短时间
     public int secondMinimum(int n, int[][] edges, int time, int change) {
+        List<Integer>[] graph = new List[n + 1];
+        for (int i = 0; i <= n; i++) {
+            graph[i] = new ArrayList<Integer>();
+        }
+        //graph 中记录每个结点的出度和入度
+        for (int[] edge : edges) {
+            graph[edge[0]].add(edge[1]); //出度
+            graph[edge[1]].add(edge[0]); //入度
+        }
 
-        //最短路径
-        int[] dist1 = new int[n + 1];
-        //次短路径
-        int[] dist2 = new int[n + 1];
-        //step/change 是奇数， +等待时间 = change - (step % change)
+        // path[i][0] 表示从 1 到 i 的最短路长度，path[i][1] 表示从 1 到 i 的严格次短路长度
+        int[][] path = new int[n + 1][2];
+        for (int i = 0; i <= n; i++) {
+            Arrays.fill(path[i], Integer.MAX_VALUE);
+        }
+        path[1][0] = 0;
+        Queue<int[]> queue = new ArrayDeque<int[]>();
+        queue.offer(new int[]{1, 0});
+        while (path[n][1] == Integer.MAX_VALUE) {
+            int[] arr = queue.poll();
+            //cur表示当前结点，len表示到达当前结点需要走的总路程
+            int cur = arr[0], len = arr[1];
+            //计算到达相邻结点，走的最短总路程，和次短总路程
+            for (int next : graph[cur]) {
+                //更新到达相邻结点的最短总路程
+                if (len + 1 < path[next][0]) {
+                    path[next][0] = len + 1;
+                    //这里更新完最短总路程后，为什么不进行比较
+                    // 原path[next][0]与path[next][1]的大小，从而更新次短总路程？
+                    //答：最短总路程总是先到达的，故不可能存在次短总路程先到达，然后最短总路程才到达
+                    queue.offer(new int[]{next, len + 1}); //用于更新next结点相邻结点的最短总路程
+                } else if (len + 1 > path[next][0] && len + 1 < path[next][1]) {
+                    //更新次短总路程
+                    path[next][1] = len + 1;
+                    //用于更新next结点相邻结点的次短总路程
+                    queue.offer(new int[]{next, len + 1});
+                }
+            }
+        }
 
-        return 0;
+        int ret = 0;
+        //计算走了 path[n][1] 步，共需要等待多少红灯和共需要多少时间
+        for (int i = 0; i < path[n][1]; i++) {
+            //经过 (2 * change) 灯由绿灯变成绿灯，并且维持 change 秒
+            //如果 ret 不在该范围到达，就无法到达后立即出发，需要等红灯
+            //等待时间为，一个 (2 * change) 周期，减去 到达时间
+            if (ret % (2 * change) >= change) {
+                ret = ret + (2 * change - ret % (2 * change));
+            }
+            ret = ret + time;
+        }
+        return ret;
     }
 
     //[524].通过删除字母匹配到字典里最长单词
