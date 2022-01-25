@@ -5057,6 +5057,36 @@ public class AllOfThem {
         return i == s.length();
     }
 
+    //[393].UTF-8 编码验证
+    public static boolean validUtf8(int[] data) {
+        //识别第一个是多少个连续的1，后面遇到10就数量--，遇到数量>0且不是10的return false
+        //   0000 0000-0000 007F | 0xxxxxxx
+        //   0000 0080-0000 07FF | 110xxxxx 10xxxxxx
+        //   0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
+        //   0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+        //最低8位来搞数据
+        int count = 0;
+        for (int item : data) {
+            if (count > 0) {
+                if (item >> 6 != 0b10) {
+                    return false;
+                }
+                count--;
+            } else if (item >> 7 == 0) {
+                count = 0;
+            } else if (item >> 5 == 0b110) {
+                count = 1;
+            } else if (item >> 4 == 0b1110) {
+                count = 2;
+            } else if (item >> 3 == 0b11110) {
+                count = 3;
+            } else {
+                return false;
+            }
+        }
+        return count == 0;
+    }
+
     //[397].整数替换
     public int integerReplacement(int n) {
         int ans = 0;
@@ -5109,6 +5139,47 @@ public class AllOfThem {
         //查看在第几组的第几个数字
         int index = (int) ((n - length - 1) % i);
         return String.valueOf(num).charAt(index) - '0';
+    }
+
+    //[401].二进制手表
+    public static List<String> readBinaryWatch(int turnedOn) {
+        List<String> res = new ArrayList<>();
+        for (int i = 0; i < 1024; i++) {
+            int hours = i >> 6;
+            int minutes = i & 63;
+            if (hours < 12 && minutes < 60 && Integer.bitCount(i) == turnedOn) {
+                res.add(hours + ":" + (minutes < 10 ? "0" + minutes : minutes));
+            }
+        }
+        return res;
+    }
+
+    //[402].移掉 K 位数字
+    public static String removeKdigits(String num, int k) {
+        if (num.equals("0")) return "0";
+        //"1432219", k = 3  => 1219
+        // 123456, k = 3 =>
+        //维护单调递增栈，后面发现前面的大，就把栈中的移除，保证后面是单调递增
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < num.length(); i++) {
+            while (!stack.isEmpty() && num.charAt(stack.peek()) > num.charAt(i) && k > 0) {
+                stack.pop();
+                k--;
+            }
+            //避免前导0
+            if (stack.isEmpty() && num.charAt(i) == '0') continue;
+            stack.push(i);
+        }
+
+        while (k-- > 0) stack.pop();
+        if (stack.isEmpty()) {
+            return "0";
+        }
+        StringBuilder sb = new StringBuilder();
+        while (!stack.isEmpty()) {
+            sb.insert(0, num.charAt(stack.pop()));
+        }
+        return sb.toString();
     }
 
     //[406].根据身高重建队列
@@ -5709,6 +5780,22 @@ public class AllOfThem {
         return left;
     }
 
+    //[477].汉明距离总和
+    public int totalHammingDistance(int[] nums) {
+        int ans = 0, n = nums.length;
+        //原本要O(N^2) -> O(32N)，单独从每一位看待，距离总和=1的个数*0的个数
+        for (int i = 0; i < 32; i++) {
+            int ones = 0;
+            for (int num : nums) {
+                if (((num >> i) & 1) == 1) {
+                    ones++;
+                }
+            }
+            ans += ones * (n - ones);
+        }
+        return ans;
+    }
+
     //[478].在圆内随机生成点
     public class Solution478 {
         double rad;
@@ -6011,6 +6098,25 @@ public class AllOfThem {
             }
         }
         return false;
+    }
+
+    //[524].通过删除字母匹配到字典里最长单词
+    public String findLongestWord(String s, List<String> dictionary) {
+        //通过删除s的字符来匹配字典中的单词，那么相对顺序不会发生变化，意思就是求字典中的单词是s的子序列，而且是自然序最小的最长字符串
+        //长度降序，长度相等自然序增序
+        Collections.sort(dictionary, (a, b) -> a.length() == b.length() ? a.compareTo(b) : b.length() - a.length());
+        for (String dic : dictionary) {
+            int i = 0;
+            for (int j = 0; i < dic.length() && j < s.length(); j++) {
+                if (dic.charAt(i) == s.charAt(j)) {
+                    i++;
+                }
+            }
+            if (i == dic.length()) {
+                return dic;
+            }
+        }
+        return "";
     }
 
     //[525].连续数组
@@ -8756,37 +8862,9 @@ public class AllOfThem {
         return ret;
     }
 
-    //[524].通过删除字母匹配到字典里最长单词
-    public String findLongestWord(String s, List<String> dictionary) {
-        return null;
-    }
-
-    //[477].汉明距离总和
-    public int totalHammingDistance(int[] nums) {
-        return 0;
-    }
-
     //[1688].比赛中的配对次数
     public int numberOfMatches(int n) {
         return n - 1;
-    }
-
-    //[393].UTF-8 编码验证
-    public boolean validUtf8(int[] data) {
-        //识别第一个是多少个连续的1，后面遇到10就数量--，遇到数量>0且不是10的return false
-        return false;
-    }
-
-    //[401].二进制手表
-    public List<String> readBinaryWatch(int turnedOn) {
-        return null;
-    }
-
-    //[402].移掉 K 位数字
-    public String removeKdigits(String num, int k) {
-        //"1432219", k = 3
-        //维护单调递增栈，后面发现前面的大，就把栈中的移除，保证后面是单调递增
-        return null;
     }
 
     public static void main(String[] args) {
@@ -8982,5 +9060,6 @@ public class AllOfThem {
 
 //        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
 //        System.out.println(lengthLongestPath("file1.txt\nfile2.txt\nlongfile.txt"));
+        System.out.println(readBinaryWatch(1));
     }
 }
