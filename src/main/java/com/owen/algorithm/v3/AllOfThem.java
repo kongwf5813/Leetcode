@@ -8766,6 +8766,29 @@ public class AllOfThem {
         return 0;
     }
 
+    //[1688].比赛中的配对次数
+    public int numberOfMatches(int n) {
+        return n - 1;
+    }
+
+    //[393].UTF-8 编码验证
+    public boolean validUtf8(int[] data) {
+        //识别第一个是多少个连续的1，后面遇到10就数量--，遇到数量>0且不是10的return false
+        return false;
+    }
+
+    //[401].二进制手表
+    public List<String> readBinaryWatch(int turnedOn) {
+        return null;
+    }
+
+    //[402].移掉 K 位数字
+    public String removeKdigits(String num, int k) {
+        //"1432219", k = 3
+        //维护单调递增栈，后面发现前面的大，就把栈中的移除，保证后面是单调递增
+        return null;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 ////        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
