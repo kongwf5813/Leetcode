@@ -9025,6 +9025,55 @@ public class AllOfThem {
         }
     }
 
+    //[1019].链表中的下一个更大节点
+    public static int[] nextLargerNodes(ListNode head) {
+        List<Integer> list = new ArrayList<>();
+        while (head != null) {
+            list.add(head.val);
+            head = head.next;
+        }
+
+        int[] res = new int[list.size()];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = list.size() - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && list.get(stack.peek()) < list.get(i)) {
+                stack.pop();
+            }
+            res[i] = stack.isEmpty() ? 0 : list.get(stack.peek());
+            stack.push(i);
+        }
+        return res;
+    }
+
+    //[451].根据字符出现频率排序
+    public static String frequencySort(String s) {
+        //桶排序，时间复杂度更低
+        Map<Character, Integer> map = new HashMap<>();
+        int max = 0;
+        for (char ch : s.toCharArray()) {
+            map.put(ch, map.getOrDefault(ch, 0) + 1);
+            max = Math.max(map.get(ch), max);
+        }
+        StringBuffer[] sbs = new StringBuffer[max + 1];
+        for (int i = 0; i <= max; i++) {
+            sbs[i] = new StringBuffer();
+        }
+        for (Map.Entry<Character, Integer> entry : map.entrySet()) {
+            sbs[entry.getValue()].append(entry.getKey());
+        }
+
+        StringBuffer res = new StringBuffer();
+        for (int i = max; i > 0; i--) {
+            StringBuffer sb = sbs[i];
+            for (int j = 0; j < sb.length(); j++) {
+                for (int k = 0; k < i; k++) {
+                    res.append(sb.charAt(j));
+                }
+            }
+        }
+        return res.toString();
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
