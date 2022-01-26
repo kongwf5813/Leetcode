@@ -8917,18 +8917,72 @@ public class AllOfThem {
     }
 
     //[636].函数的独占时间
-    public int[] exclusiveTime(int n, List<String> logs) {
-        return null;
+    public static int[] exclusiveTime(int n, List<String> logs) {
+        //start end start end
+        //start start end end
+        //因为有嵌套，两个start差值，两个end之间的差值，start和end之间的差值都需要更新，所以定义一个pre
+        //end时，出战，更新pre
+        //start时，进站，更新pre，如果栈不空，说明有嵌套，需要更新前面的时间。否则进站。
+        Stack<Integer> stack = new Stack<>();
+        int[] res = new int[n];
+        String[] first = logs.get(0).split(":");
+
+        stack.push(Integer.parseInt(first[0]));
+        int pre = Integer.parseInt(first[2]);
+        for (int i = 1; i < logs.size(); i++) {
+            String[] split = logs.get(i).split(":");
+            if (split[1].equals("start")) {
+                //更新上一个节点的时间
+                if (!stack.isEmpty()) {
+                    res[stack.peek()] += Integer.parseInt(split[2]) - pre;
+                }
+                //更新start时间
+                pre = Integer.parseInt(split[2]);
+                //等待配对，进栈
+                stack.push(Integer.parseInt(split[0]));
+            } else {
+                res[stack.peek()] += Integer.parseInt(split[2]) - pre + 1;
+                //更新start时间
+                pre = Integer.parseInt(split[2]) + 1;
+                //配对成功，出栈
+                stack.pop();
+            }
+        }
+        return res;
     }
 
     //[640].求解方程
     public String solveEquation(String equation) {
+        if (equation == null || equation.length() == 0) return "No solution";
         //"2x=x"
         //大概的想法，把等式替换成+-，按照=分割，然后按照+分割，然后求出x的系数，合并成如下式子
         //Ax + y = Bx + z， （A-B）x = z -y， 如果A-B = 0 且 z-y = 0，然后无限。如果 A-B = 0且z-y != 0 ，无解。否则返回解
-        return null;
-    }
+        equation = equation.replaceAll("-", "+-");
+        String left = equation.split("=")[0];
+        String right = equation.split("=")[1];
 
+        int A = 0, y = 0, B = 0, z = 0;
+        for (String s : left.split("\\+")) {
+            if (s.contains("x")) {
+                String replace = s.replace("x", "");
+                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
+            } else if (s.length() > 0) {
+                y += Integer.parseInt(s);
+            }
+        }
+        for (String s : right.split("\\+")) {
+            if (s.contains("x")) {
+                String replace = s.replace("x", "");
+                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
+            } else if (s.length() > 0) {
+                z += Integer.parseInt(s);
+            }
+        }
+
+        if (A == B && y == z) return "Infinite solutions";
+        else if (A == B && y != z) return "No solution";
+        else return "x=" + (z - y) / (A - B);
+    }
 
     //[2013].检测正方形
     public class DetectSquares {
