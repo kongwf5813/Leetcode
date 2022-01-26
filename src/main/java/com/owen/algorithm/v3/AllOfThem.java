@@ -8929,6 +8929,48 @@ public class AllOfThem {
         return null;
     }
 
+
+    //[2013].检测正方形
+    public class DetectSquares {
+
+        Map<Integer, Map<Integer, Integer>> row2Col;
+
+        public DetectSquares() {
+            row2Col = new HashMap<>();
+        }
+
+        public void add(int[] point) {
+            int x = point[0], y = point[1];
+            Map<Integer, Integer> yCount = row2Col.getOrDefault(x, new HashMap<>());
+            yCount.put(y, yCount.getOrDefault(y, 0) + 1);
+            row2Col.put(x, yCount);
+        }
+
+        public int count(int[] point) {
+            int x = point[0], y = point[1];
+            int ans = 0;
+            Map<Integer, Integer> yCount = row2Col.getOrDefault(x, new HashMap<>());
+            //上下不同的点
+            for (int ny : yCount.keySet()) {
+                if (ny == y) continue;
+                //正上方
+                int c1 = yCount.get(ny);
+                int d = ny - y;
+                //左右不同方向
+                int[] xs = new int[]{x + d, x - d};
+                for (int nx : xs) {
+                    Map<Integer, Integer> nyCount = row2Col.getOrDefault(nx, new HashMap<>());
+                    //左上方
+                    int c3 = nyCount.getOrDefault(ny, 0);
+                    //左下方
+                    int c2 = nyCount.getOrDefault(y, 0);
+                    ans += c1 * c2 * c3;
+                }
+            }
+            return ans;
+        }
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
