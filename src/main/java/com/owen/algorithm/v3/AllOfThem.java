@@ -9074,6 +9074,117 @@ public class AllOfThem {
         return res.toString();
     }
 
+    //[2047].句子中的有效单词数
+    public int countValidWords(String sentence) {
+        int ans = 0, n = sentence.length();
+        for (int i = 0; i < n; ) {
+            if (sentence.charAt(i) == ' ') continue;
+            int j = i;
+            while (j < n && sentence.charAt(j) != ' ') j++;
+            if (checkForCountValidWords(sentence.substring(i, j))) {
+                ans++;
+            }
+            i = j + 1;
+        }
+        return ans;
+    }
+
+    private boolean checkForCountValidWords(String word) {
+        int countDash = 0, countSign = 0;
+        if (word.length() == 0) return false;
+        for (int i = 0; i < word.length(); i++) {
+            char ch = word.charAt(i);
+            if (ch >= '0' && ch <= '9') {
+                return false;
+            } else if (ch == ' ') {
+                return false;
+            } else if (ch == '-') {
+                countDash++;
+                if (i == 0 || i == word.length() - 1
+                        || !Character.isLetter(word.charAt(i - 1))
+                        || !Character.isLetter(word.charAt(i + 1))
+                        || countDash > 1) {
+                    return false;
+                }
+            } else if (ch == '!' || ch == '.' || ch == ',') {
+                countSign++;
+                if (countSign > 1 || i != word.length() - 1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //[307].区域和检索 - 数组可修改 （重点掌握）
+    public class NumArray307 {
+
+        private int[] tree;
+        private int[] nums;
+
+        private int lowbit(int x) {
+            return x & (-x);
+        }
+
+        private int query(int x) {
+            int ans = 0;
+            for (int i = x; i > 0; i -= lowbit(i)) ans += tree[i];
+            return ans;
+        }
+
+        private void add(int x, int u) {
+            for (int i = x; i <= tree.length - 1; i += lowbit(i)) tree[i] += u;
+        }
+
+        public NumArray307(int[] nums) {
+            int n = nums.length;
+            this.nums = nums;
+            this.tree = new int[n + 1];
+            for (int i = 0; i < n; i++) add(i + 1, nums[i]);
+        }
+
+        public void update(int index, int val) {
+            //此处额外注意，补的是差值
+            add(index + 1, val - nums[index]);
+            nums[index] = val;
+        }
+
+        public int sumRange(int left, int right) {
+            return query(right + 1) - query(left);
+        }
+    }
+
+    //[567].字符串的排列
+    public boolean checkInclusion(String s1, String s2) {
+        int m = s1.length(), n = s2.length();
+        if (m > n) return false;
+        int[] cnt = new int[26];
+        //逆向思维，窗口内如果大于0，说明需要缩窗口，否则如果right - left + 1 == m
+        for (int i = 0; i < m; i++) {
+            --cnt[s1.charAt(i) - 'a'];
+        }
+
+        for (int right = 0, left = 0; right < n; right++) {
+            int ch = s2.charAt(right) - 'a';
+            ++cnt[ch];
+
+            while (cnt[ch] > 0) {
+                --cnt[s2.charAt(left) - 'a'];
+                left++;
+            }
+            if (right - left + 1 == m) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //[394].字符串解码
+    public String decodeString(String s) {
+        //从后往前遍历，遇到数字出栈
+        return null;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
