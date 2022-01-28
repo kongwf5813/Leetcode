@@ -9156,27 +9156,53 @@ public class AllOfThem {
 
     //[567].字符串的排列
     public boolean checkInclusion(String s1, String s2) {
+//        int m = s1.length(), n = s2.length();
+//        if (m > n) return false;
+//        int[] cnt = new int[26];
+//        //逆向思维，窗口内如果大于0，说明需要缩窗口，否则如果right - left + 1 == m
+//        for (int i = 0; i < m; i++) {
+//            --cnt[s1.charAt(i) - 'a'];
+//        }
+//
+//        for (int right = 0, left = 0; right < n; right++) {
+//            int ch = s2.charAt(right) - 'a';
+//            ++cnt[ch];
+//
+//            while (cnt[ch] > 0) {
+//                --cnt[s2.charAt(left) - 'a'];
+//                left++;
+//            }
+//            if (right - left + 1 == m) {
+//                return true;
+//            }
+//        }
+//        return false;
+
+        //宫水三叶的解法，非常易懂
         int m = s1.length(), n = s2.length();
         if (m > n) return false;
-        int[] cnt = new int[26];
-        //逆向思维，窗口内如果大于0，说明需要缩窗口，否则如果right - left + 1 == m
-        for (int i = 0; i < m; i++) {
-            --cnt[s1.charAt(i) - 'a'];
-        }
-
-        for (int right = 0, left = 0; right < n; right++) {
-            int ch = s2.charAt(right) - 'a';
-            ++cnt[ch];
-
-            while (cnt[ch] > 0) {
-                --cnt[s2.charAt(left) - 'a'];
-                left++;
-            }
-            if (right - left + 1 == m) {
+        int[] cnt1 = new int[26], cnt2 = new int[26];
+        for (int i = 0; i < m; i++) cnt1[s1.charAt(i) - 'a']++;
+        for (int i = 0; i < m; i++) cnt2[s2.charAt(i) - 'a']++;
+        if (check(cnt1, cnt2)) return true;
+        for (int i = m; i < n; i++) {
+            //右边增加一个值
+            cnt2[s2.charAt(i) - 'a']++;
+            //左边减少一个值
+            cnt2[s2.charAt(i - m) - 'a']--;
+            //判断是否相等
+            if (check(cnt1, cnt2)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean check(int[] cnt1, int[] cnt2) {
+        for (int i = 0; i < 26; i++) {
+            if (cnt1[i] != cnt2[i]) return false;
+        }
+        return true;
     }
 
     //[394].字符串解码
@@ -9239,22 +9265,48 @@ public class AllOfThem {
 
     //[424].替换后的最长重复字符
     public int characterReplacement(String s, int k) {
-        int[] cnt = new int[26];
-        int maxCount = 0;
-        int l = 0;
-        for (int r = 0; r < s.length(); ) {
-            cnt[s.charAt(r) - 'A']++;
-            maxCount = Math.max(maxCount, cnt[s.charAt(r) - 'A']);
-            r++;
+//        int[] cnt = new int[26];
+//        int maxCount = 0;
+//        int l = 0;
+//        for (int r = 0; r < s.length(); ) {
+//            cnt[s.charAt(r) - 'A']++;
+//            maxCount = Math.max(maxCount, cnt[s.charAt(r) - 'A']);
+//            r++;
+//
+//            //最大的窗口 > 某个字符最大的数量+ 其他字符替换的k次，就需要缩窗口
+//            if (r - l > maxCount + k) {
+//                cnt[s.charAt(l) - 'A']--;
+//                l++;
+//            }
+//        }
+//        //左窗口的位置就是最大的重复串位置
+//        return s.length() - l;
 
-            //最大的窗口 > 某个字符最大的数量+ 其他字符替换的k次，就需要缩窗口
-            if (r - l > maxCount + k) {
+        //宫水三叶解法
+        int ans = 0;
+        int[] cnt = new int[26];
+        int n = s.length();
+        for (int l = 0, r = 0; r < n; r++) {
+            int cur = s.charAt(r) - 'A';
+            cnt[cur]++;
+            //只要不合法就一直缩窗口
+            while (!check(cnt, k)) {
                 cnt[s.charAt(l) - 'A']--;
                 l++;
             }
+
+            ans = Math.max(ans, r - l +1);
         }
-        //左窗口的位置就是最大的重复串位置
-        return s.length() - l;
+        return ans;
+    }
+
+    private boolean check(int[] cnt, int k) {
+        int maxCount = 0, sum = 0;
+        for (int i = 0; i < 26; i++) {
+            maxCount = Math.max(maxCount, cnt[i]);
+            sum += cnt[i];
+        }
+        return sum - maxCount <= k;
     }
 
     public static void main(String[] args) {
