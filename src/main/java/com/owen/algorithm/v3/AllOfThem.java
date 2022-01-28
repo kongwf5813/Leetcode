@@ -9186,7 +9186,7 @@ public class AllOfThem {
     }
 
     public int numberOfWeakCharacters(int[][] properties) {//第一维度降序，第二维度增序，保证相同的攻击值的时候，最大的防御值大，一定是一个弱者
-        Arrays.sort(properties, (a,b) -> a[0] == b[0] ? a[1] - b[1] : b[0] - a[0]);
+        Arrays.sort(properties, (a, b) -> a[0] == b[0] ? a[1] - b[1] : b[0] - a[0]);
 
         int maxDef = 0, ans = 0;
         for (int[] property : properties) {
@@ -9198,6 +9198,63 @@ public class AllOfThem {
         }
         return ans;
 
+    }
+
+    //[面试题 10.10].数字流的秩
+    class StreamRank {
+        //树状数组解决的问题是，频繁变更，求解区间和问题
+        //频繁求解<=x的数量，可以通过每个
+        //tree是从1开始计数，x范围是5000，所以数组必须是50001个数字
+        int[] tree;
+        int n;
+
+        public StreamRank() {
+            n = 50001;
+            //最后一个是空格，防止query的时候，边界为50001，实际数组超了
+            tree = new int[n + 1];
+        }
+
+        private int lowbit(int x) {
+            return x & (-x);
+        }
+
+        private int query(int x) {
+            int ans = 0;
+            for (int i = x; i > 0; i -= lowbit(i)) ans += tree[i];
+            return ans;
+        }
+
+        private void add(int x, int u) {
+            for (int i = x; i <= n; i += lowbit(i)) tree[i] += u;
+        }
+
+        public void track(int x) {
+            add(x + 1, 1);
+        }
+
+        public int getRankOfNumber(int x) {
+            return query(x + 1);
+        }
+    }
+
+    //[424].替换后的最长重复字符
+    public int characterReplacement(String s, int k) {
+        int[] cnt = new int[26];
+        int maxCount = 0;
+        int l = 0;
+        for (int r = 0; r < s.length(); ) {
+            cnt[s.charAt(r) - 'A']++;
+            maxCount = Math.max(maxCount, cnt[s.charAt(r) - 'A']);
+            r++;
+
+            //最大的窗口 > 某个字符最大的数量+ 其他字符替换的k次，就需要缩窗口
+            if (r - l > maxCount + k) {
+                cnt[s.charAt(l) - 'A']--;
+                l++;
+            }
+        }
+        //左窗口的位置就是最大的重复串位置
+        return s.length() - l;
     }
 
     public static void main(String[] args) {
