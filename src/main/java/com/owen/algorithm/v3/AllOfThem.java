@@ -9185,6 +9185,21 @@ public class AllOfThem {
         return null;
     }
 
+    public int numberOfWeakCharacters(int[][] properties) {//第一维度降序，第二维度增序，保证相同的攻击值的时候，最大的防御值大，一定是一个弱者
+        Arrays.sort(properties, (a,b) -> a[0] == b[0] ? a[1] - b[1] : b[0] - a[0]);
+
+        int maxDef = 0, ans = 0;
+        for (int[] property : properties) {
+            if (property[1] < maxDef) {
+                ans++;
+            } else {
+                maxDef = property[1];
+            }
+        }
+        return ans;
+
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
