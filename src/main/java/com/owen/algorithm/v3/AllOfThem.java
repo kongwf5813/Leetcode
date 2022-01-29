@@ -5256,6 +5256,52 @@ public class AllOfThem {
         return String.valueOf(cs);
     }
 
+    //[424].替换后的最长重复字符
+    public int characterReplacement(String s, int k) {
+//        int[] cnt = new int[26];
+//        int maxCount = 0;
+//        int l = 0;
+//        for (int r = 0; r < s.length(); ) {
+//            cnt[s.charAt(r) - 'A']++;
+//            maxCount = Math.max(maxCount, cnt[s.charAt(r) - 'A']);
+//            r++;
+//
+//            //最大的窗口 > 某个字符最大的数量+ 其他字符替换的k次，就需要缩窗口
+//            if (r - l > maxCount + k) {
+//                cnt[s.charAt(l) - 'A']--;
+//                l++;
+//            }
+//        }
+//        //左窗口的位置就是最大的重复串位置
+//        return s.length() - l;
+
+        //宫水三叶解法
+        int ans = 0;
+        int[] cnt = new int[26];
+        int n = s.length();
+        for (int l = 0, r = 0; r < n; r++) {
+            int cur = s.charAt(r) - 'A';
+            cnt[cur]++;
+            //想想什么时候需要缩窗口，肯定是总数量 - 数量最多的字符 > k 的时候
+            while (!check(cnt, k)) {
+                cnt[s.charAt(l) - 'A']--;
+                l++;
+            }
+
+            ans = Math.max(ans, r - l + 1);
+        }
+        return ans;
+    }
+
+    private boolean check(int[] cnt, int k) {
+        int maxCount = 0, sum = 0;
+        for (int i = 0; i < 26; i++) {
+            maxCount = Math.max(maxCount, cnt[i]);
+            sum += cnt[i];
+        }
+        return sum - maxCount <= k;
+    }
+
     //[427].建立四叉树
     public Solution427.Node construct(int[][] grid) {
         return helper(grid, 0, 0, grid.length);
@@ -5517,6 +5563,35 @@ public class AllOfThem {
             cur = cur.left;
         }
         return cur;
+    }
+
+    //[451].根据字符出现频率排序
+    public static String frequencySort(String s) {
+        //桶排序，时间复杂度更低
+        Map<Character, Integer> map = new HashMap<>();
+        int max = 0;
+        for (char ch : s.toCharArray()) {
+            map.put(ch, map.getOrDefault(ch, 0) + 1);
+            max = Math.max(map.get(ch), max);
+        }
+        StringBuffer[] sbs = new StringBuffer[max + 1];
+        for (int i = 0; i <= max; i++) {
+            sbs[i] = new StringBuffer();
+        }
+        for (Map.Entry<Character, Integer> entry : map.entrySet()) {
+            sbs[entry.getValue()].append(entry.getKey());
+        }
+
+        StringBuffer res = new StringBuffer();
+        for (int i = max; i > 0; i--) {
+            StringBuffer sb = sbs[i];
+            for (int j = 0; j < sb.length(); j++) {
+                for (int k = 0; k < i; k++) {
+                    res.append(sb.charAt(j));
+                }
+            }
+        }
+        return res.toString();
     }
 
     //[456].132 模式
@@ -6356,6 +6431,57 @@ public class AllOfThem {
         return res;
     }
 
+    //[567].字符串的排列
+    public boolean checkInclusion(String s1, String s2) {
+//        int m = s1.length(), n = s2.length();
+//        if (m > n) return false;
+//        int[] cnt = new int[26];
+//        //逆向思维，窗口内如果大于0，说明需要缩窗口，否则如果right - left + 1 == m
+//        for (int i = 0; i < m; i++) {
+//            --cnt[s1.charAt(i) - 'a'];
+//        }
+//
+//        for (int right = 0, left = 0; right < n; right++) {
+//            int ch = s2.charAt(right) - 'a';
+//            ++cnt[ch];
+//
+//            while (cnt[ch] > 0) {
+//                --cnt[s2.charAt(left) - 'a'];
+//                left++;
+//            }
+//            if (right - left + 1 == m) {
+//                return true;
+//            }
+//        }
+//        return false;
+
+        //宫水三叶的解法，非常易懂
+        int m = s1.length(), n = s2.length();
+        if (m > n) return false;
+        int[] cnt1 = new int[26], cnt2 = new int[26];
+        for (int i = 0; i < m; i++) cnt1[s1.charAt(i) - 'a']++;
+        for (int i = 0; i < m; i++) cnt2[s2.charAt(i) - 'a']++;
+        if (check(cnt1, cnt2)) return true;
+        for (int i = m; i < n; i++) {
+            //右边增加一个值
+            cnt2[s2.charAt(i) - 'a']++;
+            //左边减少一个值
+            cnt2[s2.charAt(i - m) - 'a']--;
+            //判断是否相等
+            if (check(cnt1, cnt2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean check(int[] cnt1, int[] cnt2) {
+        for (int i = 0; i < 26; i++) {
+            if (cnt1[i] != cnt2[i]) return false;
+        }
+        return true;
+    }
+
     //[581].最短无序连续子数组
     public int findUnsortedSubarray(int[] nums) {
         int right = 0;
@@ -6590,6 +6716,74 @@ public class AllOfThem {
             }
         }
         return false;
+    }
+
+    //[636].函数的独占时间
+    public static int[] exclusiveTime(int n, List<String> logs) {
+        //start end start end
+        //start start end end
+        //因为有嵌套，两个start差值，两个end之间的差值，start和end之间的差值都需要更新，所以定义一个pre
+        //end时，出战，更新pre
+        //start时，进站，更新pre，如果栈不空，说明有嵌套，需要更新前面的时间。否则进站。
+        Stack<Integer> stack = new Stack<>();
+        int[] res = new int[n];
+        String[] first = logs.get(0).split(":");
+
+        stack.push(Integer.parseInt(first[0]));
+        int pre = Integer.parseInt(first[2]);
+        for (int i = 1; i < logs.size(); i++) {
+            String[] split = logs.get(i).split(":");
+            if (split[1].equals("start")) {
+                //更新上一个节点的时间
+                if (!stack.isEmpty()) {
+                    res[stack.peek()] += Integer.parseInt(split[2]) - pre;
+                }
+                //更新start时间
+                pre = Integer.parseInt(split[2]);
+                //等待配对，进栈
+                stack.push(Integer.parseInt(split[0]));
+            } else {
+                res[stack.peek()] += Integer.parseInt(split[2]) - pre + 1;
+                //更新start时间
+                pre = Integer.parseInt(split[2]) + 1;
+                //配对成功，出栈
+                stack.pop();
+            }
+        }
+        return res;
+    }
+
+    //[640].求解方程
+    public String solveEquation(String equation) {
+        if (equation == null || equation.length() == 0) return "No solution";
+        //"2x=x"
+        //大概的想法，把等式替换成+-，按照=分割，然后按照+分割，然后求出x的系数，合并成如下式子
+        //Ax + y = Bx + z， （A-B）x = z -y， 如果A-B = 0 且 z-y = 0，然后无限。如果 A-B = 0且z-y != 0 ，无解。否则返回解
+        equation = equation.replaceAll("-", "+-");
+        String left = equation.split("=")[0];
+        String right = equation.split("=")[1];
+
+        int A = 0, y = 0, B = 0, z = 0;
+        for (String s : left.split("\\+")) {
+            if (s.contains("x")) {
+                String replace = s.replace("x", "");
+                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
+            } else if (s.length() > 0) {
+                y += Integer.parseInt(s);
+            }
+        }
+        for (String s : right.split("\\+")) {
+            if (s.contains("x")) {
+                String replace = s.replace("x", "");
+                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
+            } else if (s.length() > 0) {
+                z += Integer.parseInt(s);
+            }
+        }
+
+        if (A == B && y == z) return "Infinite solutions";
+        else if (A == B && y != z) return "No solution";
+        else return "x=" + (z - y) / (A - B);
     }
 
     //[674].最长连续递增序列
@@ -8916,74 +9110,6 @@ public class AllOfThem {
         ans.add(head.val);
     }
 
-    //[636].函数的独占时间
-    public static int[] exclusiveTime(int n, List<String> logs) {
-        //start end start end
-        //start start end end
-        //因为有嵌套，两个start差值，两个end之间的差值，start和end之间的差值都需要更新，所以定义一个pre
-        //end时，出战，更新pre
-        //start时，进站，更新pre，如果栈不空，说明有嵌套，需要更新前面的时间。否则进站。
-        Stack<Integer> stack = new Stack<>();
-        int[] res = new int[n];
-        String[] first = logs.get(0).split(":");
-
-        stack.push(Integer.parseInt(first[0]));
-        int pre = Integer.parseInt(first[2]);
-        for (int i = 1; i < logs.size(); i++) {
-            String[] split = logs.get(i).split(":");
-            if (split[1].equals("start")) {
-                //更新上一个节点的时间
-                if (!stack.isEmpty()) {
-                    res[stack.peek()] += Integer.parseInt(split[2]) - pre;
-                }
-                //更新start时间
-                pre = Integer.parseInt(split[2]);
-                //等待配对，进栈
-                stack.push(Integer.parseInt(split[0]));
-            } else {
-                res[stack.peek()] += Integer.parseInt(split[2]) - pre + 1;
-                //更新start时间
-                pre = Integer.parseInt(split[2]) + 1;
-                //配对成功，出栈
-                stack.pop();
-            }
-        }
-        return res;
-    }
-
-    //[640].求解方程
-    public String solveEquation(String equation) {
-        if (equation == null || equation.length() == 0) return "No solution";
-        //"2x=x"
-        //大概的想法，把等式替换成+-，按照=分割，然后按照+分割，然后求出x的系数，合并成如下式子
-        //Ax + y = Bx + z， （A-B）x = z -y， 如果A-B = 0 且 z-y = 0，然后无限。如果 A-B = 0且z-y != 0 ，无解。否则返回解
-        equation = equation.replaceAll("-", "+-");
-        String left = equation.split("=")[0];
-        String right = equation.split("=")[1];
-
-        int A = 0, y = 0, B = 0, z = 0;
-        for (String s : left.split("\\+")) {
-            if (s.contains("x")) {
-                String replace = s.replace("x", "");
-                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
-            } else if (s.length() > 0) {
-                y += Integer.parseInt(s);
-            }
-        }
-        for (String s : right.split("\\+")) {
-            if (s.contains("x")) {
-                String replace = s.replace("x", "");
-                A += replace.length() == 0 ? 1 : replace.equals("-") ? -1 : Integer.parseInt(replace);
-            } else if (s.length() > 0) {
-                z += Integer.parseInt(s);
-            }
-        }
-
-        if (A == B && y == z) return "Infinite solutions";
-        else if (A == B && y != z) return "No solution";
-        else return "x=" + (z - y) / (A - B);
-    }
-
     //[2013].检测正方形
     public class DetectSquares {
 
@@ -9043,35 +9169,6 @@ public class AllOfThem {
             stack.push(i);
         }
         return res;
-    }
-
-    //[451].根据字符出现频率排序
-    public static String frequencySort(String s) {
-        //桶排序，时间复杂度更低
-        Map<Character, Integer> map = new HashMap<>();
-        int max = 0;
-        for (char ch : s.toCharArray()) {
-            map.put(ch, map.getOrDefault(ch, 0) + 1);
-            max = Math.max(map.get(ch), max);
-        }
-        StringBuffer[] sbs = new StringBuffer[max + 1];
-        for (int i = 0; i <= max; i++) {
-            sbs[i] = new StringBuffer();
-        }
-        for (Map.Entry<Character, Integer> entry : map.entrySet()) {
-            sbs[entry.getValue()].append(entry.getKey());
-        }
-
-        StringBuffer res = new StringBuffer();
-        for (int i = max; i > 0; i--) {
-            StringBuffer sb = sbs[i];
-            for (int j = 0; j < sb.length(); j++) {
-                for (int k = 0; k < i; k++) {
-                    res.append(sb.charAt(j));
-                }
-            }
-        }
-        return res.toString();
     }
 
     //[2047].句子中的有效单词数
@@ -9154,63 +9251,13 @@ public class AllOfThem {
         }
     }
 
-    //[567].字符串的排列
-    public boolean checkInclusion(String s1, String s2) {
-//        int m = s1.length(), n = s2.length();
-//        if (m > n) return false;
-//        int[] cnt = new int[26];
-//        //逆向思维，窗口内如果大于0，说明需要缩窗口，否则如果right - left + 1 == m
-//        for (int i = 0; i < m; i++) {
-//            --cnt[s1.charAt(i) - 'a'];
-//        }
-//
-//        for (int right = 0, left = 0; right < n; right++) {
-//            int ch = s2.charAt(right) - 'a';
-//            ++cnt[ch];
-//
-//            while (cnt[ch] > 0) {
-//                --cnt[s2.charAt(left) - 'a'];
-//                left++;
-//            }
-//            if (right - left + 1 == m) {
-//                return true;
-//            }
-//        }
-//        return false;
-
-        //宫水三叶的解法，非常易懂
-        int m = s1.length(), n = s2.length();
-        if (m > n) return false;
-        int[] cnt1 = new int[26], cnt2 = new int[26];
-        for (int i = 0; i < m; i++) cnt1[s1.charAt(i) - 'a']++;
-        for (int i = 0; i < m; i++) cnt2[s2.charAt(i) - 'a']++;
-        if (check(cnt1, cnt2)) return true;
-        for (int i = m; i < n; i++) {
-            //右边增加一个值
-            cnt2[s2.charAt(i) - 'a']++;
-            //左边减少一个值
-            cnt2[s2.charAt(i - m) - 'a']--;
-            //判断是否相等
-            if (check(cnt1, cnt2)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean check(int[] cnt1, int[] cnt2) {
-        for (int i = 0; i < 26; i++) {
-            if (cnt1[i] != cnt2[i]) return false;
-        }
-        return true;
-    }
-
     //[394].字符串解码
     public String decodeString(String s) {
         //从后往前遍历，遇到数字出栈
         return null;
     }
 
+    //[1996].游戏中弱角色的数量
     public int numberOfWeakCharacters(int[][] properties) {//第一维度降序，第二维度增序，保证相同的攻击值的时候，最大的防御值大，一定是一个弱者
         Arrays.sort(properties, (a, b) -> a[0] == b[0] ? a[1] - b[1] : b[0] - a[0]);
 
@@ -9223,7 +9270,6 @@ public class AllOfThem {
             }
         }
         return ans;
-
     }
 
     //[面试题 10.10].数字流的秩
@@ -9263,50 +9309,37 @@ public class AllOfThem {
         }
     }
 
-    //[424].替换后的最长重复字符
-    public int characterReplacement(String s, int k) {
-//        int[] cnt = new int[26];
-//        int maxCount = 0;
-//        int l = 0;
-//        for (int r = 0; r < s.length(); ) {
-//            cnt[s.charAt(r) - 'A']++;
-//            maxCount = Math.max(maxCount, cnt[s.charAt(r) - 'A']);
-//            r++;
-//
-//            //最大的窗口 > 某个字符最大的数量+ 其他字符替换的k次，就需要缩窗口
-//            if (r - l > maxCount + k) {
-//                cnt[s.charAt(l) - 'A']--;
-//                l++;
-//            }
-//        }
-//        //左窗口的位置就是最大的重复串位置
-//        return s.length() - l;
-
-        //宫水三叶解法
-        int ans = 0;
-        int[] cnt = new int[26];
-        int n = s.length();
-        for (int l = 0, r = 0; r < n; r++) {
-            int cur = s.charAt(r) - 'A';
-            cnt[cur]++;
-            //只要不合法就一直缩窗口
-            while (!check(cnt, k)) {
-                cnt[s.charAt(l) - 'A']--;
-                l++;
+    //[1765].地图中的最高点
+    public int[][] highestPeak(int[][] isWater) {
+        //广度优先遍历的特点是层，可以解决最短路径，树层遍历，图遍历
+        //该道题需要从水域开始遍历，往外一层层遍历，后面节点重复遍历必然值更大，但不满足题目要求
+        int m = isWater.length, n = isWater[0].length;
+        int[][] res = new int[m][n];
+        Queue<int[]> queue = new ArrayDeque<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (isWater[i][j] == 1) {
+                    queue.offer(new int[]{i, j});
+                }
+                res[i][j] = isWater[i][j] == 1 ? 0 : -1;
             }
-
-            ans = Math.max(ans, r - l +1);
         }
-        return ans;
-    }
-
-    private boolean check(int[] cnt, int k) {
-        int maxCount = 0, sum = 0;
-        for (int i = 0; i < 26; i++) {
-            maxCount = Math.max(maxCount, cnt[i]);
-            sum += cnt[i];
+        int[][] directs = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1];
+            int val = res[x][y];
+            for (int[] dir : directs) {
+                int nx = dir[0] + x;
+                int ny = dir[1] + y;
+                if (nx < 0 || ny < 0 || nx >= m || ny >= n || res[nx][ny] != -1) {
+                    continue;
+                }
+                res[nx][ny] = val + 1;
+                queue.offer(new int[]{nx, ny});
+            }
         }
-        return sum - maxCount <= k;
+        return res;
     }
 
     public static void main(String[] args) {
