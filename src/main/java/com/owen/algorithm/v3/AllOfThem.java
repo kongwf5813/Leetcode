@@ -9342,6 +9342,22 @@ public class AllOfThem {
         return res;
     }
 
+
+    public int findMinArrowShots(int[][] points) {
+        Arrays.sort(points, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        int e = points[0][1];
+        int ans = 1;
+        for (int i = 1; i < points.length; i++) {
+            int[] cur = points[i];
+            if (cur[0] > e){
+                //没交集，新的一根针
+                ans++;
+                e = cur[1];
+            }
+        }
+        return ans;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
