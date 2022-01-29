@@ -5614,6 +5614,40 @@ public class AllOfThem {
         return false;
     }
 
+    //[462].最少移动次数使数组元素相等 II
+    public int minMoves2(int[] nums) {
+        //中位数，就是最少移动次数，常规操作肯定是排序之后，取中间的
+        int n = nums.length;
+        //用快速选择比较好，平均O(n)， 最坏情况O(n2)
+        int mid = select(nums, 0, n - 1, n / 2);
+        int sum = 0;
+        for (int num : nums) {
+            sum += Math.abs(mid - num);
+        }
+        return sum;
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        int pivot = nums[right];
+        int i = left;
+        for (int j = left; j <= right; j++) {
+            if (nums[j] < pivot) {
+                swap(nums, i, j);
+                i++;
+            }
+        }
+        swap(nums, i, right);
+        return i;
+    }
+
+    private int select(int[] nums, int left, int right, int k) {
+        if (left == right) return nums[left];
+        int index = partition(nums, left, right);
+        if (k == index) return nums[k];
+        else if (k < index) return select(nums, left, index - 1, k);
+        else return select(nums, index + 1, right, k);
+    }
+
     //[463].岛屿的周长
     public int islandPerimeter(int[][] grid) {
         int m = grid.length, n = grid[0].length;
@@ -6052,6 +6086,36 @@ public class AllOfThem {
         }
         return sum == num;
     }
+
+    //[508].出现次数最多的子树元素和
+    public int[] findFrequentTreeSum(TreeNode root) {
+        AtomicInteger maxCount = new AtomicInteger(0);
+        Map<Integer, Integer> count = new HashMap<>();
+        dfsForFindFrequentTreeSum(root, count, maxCount);
+
+        List<Integer> res = new ArrayList<>();
+        for (int num : count.keySet()) {
+            if (count.get(num).equals(maxCount.get())) {
+                res.add(num);
+            }
+        }
+        int[] result = new int[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            result[i] = res.get(i);
+        }
+        return result;
+    }
+
+    private int dfsForFindFrequentTreeSum(TreeNode root, Map<Integer, Integer> count, AtomicInteger max) {
+        if (root == null) return 0;
+        int left = dfsForFindFrequentTreeSum(root.left, count, max);
+        int right = dfsForFindFrequentTreeSum(root.right, count, max);
+        int sum = left + right + root.val;
+        count.put(sum, count.getOrDefault(sum, 0) + 1);
+        max.set(Math.max(max.get(), count.get(sum)));
+        return sum;
+    }
+
 
     //[509].斐波那契数
     public int fib(int n) {
@@ -6683,6 +6747,18 @@ public class AllOfThem {
         helperForAddOneRow(root.right, val, depth, level + 1);
     }
 
+    //[628].三个数的最大乘积
+    public int maximumProduct(int[] nums) {
+        int n = nums.length;
+        if (n < 3) return 0;
+
+        Arrays.sort(nums);
+        int a = nums[n - 1] * nums[n - 2] * nums[n - 3];
+        //有可能负数，并且只有两两是负数的时候才可能最大
+        int b = nums[0] * nums[1] * nums[n - 1];
+        return Math.max(a, b);
+    }
+
     //[630].课程表 III
     public int scheduleCourse(int[][] courses) {
         //将课程按照最后的截止日期从小到大，起始时间从小到大排序
@@ -6800,6 +6876,20 @@ public class AllOfThem {
             right++;
         }
         return res;
+    }
+
+    //[684].冗余连接
+    public int[] findRedundantConnection(int[][] edges) {
+        int n = edges.length;
+        //从1开始
+        UnionFind uf = new UnionFind(n + 1);
+        for (int[] edge : edges) {
+            if (uf.connect(edge[0], edge[1])) {
+                return edge;
+            }
+            uf.union(edge[0], edge[1]);
+        }
+        return new int[0];
     }
 
     //[686].重复叠加字符串匹配
@@ -8017,7 +8107,7 @@ public class AllOfThem {
         return sb.delete(j + 1, sb.length()).toString();
     }
 
-    //[5956].找出数组中的第一个回文字符串
+    //[2108].找出数组中的第一个回文字符串
     public String firstPalindrome(String[] words) {
         for (int i = 0; i < words.length; i++) {
             if (isPalindrome(words[i])) {
@@ -8040,18 +8130,20 @@ public class AllOfThem {
         return true;
     }
 
-    //[5957].向字符串添加空格
-    public String addSpaces(String s, int[] spaces) {
-        StringBuilder sb = new StringBuilder(s);
-        int count = 0;
+    //[2109].向字符串添加空格
+    public static String addSpaces(String s, int[] spaces) {
+        StringBuilder sb = new StringBuilder();
+        int start = 0;
         for (int space : spaces) {
-            sb.insert(space + count, ' ');
-            count++;
+            sb.append(s.substring(start, space));
+            sb.append(' ');
+            start = space;
         }
+        sb.append(s.substring(start));
         return sb.toString();
     }
 
-    //[5958].股票平滑下跌阶段的数目
+    //[2110].股票平滑下跌阶段的数目
     public long getDescentPeriods(int[] prices) {
         int n = prices.length;
         //从第1个开始，少算了一个数
@@ -8065,7 +8157,6 @@ public class AllOfThem {
             }
             ans += count;
         }
-
         return ans;
     }
 
@@ -9251,12 +9342,6 @@ public class AllOfThem {
         }
     }
 
-    //[394].字符串解码
-    public String decodeString(String s) {
-        //从后往前遍历，遇到数字出栈
-        return null;
-    }
-
     //[1996].游戏中弱角色的数量
     public int numberOfWeakCharacters(int[][] properties) {//第一维度降序，第二维度增序，保证相同的攻击值的时候，最大的防御值大，一定是一个弱者
         Arrays.sort(properties, (a, b) -> a[0] == b[0] ? a[1] - b[1] : b[0] - a[0]);
@@ -9349,7 +9434,7 @@ public class AllOfThem {
         int ans = 1;
         for (int i = 1; i < points.length; i++) {
             int[] cur = points[i];
-            if (cur[0] > e){
+            if (cur[0] > e) {
                 //没交集，新的一根针
                 ans++;
                 e = cur[1];
@@ -9545,5 +9630,6 @@ public class AllOfThem {
 //        System.out.println(lengthLongestPath("dir\n\tsubdir1\n\t\tfile1.ext\n\t\tsubsubdir1\n\tsubdir2\n\t\tsubsubdir2\n\t\t\tfile2.ext"));
 //        System.out.println(lengthLongestPath("file1.txt\nfile2.txt\nlongfile.txt"));
 //        System.out.println(readBinaryWatch(1));
+//        System.out.println(addSpaces("spacing", new int[]{0,1,2,3,4,5,6}));
     }
 }
