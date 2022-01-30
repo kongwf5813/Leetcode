@@ -7104,6 +7104,42 @@ public class AllOfThem {
         return sum - dp[m][n] * 2;
     }
 
+    //[735].行星碰撞
+    public static int[] asteroidCollision(int[] asteroids) {
+        int n = asteroids.length;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < n; i++) {
+            int num = asteroids[i];
+            boolean push = true;
+            while (!stack.isEmpty()) {
+                int top = asteroids[stack.peek()];
+                if (top > 0 && num < 0) {
+                    if (top < -num) {
+                        stack.pop();
+                    } else if (top == -num) {
+                        stack.pop();
+                        push = false;
+                        break;
+                    } else {
+                        push = false;
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (push) {
+                stack.push(i);
+            }
+        }
+        int[] res = new int[stack.size()];
+        int index = res.length - 1;
+        while (!stack.isEmpty()) {
+            res[index--] = asteroids[stack.pop()];
+        }
+        return res;
+    }
+
     //[739].每日温度
     public int[] dailyTemperatures(int[] temperatures) {
         int[] res = new int[temperatures.length];
