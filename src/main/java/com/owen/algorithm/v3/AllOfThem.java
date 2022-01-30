@@ -4791,6 +4791,31 @@ public class AllOfThem {
         }
     }
 
+    //[345].反转字符串中的元音字母
+    public String reverseVowels(String s) {
+        int n = s.length();
+        int l = 0, r = n - 1;
+        char[] str = s.toCharArray();
+        while (l < r) {
+            if (!isVowel(str[l])) {
+                l++;
+            } else if (!isVowel(str[r])) {
+                r--;
+            } else {
+                char temp = str[l];
+                str[l] = str[r];
+                str[r] = temp;
+                l++;
+                r--;
+            }
+        }
+        return String.valueOf(str);
+    }
+
+    private boolean isVowel(char ch) {
+        return ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o';
+    }
+
     //[354].俄罗斯套娃信封问题
     public int maxEnvelopes(int[][] envelopes) {
         int n = envelopes.length;
@@ -5592,6 +5617,22 @@ public class AllOfThem {
             }
         }
         return res.toString();
+    }
+
+    //[452].用最少数量的箭引爆气球
+    public int findMinArrowShots(int[][] points) {
+        Arrays.sort(points, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+        int e = points[0][1];
+        int ans = 1;
+        for (int i = 1; i < points.length; i++) {
+            int[] cur = points[i];
+            if (cur[0] > e) {
+                //没交集，新的一根针
+                ans++;
+                e = cur[1];
+            }
+        }
+        return ans;
     }
 
     //[456].132 模式
@@ -7426,6 +7467,26 @@ public class AllOfThem {
             slow = slow.next;
         }
         return slow;
+    }
+
+    //[884].两句话中的不常见单词
+    public String[] uncommonFromSentences(String s1, String s2) {
+        Map<String, Integer> count = new HashMap<>();
+        String[] sp1 = s1.split(" ");
+        String[] sp2 = s2.split(" ");
+        for (String sp : sp1) {
+            count.put(sp, count.getOrDefault(sp, 0) + 1);
+        }
+        for (String sp : sp2) {
+            count.put(sp, count.getOrDefault(sp, 0) + 1);
+        }
+        List<String> temp = new ArrayList<>();
+        for (String key : count.keySet()) {
+            if (count.get(key) == 1) {
+                temp.add(key);
+            }
+        }
+        return temp.toArray(new String[0]);
     }
 
     //[911].在线选举
@@ -9425,22 +9486,6 @@ public class AllOfThem {
             }
         }
         return res;
-    }
-
-
-    public int findMinArrowShots(int[][] points) {
-        Arrays.sort(points, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
-        int e = points[0][1];
-        int ans = 1;
-        for (int i = 1; i < points.length; i++) {
-            int[] cur = points[i];
-            if (cur[0] > e) {
-                //没交集，新的一根针
-                ans++;
-                e = cur[1];
-            }
-        }
-        return ans;
     }
 
     public static void main(String[] args) {
