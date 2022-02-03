@@ -753,7 +753,7 @@ public class Tree {
         }
 
         public int findMaximumXOR(int[] nums) {
-            if (nums.length == 0) return 0;
+            if (nums.length == 1) return nums[0];
             build(nums);
             int max = 0;
             for (int num : nums) {

@@ -395,6 +395,59 @@ public class AllOfThem {
         return strs[0];
     }
 
+    //[15].三数之和
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        List<List<Integer>> res = new ArrayList<>();
+        //锚定第一个数之和，就是左右双指针，判断重复两个点： 第一个数第二次处理重复可以跳过，第二个数重复加速
+        for (int i = 0; i < n; i++) {
+            if (i > 0 && nums[i - 1] == nums[i]) continue;
+            int j = i + 1, k = n - 1;
+            while (j < k) {
+                while (j > i + 1 && j < n && nums[j - 1] == nums[j]) j++;
+                if (j >= k) break;
+                int sum = nums[i] + nums[j] + nums[k];
+                if (sum == 0) {
+                    res.add(Arrays.asList(nums[i], nums[j], nums[k]));
+                    j++;
+                } else if (sum > 0) {
+                    k--;
+                } else {
+                    j++;
+                }
+            }
+        }
+        return res;
+    }
+
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        int ans = nums[0] + nums[1] + nums[2];
+        for (int i = 0; i < n; i++) {
+            // 保证和上一次枚举的元素不相等
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            int left = i + 1, right = n - 1;
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (Math.abs(sum - target) < Math.abs(ans - target)) {
+                    ans = sum;
+                }
+                if (ans == target) {
+                    return ans;
+                } else if (sum > target) {
+                    right--;
+                } else if (sum < target) {
+                    left++;
+                }
+            }
+        }
+        return ans;
+    }
+
     //[17].电话号码的字母组合
     public List<String> letterCombinations(String digits) {
         List<String> res = new ArrayList<>();
@@ -1391,6 +1444,25 @@ public class AllOfThem {
         return res;
     }
 
+    //[60].排列序列
+    public String getPermutation(int n, int k) {
+        int[] frac = new int[n + 1];
+        List<Integer> select = new ArrayList<>();
+        frac[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            frac[i] = frac[i - 1] * i;
+            select.add(i);
+        }
+        k--;
+        StringBuilder sb = new StringBuilder();
+        for (int j = n - 1; j >= 0; j--) {
+            int index = k / frac[j];
+            sb.append(select.remove(index));
+            k %= frac[j];
+        }
+        return sb.toString();
+    }
+
     //[61].旋转链表
     public ListNode rotateRight(ListNode head, int k) {
         int count = 0;
@@ -1571,6 +1643,30 @@ public class AllOfThem {
             sb.insert(0, "/" + stack.pop());
         }
         return sb.toString();
+    }
+
+    //[72].编辑距离
+    public int minDistance0(String word1, String word2) {
+        int m = word1.length(), n = word2.length();
+        //word1长度为i，word2长度为j的最小编辑距离
+        int[][] dp = new int[m + 1][n + 1];
+        //初始值
+        for (int i = 1; i <= m; i++) dp[i][0] = i;
+        for (int j = 1; j <= n; j++) dp[0][j] = j;
+
+        //当前值依赖左上方，左边，上边的值，求得值为dp[m][n]，由短及远，所以遍历方向是从(0,0)从左到右，从上到下
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                //这边是索引
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    //hab hae => dp[i][j] 还依赖dp[i-1][j-1] +1
+                    dp[i][j] = Math.min(dp[i - 1][j], Math.min(dp[i][j - 1], dp[i - 1][j - 1])) + 1;
+                }
+            }
+        }
+        return dp[m][n];
     }
 
     //[73].矩阵置零
@@ -1924,6 +2020,28 @@ public class AllOfThem {
         }
     }
 
+    //[91].解码方法
+    public int numDecodings(String s) {
+        int n = s.length();
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        //长度为i的字符串的方法数
+        for (int i = 1; i <= n; i++) {
+            int a = s.charAt(i - 1) - '0';
+            //单独一个数字
+            if (a >= 1 && a <= 9) {
+                dp[i] = dp[i - 1];
+            }
+            //可以和前面的组成一个数字
+            if (i > 1) {
+                int b = (s.charAt(i - 2) - '0') * 10 + (s.charAt(i - 1) - '0');
+                if (b >= 10 && b <= 26) {
+                    dp[i] += dp[i - 2];
+                }
+            }
+        }
+        return dp[n];
+    }
 
     //[92].反转链表 II
     public ListNode reverseBetween(ListNode head, int left, int right) {
@@ -2678,6 +2796,29 @@ public class AllOfThem {
         return dp_2_0;
     }
 
+    //[124].二叉树中的最大路径和
+    public int maxPathSum(TreeNode root) {
+        AtomicInteger res = new AtomicInteger(Integer.MIN_VALUE);
+        oneSideMax(root, res);
+        return res.get();
+    }
+
+    private int oneSideMax(TreeNode root, AtomicInteger maxPathSum) {
+        if (root == null) return 0;
+
+        //只有单边路径和为正值才会选择
+        int leftMax = Math.max(oneSideMax(root.left, maxPathSum), 0);
+        int rightMax = Math.max(oneSideMax(root.right, maxPathSum), 0);
+
+        int pathSum = leftMax + rightMax + root.val;
+        if (maxPathSum.get() < pathSum) {
+            maxPathSum.set(pathSum);
+        }
+
+        //单边路径和等于左右两边的最大和+根节点的值
+        return Math.max(leftMax, rightMax) + root.val;
+    }
+
     //[128].最长连续序列
     public int longestConsecutive(int[] nums) {
         Set<Integer> set = new HashSet<>();
@@ -3197,6 +3338,24 @@ public class AllOfThem {
         return nums[left];
     }
 
+    //[154].寻找旋转排序数组中的最小值 II
+    public int findMin2(int[] nums) {
+        int l = 0, r = nums.length - 1;
+        while (l < r) {
+            int mid = l + (r - l) / 2;
+            if (nums[mid] > nums[r]) {
+                l = mid + 1;
+            } else if (nums[mid] < nums[r]) {
+                //有可能是，所以r = mid;
+                r = mid;
+            } else {
+                //砍掉右边界
+                r--;
+            }
+        }
+        return nums[l];
+    }
+
     //[160].相交链表
     public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
         ListNode p1 = headA, p2 = headB;
@@ -3397,6 +3556,28 @@ public class AllOfThem {
         return res;
     }
 
+    //[189].轮转数组
+    public void rotate(int[] nums, int k) {
+        int n = nums.length;
+        k = k % n;
+        //控制翻转的数量就可以
+        int count = 0;
+        for (int start = 0; start < n && count < n; start++) {
+            int current = start;
+            int pre = nums[current];
+            do {
+                count++;
+                int next = (current + k) % n;
+                int temp = nums[next];
+                nums[next] = pre;
+
+                current = next;
+                pre = temp;
+            } while (start != current);
+        }
+
+    }
+
     //[198].打家劫舍
     public int rob(int[] nums) {
         int n = nums.length;
@@ -3473,7 +3654,6 @@ public class AllOfThem {
         }
         return m << count;
     }
-
 
     //[203].移除链表元素
     public ListNode removeElements(ListNode head, int val) {
@@ -4330,6 +4510,40 @@ public class AllOfThem {
         return slow;
     }
 
+    //[295].数据流的中位数
+    public class MedianFinder {
+
+        PriorityQueue<Integer> small;
+        PriorityQueue<Integer> large;
+
+        public MedianFinder() {
+            //这个是大根堆，保证堆顶是较大值
+            small = new PriorityQueue<>((a, b) -> b - a);
+            //这个是小根堆，保证堆顶是较小值
+            large = new PriorityQueue<>((a, b) -> a - b);
+        }
+
+        public void addNum(int num) {
+            if (small.size() > large.size()) {
+                small.offer(num);
+                large.offer(small.poll());
+            } else {
+                large.offer(num);
+                small.offer(large.poll());
+            }
+        }
+
+        public double findMedian() {
+            if (small.size() == large.size()) {
+                return (small.peek() + large.peek()) / 2.0d;
+            } else if (small.size() > large.size()) {
+                return small.peek();
+            } else {
+                return large.peek();
+            }
+        }
+    }
+
     //[297].二叉树的序列化与反序列化
     public class Codec {
 
@@ -4639,6 +4853,45 @@ public class AllOfThem {
         return (int) Math.sqrt(n);
     }
 
+    //[322].零钱兑换
+    public int coinChange(int[] coins, int amount) {
+        int n = coins.length;
+        int[] dp = new int[amount + 1];
+        //dp[0] 金额为0， 需要的硬币数为0，求得是最小硬币数量，所以初始化为最大
+        for (int i = 1; i <= amount; i++) dp[i] = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            int val = coins[i];
+            //正序遍历：完全背包每个硬币可以选择多次
+            for (int j = val; j <= amount; j++) {
+                //只有dp[j-coins[i]]不是初始最大值时，该位才有选择的必要
+                //如果是最大值，意味着无解
+                if (dp[j - val] != Integer.MAX_VALUE) {
+                    dp[j] = Math.min(dp[j], dp[j - val] + 1);
+                }
+            }
+        }
+        return dp[amount] == Integer.MAX_VALUE ? -1 : dp[amount];
+    }
+
+    //[324].摆动排序 II
+    public void wiggleSort(int[] nums) {
+        Arrays.sort(nums);
+        //1| 1 2 2 | 3 3 4
+        // 2 4 2 3 1 3 | 1
+        int[] temp = nums.clone();
+        int n = nums.length;
+        for (int i = 0; i < n / 2; i++) {
+            //较小值一半的位置倒序
+            nums[2 * i] = temp[(n - 1) / 2 - i];
+            //较大值倒序
+            nums[2 * i + 1] = temp[n - 1 - i];
+        }
+
+        if ((n % 2) != 0) {
+            nums[n-1] = temp[0];
+        }
+    }
+
     //[326].3的幂
     public boolean isPowerOfThree(int n) {
         if (n <= 0) return false;
@@ -4709,6 +4962,35 @@ public class AllOfThem {
         return in == out;
     }
 
+    //[332].重新安排行程
+    public List<String> findItinerary(List<List<String>> tickets) {
+        LinkedList<String> res = new LinkedList<>();
+        if (tickets == null || tickets.size() == 0) {
+            return res;
+        }
+        Map<String, LinkedList<String>> graph = new HashMap<>();
+        for (List<String> ticket : tickets) {
+            graph.putIfAbsent(ticket.get(0), new LinkedList<>());
+            graph.get(ticket.get(0)).add(ticket.get(1));
+        }
+        graph.values().forEach(x -> x.sort(String::compareTo));
+        dfsForFindItinerary(graph, "JFK", res);
+        return res;
+    }
+
+    private void dfsForFindItinerary(Map<String, LinkedList<String>> graph, String src, LinkedList<String> path) {
+        LinkedList<String> items = graph.get(src);
+        path.add(src);
+        if (items == null) {
+            return;
+        }
+        //做选择，这里就不要撤销了，因为存在唯一解，优先取字典序最小的就可以
+        while (items.size() > 0) {
+            String dest = items.removeFirst();
+            dfsForFindItinerary(graph, dest, path);
+        }
+    }
+
     //[334].递增的三元子序列
     public boolean increasingTriplet(int[] nums) {
         int firstMin = Integer.MAX_VALUE, secondMin = Integer.MAX_VALUE;
@@ -4754,6 +5036,82 @@ public class AllOfThem {
             dp[i] = dp[i >> 1] + ((i & 1) == 1 ? 1 : 0);
         }
         return dp;
+    }
+
+    //[341].扁平化嵌套列表迭代器
+    interface NestedInteger {
+
+        // @return true if this NestedInteger holds a single integer, rather than a nested list.
+        public boolean isInteger();
+
+        // @return the single integer that this NestedInteger holds, if it holds a single integer
+        // Return null if this NestedInteger holds a nested list
+        public Integer getInteger();
+
+        // @return the nested list that this NestedInteger holds, if it holds a nested list
+        // Return empty list if this NestedInteger holds a single integer
+        public List<NestedInteger> getList();
+    }
+
+    public class NestedIterator implements Iterator<Integer> {
+        // This is the interface that allows for creating nested lists.
+        // You should not implement it, or speculate about its implementation
+
+//        private Queue<Integer> queue = new LinkedList<>();
+//        public NestedIterator(List<NestedInteger> nestedList) {
+//            dfs(nestedList);
+//        }
+//
+//        @Override
+//        public Integer next() {
+//            return hasNext() ? queue.poll() : -1;
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return !queue.isEmpty();
+//        }
+//
+//        private void dfs(List<NestedInteger> nestedList) {
+//            for(NestedInteger it : nestedList) {
+//                if (it.isInteger()) {
+//                    queue.offer(it.getInteger());
+//                } else {
+//                    dfs(it.getList());
+//                }
+//            }
+//        }
+
+        private Stack<NestedInteger> stack = new Stack<>();
+
+        public NestedIterator(List<NestedInteger> nestedList) {
+            //跟二叉树一样，前序遍历，是倒序进栈
+            for (int i = nestedList.size() - 1; i >= 0; i--) {
+                stack.push(nestedList.get(i));
+            }
+        }
+
+        @Override
+        public Integer next() {
+            return hasNext() ? stack.pop().getInteger() : -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (stack.isEmpty()) return false;
+            else {
+                if (stack.peek().isInteger()) {
+                    return true;
+                } else {
+                    List<NestedInteger> list = stack.pop().getList();
+                    for (int i = list.size() - 1; i >= 0; i--) {
+                        stack.push(list.get(i));
+                    }
+                    //可能有多个嵌套
+                    return hasNext();
+                }
+            }
+        }
     }
 
     //[342].4的幂
@@ -4816,6 +5174,34 @@ public class AllOfThem {
         return ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o';
     }
 
+    //[347].前 K 个高频元素
+    public int[] topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num : nums) {
+            map.put(num, map.getOrDefault(num, 0) + 1);
+        }
+
+        int n = nums.length;
+        List<Integer>[] bucket = new List[n + 1];
+        for (int key : map.keySet()) {
+            int i = map.get(key);
+            if (bucket[i] == null) {
+                bucket[i] = new ArrayList<>();
+            }
+            bucket[i].add(key);
+        }
+
+        int[] res = new int[k];
+        for (int i = n, j = 0; i >= 1 && j < k; i--) {
+            if (bucket[i] != null) {
+                for (int w = 0; w < bucket[i].size() && j < k; w++) {
+                    res[j++] = bucket[i].get(w);
+                }
+            }
+        }
+        return res;
+    }
+
     //[354].俄罗斯套娃信封问题
     public int maxEnvelopes(int[][] envelopes) {
         int n = envelopes.length;
@@ -4828,6 +5214,105 @@ public class AllOfThem {
             height[i] = envelopes[i][1];
         }
         return lengthOfLIS(height);
+    }
+
+    //[355].设计推特
+    public class Twitter {
+
+        private class Tweet {
+            int tweetId;
+            //时间戳需要添加的，不然没办法按时间戳来排序
+            long timestamp;
+            Tweet next;
+
+            public Tweet(int tweetId) {
+                this.tweetId = tweetId;
+                this.timestamp = System.currentTimeMillis();
+            }
+        }
+
+        Map<Integer, Tweet> userTweet;
+        Map<Integer, Set<Integer>> followers;
+
+        public Twitter() {
+            userTweet = new HashMap<>();
+            followers = new HashMap<>();
+        }
+
+        public void postTweet(int userId, int tweetId) {
+            Tweet cur = userTweet.get(userId);
+            Tweet latest;
+            if (cur == null) {
+                latest = new Tweet(tweetId);
+            } else {
+                latest = new Tweet(tweetId);
+                latest.next = cur;
+            }
+            userTweet.put(userId, latest);
+        }
+
+        public List<Integer> getNewsFeed(int userId) {
+            Set<Integer> users = new HashSet<>();
+            //把自己添加进去
+            users.add(userId);
+            Set<Integer> followee = followers.get(userId);
+            if (followee != null) {
+                users.addAll(followee);
+            }
+
+            PriorityQueue<Tweet> queue = new PriorityQueue<>((a, b) -> (int) (b.timestamp - a.timestamp));
+            for (int user : users) {
+                //没发表过，就不需要加
+                if (!userTweet.containsKey(user)) {
+                    continue;
+                }
+                queue.offer(userTweet.get(user));
+            }
+
+            List<Integer> res = new ArrayList<>();
+            while (!queue.isEmpty()) {
+                Tweet cur = queue.poll();
+                res.add(cur.tweetId);
+                if (res.size() == 10) {
+                    return res;
+                }
+
+                if (cur.next != null) {
+                    queue.offer(cur.next);
+                }
+            }
+            return res;
+        }
+
+        public void follow(int followerId, int followeeId) {
+            Set<Integer> followee = followers.getOrDefault(followerId, new HashSet<>());
+            followee.add(followeeId);
+            followers.put(followerId, followee);
+        }
+
+        public void unfollow(int followerId, int followeeId) {
+            Set<Integer> followee = followers.get(followerId);
+            if (followee != null) {
+                followee.remove(followeeId);
+            }
+        }
+    }
+
+    //[357].计算各个位数不同的数字个数
+    public int countNumbersWithUniqueDigits(int n) {
+        //不要被题目标题诱惑，明显是0 ~ 10^n次方
+        //n = 0，只能取0一个数
+        if (n == 0) return 1;
+        //1  10种不同的数字
+        //2  9 * 9种不同的数字 + 1位数的不同数字
+        //3  9 * 9 * 8种不同的数字 + 2位数的不同数字
+        //11 9 * 9 * 8 * ... * 0种不同的数字 + 10位数的不同数字
+        int res = 10, dp = 9;
+        for (int i = 2; i <= Math.min(n, 10); i++) {
+            dp = dp * (10 - i + 1);
+            res += dp;
+        }
+        return res;
     }
 
     //[371].两整数之和
@@ -4919,6 +5404,79 @@ public class AllOfThem {
         }
     }
 
+    //[375].猜数字大小 II
+    public int getMoneyAmount(int n) {
+//        //区间dp问题， dp[1][1]，只有1数字的时候，最小的罚金
+//        //从i到j的范围内确保胜利的最少金额，确保胜利就是最大罚金
+//        //dp[i][j] = min i<=k<=j {k + max(dp[i][k-1], dp[k+1][j])}
+//        //依赖下边和左边，所以倒序遍历
+//        int[][] dp = new int[n + 1][n + 1];
+//        //base case dp[i][i] = 0
+//        for (int i = n - 1; i >= 1; i--) {
+//            for (int j = i; j <= n; j++) {
+//                if (j == i) {
+//                    dp[i][j] = 0;
+//                } else {
+//                    //主要是外层取得是min操作，所以需要设置为最大值，而不是最小值，里面的max其实可以推倒出来，不是基于max值推倒出来的。
+//                    dp[i][j] = Integer.MAX_VALUE;
+//                    for (int k = i; k < j; k++) {
+//                        dp[i][j] = Math.min(dp[i][j], Math.max(dp[i][k - 1], dp[k + 1][j]) + k);
+//                    }
+//                }
+//            }
+//        }
+//        return dp[1][n];
+
+        int[][] dp = new int[n + 1][n + 1];
+        return dfsForGetMoneyAmount(dp, 1, n);
+    }
+
+    private int dfsForGetMoneyAmount(int[][] dp, int left, int right) {
+        if (left >= right) return 0;
+
+        if (dp[left][right] != 0) {
+            return dp[left][right];
+        }
+
+        int res = Integer.MAX_VALUE;
+
+        for (int i = left; i <= right; i++) {
+            int cost = Math.max(dfsForGetMoneyAmount(dp, left, i - 1), dfsForGetMoneyAmount(dp, i + 1, right)) + i;
+            res = Math.min(res, cost);
+        }
+
+        dp[left][right] = res;
+        return res;
+    }
+
+    //[376].摆动序列
+    public int wiggleMaxLength(int[] nums) {
+        int n = nums.length;
+        //长度1也被是被摆动序列，2的话需要完全不相等
+        if (n < 2) return n;
+        //i为结尾的上升子序列的最大长度
+        int[] up = new int[n];
+        //i为结尾的下降子序列的最大长度
+        int[] down = new int[n];
+        up[0] = 1;
+        down[0] = 1;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] == nums[i - 1]) {
+                up[i] = up[i - 1];
+                down[i] = down[i - 1];
+            } else if (nums[i] > nums[i - 1]) {
+                //严格上升，那么在下降子序列上+1
+                up[i] = Math.max(down[i - 1] + 1, up[i - 1]);
+                //严格上升，对下降子序列没有增益，所以保持之前的值
+                down[i] = down[i - 1];
+            } else {
+                down[i] = Math.max(up[i - 1] + 1, down[i - 1]);
+                up[i] = up[i - 1];
+            }
+        }
+        return Math.max(up[n - 1], down[n - 1]);
+    }
+
     //[380].O(1) 时间插入、删除和获取随机元素
     public class RandomizedSet {
         //只要是获取随机需要提前知道大小并且能根据index直接获取
@@ -5003,7 +5561,7 @@ public class AllOfThem {
     }
 
     //[384].打乱数组
-    class Solution384 {
+    public class Solution384 {
         int[] original;
 
         public Solution384(int[] nums) {
@@ -5026,6 +5584,27 @@ public class AllOfThem {
                 res[j] = temp;
             }
             return res;
+        }
+    }
+
+    //[386].字典序排数
+    public List<Integer> lexicalOrder(int n) {
+        List<Integer> res = new ArrayList<>();
+        //从1到9开始选择，刚开始1个数字，后序有个层的概念
+        for (int i = 1; i <= 9; i++) {
+            dfsForLexicalOrder(n, i, res);
+        }
+        return res;
+    }
+
+    private void dfsForLexicalOrder(int n, int i, List<Integer> select) {
+        if (i > n) {
+            return;
+        }
+        select.add(i);
+        //选择
+        for (int j = 0; j <= 9; j++) {
+            dfsForLexicalOrder(n, i * 10 + j, select);
         }
     }
 
@@ -5065,6 +5644,43 @@ public class AllOfThem {
         //由公式可得：
         //f(i) = 2* (i/2 + 1 - f(i/2))
         return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
+    }
+
+    //[391].完美矩形
+    public boolean isRectangleCover(int[][] rectangles) {
+        int X1 = Integer.MAX_VALUE, Y1 = Integer.MAX_VALUE, X2 = Integer.MIN_VALUE, Y2 = Integer.MIN_VALUE;
+        //奇数点最终为4个
+        Set<String> oddPoints = new HashSet<>();
+        int area = 0;
+        for (int[] rectangle : rectangles) {
+            int x1 = rectangle[0], y1 = rectangle[1];
+            int x2 = rectangle[2], y2 = rectangle[3];
+            List<String> points = new ArrayList<>();
+            points.add(x1 + "," + y2);
+            points.add(x1 + "," + y1);
+            points.add(x2 + "," + y1);
+            points.add(x2 + "," + y2);
+            for (String point : points) {
+                if (oddPoints.contains(point)) {
+                    oddPoints.remove(point);
+                } else {
+                    oddPoints.add(point);
+                }
+            }
+
+            X1 = Math.min(x1, X1);
+            Y1 = Math.min(y1, Y1);
+            X2 = Math.max(x2, X2);
+            Y2 = Math.max(y2, Y2);
+            area += Math.abs(x2 - x1) * Math.abs(y2 - y1);
+        }
+        if (oddPoints.size() != 4) return false;
+        if (Math.abs(X2 - X1) * Math.abs(Y2 - Y1) != area) return false;
+        if (!oddPoints.contains(X1 + "," + Y2)) return false;
+        if (!oddPoints.contains(X1 + "," + Y1)) return false;
+        if (!oddPoints.contains(X2 + "," + Y2)) return false;
+        if (!oddPoints.contains(X2 + "," + Y1)) return false;
+        return true;
     }
 
     //[392].判断子序列
@@ -5110,6 +5726,83 @@ public class AllOfThem {
         return count == 0;
     }
 
+    //[394].字符串解码
+    public String decodeString(String s) {
+//        return dfsForDecodeString(s, 0)[1];
+
+        Stack<Integer> numbers = new Stack<>();
+        Stack<String> strings = new Stack<>();
+        char[] arr = s.toCharArray();
+        int num = 0;
+        StringBuilder last = new StringBuilder();
+        for (char ch : arr) {
+            if (ch >= '0' && ch <= '9') {
+                num = num * 10 + (ch - '0');
+            } else if (ch == '[') {
+                //将数字和字符都放入栈中
+                numbers.push(num);
+                //[之前的字符串，有可能是个空串
+                strings.push(last.toString());
+                last = new StringBuilder();
+                num = 0;
+            } else if (ch == ']') {
+                //数字栈出栈 * last
+                int cnt = numbers.pop();
+                String preStr = strings.pop();
+                StringBuilder temp = new StringBuilder(preStr);
+                while (cnt-- > 0) {
+                    temp.append(last);
+                }
+                last = temp;
+            } else {
+                last.append(ch);
+            }
+        }
+        return last.toString();
+    }
+
+    public String[] dfsForDecodeString(String s, int start) {
+        //遇到[开始递归，遇到]就返回到上一层
+        StringBuilder res = new StringBuilder();
+        int num = 0;
+        for (int i = start; i < s.length(); i++) {
+            if (s.charAt(i) >= '0' && s.charAt(i) <= '9') {
+                num = num * 10 + s.charAt(i) - '0';
+            } else if (s.charAt(i) == '[') {
+                String[] tmp = dfsForDecodeString(s, i + 1);
+                i = Integer.parseInt(tmp[0]);
+                while (num > 0) {
+                    res.append(tmp[1]);
+                    num--;
+                }
+            } else if (s.charAt(i) == ']') {
+                return new String[]{String.valueOf(i), res.toString()};
+            } else {
+                res.append(s.charAt(i));
+            }
+        }
+        return new String[]{String.valueOf(s.length()), res.toString()};
+    }
+
+    //[396].旋转函数
+    public int maxRotateFunction(int[] nums) {
+        //F(n) - F(n-1) = sum - size * nums[size - n];
+        int n = nums.length;
+        int[] dp = new int[n];
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            dp[0] += i * nums[i];
+            sum += nums[i];
+        }
+
+        int max = Integer.MIN_VALUE;
+        for (int i = 1; i < n; i++) {
+            dp[i] = dp[i - 1] + sum - n * nums[n - i];
+            max = Math.max(max, dp[i]);
+        }
+        return max;
+    }
+
     //[397].整数替换
     public int integerReplacement(int n) {
         int ans = 0;
@@ -5146,6 +5839,91 @@ public class AllOfThem {
             }
             Random random = new Random();
             return res.get(random.nextInt(res.size()));
+        }
+    }
+
+    //[399].除法求值
+    public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+        int n = equations.size();
+        int index = 0;
+
+        //两两不相等，最多有2n个节点，并查集走的是index，需要转化成index
+        UnionFind2 uf = new UnionFind2(n * 2);
+        Map<String, Integer> indexMap = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            List<String> equation = equations.get(i);
+
+            String p = equation.get(0);
+            String q = equation.get(1);
+            if (!indexMap.containsKey(p)) {
+                indexMap.put(p, index++);
+            }
+            if (!indexMap.containsKey(q)) {
+                indexMap.put(q, index++);
+            }
+            uf.union(indexMap.get(p), indexMap.get(q), values[i]);
+        }
+
+        double[] res = new double[queries.size()];
+        for (int i = 0; i < queries.size(); i++) {
+            List<String> query = queries.get(i);
+            String p = query.get(0);
+            String q = query.get(1);
+            if (!indexMap.containsKey(p) || !indexMap.containsKey(q)) {
+                res[i] = -1.0d;
+            } else {
+                res[i] = uf.connected(indexMap.get(p), indexMap.get(q));
+            }
+        }
+        return res;
+    }
+
+    private class UnionFind2 {
+        int[] parent;
+        double[] weight;
+
+        public UnionFind2(int n) {
+            parent = new int[n];
+            weight = new double[n];
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+                weight[i] = 1.0d;
+            }
+        }
+
+        public int find(int x) {
+            if (x != parent[x]) {
+                int origin = parent[x];
+                //路径压缩，它的老子更新 为 它老子节点的根节点
+                parent[x] = find(parent[x]);
+                //路径压缩完之后，将权重更新，其实应该是从上到下更新
+                weight[x] *= weight[origin];
+            }
+            return parent[x];
+        }
+
+        public void union(int p, int q, double v) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            if (rootP == rootQ) return;
+
+            //分子连上分母
+            parent[rootP] = rootQ;
+            //    rootX  --?---> rootY
+            //     /            /
+            //    /w[x]        / w[y]
+            //   x -----v---> y
+            //w[x] * w[rootX] = v * w[y]
+            //目的是查找的时的路径压缩，能够正常换算p节点和rootP的权值，p会直接接入到rootP上
+            weight[rootP] = v * weight[q] / weight[p];
+        }
+
+        public double connected(int p, int q) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            if (rootP != rootQ) return -1.0d;
+            //因为find，带路径压缩，p会直接接入到rootP上，q会直接接入到rootQ上，所以可以直接相除得到值
+            return weight[p] / weight[q];
         }
     }
 
@@ -5219,6 +5997,63 @@ public class AllOfThem {
         return res.toArray(new int[res.size()][]);
     }
 
+    //[417].太平洋大西洋水流问题
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        int m = heights.length, n = heights[0].length;
+
+        List<List<Integer>> res = new ArrayList<>();
+        boolean[][] visited = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dfsForPacific(heights, visited, i, j, Integer.MAX_VALUE)
+                        && dfsForAtlantic(heights, visited, i, j, Integer.MAX_VALUE)) {
+                    res.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        return res;
+    }
+
+    private boolean dfsForPacific(int[][] heights, boolean[][] visited, int x, int y, int pre) {
+        int m = heights.length, n = heights[0].length;
+        if (x >= m || y >= n || visited[x][y] || pre < heights[x][y]) {
+            return false;
+        }
+        //即将触碰边界，提前返回
+        if (x <= 0 || y <= 0) {
+            return true;
+        }
+
+        visited[x][y] = true;
+        int height = heights[x][y];
+        boolean result = dfsForPacific(heights, visited, x - 1, y, height)
+                || dfsForPacific(heights, visited, x + 1, y, height)
+                || dfsForPacific(heights, visited, x, y - 1, height)
+                || dfsForPacific(heights, visited, x, y + 1, height);
+        visited[x][y] = false;
+        return result;
+    }
+
+    private boolean dfsForAtlantic(int[][] heights, boolean[][] visited, int x, int y, int pre) {
+        int m = heights.length, n = heights[0].length;
+        if (x < 0 || y < 0 || visited[x][y] || pre < heights[x][y]) {
+            return false;
+        }
+        //即将触碰边界，提前返回
+        if (x >= m - 1 || y >= n - 1) {
+            return true;
+        }
+
+        visited[x][y] = true;
+        int height = heights[x][y];
+        boolean result = dfsForAtlantic(heights, visited, x - 1, y, height)
+                || dfsForAtlantic(heights, visited, x + 1, y, height)
+                || dfsForAtlantic(heights, visited, x, y - 1, height)
+                || dfsForAtlantic(heights, visited, x, y + 1, height);
+        visited[x][y] = false;
+        return result;
+    }
+
     //[419].甲板上的战舰
     public int countBattleships(char[][] board) {
         //X就改变成.，往下面和右边扩大范围
@@ -5253,6 +6088,57 @@ public class AllOfThem {
             }
         }
         return ans;
+    }
+
+    //[421].数组中两个数的最大异或值
+    public class Solution421 {
+
+        class XorTrie {
+            XorTrie[] children = new XorTrie[2];
+        }
+
+        XorTrie root = new XorTrie();
+
+        private void build(int[] nums) {
+            for (int num : nums) {
+                XorTrie cur = root;
+                for (int i = 30; i >= 0; i--) {
+                    int bit = num >> i & 1;
+                    if (cur.children[bit] == null) {
+                        cur.children[bit] = new XorTrie();
+                    }
+                    cur = cur.children[bit];
+                }
+            }
+        }
+
+        private int search(int num) {
+            XorTrie cur = root;
+            int res = 0;
+            for (int i = 30; i >= 0; i--) {
+                int bit = num >> i & 1;
+                int xor = bit ^ 1;
+
+                if (cur.children[xor] != null) {
+                    cur = cur.children[xor];
+                    //相反方向有值，意味着异或之后肯定是1
+                    res |= 1 << i;
+                } else {
+                    cur = cur.children[bit];
+                }
+            }
+            return res;
+        }
+
+        public int findMaximumXOR(int[] nums) {
+            if (nums.length == 0) return 0;
+            build(nums);
+            int max = nums[0];
+            for (int i = 1; i < nums.length; i++) {
+                max = Math.max(max, search(nums[i]));
+            }
+            return max;
+        }
     }
 
     //[423].从英文中重建数字
@@ -5372,6 +6258,81 @@ public class AllOfThem {
             res.add(level);
         }
         return res;
+    }
+
+    //[430].扁平化多级双向链表
+    public class Solution430 {
+        class Node {
+            public int val;
+            public Node prev;
+            public Node next;
+            public Node child;
+        }
+
+        public Node flatten(Node head) {
+            dfsForFlatten(head);
+            return head;
+        }
+
+        //返回尾节点
+        public Node dfsForFlatten(Node head) {
+            Node cur = head;
+            Node last = null;
+            while (cur != null) {
+                Node next = cur.next;
+                if (cur.child != null) {
+                    Node childLast = dfsForFlatten(cur.child);
+
+                    //处理child节点
+                    cur.next = cur.child;
+                    cur.child.prev = cur;
+                    cur.child = null;
+
+                    //处理next不为空
+                    if (next != null) {
+                        next.prev = childLast;
+                        childLast.next = next;
+                    }
+                    last = childLast;
+                } else {
+                    last = cur;
+                }
+                cur = next;
+            }
+            return last;
+        }
+    }
+
+    //[433].最小基因变化
+    public int minMutation(String start, String end, String[] bank) {
+        AtomicInteger res = new AtomicInteger(Integer.MAX_VALUE);
+        dfsForMinMutation(start, end, bank, new HashSet<>(), res);
+        return res.get() == Integer.MAX_VALUE ? -1 : res.get();
+    }
+
+    private void dfsForMinMutation(String current, String end, String[] bank, Set<String> select, AtomicInteger minCount) {
+        if (current.equals(end)) {
+            minCount.set(Math.min(minCount.get(), select.size()));
+            return;
+        }
+        //选择只能从bank里找
+        for (String str : bank) {
+            //select用来加速，防止重复计算
+            if (!checkNeighbor(current, str) || select.contains(str)) {
+                continue;
+            }
+            select.add(str);
+            dfsForMinMutation(str, end, bank, select, minCount);
+            select.remove(str);
+        }
+    }
+
+    private boolean checkNeighbor(String first, String second) {
+        int n = first.length(), diff = 0;
+        for (int i = 0; i < n; i++) {
+            diff += first.charAt(i) == second.charAt(i) ? 0 : 1;
+        }
+        return diff == 1;
     }
 
     //[435].无重叠区间
@@ -5655,6 +6616,71 @@ public class AllOfThem {
         return false;
     }
 
+    //[460].LFU 缓存
+    public class LFUCache {
+        Map<Integer, Integer> keyToVal;
+        Map<Integer, Integer> keyToFreq;
+        Map<Integer, LinkedHashSet<Integer>> freqToKeys;
+        int capacity;
+        int minFreq;
+
+        public LFUCache(int capacity) {
+            keyToVal = new HashMap<>();
+            keyToFreq = new HashMap<>();
+            freqToKeys = new HashMap<>();
+            this.capacity = capacity;
+        }
+
+        public int get(int key) {
+            if (!keyToVal.containsKey(key)) return -1;
+            updateFreq(key);
+            return keyToVal.get(key);
+        }
+
+        public void put(int key, int value) {
+            if (capacity <= 0) return;
+            if (keyToVal.containsKey(key)) {
+                keyToVal.put(key, value);
+                updateFreq(key);
+            } else {
+                if (capacity <= keyToVal.size()) {
+                    LinkedHashSet<Integer> keys = freqToKeys.get(minFreq);
+                    int removeKey = keys.iterator().next();
+                    keyToVal.remove(removeKey);
+                    keyToFreq.remove(removeKey);
+                    keys.remove(removeKey);
+                    if (keys.size() == 0) {
+                        freqToKeys.remove(minFreq);
+                    }
+                }
+
+                keyToVal.put(key, value);
+                keyToFreq.put(key, 1);
+                freqToKeys.putIfAbsent(1, new LinkedHashSet<>());
+                freqToKeys.get(1).add(key);
+                minFreq = 1;
+            }
+        }
+
+        private void updateFreq(int key) {
+            int freq = keyToFreq.get(key);
+            int newFreq = freq + 1;
+            freqToKeys.putIfAbsent(newFreq, new LinkedHashSet<>());
+            LinkedHashSet<Integer> newKeys = freqToKeys.get(newFreq);
+            newKeys.add(key);
+
+            LinkedHashSet<Integer> keys = freqToKeys.get(freq);
+            keys.remove(key);
+            if (keys.size() == 0) {
+                freqToKeys.remove(freq);
+                if (freq == minFreq) {
+                    minFreq++;
+                }
+            }
+        }
+    }
+
+
     //[462].最少移动次数使数组元素相等 II
     public int minMoves2(int[] nums) {
         //中位数，就是最少移动次数，常规操作肯定是排序之后，取中间的
@@ -5723,6 +6749,37 @@ public class AllOfThem {
                 + dfsForIslandPerimeter(grid, x + 1, y)
                 + dfsForIslandPerimeter(grid, x, y - 1)
                 + dfsForIslandPerimeter(grid, x, y + 1);
+    }
+
+    //[464].我能赢吗
+    public boolean canIWin(int maxChoosableInteger, int desiredTotal) {
+        if (maxChoosableInteger >= desiredTotal) return true;
+        if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) return false;
+        int[] select = new int[maxChoosableInteger + 1];
+        return dfsForCanIWin(select, new HashMap<>(), desiredTotal);
+    }
+
+    private boolean dfsForCanIWin(int[] visited, Map<String, Boolean> result, int desiredTotal) {
+        String key = Arrays.toString(visited);
+        if (result.containsKey(key)) return result.get(key);
+
+        for (int i = 1; i < visited.length; i++) {
+            if (visited[i] == 1) {
+                continue;
+            }
+
+            visited[i] = 1;
+            if (i >= desiredTotal || !dfsForCanIWin(visited, result, desiredTotal - i)) {
+                result.put(key, true);
+                visited[i] = 0;
+                return true;
+            }
+
+            visited[i] = 0;
+        }
+
+        result.put(key, false);
+        return false;
     }
 
     //[468].验证IP地址
@@ -5835,6 +6892,34 @@ public class AllOfThem {
             cur = cur.children[ch];
         }
         cur.isEnd = true;
+    }
+
+    //[473].火柴拼正方形
+    public boolean makesquare(int[] matchsticks) {
+        if (null == matchsticks || matchsticks.length < 4) {
+            return false;
+        }
+        int n = matchsticks.length;
+        int sum = 0;
+        for (int matchstick : matchsticks) {
+            sum += matchstick;
+        }
+        if (sum % 4 != 0) return false;
+        return dfsForMakesquare(matchsticks, 0, 0, 0, 0, 0, sum / 4);
+    }
+
+    private boolean dfsForMakesquare(int[] matchsticks, int index, int a, int b, int c, int d, int side) {
+        if (index == matchsticks.length) {
+            return a == b && b == c && c == d && d == a;
+        }
+        if (a > side || b > side || c > side || d > side) {
+            return false;
+        }
+        int stick = matchsticks[index];
+        return dfsForMakesquare(matchsticks, index + 1, a + stick, b, c, d, side)
+                || dfsForMakesquare(matchsticks, index + 1, a, b + stick, c, d, side)
+                || dfsForMakesquare(matchsticks, index + 1, a, b, c + stick, d, side)
+                || dfsForMakesquare(matchsticks, index + 1, a, b, c, d + stick, side);
     }
 
     //[474].一和零
@@ -5972,6 +7057,50 @@ public class AllOfThem {
         }
     }
 
+    //[481].神奇字符串
+    public static int magicalString(int n) {
+        StringBuilder sb = new StringBuilder("122");
+        boolean one = true;
+        for (int i = 2; sb.length() < n; i++) {
+            int num = sb.charAt(i) - '0';
+            if (one) {
+                while (num-- > 0) {
+                    sb.append(1);
+                }
+                one = false;
+            } else {
+                while (num-- > 0) {
+                    sb.append(2);
+                }
+                one = true;
+            }
+        }
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            if (sb.charAt(i) == '1') res++;
+        }
+        return res;
+    }
+
+    //[486].预测赢家
+    public static boolean PredictTheWinner(int[] nums) {
+        int n = nums.length;
+        //dp[i][j] 从i到j当前玩家最大分差值
+        int[][] dp = new int[n][n];
+        //base case： 当为一个元素的时候，先手获得分差值为nums[i]
+        for (int i = 0; i < n; i++) dp[i][i] = nums[i];
+
+        //依赖下和左，所以第一维度倒序遍历
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                //最大分差值
+                dp[i][j] = Math.max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1]);
+            }
+        }
+        //最大分差值是否大于0
+        return dp[0][n - 1] >= 0;
+    }
+
     //[491].递增子序列
     public List<List<Integer>> findSubsequences(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
@@ -5998,6 +7127,29 @@ public class AllOfThem {
             backtraceForFindSubsequences(nums, i + 1, res, select);
             select.removeLast();
         }
+    }
+
+    //[494].目标和
+    public int findTargetSumWays(int[] nums, int target) {
+        //x - (sum - x) = target => x = (target + sum) /2;
+        //背包容量为x
+        int sum = 0, n = nums.length;
+        for (int num : nums) sum += num;
+        //奇数，凑不了target
+        if ((target + sum) % 2 != 0) return 0;
+        int size = (target + sum) / 2;
+
+        if (size < 0) size = -size;
+        int[] dp = new int[size + 1];
+        //求得是组合数，所以这边初始值为1
+        //如果是求最值，这边是0，其他是边界值
+        dp[0] = 1;
+        for (int i = 0; i < n; i++) {//容量
+            for (int j = size; j >= nums[i]; j--) {//背包，01，降维之后，需要考虑降序遍历
+                dp[j] += dp[j - nums[i]];
+            }
+        }
+        return dp[size];
     }
 
     //[495].提莫攻击
@@ -6030,6 +7182,35 @@ public class AllOfThem {
             res[i] = numberMap.get(nums1[i]);
         }
         return res;
+    }
+
+    //[497].非重叠矩形中的随机点
+    public class Solution497 {
+
+        int[][] rects;
+        TreeMap<Integer, int[]> map;
+        int total;
+        Random random;
+
+        public Solution497(int[][] rects) {
+            this.rects = rects;
+            for (int[] rect : rects) {
+                total += (rect[2] - rect[0] + 1) * (rect[3] - rect[1] + 1);
+                map.put(total, rect);
+            }
+            this.random = new Random();
+        }
+
+        public int[] pick() {
+            int randomArea = random.nextInt(total);
+            int ceilingArea = map.ceilingKey(randomArea);
+            //被选中的区间
+            int[] rect = map.get(ceilingArea);
+            int width = rect[2] - rect[0] + 1;
+            //多出来的空间，那么需要映射到区间中
+            int offset = ceilingArea - randomArea;
+            return new int[]{rect[0] + offset % width, rect[1] + offset / width};
+        }
     }
 
     //[498].对角线遍历
@@ -6157,7 +7338,6 @@ public class AllOfThem {
         return sum;
     }
 
-
     //[509].斐波那契数
     public int fib(int n) {
 //        int[] dp = new int[n + 1];
@@ -6217,6 +7397,42 @@ public class AllOfThem {
 
         dfsForLargestValues(root.left, depth + 1);
         dfsForLargestValues(root.right, depth + 1);
+    }
+
+    //[516].最长回文子序列
+    public static int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        //i到j之间的回文子序列的最长长度
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    //这边利用了为0的情况，如果bb相等，那么这边就是dp[1][0]+2 = 2
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+
+    //[518].零钱兑换 II
+    public int change(int amount, int[] coins) {
+        int n = coins.length;
+        int[] dp = new int[amount + 1];
+        //需要的是组合数，当为0的时候，为1种组合，因为后面的状态转移是+，所以需要设置成1
+        dp[0] = 1;
+        for (int i = 1; i <= n; i++) { //物品维度
+            int val = coins[i - 1];
+            for (int j = val; j <= amount; j++) { //容量维度
+                dp[j] += dp[j - val];
+            }
+        }
+        return dp[amount];
     }
 
     //[519].随机翻转矩阵
@@ -6349,6 +7565,65 @@ public class AllOfThem {
             }
             return left;
         }
+    }
+
+    //[529].扫雷游戏
+    public char[][] updateBoard(char[][] board, int[] click) {
+        int[][] direct = new int[][]{{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        int x = click[0], y = click[1];
+        if (board[x][y] == 'M') {
+            board[x][y] = 'X';
+        } else {
+            dfsForUpdateBoard(board, x, y, direct);
+        }
+        return board;
+    }
+
+    private void dfsForUpdateBoard(char[][] board, int x, int y, int[][] direct) {
+        int m = board.length, n = board[0].length;
+        //先查看附近周围有没有隐藏炸弹，并计数
+        int bomb = 0;
+        for (int[] d : direct) {
+            int newX = x + d[0], newY = y + d[1];
+            if (newX < 0 || newY < 0 || newX >= m || newY >= n) {
+                continue;
+            }
+            if (board[newX][newY] == 'M') {
+                bomb++;
+            }
+        }
+        board[x][y] = bomb > 0 ? (char) (bomb + '0') : 'B';
+        if (board[x][y] == 'B') {
+            for (int[] d : direct) {
+                int newX = x + d[0], newY = y + d[1];
+                //只能把E的消失掉
+                if (newX < 0 || newY < 0 || newX >= m || newY >= n || board[newX][newY] != 'E') {
+                    continue;
+                }
+                dfsForUpdateBoard(board, newX, newY, direct);
+            }
+        }
+    }
+
+    //[532].数组中的 k-diff 数对
+    public int findPairs(int[] nums, int k) {
+        Map<Integer, Integer> count = new HashMap<>();
+        for (int num : nums) {
+            count.put(num, count.getOrDefault(num, 0) + 1);
+        }
+        int ans = 0;
+        for (int key : count.keySet()) {
+            if (k == 0) {
+                if (count.get(key) > 1) {
+                    ans++;
+                }
+            } else {
+                if (count.containsKey(key + k)) {
+                    ans++;
+                }
+            }
+        }
+        return ans;
     }
 
     //[535].TinyURL 的加密与解密
@@ -6508,6 +7783,57 @@ public class AllOfThem {
         return uf.count;
     }
 
+    //[553].最优除法
+    public String optimalDivision(int[] nums) {
+        //要使得值最大，那么分母必须最小，因为是整数，所以后面的数连除是最小
+        int n = nums.length;
+        if (n == 0) return "";
+        if (n == 1) return "" + nums[0];
+        if (n == 2) return nums[0] + "/" + nums[1];
+        StringBuilder sb = new StringBuilder(nums[0] + "/(" + nums[1]);
+        for (int i = 2; i < n; i++) {
+            sb.append("/" + nums[i]);
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    //[554].砖墙
+    public int leastBricks(List<List<Integer>> wall) {
+        Map<Integer, Integer> countMap = new HashMap<>();
+        int n = wall.size();
+        int max = 0;
+        for (List<Integer> row : wall) {
+            int edge = 0;
+            for (int i = 0; i < row.size() - 1; i++) {
+                edge += row.get(i);
+                countMap.put(edge, countMap.getOrDefault(edge, 0) + 1);
+                max = Math.max(max, countMap.get(edge));
+            }
+        }
+        return n - max;
+    }
+
+    //[557].反转字符串中的单词 III
+    public String reverseWords3(String s) {
+        char[] arr = s.toCharArray();
+        int left = 0;
+        for (int i = 0; i <= s.length(); i++) {
+            if (i == s.length() || s.charAt(i) == ' ') {
+                int right = i - 1;
+                while (left < right) {
+                    char temp = arr[right];
+                    arr[right] = arr[left];
+                    arr[left] = temp;
+                    left++;
+                    right--;
+                }
+                left = i + 1;
+            }
+        }
+        return String.valueOf(arr);
+    }
+
     //[559].N 叉树的最大深度
     public int maxDepth(Node root) {
         if (root == null) return 0;
@@ -6532,6 +7858,25 @@ public class AllOfThem {
                 res += preSumCount.get(preSum - k);
             }
             preSumCount.put(preSum, preSumCount.getOrDefault(preSum, 0) + 1);
+        }
+        return res;
+    }
+
+    //[565].数组嵌套
+    public int arrayNesting(int[] nums) {
+        int res = 0;
+        //0~n-1的特性说明了，可能会有多个分组，相同的分组元素可以有环，不同的分组不会有环
+        //一个分组遍历完了之后，不会影响下一个组
+        Set<Integer> visited = new HashSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            int k = i, count = 0;
+            while (!visited.contains(nums[k])) {
+                visited.add(nums[k]);
+                k = nums[k];
+                count++;
+            }
+            //跳出循环有重复的，更新最大值，如果之前被遍历过，count就会为0，不会更新结果
+            res = Math.max(res, count);
         }
         return res;
     }
@@ -6585,6 +7930,15 @@ public class AllOfThem {
             if (cnt1[i] != cnt2[i]) return false;
         }
         return true;
+    }
+
+    //[575].分糖果
+    public int distributeCandies(int[] candyType) {
+        Set<Integer> set = new HashSet<>();
+        for (int candy : candyType) {
+            set.add(candy);
+        }
+        return Math.min(candyType.length / 2, set.size());
     }
 
     //[581].最短无序连续子数组
@@ -6756,6 +8110,27 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[621].任务调度器
+    public int leastInterval(char[] tasks, int n) {
+        //举个例子：AAAABB 2 -> AB_AB_A__A前半部分只取决于n和最大的个数，后半部分取决于剩余的个数
+        //前半部分 = (max-1) * (n+1) 后半部分 = 最大的数量的个数
+        int[] cnt = new int[26];
+        int max = 0;
+        for (char ch : tasks) {
+            cnt[ch - 'A']++;
+            max = Math.max(max, cnt[ch - 'A']);
+        }
+        int sameCount = 0;
+        for (int count : cnt) {
+            if (max == count) {
+                sameCount++;
+            }
+        }
+        //当n==0的时候，公式不正确
+        int res = (max - 1) * (n + 1) + sameCount;
+        return Math.max(res, tasks.length);
     }
 
     //[623].在二叉树中增加一行
@@ -7505,6 +8880,27 @@ public class AllOfThem {
         return slow;
     }
 
+    //[877].石子游戏
+    public boolean stoneGame(int[] piles) {
+        //此题跟上面的486.预测赢家一样的解法
+        int n = piles.length;
+        //dp[i][j] i...j 先手领先后手的最大分差
+        int[][] dp = new int[n][n];
+        //只有一个元素的时候，最大分差就是本身。
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = piles[i];
+        }
+
+        //依赖下和左，所以倒序遍历，从下到上，从左往右
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                dp[i][j] = Math.max(piles[i] - dp[i + 1][j], piles[j] - dp[i][j - 1]);
+            }
+        }
+        //总分值为奇数，所以不可能出现=0的情况
+        return dp[0][n - 1] > 0;
+    }
+
     //[884].两句话中的不常见单词
     public String[] uncommonFromSentences(String s1, String s2) {
         Map<String, Integer> count = new HashMap<>();
@@ -7523,6 +8919,41 @@ public class AllOfThem {
             }
         }
         return temp.toArray(new String[0]);
+    }
+
+    //[895].最大频率栈
+    public class FreqStack {
+        Map<Integer, Integer> numberFreq;
+        Map<Integer, Stack<Integer>> freqNumber;
+        int maxFreq;
+
+        public FreqStack() {
+            numberFreq = new HashMap<>();
+            freqNumber = new HashMap<>();
+            maxFreq = 0;
+        }
+
+        public void push(int val) {
+            int freq = numberFreq.getOrDefault(val, 0) + 1;
+            numberFreq.put(val, freq);
+
+            freqNumber.putIfAbsent(freq, new Stack<>());
+            Stack<Integer> stack = freqNumber.get(freq);
+            stack.push(val);
+
+            maxFreq = Math.max(maxFreq, freq);
+        }
+
+        public int pop() {
+            Stack<Integer> stack = freqNumber.get(maxFreq);
+            int number = stack.pop();
+            numberFreq.put(number, numberFreq.get(number) - 1);
+
+            if (stack.isEmpty()) {
+                maxFreq--;
+            }
+            return number;
+        }
     }
 
     //[911].在线选举
@@ -8125,6 +9556,43 @@ public class AllOfThem {
         }
 
         return maxCount + sameCount;
+    }
+
+    //[1690].石子游戏 VII
+    public int stoneGameVII(int[] stones) {
+        int n = stones.length;
+        //同样定义为i到j的范围内，先手的最大分差值
+        int[][] dp = new int[n][n];
+        //方便求解区间的sum
+        int[][] sum = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                if (j == i) {
+                    sum[i][j] = stones[j];
+                } else {
+                    sum[i][j] = sum[i][j - 1] + stones[j];
+                }
+            }
+        }
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
+                if (i == j) {
+                    //只有一个元素可选时，没有利益
+                    dp[i][j] = 0;
+                } else if (i == j - 1) {
+                    //有两个元素时，一定选择使得剩下值最大的另一个
+                    dp[i][j] = Math.max(stones[i], stones[j]);
+                } else {
+                    //先手选择i元素，剩下的和是他的利益 与 后手选择的最大利益之间的差值
+                    int left = sum[i + 1][j] - dp[i + 1][j];
+                    //先手选择j元素，剩下的和是他的利益 与 后手选择的最大利益之间的差值
+                    int right = sum[i][j - 1] - dp[i][j - 1];
+                    //先手选择一个最大利益值
+                    dp[i][j] = Math.max(left, right);
+                }
+            }
+        }
+        return dp[0][n - 1];
     }
 
     //[1518].换酒问题
@@ -9524,6 +10992,101 @@ public class AllOfThem {
         return res;
     }
 
+    //[1342].将数字变成 0 的操作次数
+    public int numberOfSteps(int num) {
+        return Math.max(getLoc(num) + getNum(num) - 1, 0);
+    }
+
+    //[1373].二叉搜索子树的最大键值和
+    public int maxSumBST(TreeNode root) {
+        //后序遍历，父节点依赖子节点计算逻辑
+        AtomicInteger maxSum = new AtomicInteger(Integer.MIN_VALUE);
+        dfsForMaxSumBST(root, maxSum);
+        return maxSum.get();
+    }
+
+    private int[] dfsForMaxSumBST(TreeNode root, AtomicInteger maxSum) {
+        //是否是二叉搜索树，最小值，最大值，和
+        if (root == null) return new int[]{1, Integer.MAX_VALUE, Integer.MIN_VALUE, 0};
+
+        int[] left = dfsForMaxSumBST(root.left, maxSum);
+        int[] right = dfsForMaxSumBST(root.right, maxSum);
+
+        int[] res = new int[4];
+        //根节点小于右侧的最小值，大于左侧的最大值
+        if (left[0] == 1 && right[0] == 1 && root.val < right[1] && root.val > left[2]) {
+            //统计和
+            res[0] = 1;
+            res[1] = Math.min(left[1], root.val);
+            res[2] = Math.max(right[2], root.val);
+            res[3] = left[3] + right[3] + root.val;
+            maxSum.set(Math.max(maxSum.get(), res[3]));
+        } else {
+            res[0] = 0;
+        }
+        return res;
+    }
+
+    private int getLoc(int num) {
+        for (int i = 31; i >= 0; i--) {
+            if (((num >> i) & 1) == 1) return i + 1;
+        }
+        return -1;
+    }
+
+    private int getNum(int num) {
+        int ans = 0;
+        for (int i = 31; i >= 0; i--) {
+            if (((num >> i) & 1) == 1) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    //[1414].和为 K 的最少斐波那契数字数目
+    public int findMinFibonacciNumbers(int k) {
+        List<Integer> f = new ArrayList<>();
+        f.add(1);
+        int a = 1, b = 1;
+        while (a + b <= k) {
+            int c = a + b;
+            f.add(c);
+            a = b;
+            b = c;
+        }
+        int ans = 0;
+        for (int i = f.size() - 1; i >= 0 && k > 0; i--) {
+            int num = f.get(i);
+            if (k >= num) {
+                k -= num;
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    //[2000].反转单词前缀
+    public String reversePrefix(String word, char ch) {
+        char[] arr = word.toCharArray();
+        int i = 0;
+        while (i < arr.length) {
+            if (ch == arr[i]) break;
+            i++;
+        }
+        if (i == arr.length) return word;
+
+        int l = 0, r = i;
+        while (l < r) {
+            char temp = arr[l];
+            arr[l] = arr[r];
+            arr[r] = temp;
+            l++;
+            r--;
+        }
+        return String.valueOf(arr);
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
@@ -9712,5 +11275,10 @@ public class AllOfThem {
 //        System.out.println(lengthLongestPath("file1.txt\nfile2.txt\nlongfile.txt"));
 //        System.out.println(readBinaryWatch(1));
 //        System.out.println(addSpaces("spacing", new int[]{0,1,2,3,4,5,6}));
+//        System.out.println(longestPalindromeSubseq("bbbab"));
+//        System.out.println(magicalString(6));
+//        System.out.println(new AllOfThem().numberOfSteps(8));
+        System.out.println(PredictTheWinner(new int[]{1, 5, 233, 7}));
     }
+
 }
