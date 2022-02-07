@@ -11983,6 +11983,36 @@ public class AllOfThem {
         return ans;
     }
 
+    //[1405].最长快乐字符串
+    public static String longestDiverseString(int a, int b, int c) {
+        PriorityQueue<int[]> queue = new PriorityQueue<>((x, y) -> y[1] - x[1]);
+        if (a > 0) queue.offer(new int[]{0, a});
+        if (b > 0) queue.offer(new int[]{1, b});
+        if (c > 0) queue.offer(new int[]{2, c});
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int n = sb.length();
+            //之前拼接的个数为2，则换下一个，值没超过2，继续拼接
+            if (n >= 2 && sb.charAt(n - 1) - 'a' == cur[0] && sb.charAt(n - 2) - 'a' == cur[0]) {
+                if (queue.isEmpty()) break;
+                int[] next = queue.poll();
+
+                sb.append((char) (next[0] + 'a'));
+                if (--next[1] > 0) {
+                    queue.offer(next);
+                }
+                queue.offer(cur);
+            } else {
+                sb.append((char) (cur[0] + 'a'));
+                if (--cur[1] > 0) {
+                    queue.offer(cur);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     //[面试题 03.05].栈排序
     public class SortedStack {
 
@@ -12090,7 +12120,7 @@ public class AllOfThem {
 
         StringBuilder sb = new StringBuilder();
 
-        for (String string :str) {
+        for (String string : str) {
             sb.append(string);
         }
         return sb.toString();
@@ -12293,5 +12323,7 @@ public class AllOfThem {
 //        System.out.println(convertToTitle(701));
 //        System.out.println(canPartitionKSubsets(new int[]{4, 3, 2, 3, 5, 2, 1}, 4));
 //        System.out.println(subarraysDivByK(new int[] {-1, 2 ,1}, 2));
+
+        System.out.println(longestDiverseString(1, 1, 7));
     }
 }
