@@ -985,23 +985,28 @@ public class AllOfThem {
     //[39].组合总和
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         List<List<Integer>> res = new ArrayList<>();
-        if (candidates.length == 0) return res;
-        backtraceForCombinationSum(candidates, 0, target, res, new LinkedList<>());
+        //先排个序，然后去剪枝
+        Arrays.sort(candidates);
+        backtraceForCombinationSum(candidates, 0, 0, target, res, new LinkedList<>());
         return res;
     }
 
-    private void backtraceForCombinationSum(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
-        if (target == 0) {
+    private void backtraceForCombinationSum(int[] candidates, int idx, int sum, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        //剪枝1
+        if (sum > target) return;
+
+        if (target == sum) {
             res.add(new ArrayList<>(select));
             return;
         }
 
-        for (int i = s; i < candidates.length; i++) {
-            if (candidates[i] > target) {
-                continue;
+        for (int i = idx; i < candidates.length; i++) {
+            //后面的更大，剪枝2
+            if (sum + candidates[i] > target) {
+                break;
             }
             select.addLast(candidates[i]);
-            backtraceForCombinationSum(candidates, i, target - candidates[i], res, select);
+            backtraceForCombinationSum(candidates, i, sum + candidates[i], target, res, select);
             select.removeLast();
         }
     }
@@ -1016,17 +1021,22 @@ public class AllOfThem {
     }
 
     private void backtraceForCombinationSum2(int[] candidates, int s, int target, List<List<Integer>> res, LinkedList<Integer> select) {
+        //剪枝1
+        if (target < 0) {
+            return;
+        }
         if (target == 0) {
             res.add(new ArrayList<>(select));
             return;
         }
 
         for (int i = s; i < candidates.length; i++) {
+            //剪枝2
+            if (candidates[i] > target) {
+                break;
+            }
             //本层如果有重复的话，只选第一个，后面的直接跳过
             if (i > s && candidates[i] == candidates[i - 1]) {
-                continue;
-            }
-            if (candidates[i] > target) {
                 continue;
             }
             select.addLast(candidates[i]);
@@ -12127,37 +12137,61 @@ public class AllOfThem {
     }
 
     //[10].正则表达式匹配
-    public boolean isMatch(String ss, String pp) {
-        //普通字符串和.
-        //f(i,j) = f(i-1,j-1) && (s[i] == p[j] || p[j] == '.')
-        //*字符
-        //f(i,j) = f(i,j-2) || f(i-1, j) && (s[i] == p[j-1] || p[j-1] == '.')
-        // 技巧：往原字符头部插入空格，这样得到 char 数组是从 1 开始，而且可以使得 f[0][0] = true，可以将 true 这个结果滚动下去
-        int n = ss.length(), m = pp.length();
+    public static boolean isMatch(String ss, String pp) {
+        //技巧：往原字符头部插入空格，这样得到 char 数组是从 1 开始，而且可以使得 f[0][0] = true，可以将 true 这个结果滚动下去
+        int m = ss.length(), n = pp.length();
         ss = " " + ss;
         pp = " " + pp;
-        char[] s = ss.toCharArray();
-        char[] p = pp.toCharArray();
-        // f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
-        boolean[][] f = new boolean[n + 1][m + 1];
+        //f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
+        boolean[][] f = new boolean[m + 1][n + 1];
         f[0][0] = true;
-        for (int i = 0; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                // 如果下一个字符是 '*'，则代表当前字符不能被单独使用，跳过
-                if (j + 1 <= m && p[j + 1] == '*') continue;
-
-                // 对应了 p[j] 为普通字符和 '.' 的两种情况
-                if (i - 1 >= 0 && p[j] != '*') {
-                    f[i][j] = f[i - 1][j - 1] && (s[i] == p[j] || p[j] == '.');
-                }
-
-                // 对应了 p[j] 为 '*' 的情况
-                else if (p[j] == '*') {
-                    f[i][j] = (j - 2 >= 0 && f[i][j - 2]) || (i - 1 >= 0 && f[i - 1][j] && (s[i] == p[j - 1] || p[j - 1] == '.'));
+        //p[j] != *  => f(i, j) = f(i-1, j-1) && (s[i] == p[j] || p[j] == '.')
+        //p[j] == *  匹配0次 f(i, j) = f(i, j-2)    #a  #b*
+        //p[j] == *  匹配1次 f(i, j) = f(i-1, j-2) && (s[i] = p[j-1] || p[j-1] == '.')
+        //p[j] == *  匹配2次 f(i, j) = f(i-2, j-2) && (s[i-1:i] = p[j-1] || p[j-1] == '.')
+        //f(i, j) = f(i, j-2) || f(i-1, j-2) && (s[i]匹配了p[j-1]) ||  f(i-2, j-2) && (s[i-1:i]匹配了p[j-1])
+        //f(i-1, j) = f(i-1, j-2) || f(i-2, j-2) && (s[i-1]匹配了p[j-1]) ||  f(i-3, j-2) && (s[i-2:i-1]匹配了p[j-1])
+        //f(i,j) = f(i, j-2) || f(i-1,j) && s[i]匹配了p[j-1]
+        //f(i,j) = f(i, j-2) || f(i-1,j) && (s[i] == p[j-1] || p[j-1] == '.')
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                //后面为*的，必须跳过，配合后面用
+                if (j + 1 <= n && pp.charAt(j + 1) == '*') continue;
+                if (pp.charAt(j) != '*') {
+                    //对应了 p[j] 为普通字符和 '.' 的两种情况
+                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (ss.charAt(i) == pp.charAt(j) || pp.charAt(j) == '.');
+                } else {
+                    //对应了 p[j] 为 '*' 的情况，这边是通过数学归纳法总结出来的
+                    f[i][j] = (j >= 2 && f[i][j - 2]) || (i >= 1 && f[i - 1][j] && (ss.charAt(i) == pp.charAt(j - 1) || pp.charAt(j - 1) == '.'));
                 }
             }
         }
-        return f[n][m];
+        return f[m][n];
+    }
+
+    //[44].通配符匹配
+    public boolean isMatch2(String s, String p) {
+        //当为?时，f(i,j) = f(i-1,j-1)
+        //                 匹配空格       匹配前面一个字符    匹配前面两个字符
+        //当为*时，f(i,j) = f(i, j-1) || f(i-1, j-1) || f(i-2, j-1) || ... || f(i-k, j-1) (i>=k)
+        //当为*时，f(i-1,j) =            f(i-1, j-1) || f(i-2, j-1) || f(i-3, j-1) || ...
+        //f(i,j) = f(i, j-1) || f(i-1, j)
+        int m = s.length(), n = p.length();
+        s = " " + s;
+        p = " " + p;
+        // f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
+        boolean[][] f = new boolean[m + 1][n + 1];
+        f[0][0] = true;
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (p.charAt(j) != '*') {
+                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (s.charAt(i) == p.charAt(j) || p.charAt(j) == '?');
+                } else {
+                    f[i][j] = f[i][j - 1] || (i >= 1 && f[i - 1][j]);
+                }
+            }
+        }
+        return f[m][n];
     }
 
     //[1001].网格照明
@@ -12411,6 +12445,8 @@ public class AllOfThem {
 //        System.out.println(canPartitionKSubsets(new int[]{4, 3, 2, 3, 5, 2, 1}, 4));
 //        System.out.println(subarraysDivByK(new int[] {-1, 2 ,1}, 2));
 
-        System.out.println(longestDiverseString(1, 1, 7));
+        System.out.println(isMatch("aab", "c*a*b"));
+        System.out.println(isMatch("mississippi", "mis*is*p*."));
+//        System.out.println(longestDiverseString(1, 1, 7));
     }
 }
