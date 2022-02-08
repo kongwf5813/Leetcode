@@ -12126,6 +12126,7 @@ public class AllOfThem {
         return sb.toString();
     }
 
+    //[10].正则表达式匹配
     public boolean isMatch(String ss, String pp) {
         //普通字符串和.
         //f(i,j) = f(i-1,j-1) && (s[i] == p[j] || p[j] == '.')
@@ -12157,6 +12158,58 @@ public class AllOfThem {
             }
         }
         return f[n][m];
+    }
+
+    //[1001].网格照明
+    public int[] gridIllumination(int n, int[][] lamps, int[][] queries) {
+        Set<Long> set = new HashSet<>();
+        Map<Integer, Integer> row = new HashMap<>(), col = new HashMap<>();
+        Map<Integer, Integer> left = new HashMap<>(), right = new HashMap<>();
+        for (int[] lamp : lamps) {
+            int x = lamp[0], y = lamp[1];
+            int a = x + y, b = x - y;
+            long hash = x * n + y;
+            if (set.contains(hash)) continue;
+            increment(row, x);
+            increment(col, y);
+            increment(left, a);
+            increment(right, b);
+            set.add(hash);
+        }
+
+        int[] ans = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int[] query = queries[i];
+            int x = query[0], y = query[1];
+            int a = x + y, b = x - y;
+            long hash = x * n + y;
+            if (row.containsKey(x) || col.containsKey(y) || left.containsKey(a) || right.containsKey(b)) {
+                ans[i] = 1;
+            }
+            int[][] direct = new int[][]{{0, 0}, {0, 1}, {1, 0}, {-1, -1}, {-1, 0}, {-1, 1}, {1, -1}, {1, 0}, {1, 1}};
+            for (int[] dir : direct) {
+                int nx = x + dir[0], ny = y + dir[1];
+                int na = nx + ny, nb = nx - ny;
+                long hash2 = nx * n + ny;
+                if (set.contains(hash2)) {
+                    set.remove(hash2);
+                    decrement(row, nx);
+                    decrement(col, ny);
+                    decrement(left, na);
+                    decrement(right, nb);
+                }
+            }
+        }
+        return ans;
+    }
+
+    private void increment(Map<Integer, Integer> map, int key) {
+        map.put(key, map.getOrDefault(key, 0) + 1);
+    }
+
+    private void decrement(Map<Integer, Integer> map, int key) {
+        if (map.get(key) == 1) map.remove(key);
+        else map.put(key, map.get(key) - 1);
     }
 
     public static void main(String[] args) {
