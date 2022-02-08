@@ -12162,13 +12162,14 @@ public class AllOfThem {
 
     //[1001].网格照明
     public int[] gridIllumination(int n, int[][] lamps, int[][] queries) {
+        long N = n;
         Set<Long> set = new HashSet<>();
         Map<Integer, Integer> row = new HashMap<>(), col = new HashMap<>();
         Map<Integer, Integer> left = new HashMap<>(), right = new HashMap<>();
         for (int[] lamp : lamps) {
             int x = lamp[0], y = lamp[1];
             int a = x + y, b = x - y;
-            long hash = x * n + y;
+            long hash = x * N + y;
             if (set.contains(hash)) continue;
             increment(row, x);
             increment(col, y);
@@ -12177,20 +12178,20 @@ public class AllOfThem {
             set.add(hash);
         }
 
+        int[][] direct = new int[][]{{0, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {1, -1}, {1, 0}, {1, 1}};
         int[] ans = new int[queries.length];
         for (int i = 0; i < queries.length; i++) {
             int[] query = queries[i];
             int x = query[0], y = query[1];
             int a = x + y, b = x - y;
-            long hash = x * n + y;
             if (row.containsKey(x) || col.containsKey(y) || left.containsKey(a) || right.containsKey(b)) {
                 ans[i] = 1;
             }
-            int[][] direct = new int[][]{{0, 0}, {0, 1}, {1, 0}, {-1, -1}, {-1, 0}, {-1, 1}, {1, -1}, {1, 0}, {1, 1}};
             for (int[] dir : direct) {
                 int nx = x + dir[0], ny = y + dir[1];
+                if (nx < 0 || ny < 0 || nx >= n || ny >= n) continue;
                 int na = nx + ny, nb = nx - ny;
-                long hash2 = nx * n + ny;
+                long hash2 = nx * N + ny;
                 if (set.contains(hash2)) {
                     set.remove(hash2);
                     decrement(row, nx);
