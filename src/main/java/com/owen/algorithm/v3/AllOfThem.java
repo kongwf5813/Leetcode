@@ -309,6 +309,39 @@ public class AllOfThem {
         return x == res;
     }
 
+    //[10].正则表达式匹配
+    public static boolean isMatch(String ss, String pp) {
+        //技巧：往原字符头部插入空格，这样得到 char 数组是从 1 开始，而且可以使得 f[0][0] = true，可以将 true 这个结果滚动下去
+        int m = ss.length(), n = pp.length();
+        ss = " " + ss;
+        pp = " " + pp;
+        //f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
+        boolean[][] f = new boolean[m + 1][n + 1];
+        f[0][0] = true;
+        //p[j] != *  => f(i, j) = f(i-1, j-1) && (s[i] == p[j] || p[j] == '.')
+        //p[j] == *  匹配0次 f(i, j) = f(i, j-2)    #a  #b*
+        //p[j] == *  匹配1次 f(i, j) = f(i-1, j-2) && (s[i] = p[j-1] || p[j-1] == '.')
+        //p[j] == *  匹配2次 f(i, j) = f(i-2, j-2) && (s[i-1:i] = p[j-1] || p[j-1] == '.')
+        //f(i, j) = f(i, j-2) || f(i-1, j-2) && (s[i]匹配了p[j-1]) ||  f(i-2, j-2) && (s[i-1:i]匹配了p[j-1])
+        //f(i-1, j) = f(i-1, j-2) || f(i-2, j-2) && (s[i-1]匹配了p[j-1]) ||  f(i-3, j-2) && (s[i-2:i-1]匹配了p[j-1])
+        //f(i,j) = f(i, j-2) || f(i-1,j) && s[i]匹配了p[j-1]
+        //f(i,j) = f(i, j-2) || f(i-1,j) && (s[i] == p[j-1] || p[j-1] == '.')
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                //后面为*的，必须跳过，配合后面用
+                if (j + 1 <= n && pp.charAt(j + 1) == '*') continue;
+                if (pp.charAt(j) != '*') {
+                    //对应了 p[j] 为普通字符和 '.' 的两种情况
+                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (ss.charAt(i) == pp.charAt(j) || pp.charAt(j) == '.');
+                } else {
+                    //对应了 p[j] 为 '*' 的情况，这边是通过数学归纳法总结出来的
+                    f[i][j] = (j >= 2 && f[i][j - 2]) || (i >= 1 && f[i - 1][j] && (ss.charAt(i) == pp.charAt(j - 1) || pp.charAt(j - 1) == '.'));
+                }
+            }
+        }
+        return f[m][n];
+    }
+
     //[11].盛最多水的容器
     public int maxArea(int[] height) {
         int left = 0, right = height.length - 1, area = 0;
@@ -1046,6 +1079,33 @@ public class AllOfThem {
         }
     }
 
+    //[42].接雨水
+    public int trap(int[] height) {
+        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
+        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
+        int res = 0;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < height.length; i++) {
+            //   |   |
+            //   | | |
+            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
+            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
+                int cur = stack.pop();
+                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
+                if (stack.isEmpty()) {
+                    continue;
+                }
+                // 左右位置，并有左右位置得出「宽度」和「高度」
+                int l = stack.peek(), r = i;
+                int w = r - l + 1 - 2;
+                int h = Math.min(height[l], height[r]) - height[cur];
+                res += w * h;
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
     //[43].字符串相乘
     public String multiply(String num1, String num2) {
         if (num1 == null || num2 == null) return "0";
@@ -1073,31 +1133,29 @@ public class AllOfThem {
         return sb.length() == 0 ? "0" : sb.toString();
     }
 
-    //[42].接雨水
-    public int trap(int[] height) {
-        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
-        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
-        int res = 0;
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < height.length; i++) {
-            //   |   |
-            //   | | |
-            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
-            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
-                int cur = stack.pop();
-                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
-                if (stack.isEmpty()) {
-                    continue;
+    //[44].通配符匹配
+    public boolean isMatch2(String s, String p) {
+        //当为?时，f(i,j) = f(i-1,j-1)
+        //                 匹配空格       匹配前面一个字符    匹配前面两个字符
+        //当为*时，f(i,j) = f(i, j-1) || f(i-1, j-1) || f(i-2, j-1) || ... || f(i-k, j-1) (i>=k)
+        //当为*时，f(i-1,j) =            f(i-1, j-1) || f(i-2, j-1) || f(i-3, j-1) || ...
+        //f(i,j) = f(i, j-1) || f(i-1, j)
+        int m = s.length(), n = p.length();
+        s = " " + s;
+        p = " " + p;
+        // f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
+        boolean[][] f = new boolean[m + 1][n + 1];
+        f[0][0] = true;
+        for (int i = 0; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (p.charAt(j) != '*') {
+                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (s.charAt(i) == p.charAt(j) || p.charAt(j) == '?');
+                } else {
+                    f[i][j] = f[i][j - 1] || (i >= 1 && f[i - 1][j]);
                 }
-                // 左右位置，并有左右位置得出「宽度」和「高度」
-                int l = stack.peek(), r = i;
-                int w = r - l + 1 - 2;
-                int h = Math.min(height[l], height[r]) - height[cur];
-                res += w * h;
             }
-            stack.push(i);
         }
-        return res;
+        return f[m][n];
     }
 
     //[45].跳跃游戏 II
@@ -12136,64 +12194,6 @@ public class AllOfThem {
         return sb.toString();
     }
 
-    //[10].正则表达式匹配
-    public static boolean isMatch(String ss, String pp) {
-        //技巧：往原字符头部插入空格，这样得到 char 数组是从 1 开始，而且可以使得 f[0][0] = true，可以将 true 这个结果滚动下去
-        int m = ss.length(), n = pp.length();
-        ss = " " + ss;
-        pp = " " + pp;
-        //f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
-        boolean[][] f = new boolean[m + 1][n + 1];
-        f[0][0] = true;
-        //p[j] != *  => f(i, j) = f(i-1, j-1) && (s[i] == p[j] || p[j] == '.')
-        //p[j] == *  匹配0次 f(i, j) = f(i, j-2)    #a  #b*
-        //p[j] == *  匹配1次 f(i, j) = f(i-1, j-2) && (s[i] = p[j-1] || p[j-1] == '.')
-        //p[j] == *  匹配2次 f(i, j) = f(i-2, j-2) && (s[i-1:i] = p[j-1] || p[j-1] == '.')
-        //f(i, j) = f(i, j-2) || f(i-1, j-2) && (s[i]匹配了p[j-1]) ||  f(i-2, j-2) && (s[i-1:i]匹配了p[j-1])
-        //f(i-1, j) = f(i-1, j-2) || f(i-2, j-2) && (s[i-1]匹配了p[j-1]) ||  f(i-3, j-2) && (s[i-2:i-1]匹配了p[j-1])
-        //f(i,j) = f(i, j-2) || f(i-1,j) && s[i]匹配了p[j-1]
-        //f(i,j) = f(i, j-2) || f(i-1,j) && (s[i] == p[j-1] || p[j-1] == '.')
-        for (int i = 0; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                //后面为*的，必须跳过，配合后面用
-                if (j + 1 <= n && pp.charAt(j + 1) == '*') continue;
-                if (pp.charAt(j) != '*') {
-                    //对应了 p[j] 为普通字符和 '.' 的两种情况
-                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (ss.charAt(i) == pp.charAt(j) || pp.charAt(j) == '.');
-                } else {
-                    //对应了 p[j] 为 '*' 的情况，这边是通过数学归纳法总结出来的
-                    f[i][j] = (j >= 2 && f[i][j - 2]) || (i >= 1 && f[i - 1][j] && (ss.charAt(i) == pp.charAt(j - 1) || pp.charAt(j - 1) == '.'));
-                }
-            }
-        }
-        return f[m][n];
-    }
-
-    //[44].通配符匹配
-    public boolean isMatch2(String s, String p) {
-        //当为?时，f(i,j) = f(i-1,j-1)
-        //                 匹配空格       匹配前面一个字符    匹配前面两个字符
-        //当为*时，f(i,j) = f(i, j-1) || f(i-1, j-1) || f(i-2, j-1) || ... || f(i-k, j-1) (i>=k)
-        //当为*时，f(i-1,j) =            f(i-1, j-1) || f(i-2, j-1) || f(i-3, j-1) || ...
-        //f(i,j) = f(i, j-1) || f(i-1, j)
-        int m = s.length(), n = p.length();
-        s = " " + s;
-        p = " " + p;
-        // f(i,j) 代表考虑 s 中的 1~i 字符和 p 中的 1~j 字符 是否匹配
-        boolean[][] f = new boolean[m + 1][n + 1];
-        f[0][0] = true;
-        for (int i = 0; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                if (p.charAt(j) != '*') {
-                    f[i][j] = i >= 1 && f[i - 1][j - 1] && (s.charAt(i) == p.charAt(j) || p.charAt(j) == '?');
-                } else {
-                    f[i][j] = f[i][j - 1] || (i >= 1 && f[i - 1][j]);
-                }
-            }
-        }
-        return f[m][n];
-    }
-
     //[1001].网格照明
     public int[] gridIllumination(int n, int[][] lamps, int[][] queries) {
         long N = n;
@@ -12245,6 +12245,19 @@ public class AllOfThem {
     private void decrement(Map<Integer, Integer> map, int key) {
         if (map.get(key) == 1) map.remove(key);
         else map.put(key, map.get(key) - 1);
+    }
+
+    //[2006].差的绝对值为 K 的数对数目
+    public int countKDifference(int[] nums, int k) {
+        int ans = 0;
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int num :nums) {
+            ans += map.getOrDefault(num -k, 0);
+            ans += map.getOrDefault(num +k, 0);
+
+            map.put(num, map.getOrDefault(num, 0) +1);
+        }
+        return ans;
     }
 
     public static void main(String[] args) {
