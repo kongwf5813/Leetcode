@@ -4224,6 +4224,91 @@ public class AllOfThem {
         return total - (Math.min(ay2, by2) - Math.max(ay1, by1)) * (Math.min(ax2, bx2) - Math.max(ax1, bx1));
     }
 
+    public static int calculate(String s) {
+        return dfsForCalculate(s, 0)[0];
+    }
+
+    private static int[] dfsForCalculate(String s, int start) {
+        int n = s.length();
+        int num = 0;
+        char preSign = '+';
+        int sum = 0;
+        for (int i = start; i < n; i++) {
+            char ch = s.charAt(i);
+            if (ch == ' ') continue;
+            boolean isDigit = Character.isDigit(ch);
+            if (isDigit) {
+                num = num * 10 + ch - '0';
+                continue;
+            }
+            if (ch == '+' || ch == '-') {
+                if (preSign == '+') {
+                    sum += num;
+                } else {
+                    sum -= num;
+                }
+                preSign = ch;
+                num = 0;
+            } else if (ch == '(') {
+                int[] res = dfsForCalculate(s, i + 1);
+                num = res[0];
+                i = res[1];
+            } else if (ch == ')') {
+                if (preSign == '+') {
+                    sum += num;
+                } else {
+                    sum -= num;
+                }
+                return new int[]{sum, i};
+            }
+        }
+        if (preSign == '+') {// 当前f由字符串到达结尾结束
+            sum += num;// 结算结果
+        } else {
+            sum -= num;
+        }
+        return new int[]{sum, 0};
+    }
+
+    private static int dfsForCalculate(Deque<Character> queue) {
+        Stack<Integer> stack = new Stack<>();
+        char sign = '+';
+        int num = 0;
+        int res = 0;
+        while (!queue.isEmpty()) {
+            char c = queue.poll();
+            if (Character.isDigit(c)) {
+                num = num * 10 + c - '0';
+            }
+            if (c == '(') {
+                num = dfsForCalculate(queue);
+            }
+            if (!Character.isDigit(c) && c != ' ' || queue.isEmpty()) {
+                if (sign == '+') {
+                    stack.push(num);
+                } else if (sign == '-') {
+                    stack.push(-num);
+                } else if (sign == '*') {
+                    stack.push(stack.pop() * num);
+                } else if (sign == '/') {
+                    stack.push(stack.pop() / num);
+                }
+            }
+            num = 0;
+            sign = c;
+
+            if (c == ')') {
+                break;
+            }
+        }
+
+        for (int num : stack) {
+            res += num;
+        }
+        return res;
+    }
+
+
     //[225].用队列实现栈
     public class MyStack {
         Queue<Integer> queue;
@@ -4263,6 +4348,47 @@ public class AllOfThem {
         invertTree(root.left);
         invertTree(root.right);
         return root;
+    }
+
+    //[227].基本计算器
+    public int calculate2(String s) {
+        // 3+5 / 2
+        //该题只有/ *优先级比较高，又没有括号，所以遇到符号的时候，更新根据前面的符号，对栈和当前值进行操作。
+        s = s.trim();
+        int n = s.length();
+        char preSign = '+';
+        int num = 0;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < n; i++) {
+            char ch = s.charAt(i);
+            if (ch == ' ') continue;
+
+            boolean isDig = Character.isDigit(ch);
+            if (isDig) {
+                num = num * 10 + ch - '0';
+            }
+            //如果第一个数负的，遇到-号，往栈中插入一个0，出栈不会影响总体值
+            if (!isDig || i == n - 1) {
+                if (preSign == '+') {
+                    stack.push(num);
+                } else if (preSign == '-') {
+                    stack.push(-num);
+                } else if (preSign == '/') {
+                    stack.push(stack.pop() / num);
+                } else if (preSign == '*') {
+                    stack.push(stack.pop() * num);
+                }
+                //符号的时候更新数字
+                preSign = ch;
+                num = 0;
+            }
+        }
+
+        int ans = 0;
+        while (!stack.isEmpty()) {
+            ans += stack.pop();
+        }
+        return ans;
     }
 
     //[228].汇总区间
@@ -12251,11 +12377,11 @@ public class AllOfThem {
     public int countKDifference(int[] nums, int k) {
         int ans = 0;
         Map<Integer, Integer> map = new HashMap<>();
-        for (int num :nums) {
-            ans += map.getOrDefault(num -k, 0);
-            ans += map.getOrDefault(num +k, 0);
+        for (int num : nums) {
+            ans += map.getOrDefault(num - k, 0);
+            ans += map.getOrDefault(num + k, 0);
 
-            map.put(num, map.getOrDefault(num, 0) +1);
+            map.put(num, map.getOrDefault(num, 0) + 1);
         }
         return ans;
     }
@@ -12458,8 +12584,9 @@ public class AllOfThem {
 //        System.out.println(canPartitionKSubsets(new int[]{4, 3, 2, 3, 5, 2, 1}, 4));
 //        System.out.println(subarraysDivByK(new int[] {-1, 2 ,1}, 2));
 
-        System.out.println(isMatch("aab", "c*a*b"));
-        System.out.println(isMatch("mississippi", "mis*is*p*."));
+//        System.out.println(isMatch("aab", "c*a*b"));
+//        System.out.println(isMatch("mississippi", "mis*is*p*."));
 //        System.out.println(longestDiverseString(1, 1, 7));
+        System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));
     }
 }
