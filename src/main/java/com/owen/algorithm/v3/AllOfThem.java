@@ -1079,6 +1079,29 @@ public class AllOfThem {
         }
     }
 
+    //[41].缺失的第一个正数
+    public int firstMissingPositive(int[] nums) {
+        //缺失的第一个正数必定在[1, n+1]之间, 而数组是从0到n
+        //[1,2,0]  => nums[i] -1 作为新的index
+        //[3,4,-1,1] => [-1, 1, 3, 4]
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            //[1,1]这种情况会进入死循环，题目没限定重复的范围，如果索引位置上的数值不相等，替换成正确的
+            while (nums[i] >= 1 && nums[i] <= n + 1 && nums[nums[i] - 1] != nums[i]) {
+                int temp = nums[nums[i] - 1];
+                nums[nums[i] - 1] = nums[i];
+                nums[i] = temp;
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            if (nums[i] - 1 != i) {
+                return i + 1;
+            }
+        }
+        return n + 1;
+    }
+
     //[42].接雨水
     public int trap(int[] height) {
         //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
@@ -4225,7 +4248,12 @@ public class AllOfThem {
     }
 
     public static int calculate(String s) {
-        return dfsForCalculate(s, 0)[0];
+//        return dfsForCalculate(s, 0)[0];
+        Deque<Character> queue = new ArrayDeque<>();
+        for (char ch : s.toCharArray()) {
+            queue.offer(ch);
+        }
+        return dfsForCalculate(queue);
     }
 
     private static int[] dfsForCalculate(String s, int start) {
@@ -4282,7 +4310,13 @@ public class AllOfThem {
             }
             if (c == '(') {
                 num = dfsForCalculate(queue);
+                //这里有一个坑，道理上遇不应该提前入栈，应该由下一轮的符号决定要不要入栈
+                //是提前入栈数字之和，遇到下一次符号时上一次的符号是(，正好不需要对数字进行操作，导致坑又被填了，最好的办法是，当最后一个字符的时候，加入栈，否者等到后面一次
+                if (!queue.isEmpty()) {
+                    continue;
+                }
             }
+            //到达最后的时候要放入栈中，不然少数据，如果末尾是空格，触发后面一个条件，所以不要遇到空格就continue
             if (!Character.isDigit(c) && c != ' ' || queue.isEmpty()) {
                 if (sign == '+') {
                     stack.push(num);
@@ -4293,21 +4327,20 @@ public class AllOfThem {
                 } else if (sign == '/') {
                     stack.push(stack.pop() / num);
                 }
+                num = 0;
+                sign = c;
             }
-            num = 0;
-            sign = c;
 
             if (c == ')') {
                 break;
             }
         }
 
-        for (int num : stack) {
-            res += num;
+        for (int s : stack) {
+            res += s;
         }
         return res;
     }
-
 
     //[225].用队列实现栈
     public class MyStack {
@@ -11887,43 +11920,6 @@ public class AllOfThem {
         return ans;
     }
 
-    //[面试题 10.10].数字流的秩
-    class StreamRank {
-        //树状数组解决的问题是，频繁变更，求解区间和问题
-        //频繁求解<=x的数量，可以通过每个
-        //tree是从1开始计数，x范围是5000，所以数组必须是50001个数字
-        int[] tree;
-        int n;
-
-        public StreamRank() {
-            n = 50001;
-            //最后一个是空格，防止query的时候，边界为50001，实际数组超了
-            tree = new int[n + 1];
-        }
-
-        private int lowbit(int x) {
-            return x & (-x);
-        }
-
-        private int query(int x) {
-            int ans = 0;
-            for (int i = x; i > 0; i -= lowbit(i)) ans += tree[i];
-            return ans;
-        }
-
-        private void add(int x, int u) {
-            for (int i = x; i <= n; i += lowbit(i)) tree[i] += u;
-        }
-
-        public void track(int x) {
-            add(x + 1, 1);
-        }
-
-        public int getRankOfNumber(int x) {
-            return query(x + 1);
-        }
-    }
-
     //[1765].地图中的最高点
     public int[][] highestPeak(int[][] isWater) {
         //广度优先遍历的特点是层，可以解决最短路径，树层遍历，图遍历
@@ -12303,6 +12299,95 @@ public class AllOfThem {
         return true;
     }
 
+    //[面试题 10.10].数字流的秩
+    class StreamRank {
+        //树状数组解决的问题是，频繁变更，求解区间和问题
+        //频繁求解<=x的数量，可以通过每个
+        //tree是从1开始计数，x范围是5000，所以数组必须是50001个数字
+        int[] tree;
+        int n;
+
+        public StreamRank() {
+            n = 50001;
+            //最后一个是空格，防止query的时候，边界为50001，实际数组超了
+            tree = new int[n + 1];
+        }
+
+        private int lowbit(int x) {
+            return x & (-x);
+        }
+
+        private int query(int x) {
+            int ans = 0;
+            for (int i = x; i > 0; i -= lowbit(i)) ans += tree[i];
+            return ans;
+        }
+
+        private void add(int x, int u) {
+            for (int i = x; i <= n; i += lowbit(i)) tree[i] += u;
+        }
+
+        public void track(int x) {
+            add(x + 1, 1);
+        }
+
+        public int getRankOfNumber(int x) {
+            return query(x + 1);
+        }
+    }
+
+    //[面试题 16.19].水域大小
+    public int[] pondSizes(int[][] land) {
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < land.length; i++) {
+            for (int j = 0; j < land[0].length; j++) {
+                if (land[i][j] == 0) {
+                    AtomicInteger count = new AtomicInteger();
+                    dfsForPondSizes(land, i, j, count);
+                    res.add(count.get());
+                }
+            }
+        }
+        return res.stream().mapToInt(a -> a).sorted().toArray();
+    }
+
+    private void dfsForPondSizes(int[][] land, int x, int y, AtomicInteger count) {
+        if (x < 0 || y < 0 || x >= land.length || y >= land[0].length || land[x][y] != 0) {
+            return;
+        }
+        land[x][y] = 2;
+        count.incrementAndGet();
+        int[][] directs = new int[][]{{0, -1}, {0, 1}, {-1, -1}, {-1, 0}, {-1, 1}, {1, -1}, {1, 0}, {1, 1}};
+        for (int[] dir : directs) {
+            int nx = x + dir[0];
+            int ny = y + dir[1];
+            dfsForPondSizes(land, nx, ny, count);
+        }
+    }
+
+    //[剑指 Offer 03].数组中重复的数字
+    public int findRepeatNumber(int[] nums) {
+        //原地hash算法，已知数字范围是从0到n-1，将数字与实际的值交换
+        //[2, 3, 1, 0, 2, 5, 3]
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            //如果当前位置上的索引和当前值不相等；如果相等继续下一个
+            while (nums[i] != i) {
+
+                //重复的数字必然会跟正确的位置闹冲突
+                if (nums[nums[i]] == nums[i]) {
+                    return nums[i];
+                }
+
+                //将当前值映射到正确的索引位置上
+                int temp = nums[nums[i]];
+                nums[nums[i]] = nums[i];
+                nums[i] = temp;
+            }
+        }
+        return -1;
+    }
+
     //[剑指 Offer 45].把数组排成最小的数
     public String minNumber(int[] nums) {
         int n = nums.length;
@@ -12387,7 +12472,7 @@ public class AllOfThem {
     }
 
     private int gcd2(int a, int b) {
-        return b == 0 ? a: gcd2(b, a%b);
+        return b == 0 ? a : gcd2(b, a % b);
     }
 
     //[2006].差的绝对值为 K 的数对数目
@@ -12605,5 +12690,6 @@ public class AllOfThem {
 //        System.out.println(isMatch("mississippi", "mis*is*p*."));
 //        System.out.println(longestDiverseString(1, 1, 7));
         System.out.println(calculate("(1+(4+5+2)-3)+(6+8)"));
+//        System.out.println(calculate("3 * (4-5 /2) -6"));
     }
 }
