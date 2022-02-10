@@ -12373,6 +12373,23 @@ public class AllOfThem {
         else map.put(key, map.get(key) - 1);
     }
 
+    //[1447].最简分数
+    public List<String> simplifiedFractions(int n) {
+        List<String> res = new ArrayList<>();
+        for (int i = 1; i < n; i++) {
+            for (int j = i + 1; j <= n; j++) {
+                if (gcd2(i, j) == 1) {
+                    res.add(i + "/" + j);
+                }
+            }
+        }
+        return res;
+    }
+
+    private int gcd2(int a, int b) {
+        return b == 0 ? a: gcd2(b, a%b);
+    }
+
     //[2006].差的绝对值为 K 的数对数目
     public int countKDifference(int[] nums, int k) {
         int ans = 0;
