@@ -12488,6 +12488,17 @@ public class AllOfThem {
         return ans;
     }
 
+    //[1984].学生分数的最小差值
+    public int minimumDifference(int[] nums, int k) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        int ans = nums[k - 1] - nums[0];
+        for (int i = 1; i <= n - k; i++) {
+            ans = Math.min(nums[i + k - 1] - nums[i], ans);
+        }
+        return ans;
+    }
+
     public static void main(String[] args) {
 //        System.out.println(maxSlidingWindow(new int[]{1, 3, -1, -3, 5, 3, 6, 7}, 3));
 //        System.out.println(mostPoints(new int[][]{{3, 2}, {4, 3}, {4, 4}, {2, 5}}));
