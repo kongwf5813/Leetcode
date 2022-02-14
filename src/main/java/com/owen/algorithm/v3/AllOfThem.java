@@ -8558,26 +8558,38 @@ public class AllOfThem {
     }
 
     //[540].有序数组中的单一元素
-    public int singleNonDuplicate(int[] nums) {
+    public static int singleNonDuplicate(int[] nums) {
+//        int n = nums.length;
+//        int l = 0, r = n - 1;
+//        while (l < r) {
+//            int mid = l + (r - l) / 2;
+//            boolean halfOdd = ((r - mid) % 2 == 0);
+//            if (nums[mid - 1] == nums[mid]) {
+//                if (halfOdd) {
+//                    r = mid - 2;
+//                } else {
+//                    l = mid + 1;
+//                }
+//            } else if (nums[mid + 1] == nums[mid]) {
+//                if (halfOdd) {
+//                    l = mid + 2;
+//                } else {
+//                    r = mid - 1;
+//                }
+//            } else {
+//                return nums[mid];
+//            }
+//        }
+//        return nums[l];
+
         int n = nums.length;
         int l = 0, r = n - 1;
         while (l < r) {
             int mid = l + (r - l) / 2;
-            boolean halfOdd = ((r - mid) % 2 == 0);
-            if (nums[mid - 1] == nums[mid]) {
-                if (halfOdd) {
-                    r = mid - 2;
-                } else {
-                    l = mid + 1;
-                }
-            } else if (nums[mid + 1] == nums[mid]) {
-                if (halfOdd) {
-                    l = mid + 2;
-                } else {
-                    r = mid - 1;
-                }
+            if (nums[mid] == nums[mid ^ 1]) {
+                l = mid + 1;
             } else {
-                return nums[mid];
+                r = mid;
             }
         }
         return nums[l];
@@ -9365,7 +9377,6 @@ public class AllOfThem {
         dfsForNumDistinctIslands(grid, x, y - 1, originalX, originalY, sb);
     }
 
-
     //[695].岛屿的最大面积
     public int maxAreaOfIsland(int[][] grid) {
         int m = grid.length, n = grid[0].length;
@@ -9497,6 +9508,85 @@ public class AllOfThem {
             }
         }
         return -1;
+    }
+
+    //[706].设计哈希映射
+    public class MyHashMap {
+
+        class Node {
+            private int key;
+            private int value;
+            private Node next;
+            public Node(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+        }
+
+        private int BASE = 1009;
+        private Node[] nodes;
+
+        public MyHashMap() {
+            nodes = new Node[BASE];
+        }
+
+        public void put(int key, int value) {
+            int idx = getIndex(key);
+            Node loc = nodes[idx], tmp = loc;
+            if (loc != null) {
+                while (tmp != null) {
+                    if (tmp.key == key) {
+                        tmp.value = value;
+                        return;
+                    }
+                    tmp = tmp.next;
+                }
+            }
+            //头插法
+            Node newOne = new Node(key, value);
+            newOne.next = loc;
+            nodes[idx] = newOne;
+        }
+
+        public int get(int key) {
+            int idx = getIndex(key);
+            Node loc = nodes[idx];
+            if (loc != null) {
+                while (loc != null) {
+                    if (loc.key == key) {
+                        return loc.value;
+                    }
+                    loc = loc.next;
+                }
+            }
+            return -1;
+        }
+
+        public void remove(int key) {
+            int idx = getIndex(key);
+            Node loc = nodes[idx];
+            if (loc != null) {
+                Node pre = null;
+                while (loc != null) {
+                    if (loc.key == key) {
+                        if (pre != null) {
+                            pre.next = loc.next;
+                        } else {
+                            nodes[idx] = loc.next;
+                        }
+                        return;
+                    }
+                    pre = loc;
+                    loc = loc.next;
+                }
+            }
+        }
+
+        private int getIndex(int key) {
+            int hash = Integer.hashCode(key);
+            hash ^= (hash >>> 16);
+            return hash % BASE;
+        }
     }
 
     //[709].转换成小写字母
@@ -13106,6 +13196,65 @@ public class AllOfThem {
         return ans;
     }
 
+    //[补充题13].中文数字转阿拉伯数字
+    public static String chinese2Arabic(String zh) {
+        HashMap<Character, Long> w2n = new HashMap<Character, Long>() {{
+            put('一', 1L);
+            put('二', 2L);
+            put('三', 3L);
+            put('四', 4L);
+            put('五', 5L);
+            put('六', 6L);
+            put('七', 7L);
+            put('八', 8L);
+            put('九', 9L);
+        }};
+        HashMap<Character, Long> w2e = new HashMap<Character, Long>() {{
+            put('十', 10L);
+            put('百', 100L);
+            put('千', 1000L);
+            put('万', 10000L);
+            put('亿', 100000000L);
+        }};
+
+        Stack<Long> stack = new Stack<>();
+        if (helper(stack, zh, w2n, w2e)) {
+            StringBuilder sb = new StringBuilder();
+            long ans = 0;
+            for (long num : stack) {
+                ans +=num;
+            }
+            sb.append(ans);
+            return sb.toString();
+        }
+        return null;
+    }
+
+    private static boolean helper(Stack<Long> st, String zh, Map<Character, Long> w2n, Map<Character, Long> w2e) {
+        if (zh.length() == 0) {
+            return true;
+        }
+        char ch = zh.charAt(0);
+        if (w2e.containsKey(ch)) {
+            if (st.isEmpty() || st.peek() >= w2e.get(ch)) {
+                return false;
+            }
+            int tmp = 0;
+            while (!st.isEmpty() && st.peek() < w2e.get(ch)) {
+                tmp += st.pop();
+            }
+            st.push(tmp * w2e.get(ch));
+            return helper(st, zh.substring(1), w2n, w2e);
+        } else if (w2n.containsKey(ch)) {
+            st.push(w2n.get(ch));
+            return helper(st, zh.substring(1), w2n, w2e);
+        } else if (ch == '零') {
+            return helper(st, zh.substring(1), w2n, w2e);
+        } else {
+            return false;
+        }
+    }
+
     //Morris遍历
     private void preOrderMorris(TreeNode root) {
         TreeNode cur = root, rightMost = null;
@@ -13375,5 +13524,6 @@ public class AllOfThem {
 //        System.out.println(missingElement(new int[]{4, 7, 9, 10}, 1));
 //        System.out.println(missingElement(new int[]{1, 2, 4}, 3));
 //        System.out.println(missingElement(new int[]{4, 7, 9, 10}, 3));
+        System.out.println(singleNonDuplicate(new int[]{1, 1, 2, 3, 3}));
     }
 }
