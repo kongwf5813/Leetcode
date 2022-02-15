@@ -9517,6 +9517,7 @@ public class AllOfThem {
             private int key;
             private int value;
             private Node next;
+
             public Node(int key, int value) {
                 this.key = key;
                 this.value = value;
@@ -11368,6 +11369,30 @@ public class AllOfThem {
             }
         }
         return cnt;
+    }
+
+    //[1380].矩阵中的幸运数
+    public List<Integer> luckyNumbers(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int[] row = new int[m];
+        int[] col = new int[n];
+        for (int i = 0; i < m; i++) {
+            row[i] = Integer.MAX_VALUE;
+            for (int j = 0; j < n; j++) {
+                row[i] = Math.min(matrix[i][j], row[i]);
+                col[j] = Math.max(matrix[i][j], col[j]);
+            }
+        }
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == row[i] && matrix[i][j] == col[j]) {
+                    res.add(matrix[i][j]);
+                }
+            }
+        }
+        return res;
     }
 
     //[1405].最长快乐字符串
@@ -13222,7 +13247,7 @@ public class AllOfThem {
             StringBuilder sb = new StringBuilder();
             long ans = 0;
             for (long num : stack) {
-                ans +=num;
+                ans += num;
             }
             sb.append(ans);
             return sb.toString();
