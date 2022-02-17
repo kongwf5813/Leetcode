@@ -9291,6 +9291,36 @@ public class AllOfThem {
         return -1;
     }
 
+    //[688].骑士在棋盘上的概率
+    public double knightProbability(int n, int k, int row, int column) {
+        //位置i，j上移动k步的概率
+        double[][][] dp = new double[n][n][k + 1];
+        int[][] directs = new int[][]{{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                dp[i][j][0] = 1;
+            }
+        }
+
+        for (int p = 1; p <= k; p++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    for (int[] dir : directs) {
+                        int nx = i + dir[0];
+                        int ny = j + dir[1];
+                        if (nx < 0 || ny < 0 || nx >= n || ny >= n) {
+                            continue;
+                        }
+                        dp[i][j][p] += dp[nx][ny][p - 1] / 8.0d;
+                    }
+                }
+            }
+        }
+
+        return dp[row][column][k];
+    }
+
     //[689].三个无重叠子数组的最大和
     public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
         int[] res = new int[3];
