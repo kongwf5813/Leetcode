@@ -435,20 +435,19 @@ public class AllOfThem {
         int n = nums.length;
         List<List<Integer>> res = new ArrayList<>();
         //锚定第一个数之和，就是左右双指针，判断重复两个点： 第一个数第二次处理重复可以跳过，第二个数重复加速
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n - 2; i++) {
             if (i > 0 && nums[i - 1] == nums[i]) continue;
             int j = i + 1, k = n - 1;
             while (j < k) {
-                while (j > i + 1 && j < n && nums[j - 1] == nums[j]) j++;
-                if (j >= k) break;
                 int sum = nums[i] + nums[j] + nums[k];
                 if (sum == 0) {
                     res.add(Arrays.asList(nums[i], nums[j], nums[k]));
-                    j++;
+                    while (j < k && nums[j] == nums[++j]) ;
+                    while (j < k && nums[k] == nums[--k]) ;
                 } else if (sum > 0) {
-                    k--;
+                    while (j < k && nums[k] == nums[--k]) ;
                 } else {
-                    j++;
+                    while (j < k && nums[j] == nums[++j]) ;
                 }
             }
         }
@@ -642,8 +641,9 @@ public class AllOfThem {
             if (p == null) return head;
             p = p.next;
         }
+        //[head, p)的区间交换
         ListNode newHead = reverse(head, p);
-        ListNode last = reverseKGroup(p.next, k);
+        ListNode last = reverseKGroup(p, k);
         head.next = last;
         return newHead;
     }
@@ -657,9 +657,6 @@ public class AllOfThem {
             dummy.next = p;
             p = next;
         }
-
-        end.next = dummy.next;
-        dummy.next = end;
         return dummy.next;
     }
 
@@ -13579,6 +13576,12 @@ public class AllOfThem {
 //        System.out.println(missingElement(new int[]{4, 7, 9, 10}, 1));
 //        System.out.println(missingElement(new int[]{1, 2, 4}, 3));
 //        System.out.println(missingElement(new int[]{4, 7, 9, 10}, 3));
-        System.out.println(singleNonDuplicate(new int[]{1, 1, 2, 3, 3}));
+//        System.out.println(singleNonDuplicate(new int[]{1, 1, 2, 3, 3}));
+        ListNode l1 = new ListNode(1);
+        l1.next = new ListNode(2);
+        l1.next.next = new ListNode(3);
+        l1.next.next.next = new ListNode(4);
+        l1.next.next.next.next = new ListNode(5);
+        new AllOfThem().reverseKGroup(l1, 2);
     }
 }
