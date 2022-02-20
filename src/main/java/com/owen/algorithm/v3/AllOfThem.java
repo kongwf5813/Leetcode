@@ -746,30 +746,32 @@ public class AllOfThem {
 
     //[33].搜索旋转排序数组
     public int search(int[] nums, int target) {
+        int n = nums.length;
+        if (n == 0) return -1;
+        if (n == 1) return nums[0] == target ? 0 : -1;
         int left = 0, right = nums.length - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
+            //相等，肯定返回
             if (nums[mid] == target) {
                 return mid;
             }
-
-            //说明left到mid是严格递增
-            if (nums[mid] > nums[right]) {
-                if (nums[left] <= target && target < nums[mid]) {
+            if (nums[0] <= nums[mid]) {
+                //[0, mid)有序递增
+                if (nums[0] <= target && target < nums[mid]) {
                     right = mid - 1;
                 } else {
-                    //mid肯定不等于target
                     left = mid + 1;
                 }
             } else {
-                //说明mid到right是严格递增
-                if (nums[mid] < target && target <= nums[right]) {
+                //(mid, n-1]有序递增
+                if (nums[mid] < target && target <= nums[n - 1]) {
                     left = mid + 1;
                 } else {
-                    //mid肯定不等于target
                     right = mid - 1;
                 }
             }
+
         }
         return -1;
     }
@@ -942,6 +944,8 @@ public class AllOfThem {
                     }
                 }
                 //i作为格子序数， j格子内的索引
+                //i作为格子序数，每个格子有3行3列， j作为格子中的第几个
+                //每一行有3个大格子，那么x的偏移就是垂直方向上i/3个格子，每个大格子还有3行，所以第一个元素的x值为(i/3) * 3
                 ch = board[(i / 3) * 3 + j / 3][(i % 3) * 3 + j % 3];
                 if (ch != '.') {
                     if (areaCount[ch - '0'] > 0) {
@@ -1198,60 +1202,53 @@ public class AllOfThem {
 
     //[46].全排列
     public List<List<Integer>> permute(int[] nums) {
+        int n = nums.length;
         List<List<Integer>> res = new ArrayList<>();
-        LinkedList<Integer> path = new LinkedList<>();
-        dfsForPermute(res, path, nums);
+        backtraceForPermute(nums, new boolean[n], res, new LinkedList<>());
         return res;
     }
 
-    private void dfsForPermute(List<List<Integer>> res, LinkedList<Integer> path, int[] nums) {
+    private void backtraceForPermute(int[] nums, boolean[] visited, List<List<Integer>> res, LinkedList<Integer> path) {
         if (path.size() == nums.length) {
-            res.add(new LinkedList<>(path));
-            return;
-        }
-
-        for (int i = 0; i < nums.length; i++) {
-            if (path.contains(nums[i])) {
-                continue;
-            }
-            path.addLast(nums[i]);
-            dfsForPermute(res, path, nums);
-            path.removeLast();
-        }
-    }
-
-    //[47].全排列 II
-    public List<List<Integer>> permuteUnique(int[] nums) {
-        List<List<Integer>> res = new ArrayList<>();
-        if (nums.length == 0) {
-            return res;
-        }
-        Arrays.sort(nums);
-        LinkedList<Integer> path = new LinkedList<>();
-        boolean[] visited = new boolean[nums.length];
-        dfsForPermuteUnique(res, path, nums, visited);
-        return res;
-    }
-
-    private void dfsForPermuteUnique(List<List<Integer>> res, LinkedList<Integer> path, int[] nums, boolean[] visited) {
-        if (path.size() == nums.length) {
-            res.add(new LinkedList<>(path));
+            res.add(new ArrayList<>(path));
             return;
         }
         for (int i = 0; i < nums.length; i++) {
             if (visited[i]) {
                 continue;
             }
-            //决策树画完之后，发现01这种状态需要剪枝，意思是重复的数。
-            //一定从左边往右边选: 如果左边的还没有选，则右边的也不选，直接跳过。
-            if (i > 0 && nums[i] == nums[i - 1] && !visited[i - 1]) {
-                continue;
-            }
             visited[i] = true;
-            path.add(nums[i]);
-            dfsForPermuteUnique(res, path, nums, visited);
+            path.addLast(nums[i]);
+            backtraceForPermute(nums, visited, res, path);
             path.removeLast();
             visited[i] = false;
+        }
+    }
+
+    //[47].全排列 II
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        int n = nums.length;
+        List<List<Integer>> res = new ArrayList<>();
+        backtraceForPermuteUnique(nums, new boolean[n], new LinkedList<>(), res);
+        return res;
+    }
+
+    private void backtraceForPermuteUnique(int[] nums, boolean[] visited, LinkedList<Integer> path, List<List<Integer>> res) {
+        if (path.size() == nums.length) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = 0; i < nums.length; i++) {
+            if (visited[i]) continue;
+            //决策树画完之后，发现01这种状态需要剪枝，意思是重复的数。
+            //一定从左边往右边选: 如果左边的还没有选，则右边的也不选，直接跳过。
+            if (i > 0 && nums[i] == nums[i-1] && !visited[i-1]) continue;
+            path.addLast(nums[i]);
+            visited[i] = true;
+            backtraceForPermuteUnique(nums, visited, path, res);
+            visited[i] = false;
+            path.removeLast();
         }
     }
 
@@ -1846,6 +1843,23 @@ public class AllOfThem {
                 swap(nums, i, right--);
             }
         }
+
+//        int p0 = 0, n = nums.length;
+//        for (int i = 0; i < n; i++) {
+//            if (nums[i] == 0) {
+//                int temp = nums[i];
+//                nums[i] = nums[p0];
+//                nums[p0++] = temp;
+//            }
+//        }
+//        int p1 = p0;
+//        for (int i = p1; i < n; i++) {
+//            if (nums[i] == 1) {
+//                int temp = nums[i];
+//                nums[i] = nums[p1];
+//                nums[p1++] = temp;
+//            }
+//        }
     }
 
     private void swap(int[] nums, int i, int j) {
@@ -1858,23 +1872,23 @@ public class AllOfThem {
     public static String minWindow(String s, String t) {
         int m = s.length(), n = t.length();
         if (m < n) return "";
-        int[] target = new int[58];
+        int[] need = new int[58];
         for (int i = 0; i < n; i++) {
-            target[t.charAt(i) - 'A']++;
+            need[t.charAt(i) - 'A']++;
         }
-        int[] src = new int[58];
+        int[] window = new int[58];
         int minLen = Integer.MAX_VALUE;
         String res = "";
         for (int l = 0, r = 0; r < m; r++) {
-            src[s.charAt(r) - 'A']++;
+            window[s.charAt(r) - 'A']++;
 
             //缩窗口
-            while (checkForMinWindow(src, target)) {
+            while (checkForMinWindow(window, need)) {
                 if (minLen > r - l + 1) {
                     minLen = r - l + 1;
                     res = s.substring(l, r + 1);
                 }
-                src[s.charAt(l) - 'A']--;
+                window[s.charAt(l) - 'A']--;
                 l++;
             }
         }
@@ -9666,6 +9680,19 @@ public class AllOfThem {
         return dp[n - 1][0];
     }
 
+    //[717].1比特与2比特字符
+    public boolean isOneBitCharacter(int[] bits) {
+        int idx = 0, n = bits.length;
+        while (idx < n - 1) {
+            if (bits[idx] == 0) {
+                idx++;
+            } else {
+                idx += 2;
+            }
+        }
+        return idx == n - 1;
+    }
+
     //[735].行星碰撞
     public static int[] asteroidCollision(int[] asteroids) {
         int n = asteroids.length;
@@ -10462,6 +10489,38 @@ public class AllOfThem {
             }
         }
         return -1;
+    }
+
+    //[969].煎饼排序
+    public List<Integer> pancakeSort(int[] arr) {
+        int n = arr.length;
+        List<Integer> res = new ArrayList<>();
+        for (int i = n; i >= 1; i--) {
+            if (i == arr[i - 1]) continue;
+            int j = i - 1;
+            for (; j >= 1; j--) {
+                if (i == arr[j - 1]) {
+                    break;
+                }
+            }
+
+            res.add(j);
+            reversePancake(arr, j - 1);
+            res.add(i);
+            reversePancake(arr, i - 1);
+        }
+        return res;
+    }
+
+    private void reversePancake(int[] arr, int end) {
+        int start = 0;
+        while (start < end) {
+            int temp = arr[start];
+            arr[start] = arr[end];
+            arr[end] = temp;
+            start++;
+            end--;
+        }
     }
 
     //[974].和可被 K 整除的子数组
@@ -12672,7 +12731,7 @@ public class AllOfThem {
         return res;
     }
 
-    //[6004].得到 0 的操作数
+    //[2169].得到 0 的操作数
     public static int countOperations(int num1, int num2) {
         int count = 0;
         while (num1 != 0 && num2 != 0) {
@@ -12690,7 +12749,7 @@ public class AllOfThem {
         return count;
     }
 
-    //[6005].使数组变成交替数组的最少操作数
+    //[2170].使数组变成交替数组的最少操作数
     public static int minimumOperations(int[] nums) {
         Map<Integer, Integer> count = new HashMap<>();
         int n = nums.length;
@@ -12733,7 +12792,7 @@ public class AllOfThem {
         return n - max;
     }
 
-    //[6006].拿出最少数目的魔法豆
+    //[2171].拿出最少数目的魔法豆
     public static long minimumRemoval(int[] beans) {
         int n = beans.length;
         Arrays.sort(beans);
@@ -12749,6 +12808,111 @@ public class AllOfThem {
             min = Math.min(min, sum - left);
         }
         return min;
+    }
+
+    //[6012].统计各位数字之和为偶数的整数个数
+    public int countEven(int num) {
+        int cur = 1, ans = 0;
+        while (cur <= num) {
+            if (isValidCountEven(cur)) {
+                ans++;
+            }
+            cur++;
+        }
+        return ans;
+    }
+
+    private boolean isValidCountEven(int num) {
+        int sum = 0;
+        while (num != 0) {
+            sum += num % 10;
+            num /= 10;
+        }
+        return (sum % 2) == 0;
+    }
+
+    //[6013].合并零之间的节点
+    public ListNode mergeNodes(ListNode head) {
+        ListNode dummy = new ListNode(-1), tail = dummy;
+        int sum = 0;
+        while (head != null) {
+            if (head.val == 0) {
+                if (sum != 0) {
+                    tail.next = new ListNode(sum);
+                    tail = tail.next;
+                }
+                sum = 0;
+            } else {
+                sum += head.val;
+            }
+            head = head.next;
+        }
+        return dummy.next;
+    }
+
+    //[6014].构造限制重复的字符串
+    public String repeatLimitedString(String s, int repeatLimit) {
+        PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> b[0] - a[0]);
+        int[] cnt = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            cnt[ch - 'a']++;
+        }
+        for (int a = 0; a < 26; a++) {
+            if (cnt[a] > 0) {
+                queue.offer(new int[]{a, cnt[a]});
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            if (cur[1] > repeatLimit) {
+                int size = repeatLimit;
+                while (size-- > 0) sb.append((char) (cur[0] + 'a'));
+                if (queue.isEmpty()) return sb.toString();
+                int[] next = queue.peek();
+                if (next[1] == 1) {
+                    queue.poll();
+                } else {
+                    next[1]--;
+                }
+                sb.append((char) (next[0] + 'a'));
+                queue.offer(new int[]{cur[0], cur[1] - repeatLimit});
+            } else {
+                int size = cur[1];
+                while (size-- > 0) sb.append((char) (cur[0] + 'a'));
+            }
+        }
+        return sb.toString();
+    }
+
+    //[6015].统计可以被 K 整除的下标对数目
+    public long countPairs(int[] nums, int k) {
+        //(a * b) % k => (gcd(a, k) * gcd(b, k)) % k
+        //nums [2, 9]   K = 6
+        //不同的gcd之间的数量数乘积，相同gcd，也有可能被k整除，还需要单独计算。
+        Map<Integer, Long> cnt = new HashMap<>();
+        for (int num : nums) {
+            //求与k的最大公约数
+            int gcd = gcd(k, num);
+            cnt.put(gcd, cnt.getOrDefault(gcd, 0L) + 1L);
+        }
+
+        long sum = 0;
+        for (int k1 : cnt.keySet()) {
+            for (int k2 : cnt.keySet()) {
+                int t = (k1 * k2) % k;
+                //防止重复计算，只统计有序的
+                if (k1 < k2 && t == 0) {
+                    sum += cnt.get(k1) * cnt.get(k2);
+                } else if (k1 == k2 && t == 0) {
+                    //相等的k，也可能导致能够被k整除
+                    long count = cnt.get(k1);
+                    sum += count * (count - 1) / 2;
+                }
+            }
+        }
+        return sum;
     }
 
     //[剑指 Offer 03].数组中重复的数字
@@ -13307,7 +13471,7 @@ public class AllOfThem {
         }
     }
 
-    //Morris遍历
+    //Morris前序遍历
     private void preOrderMorris(TreeNode root) {
         TreeNode cur = root, rightMost = null;
         List<Integer> list = new ArrayList<>();
