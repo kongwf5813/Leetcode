@@ -2111,10 +2111,27 @@ public class AllOfThem {
 
     //[89].格雷编码
     public List<Integer> grayCode(int n) {
-        boolean[] visit = new boolean[1 << n];
-        LinkedList<Integer> select = new LinkedList<>();
-        backtraceForGrayCode(n, 0, visit, select);
-        return select;
+//        boolean[] visit = new boolean[1 << n];
+//        LinkedList<Integer> select = new LinkedList<>();
+//        backtraceForGrayCode(n, 0, visit, select);
+//        return select;
+        //镜像构造法
+        //0 0  00
+        //  1  01
+        //     11
+        //     10
+        List<Integer> res = new ArrayList<Integer>() {{
+            add(0);
+        }};
+        int head = 1;
+        for (int i = 0; i < n; i++) {
+            int size = res.size();
+            for (int j = size - 1; j >= 0; j--) {
+                res.add(head + res.get(j));
+            }
+            head <<= 1;
+        }
+        return res;
     }
 
     private boolean backtraceForGrayCode(int n, int cur, boolean[] visit, LinkedList<Integer> select) {
@@ -10083,6 +10100,37 @@ public class AllOfThem {
         if (y > x) return false;
         if (y > 100 && x < 100) return false;
         return true;
+    }
+
+    //[838].推多米诺
+    public String pushDominoes(String dominoes) {
+        int n = dominoes.length();
+        char[] s = dominoes.toCharArray();
+        char left = 'L';
+        int i = 0;
+        while (i < n) {
+            int j = i;
+            while (j < n && s[j] == '.') j++;
+            //左边是L，右边是R，不受影响
+            char right = j < n ? s[j] : 'R';
+            //...L往左边倒， ...R往右边倒，直到右边有R的时候再处理
+            if (left == right) {
+                while (i < j) {
+                    s[i++] = left;
+                }
+            } else if (left == 'R' && right == 'L') {
+                //相向倒
+                int k = j - 1;
+                while (i < k) {
+                    s[i++] = 'R';
+                    s[k--] = 'L';
+                }
+            }
+
+            i = j + 1;
+            left = right;
+        }
+        return new String(s);
     }
 
     //[844].比较含退格的字符串
