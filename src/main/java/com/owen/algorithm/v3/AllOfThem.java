@@ -2205,14 +2205,19 @@ public class AllOfThem {
         for (int i = 0; i < left - 1; i++) {
             pre = pre.next;
         }
+
+        //pre表示前面的节点，后面的节点为新的头节点
+        //cur表示当前节点，需要链接到最后面的节点
+        //next表示后置节点，需要连接到pre.next(新头)
+        //头插法
         ListNode cur = pre.next;
-        ListNode next;
         for (int i = 0; i < right - left; i++) {
-            next = cur.next;
-            //移动的永远是cur
+            ListNode next = cur.next;
+            //cur连接到最后的节点
             cur.next = next.next;
-            //此处的cur是会变动的，所以接的是pre.next节点
+            //翻转后置节点，不是cur节点，而是pre.next
             next.next = pre.next;
+            //尾结点变更成后置节点
             pre.next = next;
         }
         return dummy.next;
@@ -2669,7 +2674,7 @@ public class AllOfThem {
         path.removeLast();
     }
 
-    //[114].二叉树展开为链表
+    //[114].二叉树展开为链表 (后序递归)
     public void flatten(TreeNode root) {
         if (root == null) return;
 
@@ -2688,6 +2693,20 @@ public class AllOfThem {
             cur = cur.right;
         }
         cur.right = right;
+    }
+
+    //[114].二叉树展开为链表 (前序递归)
+    TreeNode pre = null;
+    private void flattenV2(TreeNode root) {
+        if (root == null) return;
+        if (pre != null) {
+            pre.right = root;
+            //前序遍历的时候更新掉左边的链接
+            pre.left = null;
+        }
+        pre = root;
+        flatten(root.left);
+        flatten(root.right);
     }
 
     //[116].填充每个节点的下一个右侧节点指针
