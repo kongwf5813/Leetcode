@@ -2659,19 +2659,38 @@ public class AllOfThem {
     }
 
     private void dfsForPathSum(TreeNode root, int targetSum, LinkedList<Integer> path, List<List<Integer>> res) {
-        if (root == null) return;
+//        if (root == null) return;
+//
+//        //前序遍历
+//        path.addLast(root.val);
+//        if (root.left == null && root.right == null && targetSum == root.val) {
+//            res.add(new ArrayList<>(path));
+//            //回溯撤销节点的，加了return，会导致叶子节点会有撤销成功，导致路径上少减少一次撤销，从而使得下一次的选择会多一个节点。
+//            //主要取决于前序遍历顺序不能变更。
+//        }
+//
+//        dfsForPathSum(root.left, targetSum - root.val, path, res);
+//        dfsForPathSum(root.right, targetSum - root.val, path, res);
+//        path.removeLast();
 
-        //前序遍历
+        //如果在内部做节点回溯，那么中间不能有额外的return，否则导致节点会减少。而且回溯状态是等左右子树都结束了，回溯的状态其实是该节点。
+        //如果在选择子节点的时候，回溯的状态其实是子节点。
         path.addLast(root.val);
         if (root.left == null && root.right == null && targetSum == root.val) {
             res.add(new ArrayList<>(path));
-            //回溯撤销节点的，加了return，会导致叶子节点会有撤销成功，导致路径上少减少一次撤销，从而使得下一次的选择会多一个节点。
-            //主要取决于前序遍历顺序不能变更。
+            return;
         }
 
-        dfsForPathSum(root.left, targetSum - root.val, path, res);
-        dfsForPathSum(root.right, targetSum - root.val, path, res);
-        path.removeLast();
+        if (root.left != null) {
+            dfsForPathSum(root.left, targetSum - root.val, path, res);
+            path.removeLast();
+        }
+
+        if (root.right != null) {
+            dfsForPathSum(root.right, targetSum - root.val, path, res);
+            path.removeLast();
+        }
+
     }
 
     //[114].二叉树展开为链表 (后序递归)
@@ -2819,57 +2838,75 @@ public class AllOfThem {
 
     //[120].三角形最小路径和
     public int minimumTotal(List<List<Integer>> triangle) {
-        int n = triangle.size();
-        //走到(i, j)点的最小路径和
-        int[][] dp = new int[n][n];
-        dp[0][0] = triangle.get(0).get(0);
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j <= i; j++) {
-                if (j == 0) {
-                    dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
-                } else if (j == i) {
-                    dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
-                } else {
-                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
-                }
-            }
-        }
-        int min = dp[n - 1][0];
-        for (int i = 1; i < n; i++) {
-            min = Math.min(min, dp[n - 1][i]);
-        }
-        return min;
-    }
+//        int n = triangle.size();
+//        //走到(i, j)点的最小路径和
+//        int[][] dp = new int[n][n];
+//        dp[0][0] = triangle.get(0).get(0);
+//        for (int i = 1; i < n; i++) {
+//            for (int j = 0; j <= i; j++) {
+//                if (j == 0) {
+//                    dp[i][j] = dp[i - 1][j] + triangle.get(i).get(j);
+//                } else if (j == i) {
+//                    dp[i][j] = dp[i - 1][j - 1] + triangle.get(i).get(j);
+//                } else {
+//                    dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j]) + triangle.get(i).get(j);
+//                }
+//            }
+//        }
+//        int min = dp[n - 1][0];
+//        for (int i = 1; i < n; i++) {
+//            min = Math.min(min, dp[n - 1][i]);
+//        }
+//        return min;
 
-    //[120].三角形最小路径和（空间压缩）
-    public int minimumTotal2(List<List<Integer>> triangle) {
+        //空间压缩
+//        int n = triangle.size();
+//        //到底层i的最短路径和
+//        int[] dp = new int[n];
+//        dp[0] = triangle.get(0).get(0);
+//        int pre = 0, cur;
+//        //  pre          cur, pre'     cur'
+//        // (i-1, j-1)   (i-1, j)     (i-1, j+1)
+//        //        ＼        ↓    ＼      ↓
+//        //               (i, j)       (i, j+1)
+//        for (int i = 1; i < n; i++) {
+//            for (int j = 0; j <= i; j++) {
+//                cur = dp[j];
+//                if (j == 0) {
+//                    dp[j] = cur + triangle.get(i).get(j);
+//                } else if (j == i) {
+//                    dp[j] = pre + triangle.get(i).get(j);
+//                } else {
+//                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
+//                }
+//                pre = cur;
+//            }
+//        }
+//        int min = dp[0];
+//        for (int i = 1; i < n; i++) {
+//            min = Math.min(min, dp[i]);
+//        }
+//        return min;
         int n = triangle.size();
-        //到底层i的最短路径和
         int[] dp = new int[n];
         dp[0] = triangle.get(0).get(0);
-        int pre = 0, cur;
-        //  pre          cur, pre'     cur'
-        // (i-1, j-1)   (i-1, j)     (i-1, j+1)
-        //        ＼        ↓    ＼      ↓
-        //               (i, j)       (i, j+1)
         for (int i = 1; i < n; i++) {
-            for (int j = 0; j <= i; j++) {
-                cur = dp[j];
+            //倒序遍历就不需要引入变量
+            for (int j = i; j >= 0; j--) {
                 if (j == 0) {
-                    dp[j] = cur + triangle.get(i).get(j);
+                    dp[j] = dp[j] + triangle.get(i).get(j);
                 } else if (j == i) {
-                    dp[j] = pre + triangle.get(i).get(j);
+                    dp[j] = dp[j-1] + triangle.get(i).get(j);
                 } else {
-                    dp[j] = Math.min(pre, cur) + triangle.get(i).get(j);
+                    dp[j] = Math.min(dp[j-1], dp[j]) + triangle.get(i).get(j);
                 }
-                pre = cur;
             }
         }
-        int min = dp[0];
-        for (int i = 1; i < n; i++) {
-            min = Math.min(min, dp[i]);
+        int ans = Integer.MAX_VALUE;
+        for (int i = 0; i < n;i++) {
+            ans = Math.min(ans, dp[i]);
         }
-        return min;
+        return ans;
     }
 
     //[121].买卖股票的最佳时机
