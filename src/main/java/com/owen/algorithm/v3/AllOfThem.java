@@ -1243,7 +1243,7 @@ public class AllOfThem {
             if (visited[i]) continue;
             //决策树画完之后，发现01这种状态需要剪枝，意思是重复的数。
             //一定从左边往右边选: 如果左边的还没有选，则右边的也不选，直接跳过。
-            if (i > 0 && nums[i] == nums[i-1] && !visited[i-1]) continue;
+            if (i > 0 && nums[i] == nums[i - 1] && !visited[i - 1]) continue;
             path.addLast(nums[i]);
             visited[i] = true;
             backtraceForPermuteUnique(nums, visited, path, res);
@@ -2696,15 +2696,15 @@ public class AllOfThem {
     }
 
     //[114].二叉树展开为链表 (前序递归)
-    TreeNode pre = null;
+    TreeNode previous = null;
     private void flattenV2(TreeNode root) {
         if (root == null) return;
-        if (pre != null) {
-            pre.right = root;
+        if (previous != null) {
+            previous.right = root;
             //前序遍历的时候更新掉左边的链接
-            pre.left = null;
+            previous.left = null;
         }
-        pre = root;
+        previous = root;
         flatten(root.left);
         flatten(root.right);
     }
@@ -12088,6 +12088,55 @@ public class AllOfThem {
             ans = Math.min(nums[i + k - 1] - nums[i], ans);
         }
         return ans;
+    }
+
+    //[1994].好子集的数目
+    public int numberOfGoodSubsets(int[] nums) {
+        int MOD = (int) 1e9 + 7;
+        // 30 以内的质数
+        int[] p = new int[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+        // 统计数字出现的次数
+        int[] cnts = new int[31];
+        for (int num : nums) cnts[num]++;
+
+        int mask = 1 << 10;
+        //dp[5]  5 二进制位 0000000101, 表示子集所有元素乘积为 p[0] * p[2] = 2 * 5 的个数
+        // 动态转移方式为在已有的情况下再增加其他质数  (p[0] * p[2]) * p[1] = (2 * 5) * 3
+        // 注意这里 dp 用 int 会溢出
+        long[] f = new long[mask];
+        f[0] = 1;
+        // 尝试将 num 加入子集中，并累计结果数
+        for (int num = 2; num <= 30; num++) {
+            if (cnts[num] == 0) continue;
+            boolean ok = true;
+            int t = num, subset = 0;
+            // t 用来你分解质因数， mask 二进制位用来记录分解出现的质因数位置
+            for (int j = 0; j < p.length; j++) {
+                int cnt = 0;
+                while ((t % p[j]) == 0) {
+                    subset |= (1 << j);
+                    t /= p[j];
+                    cnt++;
+                }
+                if (cnt > 1) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (!ok) continue;
+            for (int prev = mask - 1; prev >= 0; prev--) {
+                //有交集：相同质数
+                if ((prev & subset) != 0) continue;
+                //不选择i作为子集，选择i作为子集
+                f[prev | subset] = (f[prev | subset] + f[prev] * cnts[num]) % MOD;
+            }
+        }
+        long ans = 0;
+        //统计所有状态的方案数
+        for (int i = 1; i < mask; i++) ans = (ans + f[i]) % MOD;
+        // 在此基础上，考虑每个 1 选择与否对答案的影响
+        for (int i = 0; i < cnts[1]; i++) ans = ans * 2 % MOD;
+        return (int) ans;
     }
 
     //[1995].统计特殊四元组
