@@ -10595,6 +10595,26 @@ public class AllOfThem {
         return -1;
     }
 
+    //[917].仅仅反转字母
+    public String reverseOnlyLetters(String s) {
+        int left = 0, right = s.length() - 1;
+        char[] arr = s.toCharArray();
+        while (left < right) {
+            if (!Character.isLetter(arr[left])) {
+                left++;
+            } else if (!Character.isLetter(arr[right])) {
+                right--;
+            } else {
+                char temp = arr[left];
+                arr[left] = arr[right];
+                arr[right] = temp;
+                left++;
+                right--;
+            }
+        }
+        return String.valueOf(arr);
+    }
+
     //[969].煎饼排序
     public List<Integer> pancakeSort(int[] arr) {
         int n = arr.length;
