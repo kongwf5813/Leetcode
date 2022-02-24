@@ -11998,6 +11998,26 @@ public class AllOfThem {
         return ans;
     }
 
+    //[1706].球会落何处
+    public int[] findBall(int[][] grid) {
+        int n = grid[0].length;
+        int[] ans = new int[n];
+        for (int j = 0; j < n; j++) {
+            int col = j;
+            for (int[] row : grid) {
+                int dir = row[col];
+                col += dir;
+                //水平方向上能形成V的肯定
+                if (col < 0 || col >= n || row[col] != dir) {
+                    col = -1;
+                    break;
+                }
+            }
+            ans[j] = col;
+        }
+        return ans;
+    }
+
     //[1716].计算力扣银行的钱
     public int totalMoney(int n) {
         int weekNum = n / 7;
