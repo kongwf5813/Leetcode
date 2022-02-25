@@ -2716,6 +2716,7 @@ public class AllOfThem {
 
     //[114].二叉树展开为链表 (前序递归)
     TreeNode previous = null;
+
     private void flattenV2(TreeNode root) {
         if (root == null) return;
         if (previous != null) {
@@ -2896,14 +2897,14 @@ public class AllOfThem {
                 if (j == 0) {
                     dp[j] = dp[j] + triangle.get(i).get(j);
                 } else if (j == i) {
-                    dp[j] = dp[j-1] + triangle.get(i).get(j);
+                    dp[j] = dp[j - 1] + triangle.get(i).get(j);
                 } else {
-                    dp[j] = Math.min(dp[j-1], dp[j]) + triangle.get(i).get(j);
+                    dp[j] = Math.min(dp[j - 1], dp[j]) + triangle.get(i).get(j);
                 }
             }
         }
         int ans = Integer.MAX_VALUE;
-        for (int i = 0; i < n;i++) {
+        for (int i = 0; i < n; i++) {
             ans = Math.min(ans, dp[i]);
         }
         return ans;
@@ -3402,37 +3403,71 @@ public class AllOfThem {
 
     //[146].LRU 缓存
     public class LRUCache {
-        LinkedHashMap<Integer, Integer> cache;
+        class Node {
+            int key;
+            int value;
+            Node prev;
+            Node next;
+
+            public Node(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+        }
+
         int capacity;
+        Node head, tail;
+        Map<Integer, Node> map;
 
         public LRUCache(int capacity) {
+            head = new Node(-1, -1);
+            tail = new Node(-1, -1);
+            head.next = tail;
+            tail.prev = head;
             this.capacity = capacity;
-            this.cache = new LinkedHashMap<>();
         }
 
         public int get(int key) {
-            if (!cache.containsKey(key)) {
-                return -1;
-            }
-            int val = cache.get(key);
-            cache.remove(key);
-            cache.put(key, val);
-            return val;
+            Node node = map.get(key);
+            if (node == null) return -1;
+
+            moveToHead(node);
+            return node.value;
         }
 
         public void put(int key, int value) {
-            if (cache.containsKey(key)) {
-                int val = cache.get(key);
-                cache.remove(key);
-                cache.put(key, val);
-            } else {
-                if (cache.size() >= capacity) {
-                    cache.remove(cache.keySet().iterator().next());
-                    cache.put(key, value);
-                } else {
-                    cache.put(key, value);
+            Node node = map.get(key);
+            if (node == null) {
+                node = new Node(key, value);
+                map.put(key, node);
+                addHead(node);
+                if (map.size() > capacity) {
+                    Node delete = tail.prev;
+                    remove(delete);
+                    map.remove(delete.key);
                 }
+            } else {
+                node.value = value;
+                moveToHead(node);
             }
+        }
+
+        private void remove(Node node) {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+
+        private void moveToHead(Node node) {
+            remove(node);
+            addHead(node);
+        }
+
+        private void addHead(Node node) {
+            node.next = head.next;
+            head.next = node;
+
+            node.next.prev = node;
+            node.prev = head;
         }
     }
 
@@ -3525,27 +3560,37 @@ public class AllOfThem {
 
     //[151].翻转字符串里的单词
     public String reverseWords(String s) {
+//        StringBuilder sb = new StringBuilder();
+//        int len = s.length();
+//        int left = 0;
+//        while (s.charAt(left) == ' ') {
+//            left++;
+//        }
+//
+//        for (int i = len - 1; i >= left; i--) {
+//            int j = i;
+//            while (i >= left && s.charAt(i) != ' ') {
+//                i--;
+//            }
+//
+//            if (i != j) {
+//                sb.append(s.substring(i + 1, j + 1));
+//                if (i > left) {
+//                    sb.append(" ");
+//                }
+//            }
+//        }
+//        return sb.toString();
+
+        s = s.trim();
         StringBuilder sb = new StringBuilder();
-        int len = s.length();
-        int left = 0;
-        while (s.charAt(left) == ' ') {
-            left++;
-        }
-
-        for (int i = len - 1; i >= left; i--) {
+        for (int i = s.length() - 1; i >= 0; ) {
             int j = i;
-            while (i >= left && s.charAt(i) != ' ') {
-                i--;
-            }
-
-            if (i != j) {
-                sb.append(s.substring(i + 1, j + 1));
-                if (i > left) {
-                    sb.append(" ");
-                }
-            }
+            while (i >= 0 && s.charAt(i) != ' ') i--;
+            sb.append(s.substring(i + 1, j + 1)).append(' ');
+            while (i >= 0 && s.charAt(i) == ' ') i--;
         }
-        return sb.toString();
+        return sb.deleteCharAt(sb.length() - 1).toString();
     }
 
     //[152].乘积最大子数组
@@ -3573,13 +3618,24 @@ public class AllOfThem {
 
     //[153].寻找旋转排序数组中的最小值
     public int findMin(int[] nums) {
+//        int left = 0, right = nums.length - 1;
+//        while (left <= right) {
+//            int mid = left + (right - left) / 2;
+//            if (nums[mid] > nums[right]) {
+//                left = mid + 1;
+//            } else {
+//                right = mid - 1;
+//            }
+//        }
+//        return nums[left];
+
         int left = 0, right = nums.length - 1;
-        while (left <= right) {
+        while (left < right) {
             int mid = left + (right - left) / 2;
             if (nums[mid] > nums[right]) {
                 left = mid + 1;
             } else {
-                right = mid - 1;
+                right = mid;
             }
         }
         return nums[left];
