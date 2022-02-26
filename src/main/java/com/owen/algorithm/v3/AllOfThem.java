@@ -2259,14 +2259,13 @@ public class AllOfThem {
         TreeNode cur = root;
         List<Integer> res = new ArrayList<>();
         while (cur != null || !stack.isEmpty()) {
-            if (cur != null) {
+            while (cur != null) {
                 stack.push(cur);
                 cur = cur.left;
-            } else {
-                cur = stack.pop();
-                res.add(cur.val);
-                cur = cur.right;
             }
+            cur = stack.pop();
+            res.add(cur.val);
+            cur = cur.right;
         }
         return res;
     }
@@ -3812,26 +3811,25 @@ public class AllOfThem {
 
         public BSTIterator(TreeNode root) {
             stack = new Stack<>();
-            TreeNode cur = root;
-            //中序遍历的迭代算法拆成了两半，前半段压栈，后半段弹栈
-            while (cur != null) {
-                stack.push(cur);
-                cur = cur.left;
-            }
+            pushLeft(root);
         }
 
         public int next() {
-            TreeNode cur = stack.pop();
-            cur = cur.right;
-            while (cur != null) {
-                stack.push(cur);
-                cur = cur.left;
-            }
-            return cur.val;
+            TreeNode root = stack.pop();
+            //右子树作为当前节点，继续压栈
+            pushLeft(root.right);
+            return root.val;
         }
 
         public boolean hasNext() {
             return !stack.isEmpty();
+        }
+
+        private void pushLeft(TreeNode root) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
         }
     }
 
@@ -4035,24 +4033,22 @@ public class AllOfThem {
 
     //[206].反转链表
     public ListNode reverseList(ListNode head) {
-        if (head == null || head.next == null) return head;
+//        迭代
+//        ListNode dummy = new ListNode(-1);
+//        while (head != null) {
+//            ListNode next = head.next;
+//            head.next = dummy.next;
+//            dummy.next = head;
+//            head = next;
+//        }
+//        return dummy.next;
 
+        //递归
+        if (head == null || head.next == null) return head;
         ListNode last = reverseList(head.next);
         head.next.next = head;
         head.next = null;
         return last;
-    }
-
-    //[206].反转链表 迭代
-    private ListNode reverseList2(ListNode head) {
-        ListNode dummy = new ListNode(-1);
-        while (head != null) {
-            ListNode next = head.next;
-            head.next = dummy.next;
-            dummy.next = head;
-            head = next;
-        }
-        return dummy.next;
     }
 
     //[207].课程表
@@ -4742,19 +4738,23 @@ public class AllOfThem {
         int[] ans = new int[n - k + 1];
         //单调队列
         LinkedList<Integer> queue = new LinkedList<>();
-        for (int r = 0; r < n; r++) {
+        int index = 0;
+        for (int l = 0, r = 0; r < n; r++) {
             while (!queue.isEmpty() && nums[queue.peekLast()] < nums[r]) {
                 queue.pollLast();
             }
             queue.offerLast(r);
 
-            //超出范围的就移除左边的值
-            if (queue.peekFirst() <= r - k) {
-                queue.pollFirst();
-            }
-            //窗口长度大于k的时候更新值
+            //满足k个就缩左边窗口
             if (r + 1 >= k) {
-                ans[r + 1 - k] = nums[queue.peekFirst()];
+                int first = queue.peekFirst();
+                ans[index++] = nums[first];
+                l++;
+
+                //更新之后发现最大值不在了，就删除掉
+                if (first < l) {
+                    queue.pollFirst();
+                }
             }
         }
         return ans;
@@ -4809,6 +4809,35 @@ public class AllOfThem {
         }
         temp.put(expression, res);
         return res;
+    }
+
+    //[242].有效的字母异位词
+    public boolean isAnagram(String s, String t) {
+        if (s.length() != t.length()) return false;
+        int[] cnt = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            cnt[s.charAt(i) - 'a']++;
+        }
+        for (int i = 0; i < t.length(); i++) {
+            cnt[t.charAt(i) - 'a']--;
+        }
+        for (int i = 0; i < 26; i++) {
+            if (cnt[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //[252].会议室
+    public boolean canAttendMeetings(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        for (int i = 0; i < intervals.length; i++) {
+            if (i + 1 < intervals.length && intervals[i][1] > intervals[i + 1][0]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //[257].二叉树的所有路径
@@ -5129,6 +5158,7 @@ public class AllOfThem {
     public int lengthOfLIS(int[] nums) {
         int size = nums.length;
         if (size == 0) return 0;
+        //以i为结尾的最长递增子序列的长度
         int[] dp = new int[size];
         int length = 1;
         for (int i = 0; i < size; i++) {
@@ -5155,13 +5185,15 @@ public class AllOfThem {
             int left = 0, right = maxLen;
             while (left < right) {
                 int mid = left + (right - left) / 2;
-                if (dp[mid] <= num) {
+                //相等的时候，放在同一沓上，因为求得是递增子序列，得确保下一组一定是放不下再新建一组
+                if (dp[mid] < num) {
                     left = mid + 1;
                 } else {
                     right = mid;
                 }
             }
             //放最顶上去
+            //maxLen，默认是左闭右开区间，left可以出界，就是新堆。
             dp[left] = num;
             //需要新建一个堆
             if (maxLen == left) {
@@ -5175,6 +5207,7 @@ public class AllOfThem {
     public static class NumArray {
 
         //preSum[i]代表nums[0...i-1]的和
+        //长度为i
         int[] preSum;
 
         public NumArray(int[] nums) {
@@ -5215,47 +5248,74 @@ public class AllOfThem {
 
     //[305].岛屿数量 II
     public List<Integer> numIslands2(int m, int n, int[][] positions) {
+        UnionFind3 uf = new UnionFind3(m * n);
+        int[][] directions = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        //只有陆地才会被访问
+        boolean[] visited = new boolean[m * n];
         List<Integer> res = new ArrayList<>();
-        if (m < 0 || n < 0) return res;
-        int[] parent = new int[m * n];
-        int count = 0;
-        int[][] directs = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        //刚开始的时候，并不是所有点都是岛屿
-        Arrays.fill(parent, -1);
         for (int[] position : positions) {
             int x = position[0];
             int y = position[1];
-            int id = x * n + y;
-            //如果已经是岛屿了， 跳过
-            if (parent[id] == -1) continue;
-            parent[id] = id;
-            count++;
-
-            for (int[] dir : directs) {
-                int nx = x + dir[0];
-                int ny = y + dir[1];
-                int nxid = nx * n + ny;
-                //该节点海水直接跳过
-                if (nx < 0 || ny < 0 || nx >= m || ny >= n || parent[nxid] == -1) continue;
-                //合并操作
-                int rootCur = findParent(parent, id);
-                int rootNext = findParent(parent, nxid);
-                if (rootNext != rootCur) {
-                    parent[rootCur] = rootNext;
-                    count--;
+            int idx = x * n + y;
+            if (!visited[idx]) {
+                visited[idx] = true;
+                //增加连通分量，刚开始为0
+                uf.addCount();
+                for (int[] direction : directions) {
+                    int nx = x + direction[0];
+                    int ny = y + direction[1];
+                    int newIdx = nx * n + ny;
+                    //被访问过就是陆地，没被访问过就不是陆地
+                    if (nx < 0 || ny < 0 || nx >= m || ny >= n || !visited[newIdx] || uf.connected(idx, newIdx))
+                        continue;
+                    uf.union(idx, newIdx);
                 }
             }
-            res.add(count);
+            res.add(uf.getCount());
         }
         return res;
     }
 
-    private int findParent(int[] parent, int i) {
-        while (i != parent[i]) {
-            parent[i] = parent[parent[i]];
-            i = parent[i];
+    public class UnionFind3 {
+        int[] parent;
+        int count;
+
+        public UnionFind3(int size) {
+            parent = new int[size];
+            //每个海水连通分量都可以为自己
+            for (int i = 0; i < size; i++) {
+                parent[i] = i;
+            }
+            //这边因为陆地是动态添加的，所以初始化没有连通分量
+            count = 0;
         }
-        return parent[i];
+
+        public int find(int p) {
+            while (p != parent[p]) {
+                parent[p] = parent[parent[p]];
+                p = parent[p];
+            }
+            return p;
+        }
+
+        public void addCount() {
+            count++;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public boolean connected(int p, int q) {
+            return find(p) == find(q);
+        }
+
+        public void union(int p, int q) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            parent[rootP] = rootQ;
+            count--;
+        }
     }
 
     //[306].累加数
@@ -12378,6 +12438,19 @@ public class AllOfThem {
             }
             return ans;
         }
+    }
+
+    //[2016].增量元素之间的最大差值
+    public int maximumDifference(int[] nums) {
+        int min = nums[0], ans = -1;
+        for (int i = 1; i < nums.length; i++) {
+            if (min < nums[i]) {
+                ans = Math.max(ans, nums[i] - min);
+            } else {
+                min = nums[i];
+            }
+        }
+        return ans;
     }
 
     //[2022].将一维数组转变成二维数组
