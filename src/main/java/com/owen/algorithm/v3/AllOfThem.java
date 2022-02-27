@@ -5551,18 +5551,17 @@ public class AllOfThem {
         int n = coins.length;
         int[] dp = new int[amount + 1];
         //dp[0] 金额为0， 需要的硬币数为0，求得是最小硬币数量，所以初始化为最大
-        for (int i = 1; i <= amount; i++) dp[i] = Integer.MAX_VALUE;
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
         for (int i = 0; i < n; i++) {
-            int val = coins[i];
-            //正序遍历：完全背包每个硬币可以选择多次
-            for (int j = val; j <= amount; j++) {
-                //只有dp[j-coins[i]]不是初始最大值时，该位才有选择的必要
-                //如果是最大值，意味着无解
-                if (dp[j - val] != Integer.MAX_VALUE) {
-                    dp[j] = Math.min(dp[j], dp[j - val] + 1);
+            for (int j = coins[i]; j <= amount; j++) {
+                //要的是恰好零钱，如果dp[j - coins[i]]为最大值，意味着j - coins[i]金额没办法兑换。
+                if (dp[j - coins[i]] != Integer.MAX_VALUE) {
+                    dp[j] = Math.min(dp[j], dp[j - coins[i]] + 1);
                 }
             }
         }
+        //没办法兑换
         return dp[amount] == Integer.MAX_VALUE ? -1 : dp[amount];
     }
 
@@ -5736,14 +5735,32 @@ public class AllOfThem {
     private Map<TreeNode, Integer> map = new HashMap<>();
 
     public int rob(TreeNode root) {
-        if (root == null) return 0;
-        if (map.containsKey(root)) return map.get(root);
-        int rob_it = root.val +
-                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
-                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
-        int rob_not = rob(root.left) + rob(root.right);
-        int res = Math.max(rob_it, rob_not);
-        map.put(root, res);
+//        if (root == null) return 0;
+//        if (map.containsKey(root)) return map.get(root);
+//        int rob_it = root.val +
+//                (root.left != null ? rob(root.left.left) + rob(root.left.right) : 0) +
+//                (root.right != null ? rob(root.right.left) + rob(root.right.right) : 0);
+//        int rob_not = rob(root.left) + rob(root.right);
+//        int res = Math.max(rob_it, rob_not);
+//        map.put(root, res);
+//        return res;
+        //前面一种方法，涉及到重复计算问题，当爷爷时，计算了儿子和孙子，当儿子时，又得计算孙子，所以有性能损耗。
+        //后一种办法，只涉及到后序遍历思想，来更新父节点。
+        int[] res = robAction(root);
+        return Math.max(res[0], res[1]);
+    }
+
+    private int[] robAction(TreeNode root) {
+        int[] res = new int[2];
+        if (root == null) return res;
+
+        int[] left = robAction(root.left);
+        int[] right = robAction(root.right);
+
+        //选择当前节点不偷，最大值取决于左右孩子最大值(可以偷，也可以不偷)
+        res[0] = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+        //选择当前节点偷，最大值取决于左右孩子都不偷的情况
+        res[1] = root.val + left[0] + right[0];
         return res;
     }
 
@@ -5951,6 +5968,11 @@ public class AllOfThem {
     //[354].俄罗斯套娃信封问题
     public int maxEnvelopes(int[][] envelopes) {
         int n = envelopes.length;
+        //因为求的是递增子序列，逆序高度可以保证，相同宽度的情况下高度只能选择一个，
+        //2,3
+        //5,4
+        //5,5
+        //5,6
         Arrays.sort(envelopes, (a, b) -> {
             if (a[0] == b[0]) return b[1] - a[1];
             else return a[0] - b[0];
@@ -6059,6 +6081,48 @@ public class AllOfThem {
             res += dp;
         }
         return res;
+    }
+
+    //[362].敲击计数器
+    public class HitCounter {
+
+        List<Integer> list;
+
+        public HitCounter() {
+            list = new ArrayList<>();
+        }
+
+        public void hit(int timestamp) {
+            list.add(timestamp);
+        }
+
+        public int getHits(int timestamp) {
+            int left = 0, right = list.size();
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (list.get(mid) > timestamp) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+            //右边界
+            int r2 = left;
+
+            left = -1;
+            right = list.size() - 1;
+            while (left < right) {
+                int mid = left + (right - left + 1) / 2;
+                if (list.get(mid) <= timestamp - 300) {
+                    left = mid;
+                } else {
+                    right = mid - 1;
+                }
+            }
+            //左边界
+            int r1 = left + 1;
+            return r2 - r1;
+        }
     }
 
     //[368].最大整除子集
@@ -6253,6 +6317,23 @@ public class AllOfThem {
         return Math.max(up[n - 1], down[n - 1]);
     }
 
+    //[377].组合总和 Ⅳ
+    public int combinationSum4(int[] nums, int target) {
+        int n = nums.length;
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        //实际求得是：排列数，所以容量在前，物品在后
+        //如果是求组合数，那么物品在前，容量在后
+        for (int j = 0; j <= target; j++) {
+            for (int i = 0; i < n; i++) {
+                if (j >= nums[i]) {
+                    dp[j] += dp[j - nums[i]];
+                }
+            }
+        }
+        return dp[target];
+    }
+
     //[380].O(1) 时间插入、删除和获取随机元素
     public class RandomizedSet {
         //只要是获取随机需要提前知道大小并且能根据index直接获取
@@ -6351,7 +6432,8 @@ public class AllOfThem {
         public int[] shuffle() {
             int[] res = original.clone();
             Random random = new Random();
-            //请认真思考下，等概率是什么。第一次被选中 * 第二次被选中的概率 = 1/n
+            //请认真思考下，等概率是什么。
+            //位置为0的概率为1/n, 位置为1的概率为n-1/n * 1/n-1，即第一次未被选中的概率 * 第二次选中的概率
             for (int i = 0; i < res.length; i++) {
                 //[i, n) => [0, n - i) + i
                 int j = random.nextInt(res.length - i) + i;
@@ -7140,6 +7222,7 @@ public class AllOfThem {
         }
 
         private Node dfsForDeserialize(LinkedList<String> items) {
+            if (items == null || items.isEmpty()) return null;
             int val = Integer.parseInt(items.pollFirst());
             int size = Integer.parseInt(items.pollFirst());
 
@@ -7322,6 +7405,7 @@ public class AllOfThem {
                 //当恢复操作，发现一个字符变为了1，说明之前有匹配的字符，需要减掉一个字符计数
                 if (++cnts[s.charAt(l++) - 'a'] == 1) diffA--;
             }
+            //刚开始窗口不相等的时候，词频肯定不相等
             if (diffA == diffP) res.add(l);
         }
         return res;
@@ -8473,12 +8557,12 @@ public class AllOfThem {
         int[] dp = new int[amount + 1];
         //需要的是组合数，当为0的时候，为1种组合，因为后面的状态转移是+，所以需要设置成1
         dp[0] = 1;
-        for (int i = 1; i <= n; i++) { //物品维度
-            int val = coins[i - 1];
-            for (int j = val; j <= amount; j++) { //容量维度
-                dp[j] += dp[j - val];
+        for (int i = 0; i < n; i++) { //物品维度
+            for (int j = coins[i]; j <= amount; j++) { //容量维度
+                dp[j] += dp[j - coins[i]];
             }
         }
+        //没法兑换的组合数为0
         return dp[amount];
     }
 
@@ -13132,7 +13216,7 @@ public class AllOfThem {
         return min;
     }
 
-    //[6012].统计各位数字之和为偶数的整数个数
+    //[2180].统计各位数字之和为偶数的整数个数
     public int countEven(int num) {
         int cur = 1, ans = 0;
         while (cur <= num) {
@@ -13153,7 +13237,7 @@ public class AllOfThem {
         return (sum % 2) == 0;
     }
 
-    //[6013].合并零之间的节点
+    //[2181].合并零之间的节点
     public ListNode mergeNodes(ListNode head) {
         ListNode dummy = new ListNode(-1), tail = dummy;
         int sum = 0;
@@ -13172,7 +13256,7 @@ public class AllOfThem {
         return dummy.next;
     }
 
-    //[6014].构造限制重复的字符串
+    //[2182].构造限制重复的字符串
     public String repeatLimitedString(String s, int repeatLimit) {
         PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> b[0] - a[0]);
         int[] cnt = new int[26];
@@ -13208,7 +13292,7 @@ public class AllOfThem {
         return sb.toString();
     }
 
-    //[6015].统计可以被 K 整除的下标对数目
+    //[2183].统计可以被 K 整除的下标对数目
     public long countPairs(int[] nums, int k) {
         //(a * b) % k => (gcd(a, k) * gcd(b, k)) % k
         //nums [2, 9]   K = 6
@@ -13235,6 +13319,58 @@ public class AllOfThem {
             }
         }
         return sum;
+    }
+
+    //[6008].统计包含给定前缀的字符串
+    public int prefixCount(String[] words, String pref) {
+        int ans = 0;
+        for (String word : words) {
+            if (word.startsWith(pref)) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    //[6009].使两字符串互为字母异位词的最少步骤数
+    public int minSteps(String s, String t) {
+        int[] cnt1 = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            int ch = s.charAt(i) - 'a';
+            cnt1[ch]++;
+        }
+
+        int[] cnt2 = new int[26];
+        for (int i = 0; i < t.length(); i++) {
+            int ch = t.charAt(i) - 'a';
+            cnt2[ch]++;
+        }
+        int ans = 0;
+        for (int i = 0; i < 26; i++) {
+            ans += Math.abs(cnt1[i] - cnt2[i]);
+        }
+        return ans;
+    }
+
+    //[6010].完成旅途的最少时间
+    public long minimumTime(int[] time, int totalTrips) {
+        Arrays.sort(time);
+        long right = (long) totalTrips * time[0];
+        long left = 1;
+        while (left < right) {
+            long mid = left + (right - left) / 2;
+            long trips = 0;
+            for (int i = 0; i < time.length; i++) {
+                trips += mid / time[i];
+            }
+
+            if (trips >= totalTrips) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
     }
 
     //[剑指 Offer 03].数组中重复的数字
