@@ -12019,6 +12019,41 @@ public class AllOfThem {
         }
     }
 
+    //[1601].最多可达成的换楼请求数目
+    public int maximumRequests(int n, int[][] requests) {
+        int m = requests.length;
+        int ans = 0;
+        //请求的状态2^m-1种选择
+        for (int i = 0; i < (1 << m); i++) {
+            int cnt = getCnt(i);
+            if (cnt <= ans) continue;
+            if (check(i, requests)) ans = cnt;
+        }
+        return ans;
+    }
+
+    private boolean check(int s, int[][] requests) {
+        //每种状态使得每个楼的数据都是净变化为 0
+        int[] cnt = new int[20];
+        int sum = 0;
+        for (int j = 0; j < 16; j++) {
+            //一共16个状态位，计算判断每一个请求导致的变化
+            if (((s >> j) & 1) == 1) {
+                if (++cnt[requests[j][0]] == 1) sum++;
+                if (--cnt[requests[j][1]] == 0) sum--;
+            }
+        }
+        return sum == 0;
+    }
+
+    private int getCnt(int s) {
+        int ans = 0;
+        for (int i = s; i > 0 ; i-= (i & -i)) {
+            ans++;
+        }
+        return ans;
+    }
+
     //[1609].奇偶树
     public boolean isEvenOddTree(TreeNode root) {
         //就是不用BFS, 在处理每一层的时候，需要获取到前面一个节点。
