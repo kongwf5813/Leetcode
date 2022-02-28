@@ -9683,6 +9683,7 @@ public class AllOfThem {
             return;
         }
         grid[x][y] = 0;
+        //因为多源dfs，肯定是从左上角开始的，所以可以记录相对位置坐标
         sb.append(originalX - x);
         sb.append(originalY - y);
         dfsForNumDistinctIslands(grid, x + 1, y, originalX, originalY, sb);
@@ -11425,6 +11426,41 @@ public class AllOfThem {
         return res == Integer.MAX_VALUE ? 0 : res;
     }
 
+    //[1219].黄金矿工
+    public int getMaximumGold(int[][] grid) {
+        int m = grid.length, n = grid[0].length;
+        boolean[][] visited = new boolean[m][n];
+        int max = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                visited[m][n] = true;
+                AtomicInteger res = new AtomicInteger();
+                dfsForGetMaximumGold(grid, i, j, visited, res);
+                max = Math.max(max, res.get());
+                visited[m][n] = false;
+            }
+        }
+        return max;
+    }
+
+    private void dfsForGetMaximumGold(int[][] grid, int x, int y, boolean[][] visited, AtomicInteger count) {
+        int[][] directions = new int[][]{{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        for (int[] direction : directions) {
+            int nx = x + direction[0];
+            int ny = y + direction[1];
+            if (nx < 0 || ny < 0 || nx >= grid.length || ny >= grid[0].length
+                    || visited[nx][ny] || grid[nx][ny] == 0) {
+                continue;
+            }
+
+            visited[nx][ny] = true;
+            count.addAndGet(grid[nx][ny]);
+            dfsForGetMaximumGold(grid, nx, ny, visited, count);
+            count.addAndGet(-grid[nx][ny]);
+            visited[nx][ny] = false;
+        }
+    }
+
     //[1220].统计元音字母序列的数量
     public int countVowelPermutation(int n) {
         // 字符串中的每个字符都应当是小写元音字母（'a', 'e', 'i', 'o', 'u'）
@@ -12048,7 +12084,7 @@ public class AllOfThem {
 
     private int getCnt(int s) {
         int ans = 0;
-        for (int i = s; i > 0 ; i-= (i & -i)) {
+        for (int i = s; i > 0; i -= (i & -i)) {
             ans++;
         }
         return ans;
@@ -12278,6 +12314,30 @@ public class AllOfThem {
             }
         }
         return count;
+    }
+
+    //[1763].最长的美好子字符串
+    public String longestNiceSubstring(String s) {
+        int n = s.length();
+        int count = 0;
+        String ans = "";
+        for (int i = 0; i < n; i++) {
+            int lower = 0, upper = 0;
+            //不关心字符的数量，只关心有没有
+            for (int j = i; j < n; j++) {
+                char ch = s.charAt(j);
+                if (Character.isLowerCase(ch)) {
+                    lower |= 1 << (s.charAt(j) - 'a');
+                } else {
+                    upper |= 1 << (s.charAt(j) - 'A');
+                }
+                if (lower == upper && j - i + 1 > count) {
+                    ans = s.substring(i, j + 1);
+                    count = j - i + 1;
+                }
+            }
+        }
+        return ans;
     }
 
     //[1765].地图中的最高点
