@@ -8481,13 +8481,13 @@ public class AllOfThem {
             while (x.left != null) x = x.left;
             return x;
         } else {
+            //x.parent.right == x 效率更高，实际效率100%
             while (x.parent != null && x.parent.left != x) {
                 x = x.parent;
             }
             return x.parent;
         }
     }
-
 
     //[513].找树左下角的值
     private int maxDepth = -1, leftValue = -1;
@@ -13669,6 +13669,7 @@ public class AllOfThem {
     }
 
     //[剑指 Offer 36].二叉搜索树与双向链表
+    //[426].将二叉搜索树转化为排序的双向链表
     private Node preOne = null, headOne = null;
 
     public Node treeToDoublyList(Node root) {
