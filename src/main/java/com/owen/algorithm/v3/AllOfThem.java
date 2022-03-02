@@ -9973,6 +9973,21 @@ public class AllOfThem {
         return sum - dp[m][n] * 2;
     }
 
+    //[713].乘积小于K的子数组
+    public int numSubarrayProductLessThanK(int[] nums, int k) {
+        if (k <= 1) return 0;
+        int n = nums.length;
+        int prod = 1, ans = 0;
+        for (int l = 0, r = 0; r < n; r++) {
+            prod *= nums[r];
+            while (prod >= k) {
+                prod /= nums[l++];
+            }
+            ans += r - l +1;
+        }
+        return ans;
+    }
+
     //[714].买卖股票的最佳时机含手续费
     public int maxProfit(int[] prices, int fee) {
         int n = prices.length;
@@ -9997,6 +10012,39 @@ public class AllOfThem {
             }
         }
         return idx == n - 1;
+    }
+
+    //[718].最长重复子数组
+    public int findLength(int[] nums1, int[] nums2) {
+//        int m = nums1.length, n = nums2.length;
+//        //长度为i的nums1，与长度为j的nums2构成的相同子数组的最大长度
+//        int[][] dp = new int[m + 1][n + 1];
+//        int ans = 0;
+//        for (int i = 1; i <= m; i++) {
+//            for (int j = 1; j <= n; j++) {
+//                if (nums1[i - 1] == nums2[j - 1]) {
+//                    dp[i][j] = dp[i - 1][j - 1] + 1;
+//                }
+//
+//                ans = Math.max(ans, dp[i][j]);
+//            }
+//        }
+//        return ans;
+        int m = nums1.length, n = nums2.length;
+        int[] dp = new int[n + 1];
+        int ans = 0;
+        for (int i = 1; i <= m; i++) {
+            for (int j = n; j >= 1; j--) {
+                if (nums1[i - 1] == nums2[j - 1]) {
+                    dp[j] = dp[j - 1] + 1;
+                } else {
+                    //二维转一维需要注意这个点！！！！！
+                    dp[j] = 0;
+                }
+                ans = Math.max(ans, dp[j]);
+            }
+        }
+        return ans;
     }
 
     //[735].行星碰撞
