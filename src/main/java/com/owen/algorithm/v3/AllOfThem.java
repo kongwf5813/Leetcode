@@ -9074,6 +9074,38 @@ public class AllOfThem {
         return res;
     }
 
+    //[564].寻找最近的回文数
+    public String nearestPalindromic(String n) {
+        int len = n.length();
+        Set<Long> set = new HashSet<>();
+        //通过取前半段数字分别-1, +0, +1来枚举最小值，其中-1,+1,会导致位数发生变化，实际就是左右边界值也是需要考虑的。
+        //99 => 101
+        //100 => 99
+        set.add((long) Math.pow(10, len - 1) - 1);
+        set.add((long) Math.pow(10, len) + 1);
+        String leftSub = n.substring(0, (len + 1) / 2);
+        int left = Integer.parseInt(leftSub);
+        long self = Long.parseLong(n);
+        for (int i = left - 1; i <= left + 1; i++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(i);
+            String reverse = sb.reverse().toString();
+            long num = Long.parseLong(i + reverse.substring(len & 1));
+            set.add(num);
+        }
+
+        long ans = -1;
+        for (long candidate : set) {
+            if (candidate == self) continue;
+            if (ans == -1
+                    || Math.abs(ans - self) > Math.abs(candidate - self)
+                    || (Math.abs(ans - self) == Math.abs(candidate - self) && candidate < ans)) {
+                ans = candidate;
+            }
+        }
+        return String.valueOf(ans);
+    }
+
     //[565].数组嵌套
     public int arrayNesting(int[] nums) {
         int res = 0;
@@ -14295,11 +14327,15 @@ public class AllOfThem {
 //        System.out.println(missingElement(new int[]{1, 2, 4}, 3));
 //        System.out.println(missingElement(new int[]{4, 7, 9, 10}, 3));
 //        System.out.println(singleNonDuplicate(new int[]{1, 1, 2, 3, 3}));
-        ListNode l1 = new ListNode(1);
-        l1.next = new ListNode(2);
-        l1.next.next = new ListNode(3);
-        l1.next.next.next = new ListNode(4);
-        l1.next.next.next.next = new ListNode(5);
-        new AllOfThem().reverseKGroup(l1, 2);
+//        ListNode l1 = new ListNode(1);
+//        l1.next = new ListNode(2);
+//        l1.next.next = new ListNode(3);
+//        l1.next.next.next = new ListNode(4);
+//        l1.next.next.next.next = new ListNode(5);
+//        new AllOfThem().reverseKGroup(l1, 2);
+
+        System.out.println(new AllOfThem().nearestPalindromic("123"));
+        System.out.println(new AllOfThem().nearestPalindromic("99"));
+        System.out.println(new AllOfThem().nearestPalindromic("100"));
     }
 }
