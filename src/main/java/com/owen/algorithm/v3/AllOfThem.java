@@ -10089,7 +10089,8 @@ public class AllOfThem {
         Stack<Integer> stack = new Stack<>();
         //单调递增减栈，遇到小的压掉它
         for (int i = temperatures.length - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
+            //47 47 46 76 如果没有=，对第一个47而言认为比第二个47比它大
+            while (!stack.isEmpty() && temperatures[i] >= temperatures[stack.peek()]) {
                 stack.pop();
             }
 
