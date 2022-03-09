@@ -9983,7 +9983,7 @@ public class AllOfThem {
             while (prod >= k) {
                 prod /= nums[l++];
             }
-            ans += r - l +1;
+            ans += r - l + 1;
         }
         return ans;
     }
@@ -10257,6 +10257,43 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    //[767].重构字符串
+    public String reorganizeString(String s) {
+        int[] cnt = new int[26];
+        for (char ch : s.toCharArray()) {
+            cnt[ch - 'a']++;
+        }
+        PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> b[1] - a[1]);
+        for (int i = 0; i < 26; i++) {
+            if (cnt[i] != 0) {
+                queue.offer(new int[]{i, cnt[i]});
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            char ch = (char) (cur[0] + 'a');
+            if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ch) {
+                if (!queue.isEmpty() && queue.peek()[1] > 0) {
+                    sb.append((char) (queue.peek()[0] + 'a'));
+                    if (--queue.peek()[1] == 0) {
+                        queue.poll();
+                    }
+                    queue.offer(cur);
+                } else {
+                    return "";
+                }
+            } else {
+                sb.append(ch);
+                if (--cur[1] > 0) {
+                    queue.offer(cur);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     //[785].判断二分图
     public class Solution785 {
         int[] color;
@@ -10334,6 +10371,48 @@ public class AllOfThem {
         if (board[0].charAt(2) == board[1].charAt(1) && board[0].charAt(2) == board[2].charAt(0) && board[2].charAt(0) == ch)
             return true;
         return false;
+    }
+
+    //[798].得分最高的最小轮调
+    public class Solution798 {
+
+        int N = 100010;
+        int[] diff = new int[N];
+
+        private void add(int l, int r) {
+            diff[l] += 1;
+            diff[r + 1] -= 1;
+        }
+
+        public int bestRotation(int[] nums) {
+            Arrays.fill(diff, 0);
+            int n = nums.length;
+            //这个题得逆向思维，对于每个元素而言，合法的k的取之范围是什么，统计不同k值合法的元素个数，最大值就是求解的k
+            //i-k为新下标，取值范围为[0, n-1]
+            //i -k >=0, i - k <= n-1
+            //nums[i]<= i - k
+            //因此nums[i] 能够得分的 k 的取值范围为 [i - (n - 1), i - nums[i]]。
+            //另 a = i - (n - 1); b = i - nums[i]; 如果a <=b, 则k的区间都得+1， 如果a > b，则k的区间[0,b]和[a,n-1]都+1
+            for (int i = 0; i < n; i++) {
+                int a = (i - (n - 1) + n) % n;
+                int b = (i - nums[i] + n) % n;
+                if (a <= b) {
+                    add(a, b);
+                } else {
+                    add(0, b);
+                    add(a, n - 1);
+                }
+            }
+
+            for (int i = 1; i <= n; i++) diff[i] += diff[i - 1];
+            int ans = 0;
+            for (int k = 1; k <= n; k++) {
+                if (diff[k] > diff[ans]) {
+                    ans = k;
+                }
+            }
+            return ans;
+        }
     }
 
     //[802].找到最终的安全状态
@@ -12960,6 +13039,32 @@ public class AllOfThem {
         }
         return sb.delete(j + 1, sb.length()).toString();
     }
+
+    //[2100].适合打劫银行的日子
+    public List<Integer> goodDaysToRobBank(int[] security, int time) {
+        int n = security.length;
+        //i的左边，连续非递增的天数
+        int[] left = new int[n];
+        //i的右边，连续非递减的天数
+        int[] right = new int[n];
+        for (int i = 1; i < n; i++) {
+            if (security[i - 1] >= security[i]) {
+                left[i] = left[i - 1] + 1;
+            }
+
+            if (security[n - i - 1] <= security[n - i]) {
+                right[n - i - 1] = right[n - i] + 1;
+            }
+        }
+        List<Integer> res = new ArrayList<>();
+        for (int i = time; i < n - time; i++) {
+            if (left[i] >= time && right[i] >= time) {
+                res.add(i);
+            }
+        }
+        return res;
+    }
+
 
     //[2108].找出数组中的第一个回文字符串
     public String firstPalindrome(String[] words) {
