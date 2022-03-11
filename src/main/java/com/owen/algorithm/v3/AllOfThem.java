@@ -10835,6 +10835,34 @@ public class AllOfThem {
         }
     }
 
+    //[907].子数组的最小值之和
+    public int sumSubarrayMins(int[] arr) {
+        if (arr.length == 1) return arr[0];
+        int BASE = (int)1e9 +7;
+        Stack<Integer> stack = new Stack<>();
+        long res = 0;
+        for (int i = 0; i < arr.length; i++) {
+            while (!stack.isEmpty() && arr[i] <= arr[stack.peek()]) {
+                int index = stack.pop();
+                int preIndex = stack.isEmpty() ? -1 : stack.peek();
+                int preCount = index - preIndex;
+                int nextCount = i - index;
+
+                res += (long)arr[index] * preCount * nextCount;
+                res %= BASE;
+            }
+            stack.push(i);
+        }
+        while (!stack.isEmpty()) {
+            int index = stack.pop();
+            int preIndex = stack.isEmpty() ? -1 : stack.peek();
+
+            res += (long)arr[index] * (index - preIndex) * (arr.length - index);
+            res %= BASE;
+        }
+        return (int)(res % BASE);
+    }
+    
     //[911].在线选举
     public static class TopVotedCandidate {
         int[] successor;
@@ -11505,6 +11533,26 @@ public class AllOfThem {
         return ans + day;
     }
 
+    //[1155].掷骰子的N种方法
+    public int numRollsToTarget(int n, int k, int target) {
+        int mod = (int) 1e9 + 7;
+        //物品维度n，背包维度target
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = target; j >= 0; j--) {
+                //三层遍历，需要置0操作
+                dp[j] = 0;
+                for (int x = 1; x <= k; x++) {
+                    if (j >= x) {
+                        dp[j] = (dp[j] + dp[j - x]) % mod;
+                    }
+                }
+            }
+        }
+        return dp[target];
+    }
+    
     //[1169].查询无效交易
     public List<String> invalidTransactions(String[] transactions) {
         Set<Integer> deleteIndex = new HashSet<>();
@@ -12964,6 +13012,57 @@ public class AllOfThem {
         return true;
     }
 
+    //[2049]统计最高分的节点数目
+    public class Solution2049 {
+        int ans = 0;
+        long maxScore = 0;
+
+        public int countHighestScoreNodes(int[] parents) {
+            int n = parents.length;
+            int[] left = new int[n];
+            int[] right = new int[n];
+            Arrays.fill(left, -1);
+            Arrays.fill(right, -1);
+            //0的父亲节点是-1，不需要建
+            for (int i = 1; i < n; i++) {
+                int parent = parents[i];
+                if (left[parent] == -1) {
+                    left[parent] = i;
+                } else {
+                    right[parent] = i;
+                }
+            }
+            dfs(0, left, right, n);
+
+            return ans;
+        }
+
+        private int dfs(int node, int[] left, int[] right, int n) {
+            if (node == -1) {
+                return 0;
+            }
+
+            int leftCount = dfs(left[node], left, right, n);
+            int rightCount = dfs(right[node], left, right, n);
+            //除去本身这棵树的数量
+            int remain = n - leftCount - rightCount -1;
+            long score = count(leftCount) * count(rightCount) * count(remain);
+
+            if (score == maxScore) {
+                ans++;
+            } else if (score > maxScore){
+                maxScore = score;
+                ans = 1;
+            }
+
+            return leftCount + rightCount + 1;
+        }
+
+        private long count(int count) {
+            return count == 0 ? 1 : count;
+        }
+    }
+
     //[2073].买票需要的时间
     public int timeRequiredToBuy(int[] tickets, int k) {
         int need = tickets[k];
@@ -13833,7 +13932,28 @@ public class AllOfThem {
 
     //[剑指 Offer 33].二叉搜索树的后序遍历序列
     public boolean verifyPostorder(int[] postorder) {
-        return dfsForVerifyPostorder(postorder, 0, postorder.length - 1);
+//        return dfsForVerifyPostorder(postorder, 0, postorder.length - 1);
+
+        Stack<Integer> stack = new Stack<>();
+        int parent = Integer.MAX_VALUE;
+        //4 6 7 5 2 3 1
+        //右子树 6 7 5， 左子树 2 3 1
+        //i < i+1，意味着 i+1是i的右子树
+        //i > i+1, 意味着 i+1是0～i的某一个的左子树
+        for (int i = postorder.length -1; i >=0; i--) {
+            int cur = postorder[i];
+            //遇到右子树节点直接进入栈
+            //遇到左子树节点则出栈，找到栈中最小的值为父亲节点
+            while (!stack.isEmpty() && cur < stack.peek()) {
+                parent = stack.pop();
+            }
+            //因为左子树节点才出栈找到该节点的父亲节点，那么父亲节点 > 左子树节点
+            if (parent < cur) {
+                return false;
+            }
+            stack.push(cur);
+        }
+        return true;
     }
 
     private boolean dfsForVerifyPostorder(int[] postorder, int i, int j) {
