@@ -778,9 +778,42 @@ public class AllOfThem {
 
     //[34].在排序数组中查找元素的第一个和最后一个位置
     public int[] searchRange(int[] nums, int target) {
-        int leftBound = findIndex(nums, target, true);
-        int rightBound = findIndex(nums, target, false);
-        return new int[]{leftBound, rightBound};
+//        int leftBound = findIndex(nums, target, true);
+//        int rightBound = findIndex(nums, target, false);
+//        return new int[]{leftBound, rightBound};
+
+        if (nums.length == 0) return new int[] {-1, -1};
+        int left = leftBinarySearch(nums, target);
+        int right = rightBinarySearch(nums, target);
+        return new int[]{left, right};
+    }
+
+    private int leftBinarySearch(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                //左边界需要找到相等的值，左边界需要收缩
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        return nums[left] == target ? left : -1;
+    }
+
+    private int rightBinarySearch(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left + 1) / 2;
+            //右边界需要找到相等的值，右边界需要收缩
+            if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid;
+            }
+        }
+        return nums[left] == target ? left : -1;
     }
 
     private int findIndex(int[] nums, int target, boolean isLeft) {
@@ -4134,26 +4167,42 @@ public class AllOfThem {
 
     //[209].长度最小的子数组
     public int minSubArrayLen(int target, int[] nums) {
-        //2,3,1,2,4, 3
-        //2 5 6 8 12 15
-        int n = nums.length;
-        int[] preSum = new int[n + 1];
-        int sum = 0;
-        for (int i = 0; i < n; i++) {
-            sum += nums[i];
-            preSum[i + 1] = sum;
-        }
-        int left = 0, right = 0, res = Integer.MAX_VALUE;
-        while (right < nums.length) {
-            right++;
-            //找到合理的，就缩
-            while (preSum[right] - preSum[left] >= target) {
-                res = Math.min(res, right - left);
-                left++;
-            }
+//        //2,3,1,2,4, 3
+//        //2 5 6 8 12 15
+//        int n = nums.length;
+//        int[] preSum = new int[n + 1];
+//        int sum = 0;
+//        for (int i = 0; i < n; i++) {
+//            sum += nums[i];
+//            preSum[i + 1] = sum;
+//        }
+//        int left = 0, right = 0, res = Integer.MAX_VALUE;
+//        while (right < nums.length) {
+//            right++;
+//            //找到合理的，就缩
+//            while (preSum[right] - preSum[left] >= target) {
+//                res = Math.min(res, right - left);
+//                left++;
+//            }
+//
+//        }
+//        return res == Integer.MAX_VALUE ? 0 : res;
 
+        //前缀和+滑动窗口，因为窗口是一个个往后扩，所以前缀和可以用给一个变量控制，而不用提前计算。
+        int n = nums.length;
+        if (n == 0) {
+            return 0;
         }
-        return res == Integer.MAX_VALUE ? 0 : res;
+        int sum = 0;
+        int ans = Integer.MAX_VALUE;
+        for (int l = 0, r = 0; r < n; r++) {
+            sum += nums[r];
+            while (sum >= target) {
+                ans = Math.min(ans, r - l + 1);
+                sum -= nums[l++];
+            }
+        }
+        return ans == Integer.MAX_VALUE ? 0 : ans;
     }
 
     //[210].课程表 II
@@ -6578,6 +6627,7 @@ public class AllOfThem {
             } else if (item >> 3 == 0b11110) {
                 count = 3;
             } else {
+                //首位不是110,1110,11110开头的，是非法的
                 return false;
             }
         }
@@ -10838,7 +10888,7 @@ public class AllOfThem {
     //[907].子数组的最小值之和
     public int sumSubarrayMins(int[] arr) {
         if (arr.length == 1) return arr[0];
-        int BASE = (int)1e9 +7;
+        int BASE = (int) 1e9 + 7;
         Stack<Integer> stack = new Stack<>();
         long res = 0;
         for (int i = 0; i < arr.length; i++) {
@@ -10848,7 +10898,7 @@ public class AllOfThem {
                 int preCount = index - preIndex;
                 int nextCount = i - index;
 
-                res += (long)arr[index] * preCount * nextCount;
+                res += (long) arr[index] * preCount * nextCount;
                 res %= BASE;
             }
             stack.push(i);
@@ -10857,12 +10907,12 @@ public class AllOfThem {
             int index = stack.pop();
             int preIndex = stack.isEmpty() ? -1 : stack.peek();
 
-            res += (long)arr[index] * (index - preIndex) * (arr.length - index);
+            res += (long) arr[index] * (index - preIndex) * (arr.length - index);
             res %= BASE;
         }
-        return (int)(res % BASE);
+        return (int) (res % BASE);
     }
-    
+
     //[911].在线选举
     public static class TopVotedCandidate {
         int[] successor;
@@ -11471,6 +11521,70 @@ public class AllOfThem {
         return true;
     }
 
+    //[1095].山脉数组中查找目标值
+    public class Solution1095 {
+        public class MountainArray {
+            public int get(int index) {
+                return -1;
+            }
+
+            public int length() {
+                return -1;
+            }
+        }
+
+        public int findInMountainArray(int target, MountainArray mountainArr) {
+            int len = mountainArr.length();
+            int left = 0, right = len - 1;
+            //找到顶峰位置
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (mountainArr.get(mid) < mountainArr.get(mid + 1)) {
+                    left = mid + 1;
+                } else {
+                    right = mid;
+                }
+            }
+
+            int index = leftBinarySearch(target, 0, left, mountainArr);
+            if (index != -1) {
+                return index;
+            }
+            return rightBinarySearch(target, left, len - 1, mountainArr);
+        }
+
+        private int leftBinarySearch(int target, int l, int r, MountainArray mountainArr) {
+            while (l < r) {
+                int mid = l + (r - l) / 2;
+                if (mountainArr.get(mid) < target) {
+                    l = mid + 1;
+                } else {
+                    r = mid;
+                }
+            }
+            if (target == mountainArr.get(l)) {
+                return l;
+            }
+            return -1;
+        }
+
+        private int rightBinarySearch(int target, int l, int r, MountainArray mountainArr) {
+            while (l < r) {
+                int mid = l + (r - l + 1) / 2;
+                //递减区间找最左边的位置，排除掉小于的
+                if (mountainArr.get(mid) < target) {
+                    r = mid - 1;
+                } else {
+                    l = mid;
+                }
+            }
+            if (target == mountainArr.get(l)) {
+                return l;
+            }
+            return -1;
+        }
+    }
+
     //[1109].航班预订统计
     public int[] corpFlightBookings(int[][] bookings, int n) {
         Difference difference = new Difference(new int[n]);
@@ -11552,7 +11666,7 @@ public class AllOfThem {
         }
         return dp[target];
     }
-    
+
     //[1169].查询无效交易
     public List<String> invalidTransactions(String[] transactions) {
         Set<Integer> deleteIndex = new HashSet<>();
@@ -13045,12 +13159,12 @@ public class AllOfThem {
             int leftCount = dfs(left[node], left, right, n);
             int rightCount = dfs(right[node], left, right, n);
             //除去本身这棵树的数量
-            int remain = n - leftCount - rightCount -1;
+            int remain = n - leftCount - rightCount - 1;
             long score = count(leftCount) * count(rightCount) * count(remain);
 
             if (score == maxScore) {
                 ans++;
-            } else if (score > maxScore){
+            } else if (score > maxScore) {
                 maxScore = score;
                 ans = 1;
             }
@@ -13163,7 +13277,6 @@ public class AllOfThem {
         }
         return res;
     }
-
 
     //[2108].找出数组中的第一个回文字符串
     public String firstPalindrome(String[] words) {
@@ -13860,6 +13973,36 @@ public class AllOfThem {
         return sum <= k;
     }
 
+    //[剑指 Offer 21].调整数组顺序使奇数位于偶数前面
+    public int[] exchange(int[] nums) {
+//        int fast = 0, slow = 0;
+//        //fast定位奇数，slow为下一个需要替换的奇数位
+//        while (fast < nums.length) {
+//            if ((nums[fast] & 1) == 1) {
+//                int temp = nums[slow];
+//                nums[slow] = nums[fast];
+//                nums[fast] = temp;
+//                slow++;
+//            }
+//            fast++;
+//        }
+//        return nums;
+        //快速交换，就是一次划分，分割两边
+        //保证i的左侧都是奇数，j的右侧都是偶数
+        int i = 0, j = nums.length -1;
+        while (i < j) {
+            //直到找到一个偶数
+            while (i < j && (nums[i] & 1) == 1) i++;
+            //直到找到一个奇数
+            while (i < j && (nums[j] & 1) == 0) j--;
+
+            int temp = nums[i];
+            nums[i] = nums[j];
+            nums[j] = temp;
+        }
+        return nums;
+    }
+
     //[剑指 Offer 30].包含min函数的栈
     //[155].最小栈
     public class MinStack {
@@ -13940,7 +14083,7 @@ public class AllOfThem {
         //右子树 6 7 5， 左子树 2 3 1
         //i < i+1，意味着 i+1是i的右子树
         //i > i+1, 意味着 i+1是0～i的某一个的左子树
-        for (int i = postorder.length -1; i >=0; i--) {
+        for (int i = postorder.length - 1; i >= 0; i--) {
             int cur = postorder[i];
             //遇到右子树节点直接进入栈
             //遇到左子树节点则出栈，找到栈中最小的值为父亲节点
@@ -14001,19 +14144,50 @@ public class AllOfThem {
 
     //[剑指 Offer 45].把数组排成最小的数
     public String minNumber(int[] nums) {
+//        int n = nums.length;
+//        String[] str = new String[n];
+//        for (int i = 0; i < n; i++) {
+//            str[i] = String.valueOf(nums[i]);
+//        }
+//        Arrays.sort(str, (x, y) -> (x + y).compareTo(y + x));
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        for (String string : str) {
+//            sb.append(string);
+//        }
+//        return sb.toString();
+
+        //面试肯定要手撕快排
         int n = nums.length;
-        String[] str = new String[n];
+        String[] arr = new String[n];
         for (int i = 0; i < n; i++) {
-            str[i] = String.valueOf(nums[i]);
+            arr[i] = String.valueOf(nums[i]);
         }
-        Arrays.sort(str, (x, y) -> (x + y).compareTo(y + x));
-
+        quickSort(arr, 0, n - 1);
         StringBuilder sb = new StringBuilder();
-
-        for (String string : str) {
-            sb.append(string);
+        for (String str : arr) {
+            sb.append(str);
         }
         return sb.toString();
+    }
+
+    private void quickSort(String[] arr, int left, int right) {
+        if (left >= right) return;
+        int i = left, j = right;
+
+        String pivot = arr[left];
+        while (i < j) {
+            //一定是跟arr[left]比较
+            while (i < j && (arr[j] + arr[left]).compareTo(arr[left] + arr[j]) >= 0) j--;
+            arr[i] = arr[j];
+            while (i < j && (arr[i] + arr[left]).compareTo(arr[left] + arr[i]) <= 0) i++;
+            arr[j] = arr[i];
+        }
+        arr[i] = pivot;
+
+        quickSort(arr, left, i - 1);
+        quickSort(arr, i + 1, right);
     }
 
     //[剑指 Offer 46].把数字翻译成字符串

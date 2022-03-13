@@ -1,31 +1,50 @@
 package com.owen.algorithm.v3;
 
+import java.util.Arrays;
 import java.util.Stack;
 
 public class Test {
 
     public static void main(String[] args) {
-        System.out.println(verifyPostorder(new int[] {1,3,2,5,6,7,4}));
+//        System.out.println(verifyPostorder(new int[] {1,3,2,5,6,7,4}));
+        getLeastNumbers(new int[]{3, 2, 1}, 1);
     }
 
     public static boolean verifyPostorder(int[] postorder) {
         Stack<Integer> stack = new Stack<>();
+
         int parent = Integer.MAX_VALUE;
-        //注意for循环是倒叙遍历的
         for (int i = postorder.length - 1; i >= 0; i--) {
             int cur = postorder[i];
-            //当如果前节点小于栈顶元素，说明栈顶元素和当前值构成了倒叙，
-            //说明当前节点是前面某个节点的左子节点，我们要找到他的父节点
-            while (!stack.isEmpty() && stack.peek() > cur)
+            while (!stack.isEmpty() && cur < stack.peek()) {
                 parent = stack.pop();
-            //只要遇到了某一个左子节点，才会执行上面的代码，才会更
-            //新parent的值，否则parent就是一个非常大的值，也就
-            //是说如果一直没有遇到左子节点，那么右子节点可以非常大
-            if (cur > parent)
+            }
+            if (parent < cur) {
                 return false;
-            //入栈
-            stack.add(cur);
+            }
+            stack.push(cur);
         }
         return true;
+    }
+
+    public static int[] getLeastNumbers(int[] arr, int k) {
+        if (k >= arr.length) return arr;
+        return quickSort(arr, 0, arr.length - 1, k);
+    }
+
+    private static int[] quickSort(int[] arr, int l, int r, int k) {
+        int i = l, j = r;
+        int pivot = arr[l];
+        while (i < j) {
+            while (i < j && arr[r] >= pivot) j--;
+            arr[i] = arr[j];
+            while (i < j && arr[l] <= pivot) i++;
+            arr[j] = arr[i];
+        }
+        arr[i] = pivot;
+
+        if (i < k) return quickSort(arr, i + 1, r, k);
+        else if (i > k) return quickSort(arr, l, i - 1, k);
+        return Arrays.copyOf(arr, k);
     }
 }
