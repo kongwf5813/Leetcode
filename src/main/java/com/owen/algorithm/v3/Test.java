@@ -1,13 +1,12 @@
 package com.owen.algorithm.v3;
 
-import java.util.Arrays;
-import java.util.Stack;
+import java.util.*;
 
 public class Test {
 
     public static void main(String[] args) {
 //        System.out.println(verifyPostorder(new int[] {1,3,2,5,6,7,4}));
-        getLeastNumbers(new int[]{3, 2, 1}, 1);
+//        getLeastNumbers(new int[]{3, 2, 1}, 1);
     }
 
     public static boolean verifyPostorder(int[] postorder) {

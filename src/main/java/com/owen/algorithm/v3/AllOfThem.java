@@ -9381,6 +9381,30 @@ public class AllOfThem {
         return minM * minN;
     }
 
+    //[599].两个列表的最小索引总和
+    public static String[] findRestaurant(String[] list1, String[] list2) {
+        Map<String, Integer> map = new HashMap<>();
+        for (int i = 0; i < list1.length; i++) {
+            map.put(list1[i], i);
+        }
+        int min = Integer.MAX_VALUE;
+        List<String> res = new ArrayList<>();
+        for (int i = 0; i < list2.length; i++) {
+            String item = list2[i];
+            if (map.containsKey(item)) {
+                int j = map.get(item);
+                if (i + j < min) {
+                    res.clear();
+                    res.add(item);
+                    min = i + j;
+                } else if (i + j == min) {
+                    res.add(item);
+                }
+            }
+        }
+        return res.toArray(new String[res.size()]);
+    }
+
     //[611].有效三角形的个数
     public int triangleNumber(int[] nums) {
         int n = nums.length;
