@@ -5668,7 +5668,7 @@ public class AllOfThem {
         odd.next = evenHead.next;
         return oddHead.next;
     }
-
+    
     //[329].矩阵中的最长递增路径
     public int longestIncreasingPath(int[][] matrix) {
         int m = matrix.length, n = matrix[0].length;
@@ -13050,6 +13050,54 @@ public class AllOfThem {
         public int minimum() {
             return priceCount.firstKey();
         }
+    }
+
+    //[2044].统计按位或能得到最大值的子集数目
+    public int countMaxOrSubsets(int[] nums) {
+        //不能通过32位来统计每位1的个数相乘，因为有可能是某一位都是0
+
+//        int ans = 0, max = 0;
+//        //可以穷举所有子集的状态，来计算最大值和子集数目
+//        int n = nums.length, state = 1 << n;
+//        for (int s = 0; s < state; s++) {
+//
+//            int cur = 0;
+//            //遍历每个数，看看子集是不是选中
+//            for (int i = 0; i < n; i++) {
+//                if ((s >> i & 1) == 1) {
+//                    cur |= nums[i];
+//                }
+//            }
+//            if (cur > max) {
+//                max = cur;
+//                ans = 1;
+//            } else if (cur == max) {
+//                ans++;
+//            }
+//        }
+//        return ans;
+
+        AtomicInteger max = new AtomicInteger();
+        AtomicInteger ans = new AtomicInteger();
+        dfsForCountMaxOrSubsets(0, 0, nums, max, ans);
+        return ans.get();
+    }
+
+    private void dfsForCountMaxOrSubsets(int start, int val, int[] nums, AtomicInteger max, AtomicInteger ans) {
+        if (start == nums.length) {
+            if (val > max.get()) {
+                max.set(val);
+                ans.set(1);
+            } else if (val == max.get()) {
+                ans.incrementAndGet();
+            }
+            return;
+        }
+
+        //不选择
+        dfsForCountMaxOrSubsets(start + 1, val, nums, max, ans);
+        //选择
+        dfsForCountMaxOrSubsets(start + 1, val | nums[start], nums, max, ans);
     }
 
     //[2045].到达目的地的第二短时间
