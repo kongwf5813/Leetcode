@@ -11078,6 +11078,57 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    //[968].监控二叉树
+    public class Solution968 {
+        int uncovered = 0;
+        int camera = 1;
+        int covered = 2;
+
+        int result = 0;
+        public int minCameraCover(TreeNode root) {
+            //根节点未覆盖，那么就需要在设置一个
+            if (dfs(root) == uncovered) {
+                result++;
+            }
+            return result;
+        }
+
+        private int dfs(TreeNode root) {
+            //空节点，得保证叶子节点没有覆盖，从而在叶子父节点上设置摄像头，所以空节点为覆盖。
+            //当然也不能设置为摄像头，贪心嘛
+            if (root == null) {
+                return covered;
+            }
+
+            int left = dfs(root.left);
+            int right = dfs(root.right);
+            // 0    0   1
+            // 0    1   1
+            // 0    2   1
+            // 1    1   2
+            // 1    2   2
+            // 2    0   1
+            // 2    1   2
+            // 2    2   0
+            //总共9种状态， 都覆盖的时候，考虑父节点设摄像头；无覆盖的时候，需要摄像头；剩下的至少有一个摄像头的时候，为覆盖状态
+            //左右都覆盖，那么最好是在父亲节点上设置摄像头，当前节点设置为无覆盖
+            if (left == covered && right == covered) return uncovered;
+
+            //至少一个无覆盖
+            if (left == uncovered || right == uncovered) {
+                result++;
+                return camera;
+            }
+
+            //至少一个有摄像头
+            if (left == camera || right == camera) {
+                return covered;
+            }
+
+            return -1;
+        }
+    }
+
     //[969].煎饼排序
     public List<Integer> pancakeSort(int[] arr) {
         int n = arr.length;
@@ -14520,7 +14571,7 @@ public class AllOfThem {
 
     //[补充题13].中文数字转阿拉伯数字
     public static String chinese2Arabic(String zh) {
-        HashMap<Character, Long> w2n = new HashMap<Character, Long>() {{
+        HashMap<Character, Long> w2n = new HashMap<>() {{
             put('一', 1L);
             put('二', 2L);
             put('三', 3L);
@@ -14531,7 +14582,7 @@ public class AllOfThem {
             put('八', 8L);
             put('九', 9L);
         }};
-        HashMap<Character, Long> w2e = new HashMap<Character, Long>() {{
+        HashMap<Character, Long> w2e = new HashMap<>() {{
             put('十', 10L);
             put('百', 100L);
             put('千', 1000L);
