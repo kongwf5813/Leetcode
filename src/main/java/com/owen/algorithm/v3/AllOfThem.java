@@ -7354,6 +7354,107 @@ public class AllOfThem {
         }
     }
 
+    //[432].全 O(1) 的数据结构
+    public class AllOne {
+
+        class Node {
+            int count;
+            Set<String> keys = new HashSet<>();
+            Node pre;
+            Node next;
+
+            public Node(int count) {
+                this.count = count;
+            }
+        }
+
+        Node head;
+        Node tail;
+        Map<String, Node> map;
+
+        public AllOne() {
+            head = new Node(-1000);
+            tail = new Node(-1000);
+            head.next = tail;
+            tail.pre = head;
+            map = new HashMap<>();
+        }
+
+        public void inc(String key) {
+            if (map.containsKey(key)) {
+                Node node = map.get(key);
+                node.keys.remove(key);
+                Node next = null;
+                if (node.next.count != node.count + 1) {
+                    next = new Node(node.count + 1);
+                    node.next.pre = next;
+                    next.next = node.next;
+                    next.pre = node;
+                    node.next = next;
+                } else {
+                    next = node.next;
+                }
+                next.keys.add(key);
+                map.put(key, next);
+                removeNode(node);
+            } else {
+                Node node = null;
+                if (head.next.count == 1) {
+                    node = head.next;
+                } else {
+                    node = new Node(1);
+                    head.next.pre = node;
+                    node.next = head.next;
+                    node.pre = head;
+                    head.next = node;
+                }
+                node.keys.add(key);
+                map.put(key, node);
+            }
+        }
+
+        public void dec(String key) {
+            Node node = map.get(key);
+            node.keys.remove(key);
+            if (node.count == 1) {
+                map.remove(key);
+            } else {
+                Node pre = null;
+                if (node.pre.count != node.count - 1) {
+                    pre = new Node(node.count - 1);
+                    node.pre.next = pre;
+                    pre.pre = node.pre;
+                    pre.next = node;
+                    node.pre = pre;
+                } else {
+                    pre = node.pre;
+                }
+                pre.keys.add(key);
+                map.put(key, pre);
+            }
+            removeNode(node);
+        }
+
+        public String getMaxKey() {
+            Node pre = tail.pre;
+            for (String str : pre.keys) return str;
+            return "";
+        }
+
+        public String getMinKey() {
+            Node next = head.next;
+            for (String str : next.keys) return str;
+            return "";
+        }
+
+        private void removeNode(Node node) {
+            if (node.keys.size() == 0) {
+                node.pre.next = node.next;
+                node.next.pre = node.pre;
+            }
+        }
+    }
+
     //[433].最小基因变化
     public int minMutation(String start, String end, String[] bank) {
         AtomicInteger res = new AtomicInteger(Integer.MAX_VALUE);
