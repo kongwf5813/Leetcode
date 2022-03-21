@@ -1,49 +1,67 @@
 package com.owen.algorithm.v3;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
+
+import static com.owen.algorithm.v3.AllOfThem.TreeNode;
 
 public class Test {
 
+
     public static void main(String[] args) {
-//        System.out.println(verifyPostorder(new int[] {1,3,2,5,6,7,4}));
-//        getLeastNumbers(new int[]{3, 2, 1}, 1);
+        System.out.println(new Test().openLock(new String[]{"5557", "5553", "5575", "5535", "5755", "5355", "7555", "3555", "6655", "6455", "4655", "4455", "5665", "5445", "5645", "5465", "5566", "5544", "5564", "5546", "6565", "4545", "6545", "4565", "5656", "5454", "5654", "5456", "6556", "4554", "4556", "6554"}, "5555"));
     }
 
-    public static boolean verifyPostorder(int[] postorder) {
-        Stack<Integer> stack = new Stack<>();
+    public int openLock(String[] deadends, String target) {
+        if (target.equals("0000")) return 0;
+        Set<String> deads = new HashSet<>();
+        for (String deadend : deadends) deads.add(deadend);
+        if (deads.contains("0000")) return -1;
 
-        int parent = Integer.MAX_VALUE;
-        for (int i = postorder.length - 1; i >= 0; i--) {
-            int cur = postorder[i];
-            while (!stack.isEmpty() && cur < stack.peek()) {
-                parent = stack.pop();
+        Set<String> q1 = new HashSet<>();
+        q1.add("0000");
+        Set<String> q2 = new HashSet<>();
+        q2.add(target);
+
+        Set<String> visited = new HashSet<>();
+        int res = 0;
+        while (!q1.isEmpty()) {
+            Set<String> temp = new HashSet<>();
+            for (String str : q1) {
+                if(deads.contains(str)) continue;
+                if (q2.contains(str)) return res;
+
+                visited.add(str);
+                for (int i = 0; i < str.length(); i++) {
+                    String plusOne = plus(str, i);
+                    if (!visited.contains(plusOne)) {
+                        temp.add(plusOne);
+                    }
+                    String minusOne = minus(str, i);
+                    if (!visited.contains(minusOne)) {
+                        temp.add(minusOne);
+                    }
+                }
             }
-            if (parent < cur) {
-                return false;
-            }
-            stack.push(cur);
+            res++;
+            q1 = q2;
+            q2 = temp;
         }
-        return true;
+        return -1;
     }
 
-    public static int[] getLeastNumbers(int[] arr, int k) {
-        if (k >= arr.length) return arr;
-        return quickSort(arr, 0, arr.length - 1, k);
+    private String plus(String str, int i) {
+        char[] arr = str.toCharArray();
+        if (arr[i] == '9') arr[i] = '0';
+        else arr[i] = (char) (arr[i] + 1);
+        return String.valueOf(arr);
     }
 
-    private static int[] quickSort(int[] arr, int l, int r, int k) {
-        int i = l, j = r;
-        int pivot = arr[l];
-        while (i < j) {
-            while (i < j && arr[r] >= pivot) j--;
-            arr[i] = arr[j];
-            while (i < j && arr[l] <= pivot) i++;
-            arr[j] = arr[i];
-        }
-        arr[i] = pivot;
-
-        if (i < k) return quickSort(arr, i + 1, r, k);
-        else if (i > k) return quickSort(arr, l, i - 1, k);
-        return Arrays.copyOf(arr, k);
+    private String minus(String str, int i) {
+        char[] arr = str.toCharArray();
+        if (arr[i] == '0') arr[i] = '9';
+        else arr[i] = (char) (arr[i] - 1);
+        return String.valueOf(arr);
     }
 }

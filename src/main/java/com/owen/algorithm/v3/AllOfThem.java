@@ -198,27 +198,81 @@ public class AllOfThem {
         return res;
     }
 
+    //[4].寻找两个正序数组的中位数
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int m = nums1.length, n = nums2.length;
+        int left = (m + n + 1) / 2;
+        int right = (m + n + 2) / 2;
+        return (getKth(nums1, 0, m - 1, nums2, 0, n - 1, left) +
+                getKth(nums1, 0, m - 1, nums2, 0, n - 1, right)) * 0.5d;
+    }
+
+    public int getKth(int[] nums1, int s1, int e1, int[] nums2, int s2, int e2, int k) {
+        int len1 = e1 - s1 + 1;
+        int len2 = e2 - s2 + 1;
+        if (len1 > len2) return getKth(nums2, s2, e2, nums1, s1, e1, k);
+        if (len1 == 0) return nums2[s2 + k - 1];
+        if (k == 1) return Math.min(nums1[s1], nums2[s2]);
+
+        //排除k/2的数据
+        //长度不够的时候，可以先取最小的
+        int i = s1 + Math.min(len1, k / 2) - 1;
+        int j = s2 + Math.min(len2, k / 2) - 1;
+
+        if (nums1[i] > nums2[j]) {
+            //排除掉s2～j的部分，注意k的运算是，排除掉了几个，扣多少
+            return getKth(nums1, s1, e1, nums2, j + 1, e2, k - (j - s2 + 1));
+        } else {
+            //排除掉s1~i的部分
+            return getKth(nums1, i + 1, e1, nums2, s2, e2, k - (i - s1 + 1));
+        }
+    }
+
     //[5].最长回文子串
     public String longestPalindrome(String s) {
         int n = s.length();
         if (n == 0) return "";
 
-        //注意只要字符串非空，一定有一个单字符必定是回文，默认最小值为1
-        int maxLen = 1, start = 0;
-        boolean[][] dp = new boolean[n][n];
+//        //注意只要字符串非空，一定有一个单字符必定是回文，默认最小值为1
+//        int maxLen = 1, start = 0;
+//        boolean[][] dp = new boolean[n][n];
+//        for (int i = 0; i < n; i++) {
+//            dp[i][i] = true;
+//        }
+//        for (int i = n - 1; i >= 0; i--) {
+//            for (int j = i + 1; j < n; j++) {
+//                dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 3 || dp[i + 1][j - 1]);
+//                if (dp[i][j] && j - i + 1 > maxLen) {
+//                    maxLen = j - i + 1;
+//                    start = i;
+//                }
+//            }
+//        }
+//        return s.substring(start, start + maxLen);
+
+        int maxLen = 0, begin = 0;
         for (int i = 0; i < n; i++) {
-            dp[i][i] = true;
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            for (int j = i + 1; j < n; j++) {
-                dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 3 || dp[i + 1][j - 1]);
-                if (dp[i][j] && j - i + 1 > maxLen) {
-                    maxLen = j - i + 1;
-                    start = i;
-                }
+            //奇数，两边扩散
+            int len1 = expand(s, i, i);
+            //偶数，两边扩散
+            int len2 = expand(s, i, i + 1);
+            int len = Math.max(len1, len2);
+            if (len > maxLen) {
+                maxLen = len;
+                //有偶数的情况，综合取len-1
+                begin = i - (len - 1) / 2;
             }
         }
-        return s.substring(start, start + maxLen);
+        return s.substring(begin, begin + maxLen);
+    }
+
+    private int expand(String s, int left, int right) {
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            left--;
+            right++;
+        }
+        //不想等
+        return right - left + 1 - 2;
     }
 
     //[6].Z 字形变换
@@ -269,32 +323,30 @@ public class AllOfThem {
 
     //[8].字符串转换整数 (atoi)
     public int myAtoi(String s) {
-        boolean begin = true;
+        boolean begin = false;
         int n = s.length();
-        int sign = 1, res = 0;
+        int sign = 1, num = 0;
         for (int i = 0; i < n; i++) {
             char ch = s.charAt(i);
-            if (begin && ch == ' ') {
+            if (!begin && ch == ' ') {
                 continue;
-            } else if (begin && ch == '-') {
+            } else if (!begin && ch == '-') {
                 sign = -1;
-                begin = false;
-            } else if (begin && ch == '+') {
+            } else if (!begin && ch == '+') {
                 sign = 1;
-                begin = false;
             } else if (Character.isDigit(ch)) {
-                int a = ch - '0';
-                if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && a < Integer.MIN_VALUE % 10))
+                int a = sign * (ch - '0');
+                if (num < Integer.MIN_VALUE / 10 || (num == Integer.MIN_VALUE / 10 && a < Integer.MIN_VALUE % 10))
                     return Integer.MIN_VALUE;
-                if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && a > Integer.MAX_VALUE % 10))
+                if (num > Integer.MAX_VALUE / 10 || (num == Integer.MAX_VALUE / 10 && a > Integer.MAX_VALUE % 10))
                     return Integer.MAX_VALUE;
-                res = res * 10 + sign * a;
-                begin = false;
+                num = num * 10 + a;
             } else {
                 break;
             }
+            begin = true;
         }
-        return res;
+        return num;
     }
 
     //[9].回文数
@@ -551,7 +603,7 @@ public class AllOfThem {
     }
 
     //[21].合并两个有序链表
-    public ListNode mergeTwoList(ListNode first, ListNode second) {
+    public ListNode mergeTwoLists(ListNode first, ListNode second) {
         ListNode dummyHead = new ListNode(-1), p = dummyHead;
         ListNode p1 = first, p2 = second;
         while (p1 != null && p2 != null) {
@@ -583,21 +635,22 @@ public class AllOfThem {
     }
 
     private void backtraceForGenerateParenthesis(int left, int right, List<String> res, StringBuilder sb) {
-        if (right < left || left < 0 || right < 0) {
-            return;
-        }
         if (left == 0 && right == 0) {
             res.add(sb.toString());
             return;
         }
+        if (left > right) return;
 
-        sb.append('(');
-        backtraceForGenerateParenthesis(left - 1, right, res, sb);
-        sb.deleteCharAt(sb.length() - 1);
-
-        sb.append(')');
-        backtraceForGenerateParenthesis(left, right - 1, res, sb);
-        sb.deleteCharAt(sb.length() - 1);
+        if (left > 0) {
+            sb.append('(');
+            backtraceForGenerateParenthesis(left - 1, right, res, sb);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        if (right > 0) {
+            sb.append(')');
+            backtraceForGenerateParenthesis(left, right - 1, res, sb);
+            sb.deleteCharAt(sb.length() - 1);
+        }
     }
 
     //[23].合并K个升序链表
@@ -782,7 +835,7 @@ public class AllOfThem {
 //        int rightBound = findIndex(nums, target, false);
 //        return new int[]{leftBound, rightBound};
 
-        if (nums.length == 0) return new int[] {-1, -1};
+        if (nums.length == 0) return new int[]{-1, -1};
         int left = leftBinarySearch(nums, target);
         int right = rightBinarySearch(nums, target);
         return new int[]{left, right};
@@ -1261,6 +1314,7 @@ public class AllOfThem {
     //[47].全排列 II
     public List<List<Integer>> permuteUnique(int[] nums) {
         int n = nums.length;
+        Arrays.sort(nums);
         List<List<Integer>> res = new ArrayList<>();
         backtraceForPermuteUnique(nums, new boolean[n], new LinkedList<>(), res);
         return res;
@@ -4254,8 +4308,41 @@ public class AllOfThem {
 
     //[215].数组中的第K个最大元素
     public int findKthLargest(int[] nums, int k) {
-        //第K大意味着是从小到大是第n-k位
-        return quickSort(nums, 0, nums.length - 1, nums.length - k);
+//        //第K大意味着是从小到大是第n-k位
+//        return quickSort(nums, 0, nums.length - 1, nums.length - k);
+
+        //堆排序，手撕大根堆
+        int heapSize = nums.length;
+        buildHeap(nums, heapSize);
+        for (int i = 0; i < k - 1; i++) {
+            swap(nums, 0, heapSize - i - 1);
+            buildHeap(nums, heapSize - i - 1);
+        }
+        return nums[0];
+    }
+
+
+    private void buildHeap(int[] nums, int heapSize) {
+        //从非叶子节点开始调整堆
+        for (int i = heapSize / 2; i >= 0; --i) {
+            maxHeapify(nums, i, heapSize);
+        }
+    }
+
+    private void maxHeapify(int[] nums, int i, int heapSize) {
+        int l = 2 * i + 1, r = 2 * i + 2;
+        int largest = i;
+        if (l < heapSize && nums[l] > nums[largest]) {
+            largest = l;
+        }
+        if (r < heapSize && nums[r] > nums[largest]) {
+            largest = r;
+        }
+
+        if (largest != i) {
+            swap(nums, i, largest);
+            maxHeapify(nums, largest, heapSize);
+        }
     }
 
     private int quickSort(int[] nums, int left, int right, int targetIndex) {
@@ -5668,7 +5755,7 @@ public class AllOfThem {
         odd.next = evenHead.next;
         return oddHead.next;
     }
-    
+
     //[329].矩阵中的最长递增路径
     public int longestIncreasingPath(int[][] matrix) {
         int m = matrix.length, n = matrix[0].length;
@@ -9506,6 +9593,24 @@ public class AllOfThem {
         return res.toArray(new String[res.size()]);
     }
 
+    //[606].根据二叉树创建字符串
+    public String tree2str(TreeNode root) {
+        if (root == null) return "";
+        StringBuilder sb = new StringBuilder();
+        dfs(root, sb);
+        return sb.substring(1, sb.length() - 1);
+    }
+
+    private void dfs(TreeNode root, StringBuilder sb) {
+        sb.append("(");
+        sb.append(root.val);
+        if (root.left != null) dfs(root.left, sb);
+        else if (root.right != null) sb.append("()");
+
+        if (root.right != null) dfs(root.right, sb);
+        sb.append(")");
+    }
+
     //[611].有效三角形的个数
     public int triangleNumber(int[] nums) {
         int n = nums.length;
@@ -9751,6 +9856,52 @@ public class AllOfThem {
             right++;
         }
         return res;
+    }
+
+    //[679].24 点游戏
+    public class Solution679 {
+        double EPISLON = 1e-6;
+        double TARGET = 24;
+
+        public boolean judgePoint24(int[] cards) {
+
+            double[] nums = new double[4];
+            for (int i = 0; i < cards.length; i++) {
+                nums[i] = cards[i];
+            }
+            return helper(nums);
+        }
+
+        private boolean helper(double[] nums) {
+            if (nums.length == 1) return Math.abs(nums[0] - TARGET) < EPISLON;
+            for (int i = 0; i < nums.length; i++) {
+                for (int j = i + 1; j < nums.length; j++) {
+                    double[] temp = new double[nums.length - 1];
+                    for (int k = 0, index = 0; k < nums.length; k++)
+                        if (k != i && k != j) temp[index++] = nums[k];
+                    for (double num : cal(nums[i], nums[j])) {
+                        temp[temp.length - 1] = num;
+                        if (helper(temp)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private List<Double> cal(double a, double b) {
+            List<Double> res = new ArrayList<>();
+            res.add(a + b);
+            res.add(a - b);
+            res.add(b - a);
+            res.add(a * b);
+            //小于1e-6认为是0
+            if (!(Math.abs(a) < EPISLON)) res.add(b / a);
+            if (!(Math.abs(b) < EPISLON)) res.add(a / b);
+            return res;
+        }
+
     }
 
     //[684].冗余连接
@@ -10218,6 +10369,27 @@ public class AllOfThem {
                 }
                 ans = Math.max(ans, dp[j]);
             }
+        }
+        return ans;
+    }
+
+    //[720].词典中最长的单词
+    public String longestWord(String[] words) {
+        Set<String> set = new HashSet<>();
+        for (String word : words) set.add(word);
+        String ans = "";
+        out:
+        for (String word : set) {
+            int m = word.length(), n = ans.length();
+            if (m < n) continue;
+            if (m == n && word.compareTo(ans) >= 0) continue;
+
+            for (int i = 1; i <= word.length(); i++) {
+                if (!set.contains(word.substring(0, i))) {
+                    continue out;
+                }
+            }
+            ans = word;
         }
         return ans;
     }
@@ -11186,6 +11358,7 @@ public class AllOfThem {
         int covered = 2;
 
         int result = 0;
+
         public int minCameraCover(TreeNode root) {
             //根节点未覆盖，那么就需要在设置一个
             if (dfs(root) == uncovered) {
@@ -14213,7 +14386,7 @@ public class AllOfThem {
 //        return nums;
         //快速交换，就是一次划分，分割两边
         //保证i的左侧都是奇数，j的右侧都是偶数
-        int i = 0, j = nums.length -1;
+        int i = 0, j = nums.length - 1;
         while (i < j) {
             //直到找到一个偶数
             while (i < j && (nums[i] & 1) == 1) i++;
@@ -14672,7 +14845,7 @@ public class AllOfThem {
 
     //[补充题13].中文数字转阿拉伯数字
     public static String chinese2Arabic(String zh) {
-        HashMap<Character, Long> w2n = new HashMap<>() {{
+        HashMap<Character, Long> w2n = new HashMap<Character, Long>() {{
             put('一', 1L);
             put('二', 2L);
             put('三', 3L);
@@ -14683,7 +14856,7 @@ public class AllOfThem {
             put('八', 8L);
             put('九', 9L);
         }};
-        HashMap<Character, Long> w2e = new HashMap<>() {{
+        HashMap<Character, Long> w2e = new HashMap<Character, Long>() {{
             put('十', 10L);
             put('百', 100L);
             put('千', 1000L);
