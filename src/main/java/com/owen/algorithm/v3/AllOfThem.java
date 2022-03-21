@@ -9842,6 +9842,24 @@ public class AllOfThem {
         else return "x=" + (z - y) / (A - B);
     }
 
+    //[653].两数之和 IV - 输入 BST
+    public boolean findTarget(TreeNode root, int k) {
+        if (root == null) return false;
+        Set<Integer> set = new HashSet<>();
+        return dfs(root, k, set);
+    }
+
+    private boolean dfs(TreeNode root, int k, Set<Integer> set) {
+        if (root == null) return false;
+        int val = root.val;
+        if (set.contains(k - val)) {
+            return true;
+        }
+        set.add(val);
+
+        return dfs(root.left, k, set) || dfs(root.right, k, set);
+    }
+
     //[674].最长连续递增序列
     public int findLengthOfLCIS(int[] nums) {
         //1 2 5 4 7
