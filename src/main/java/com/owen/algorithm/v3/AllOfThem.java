@@ -13395,6 +13395,21 @@ public class AllOfThem {
         }
     }
 
+    //[2038].如果相邻两个颜色均相同则删除当前颜色
+    public boolean winnerOfGame(String colors) {
+        int n = colors.length();
+        int a  = 0, b = 0;
+        for (int i = 1; i < n-1; i++) {
+            if (colors.charAt(i-1) == 'A' && colors.charAt(i) == 'A' && colors.charAt(i+1) == 'A') {
+                a++;
+            }
+            if (colors.charAt(i-1) == 'B' && colors.charAt(i) == 'B' && colors.charAt(i+1) == 'B') {
+                b++;
+            }
+        }
+        return a > b;
+    }
+
     //[2044].统计按位或能得到最大值的子集数目
     public int countMaxOrSubsets(int[] nums) {
         //不能通过32位来统计每位1的个数相乘，因为有可能是某一位都是0
