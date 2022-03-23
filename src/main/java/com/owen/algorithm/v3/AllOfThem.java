@@ -7649,6 +7649,45 @@ public class AllOfThem {
         return res;
     }
 
+    //[440].字典序的第K小数字
+    public int findKthNumber(int n, int k) {
+        int ans = 1;
+        while (k > 1) {
+            int cnt = getCnt(ans, n);
+            if (cnt < k) {
+                //从兄弟节点找
+                ans++;
+                k -= cnt;
+            } else {
+                //就在ans为前缀的节点中找，只不过是从下一层节点找
+                ans *=10;
+                k--;
+            }
+        }
+        return ans;
+    }
+
+    public int getCnt(int x, int limit) {
+        String a = String.valueOf(x), b = String.valueOf(limit);
+        int m = a.length(), n = b.length(), k = n - m;
+        int ans = 0, u = Integer.parseInt(b.substring(0, m));
+        //以x为前缀，<=limit的个数， 位数少于limit的位数其实是合法值
+        //x = 12  limit = 1234  k = 2
+        // 12 1个
+        // 120 ... 129  10个
+        // 1200 ... 1234  35个
+        for (int i = 0; i < k; i++) ans += Math.pow(10, i);
+
+        if (x == u) {
+            //x = 12 limit = 123， 120...123共三个
+            ans += limit - x * Math.pow(10, k) + 1;
+        } else if (x < u) {
+            //x = 11 limit = 123   110 111 ... 119共十个
+            ans += Math.pow(10, k);
+        }
+        return ans;
+    }
+
     //[442].数组中重复的数据
     public static List<Integer> findDuplicates(int[] nums) {
         List<Integer> res = new ArrayList<>();
