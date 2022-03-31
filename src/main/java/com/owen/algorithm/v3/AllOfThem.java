@@ -2677,22 +2677,73 @@ public class AllOfThem {
     }
 
     //[109].有序链表转换二叉搜索树
-    public TreeNode sortedListToBST(ListNode head) {
-        if (head == null) return null;
-        ListNode slow = head, fast = head, pre = null;
-        while (fast != null && fast.next != null) {
-            pre = slow;
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-        TreeNode root = new TreeNode(slow.val);
-        //只有一个节点了
-        if (pre == null) return root;
+    ListNode p;
 
-        //断开前面一个节点
-        pre.next = null;
-        root.left = sortedListToBST(head);
-        root.right = sortedListToBST(slow.next);
+    public TreeNode sortedListToBST(ListNode head) {
+//        if (head == null) return null;
+//        ListNode slow = head, fast = head, pre = null;
+//        while (fast != null && fast.next != null) {
+//            pre = slow;
+//            slow = slow.next;
+//            fast = fast.next.next;
+//        }
+//        TreeNode root = new TreeNode(slow.val);
+//        //只有一个节点了
+//        if (pre == null) return root;
+//
+//        //断开前面一个节点
+//        pre.next = null;
+//        root.left = sortedListToBST(head);
+//        root.right = sortedListToBST(slow.next);
+//        return root;
+
+        //法二，效率比较低，每次都需要找中点
+//        return buildTree(head, null);
+
+        //法三，利用中序遍历，延迟找中点
+        p = head;
+        int len = getLength(head);
+        return buildTree(0, len - 1);
+    }
+
+    private TreeNode buildTree(ListNode left, ListNode right) {
+        if (left == right) {
+            return null;
+        }
+        ListNode mid = getMedian(left, right);
+        TreeNode root = new TreeNode(mid.val);
+        root.left = buildTree(left, mid);
+        root.right = buildTree(mid.next, right);
+        return root;
+    }
+
+    private ListNode getMedian(ListNode left, ListNode right) {
+        ListNode slow = left, fast = left;
+        while (fast != right && fast.next != right) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+    private int getLength(ListNode head) {
+        int ans = 0;
+        while (head != null) {
+            ans++;
+            head = head.next;
+        }
+        return ans;
+    }
+
+    private TreeNode buildTree(int left, int right) {
+        if (left > right) return null;
+        int mid = left + (right - left) / 2;
+        TreeNode root = new TreeNode(-1);
+        root.left = buildTree(left, mid - 1);
+        //左根右特性，这边第一次访问一定是中点。
+        root.val = p.val;
+        p = p.next;
+        root.right = buildTree(mid + 1, right);
         return root;
     }
 
@@ -4769,35 +4820,34 @@ public class AllOfThem {
     //[232].用栈实现队列
     public class MyQueue {
 
+        Stack<Integer> in;
         Stack<Integer> out;
-        Stack<Integer> s2;
 
         public MyQueue() {
+            in = new Stack<>();
             out = new Stack<>();
-            s2 = new Stack<>();
         }
 
         public void push(int x) {
-            //每次out栈保持栈顶是第一个元素，借助s2，转储下
-            while (!out.isEmpty()) {
-                s2.push(out.pop());
-            }
-            out.push(x);
-            while (!s2.isEmpty()) {
-                out.push(s2.pop());
-            }
+            in.push(x);
         }
 
         public int pop() {
+            if (out.isEmpty()) {
+                while (!in.isEmpty()) out.push(in.pop());
+            }
             return out.pop();
         }
 
         public int peek() {
+            if (out.isEmpty()) {
+                while (!in.isEmpty()) out.push(in.pop());
+            }
             return out.peek();
         }
 
         public boolean empty() {
-            return out.isEmpty();
+            return out.isEmpty() && in.isEmpty();
         }
     }
 
@@ -9904,6 +9954,35 @@ public class AllOfThem {
 
     }
 
+    //[682].棒球比赛
+    public int calPoints(String[] ops) {
+        Stack<Integer> stack = new Stack<>();
+        int ans = 0;
+        for (String op : ops) {
+            if (op.equals("C")) {
+                ans -= stack.pop();
+            } else if (op.equals("D")) {
+                int num = stack.peek() * 2;
+                ans += num;
+                stack.push(num);
+            } else if (op.equals("+")) {
+                int first = stack.pop();
+                int second = stack.pop();
+                int num = first + second;
+
+                ans += num;
+                stack.push(second);
+                stack.push(first);
+                stack.push(num);
+            } else {
+                int num = Integer.parseInt(op);
+                ans += num;
+                stack.push(num);
+            }
+        }
+        return ans;
+    }
+
     //[684].冗余连接
     public int[] findRedundantConnection(int[][] edges) {
         int n = edges.length;
@@ -10019,6 +10098,13 @@ public class AllOfThem {
         }
         Collections.reverse(res);
         return res;
+    }
+
+    //[693].交替位二进制数
+    public boolean hasAlternatingBits(int n) {
+        //交替二进制，右移一位，异或必定为0000011111这种
+        int x = n & n >> 1;
+        return (x & (x + 1)) == 0;
     }
 
     //[694].不同岛屿的数量
@@ -10434,7 +10520,7 @@ public class AllOfThem {
     public int[] dailyTemperatures(int[] temperatures) {
         int[] res = new int[temperatures.length];
         Stack<Integer> stack = new Stack<>();
-        //单调递增减栈，遇到小的压掉它
+        //单调递增减栈，当前元素大于栈顶元素则压掉它
         for (int i = temperatures.length - 1; i >= 0; i--) {
             //47 47 46 76 如果没有=，对第一个47而言认为比第二个47比它大
             while (!stack.isEmpty() && temperatures[i] >= temperatures[stack.peek()]) {
@@ -10963,6 +11049,20 @@ public class AllOfThem {
             }
         }
         return true;
+    }
+
+    //[848].字母移位
+    public String shiftingLetters(String s, int[] shifts) {
+        int n = s.length();
+        long sum = 0L;
+        //比较明显是个前缀和做法，i的字母会受到shifts i...n-1的影响，
+        //那么从后遍历，计算出当前字母需要变化的次数，根据26取模运算当前字符。
+        char[] arr = s.toCharArray();
+        for (int i = n - 1; i >= 0; i--) {
+            sum += shifts[i];
+            arr[i] = (char) ((arr[i] + sum - 'a') % 26 + 'a');
+        }
+        return String.valueOf(arr);
     }
 
     //[851].喧闹和富有
@@ -13316,6 +13416,44 @@ public class AllOfThem {
         return res;
     }
 
+    //[2024].考试的最大困扰度
+    public int maxConsecutiveAnswers(String answerKey, int k) {
+        int countT = 0, countF = 0;
+        int ans = 0;
+        for (int l = 0, r = 0; r < answerKey.length(); r++) {
+            char ch = answerKey.charAt(r);
+            if (ch == 'T') countT++;
+            else countF++;
+
+            //这个条件没找到，应该是最小值超过了k，意味着需要缩窗口
+            while (Math.min(countF, countT) > k && l < r) {
+                char lCh = answerKey.charAt(l);
+                if (lCh == 'T') countT--;
+                else countF--;
+                l++;
+            }
+
+            ans = Math.max(ans, r - l + 1);
+        }
+        return ans;
+    }
+
+    //[2028].找出缺失的观测数据
+    public int[] missingRolls(int[] rolls, int mean, int n) {
+        int m = rolls.length;
+        int remain = mean * (m + n);
+        for (int roll : rolls) {
+            remain -= roll;
+        }
+        if (remain < n || remain > 6 * n) return new int[0];
+        int avg = remain / n, remainder = remain % n;
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            ans[i] = avg + (i < remainder ? 1 : 0);
+        }
+        return ans;
+    }
+
     //[2029].石子游戏 IX
     public boolean stoneGameIX(int[] stones) {
         int cnt0 = 0, cnt1 = 0, cnt2 = 0;
@@ -14738,6 +14876,35 @@ public class AllOfThem {
             }
         }
         return true;
+    }
+
+    //[面试题 10.03].搜索旋转数组
+    public int search4(int[] arr, int target) {
+        if (arr.length == 0) return -1;
+        int left = 0, right = arr.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (arr[mid] > arr[left]) {
+                if (arr[left] <= target && target <= arr[mid]) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            } else if (arr[mid] < arr[left]) {
+                if (arr[left] <= target || target <= arr[mid]) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (arr[left] != target) {
+                    left++;
+                } else {
+                    right = left;
+                }
+            }
+        }
+        return arr[left] == target ? left : -1;
     }
 
     //[面试题 10.10].数字流的秩
