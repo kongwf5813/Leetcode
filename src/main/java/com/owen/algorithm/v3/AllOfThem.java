@@ -557,28 +557,18 @@ public class AllOfThem {
 
     //[19].删除链表的倒数第 N 个结点
     public ListNode removeNthFromEnd(ListNode head, int n) {
-        ListNode slow = head, fast = head;
-        int count = 0;
-        while (count < n) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode slow = dummy, fast = head;
+        for (int i = 0; i < n; i++) {
             fast = fast.next;
-            count++;
         }
-        ListNode pre = null;
         while (fast != null) {
-            pre = slow;
-            slow = slow.next;
             fast = fast.next;
+            slow = slow.next;
         }
-
-        //第一个节点
-        if (pre == null) {
-            pre = slow.next;
-            slow.next = null;
-            return pre;
-        } else {
-            pre.next = slow.next;
-            return head;
-        }
+        slow.next = slow.next.next;
+        return dummy.next;
     }
 
     //[20].有效的括号
@@ -1170,11 +1160,11 @@ public class AllOfThem {
     public int firstMissingPositive(int[] nums) {
         //缺失的第一个正数必定在[1, n+1]之间, 而数组是从0到n
         //[1,2,0]  => nums[i] -1 作为新的index
-        //[3,4,-1,1] => [-1, 1, 3, 4]
+        //[3,4,-1,1] => [1, -1, 3, 4]
         int n = nums.length;
         for (int i = 0; i < n; i++) {
             //[1,1]这种情况会进入死循环，题目没限定重复的范围，如果索引位置上的数值不相等，替换成正确的
-            while (nums[i] >= 1 && nums[i] <= n + 1 && nums[nums[i] - 1] != nums[i]) {
+            while (nums[i] >= 1 && nums[i] <= n && nums[nums[i] - 1] != nums[i]) {
                 int temp = nums[nums[i] - 1];
                 nums[nums[i] - 1] = nums[i];
                 nums[i] = temp;
@@ -1638,28 +1628,27 @@ public class AllOfThem {
 
     //[61].旋转链表
     public ListNode rotateRight(ListNode head, int k) {
+        if (head == null || head.next == null || k == 0) return head;
         int count = 0;
-        ListNode p = head, last = null;
+        ListNode p = head;
         while (p != null) {
-            last = p;
             p = p.next;
             count++;
         }
-        int realK;
-        if (count == 0 || count == 1 || (realK = k % count) == 0) return head;
+        k %= count;
+        if (k == 0) return head;
 
-        ListNode slow = head, fast = head;
-        for (int i = 0; i < realK; i++) {
+        ListNode fast = head;
+        for (int i = 0; i < k; i++) {
             fast = fast.next;
         }
-        ListNode pre = null;
-        while (fast != null) {
-            pre = slow;
+        ListNode slow = head;
+        while (fast.next != null) {
             slow = slow.next;
             fast = fast.next;
         }
-        pre.next = null;
-        last.next = head;
+        slow.next = null;
+        fast.next = head;
         return slow;
     }
 
@@ -2157,6 +2146,26 @@ public class AllOfThem {
         return head;
     }
 
+    //[84]. 柱状图中最大的矩形
+    public int largestRectangleArea(int[] heights) {
+        int[] newHeights = new int[heights.length + 2];
+        //跟接雨水的问题类似，雨水是高低高，这题是低高低
+        for (int i = 0; i < heights.length; i++) {
+            newHeights[i + 1] = heights[i];
+        }
+
+        int res = 0;
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < newHeights.length; i++) {
+            while (!stack.isEmpty() && newHeights[i] < newHeights[stack.peek()]) {
+                int cur = stack.pop();
+                res = Math.max((i - stack.peek() - 1) * newHeights[cur], res);
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
     //[86].分隔链表
     public ListNode partition(ListNode head, int x) {
         ListNode sDummy = new ListNode(-1), fDummy = new ListNode(-1), cur = head, s = sDummy, f = fDummy;
@@ -2308,6 +2317,30 @@ public class AllOfThem {
             pre.next = next;
         }
         return dummy.next;
+    }
+
+    //[92].反转链表 II（递归）
+    public ListNode reverseBetweenV2(ListNode head, int left, int right) {
+        if (left == 1) {
+            return reverseN(head, right);
+        }
+        head.next = reverseBetweenV2(head.next, left - 1, right - 1);
+        return head;
+    }
+
+    private ListNode successor = null;
+
+    private ListNode reverseN(ListNode head, int n) {
+        if (n == 1) {
+            successor = head.next;
+            return head;
+        }
+
+        ListNode last = reverseN(head.next, n - 1);
+
+        head.next.next = head;
+        head.next = successor;
+        return last;
     }
 
     //[93].复原 IP 地址
@@ -2864,6 +2897,31 @@ public class AllOfThem {
         previous = root;
         flatten(root.left);
         flatten(root.right);
+    }
+
+    //[115].不同的子序列
+    public int numDistinct(String s, String t) {
+        int m = s.length(), n = t.length();
+        //长度为i的s和长度为j的t，出现的个数
+        int[][] dp = new int[m + 1][n + 1];
+        //当s长度为0的时候，dp[0][i] = 0
+        //当t长度为0的时候，dp[i][0] = 1, 因为空字符串可以通过s删掉得到，有且仅有唯一一种办法可以得到。
+        for (int i = 0; i < m; i++) dp[i][0] = 1;
+
+        //bag  bag, bagg bag, 可以对s进行删除操作
+        //s[i] == t[j] => dp[i][j] = dp[i-1][j-1] + dp[i-1][j];
+        //s[i] != t[j] => dp[i][j] = dp[i-1][j];
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s.charAt(i - 1) == t.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[m][n];
     }
 
     //[116].填充每个节点的下一个右侧节点指针
@@ -3997,27 +4055,48 @@ public class AllOfThem {
 //            }
 //        }
 
-        Map<Character, Integer> map = new HashMap<>();
-        map.put('A', 0);
-        map.put('C', 1);
-        map.put('T', 2);
-        map.put('G', 3);
-        //前10位先构造出来，一共需要20位，理论上够的
-        int x = 0;
-        for (int i = 0; i < 9; i++) {
-            x = (x << 2) | map.get(s.charAt(i));
-        }
+//        Map<Character, Integer> map = new HashMap<>();
+//        map.put('A', 0);
+//        map.put('C', 1);
+//        map.put('T', 2);
+//        map.put('G', 3);
+//        //前10位先构造出来，一共需要20位，理论上够的
+//        int x = 0;
+//        for (int i = 0; i < 9; i++) {
+//            x = (x << 2) | map.get(s.charAt(i));
+//        }
+//        int n = s.length();
+//        Map<Integer, Integer> count = new HashMap<>();
+//        for (int i = 0; i <= n - 10; i++) {
+//            //前面算了9位，从index 9开始算
+//            x = ((x << 2) | map.get(s.charAt(i + 9))) & ((1 << 20) - 1);
+//            count.put(x, count.getOrDefault(x, 0) + 1);
+//            if (count.get(x) == 2) {
+//                res.add(s.substring(i, i + 10));
+//            }
+//        }
+//        return res;
         int n = s.length();
+        int N = (int) 1e5 + 10, P = 131313;
+        int[] h = new int[N];
+        int[] p = new int[N];
+        p[0] = 1;
+        for (int i = 1; i <= n; i++) {
+            h[i] = h[i - 1] * P + s.charAt(i - 1);
+            p[i] = p[i - 1] * P;
+        }
+
         Map<Integer, Integer> count = new HashMap<>();
-        for (int i = 0; i <= n - 10; i++) {
-            //前面算了9位，从index 9开始算
-            x = ((x << 2) | map.get(s.charAt(i + 9))) & ((1 << 20) - 1);
-            count.put(x, count.getOrDefault(x, 0) + 1);
-            if (count.get(x) == 2) {
-                res.add(s.substring(i, i + 10));
+        for (int i = 1; i + 10 - 1 <= n; i++) {
+            int j = i + 10 - 1;
+            int hash = h[j] - h[i - 1] * p[j - i + 1];
+            count.put(hash, count.getOrDefault(hash, 0) + 1);
+            if (count.get(hash) == 2) {
+                res.add(s.substring(i - 1, j));
             }
         }
         return res;
+
     }
 
     //[188].买卖股票的最佳时机 IV
@@ -4365,9 +4444,10 @@ public class AllOfThem {
         //堆排序，手撕大根堆
         int heapSize = nums.length;
         buildHeap(nums, heapSize);
-        for (int i = 0; i < k - 1; i++) {
-            swap(nums, 0, heapSize - i - 1);
-            buildHeap(nums, heapSize - i - 1);
+        for (int i = nums.length - 1; i >= nums.length - k + 1; i--) {
+            swap(nums, 0, i);
+            heapSize--;
+            maxHeapify(nums, 0, heapSize);
         }
         return nums[0];
     }
@@ -4570,6 +4650,7 @@ public class AllOfThem {
         return total - (Math.min(ay2, by2) - Math.max(ay1, by1)) * (Math.min(ax2, bx2) - Math.max(ax1, bx1));
     }
 
+    //[224].基本计算器
     public static int calculate(String s) {
 //        return dfsForCalculate(s, 0)[0];
         Deque<Character> queue = new ArrayDeque<>();
@@ -5025,6 +5106,22 @@ public class AllOfThem {
         }
         return true;
     }
+
+    //[253].会议室II
+    public int minMeetingRooms(int[][] intervals) {
+        //[[0, 30],[5, 10],[15, 20]]
+        //思路，优先按照start排序，然后以end建立小根堆，如果当前的start >= 堆中最小的end，说明两个时间上面没有冲突，可以共用一个会议室。最终的堆大小就是最少会议室
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+        PriorityQueue<Integer> queue = new PriorityQueue<>();
+
+        for (int i = 0; i < intervals.length; i++) {
+            int[] interval = intervals[i];
+            if (!queue.isEmpty() && interval[0] >= queue.peek()) queue.poll();
+            queue.offer(interval[1]);
+        }
+        return queue.size();
+    }
+
 
     //[257].二叉树的所有路径
     public List<String> binaryTreePaths(TreeNode root) {
@@ -5643,6 +5740,34 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[311].稀疏矩阵的乘法
+    public int[][] multiply(int[][] A, int[][] B) {
+        List<int[]> aPoints = getNonZeroPoints(A);
+        List<int[]> bPoints = getNonZeroPoints(B);
+
+        int[][] res = new int[A.length][B[0].length];
+        for (int[] a : aPoints) {
+            for (int[] b : bPoints) {
+                if (a[1] == b[0]) {
+                    res[a[0]][b[1]] += A[a[0]][a[1]] * B[b[0]][b[1]];
+                }
+            }
+        }
+        return res;
+    }
+
+    private List<int[]> getNonZeroPoints(int[][] matrix) {
+        List<int[]> points = new ArrayList<>();
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                if (matrix[i][j] != 0) {
+                    points.add(new int[]{i, j});
+                }
+            }
+        }
+        return points;
     }
 
     //[313].超级丑数
@@ -7082,6 +7207,40 @@ public class AllOfThem {
         return res.toArray(new int[res.size()][]);
     }
 
+    //[407].接雨水 II
+    public int trapRainWater(int[][] heightMap) {
+        PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> a[2] - b[2]);
+        int m = heightMap.length, n = heightMap[0].length;
+        boolean[][] visited = new boolean[m][n];
+        for (int i = 0; i < n; i++) {
+            queue.offer(new int[]{0, i, heightMap[0][i]});
+            queue.offer(new int[]{m - 1, i, heightMap[m - 1][i]});
+            visited[0][i] = visited[m - 1][i] = true;
+        }
+
+        for (int i = 0; i < m; i++) {
+            queue.offer(new int[]{i, 0, heightMap[i][0]});
+            queue.offer(new int[]{i, n - 1, heightMap[i][n - 1]});
+            visited[i][0] = visited[i][n - 1] = true;
+        }
+
+        int ans = 0;
+        int[][] directs = new int[][]{{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1], h = cur[2];
+            for (int[] direct : directs) {
+                int nx = x + direct[0];
+                int ny = y + direct[1];
+                if (nx < 0 || nx >= m - 1 || ny < 0 || ny >= n - 1 || visited[nx][ny]) continue;
+                if (h > heightMap[nx][ny]) ans += h - heightMap[nx][ny];
+                queue.offer(new int[]{nx, ny, Math.max(heightMap[nx][ny], h)});
+                visited[nx][ny] = true;
+            }
+        }
+        return ans;
+    }
+
     //[413].等差数列划分
     public int numberOfArithmeticSlices(int[] nums) {
         int n = nums.length;
@@ -7710,7 +7869,7 @@ public class AllOfThem {
                 k -= cnt;
             } else {
                 //就在ans为前缀的节点中找，只不过是从下一层节点找
-                ans *=10;
+                ans *= 10;
                 k--;
             }
         }
@@ -9504,6 +9663,19 @@ public class AllOfThem {
         return true;
     }
 
+    //[572].另一棵树的子树
+    public boolean isSubtree(TreeNode root, TreeNode subRoot) {
+        if (root == null) return false;
+        return isSamTree(root, subRoot) || isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot);
+    }
+
+    private boolean isSamTree(TreeNode root, TreeNode subRoot) {
+        if (root == null && subRoot == null) return true;
+        if (root == null || subRoot == null) return false;
+        if (root.val != subRoot.val) return false;
+        return isSamTree(root.left, subRoot.left) && isSamTree(root.right, subRoot.right);
+    }
+
     //[575].分糖果
     public int distributeCandies(int[] candyType) {
         Set<Integer> set = new HashSet<>();
@@ -9948,6 +10120,25 @@ public class AllOfThem {
         set.add(val);
 
         return dfs(root.left, k, set) || dfs(root.right, k, set);
+    }
+
+    //[662].二叉树最大宽度
+    public int widthOfBinaryTree(TreeNode root) {
+        if (root == null) return 0;
+        AtomicInteger res = new AtomicInteger();
+        dfs(root, 0, 0, new HashMap<>(), res);
+        return res.get();
+    }
+
+    private void dfs(TreeNode root, int depth, int pos, Map<Integer, Integer> map, AtomicInteger res) {
+        if (root == null) return;
+
+        map.putIfAbsent(depth, pos);
+
+        res.set(Math.max(res.get(), pos - map.get(depth) + 1));
+
+        dfs(root.left, depth + 1, 2 * pos + 1, map, res);
+        dfs(root.right, depth + 1, 2 * pos + 2, map, res);
     }
 
     //[674].最长连续递增序列
@@ -10639,6 +10830,26 @@ public class AllOfThem {
             }
         }
         return distTo;
+    }
+
+    //[744].寻找比目标字母大的最小字母
+    public char nextGreatestLetter(char[] letters, char target) {
+        int n = letters.length;
+        int left = 0, right = n - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (letters[mid] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+
+        if (letters[left] <= target) {
+            return letters[0];
+        } else {
+            return letters[left];
+        }
     }
 
     //[747].至少是其他数字两倍的最大数
@@ -11509,6 +11720,31 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    //[954].二倍数对数组
+    public boolean canReorderDoubled(int[] arr) {
+        Map<Integer, Integer> cnt = new HashMap<Integer, Integer>();
+        for (int x : arr) {
+            cnt.put(x, cnt.getOrDefault(x, 0) + 1);
+        }
+        if (cnt.getOrDefault(0, 0) % 2 != 0) {
+            return false;
+        }
+
+        List<Integer> vals = new ArrayList<Integer>();
+        for (int x : cnt.keySet()) {
+            vals.add(x);
+        }
+        Collections.sort(vals, (a, b) -> Math.abs(a) - Math.abs(b));
+
+        for (int x : vals) {
+            if (cnt.getOrDefault(2 * x, 0) < cnt.get(x)) { // 无法找到足够的 2x 与 x 配对
+                return false;
+            }
+            cnt.put(2 * x, cnt.getOrDefault(2 * x, 0) - cnt.get(x));
+        }
+        return true;
+    }
+
     //[968].监控二叉树
     public class Solution968 {
         int uncovered = 0;
@@ -12367,6 +12603,22 @@ public class AllOfThem {
         return res;
     }
 
+    //[1233].删除子文件夹
+    public List<String> removeSubfolders(String[] folder) {
+        Arrays.sort(folder);
+        List<String> res = new ArrayList<>();
+        for (int i = 0; i < folder.length; ) {
+            res.add(folder[i]);
+            String dir = res.get(res.size() - 1);
+            int j = i + 1;
+            while (j < folder.length && folder[j].startsWith(dir + "/")) {
+                j++;
+            }
+            i = j;
+        }
+        return res;
+    }
+
     //[1248].统计「优美子数组」
     public int numberOfSubarrays(int[] nums, int k) {
         //奇数个数，可以转化为奇数为1，偶数为0看待，求和为k的子数组个数
@@ -12783,6 +13035,23 @@ public class AllOfThem {
         return res == n ? n - 1 : res;
     }
 
+    //[1497].检查数组对是否可以被 k 整除
+    public boolean canArrange(int[] arr, int k) {
+        int[] mod = new int[k];
+        for (int num : arr) {
+            //把负数的余数调整成[0, k-1]中间
+            ++mod[(num % k + k) % k];
+        }
+        //余数1开始判断配对的数，余数和为k的数量必须相等
+        for (int i = 1; i + i < k; ++i) {
+            if (mod[i] != mod[k - i]) {
+                return false;
+            }
+        }
+        //余数0，需要偶数对。
+        return mod[0] % 2 == 0;
+    }
+
     //[1518].换酒问题
     public int numWaterBottles(int numBottles, int numExchange) {
         int bottles = numBottles, left = numBottles;
@@ -12999,6 +13268,27 @@ public class AllOfThem {
         }
         return keysPressed.charAt(idx);
     }
+
+    //[1642].可以到达的最远建筑
+    public int furthestBuilding(int[] heights, int bricks, int ladders) {
+        PriorityQueue<Integer> queue = new PriorityQueue<>();
+        for (int i = 1; i < heights.length; i++) {
+            int cnt = heights[i] - heights[i - 1];
+            if (cnt <= 0) {
+                continue;
+            }
+            queue.offer(cnt);
+            if (queue.size() > ladders) {
+                //最小的砖头替代
+                bricks -= queue.poll();
+            }
+            if (bricks < 0) {
+                return i - 1;
+            }
+        }
+        return heights.length - 1;
+    }
+
 
     //[1654].到家的最少跳跃次数
     public int minimumJumps(int[] forbidden, int a, int b, int x) {
@@ -14818,6 +15108,51 @@ public class AllOfThem {
         return dp[n];
     }
 
+    //[剑指 Offer 51].数组中的逆序对
+    public int reversePairs(int[] nums) {
+        return mergeSort(nums, 0, nums.length - 1);
+    }
+
+    private int merge(int[] nums, int left, int mid, int right) {
+        int[] temp = new int[right - left + 1];
+        int i = left, j = mid + 1, index = 0;
+        int count = 0;
+        while (i <= mid && j <= right) {
+            if (nums[i] <= nums[j]) {
+                temp[index++] = nums[i++];
+            } else {
+                temp[index++] = nums[j++];
+                //后面的
+                count += mid - i + 1;
+            }
+        }
+
+        while (i <= mid) {
+            temp[index++] = nums[i++];
+        }
+
+        while (j <= right) {
+            temp[index++] = nums[j++];
+        }
+
+        for (int k = 0; k < right - left + 1; k++) {
+            nums[k + left] = temp[k];
+        }
+        return count;
+    }
+
+    private int mergeSort(int[] nums, int left, int right) {
+        if (left >= right) return 0;
+
+        int mid = left + (right - left) / 2;
+
+        int a = mergeSort(nums, left, mid);
+        int b = mergeSort(nums, mid + 1, right);
+
+        int c = merge(nums, left, mid, right);
+        return a + b + c;
+    }
+
     //[剑指 Offer II 053].二叉搜索树中的中序后继
     TreeNode next = null;
 
@@ -15053,13 +15388,15 @@ public class AllOfThem {
         int[] sum = new int[n];
         int[] ans = new int[4];
         int maxAns = matrix[0][0];
+        //上边界
         for (int i = 0; i < m; i++) {
             //固定了第一行之后，就需要重置
             for (int t = 0; t < n; t++) sum[t] = 0;
-            //最后的每一行迭代都需要计算
+            //下边界
             for (int j = i; j < m; j++) {
                 // start 记录最大连续数组子序的开始位置
                 int maxSum = 0, start = 0;
+                //从左到右遍历
                 for (int k = 0; k < n; k++) {
                     sum[k] += matrix[j][k];
                     //动态规划求sum数组的最大连续子序列之和
