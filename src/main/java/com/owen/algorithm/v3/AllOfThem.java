@@ -11720,6 +11720,23 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    //[949].给定数字能组成的最大时间
+    public String largestTimeFromDigits(int[] arr) {
+        String ans = "";
+        Arrays.sort(arr);
+        for (int i = 3; i >= 0; i--) {
+            if (arr[i] > 2) continue;
+            for (int j = 3; j >= 0; j--) {
+                if (i == j || arr[i] == 2 && arr[j] > 3) continue;
+                for (int k = 3; k >=0; k--) {
+                    if (k == i || k == j || arr[k] > 5) continue;
+                    return "" + arr[i] + arr[j] +":" + arr[k] + arr[6 - i - j -k];
+                }
+            }
+        }
+        return "";
+    }
+
     //[954].二倍数对数组
     public boolean canReorderDoubled(int[] arr) {
         Map<Integer, Integer> cnt = new HashMap<Integer, Integer>();

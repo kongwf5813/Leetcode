@@ -20,7 +20,8 @@ public class Test {
 //        root.right.left = new TreeNode(15);
 //        root.right.right = new TreeNode(7);
 //        new Test().maxPathSum(root);
-        new Test().largestRectangleArea(new int[]{2, 1, 5, 6, 2, 3});
+//        new Test().largestRectangleArea(new int[]{2, 1, 5, 6, 2, 3});
+        new Test().largestTimeFromDigits(new int[]{0, 0, 0, 1});
     }
 
     void heapSort(int[] nums) {
@@ -130,5 +131,26 @@ public class Test {
             this.sum = sum;
             this.path = path;
         }
+    }
+
+
+    public String largestTimeFromDigits(int[] arr) {
+        String ans = "";
+        int maxTime = -1;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if (i == j) continue;
+                for (int k = 0; k < 4; k++) {
+                    if (k == i || k == j) continue;
+                    int hours = 10 * arr[i] + arr[j];
+                    int mins = 10 * arr[k] + arr[6 - i - j - k];
+                    if (hours < 24 && mins < 60 && (maxTime < hours * 60 + mins)) {
+                        maxTime = hours * 60 + mins;
+                        ans = String.format("%02d:%02d", hours, mins);
+                    }
+                }
+            }
+        }
+        return ans;
     }
 }
