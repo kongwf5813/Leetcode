@@ -3965,18 +3965,22 @@ public class AllOfThem {
 
     //[169].多数元素
     public int majorityElement(int[] nums) {
-        int candidate = -1;
+        int candidate = 0;
         int count = 0;
         for (int num : nums) {
             if (count != 0 && candidate == num) count++;
             else if (count == 0) {
                 candidate = num;
-                count++;
+                count = 1;
             } else {
                 count--;
             }
         }
-        return candidate;
+        count = 0;
+        for (int num : nums) {
+            if (candidate == num) count++;
+        }
+        return count > nums.length / 2 ? candidate : -1;
     }
 
     //[171].Excel 表列序号
@@ -4150,9 +4154,19 @@ public class AllOfThem {
 //        }
         int n = nums.length;
         k = k % n;
-        swap(nums, 0, n - 1);
-        swap(nums, 0, k - 1);
-        swap(nums, k, n - 1);
+        reverse(nums, 0, n - 1);
+        reverse(nums, 0, k - 1);
+        reverse(nums, k, n - 1);
+    }
+
+    private void reverse(int[] nums, int start, int end) {
+        while (start < end) {
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start++;
+            end--;
+        }
     }
 
     //[198].打家劫舍
@@ -4444,10 +4458,10 @@ public class AllOfThem {
         //堆排序，手撕大根堆
         int heapSize = nums.length;
         buildHeap(nums, heapSize);
-        for (int i = nums.length - 1; i >= nums.length - k + 1; i--) {
-            swap(nums, 0, i);
-            heapSize--;
-            maxHeapify(nums, 0, heapSize);
+        //每次交换之后就会调整一次最大值，所以k-1次出堆就可以
+        for (int i = heapSize - 1; k > 1; i--, k--) {
+            swap(nums, i, 0);
+            maxHeapify(nums, 0, i);
         }
         return nums[0];
     }
@@ -5309,10 +5323,13 @@ public class AllOfThem {
     public int numSquares(int n) {
         if (n <= 0) return 0;
         int[] dp = new int[n + 1];
-        for (int i = 1; i <= n; i++) {
-            dp[i] = Integer.MAX_VALUE;
-            for (int j = 1; j * j <= i; j++) {
-                dp[i] = Math.min(dp[i - j * j] + 1, dp[i]);
+        Arrays.fill(dp, 0x3f3f3f3f);
+        dp[0] = 0;
+        //物品是完全平方数
+        for (int i = 1; i * i <= n; i++) {
+            //背包是n
+            for (int j = i * i; j <= n; i++) {
+                dp[j] = Math.min(dp[j - i * i] + 1, dp[j]);
             }
         }
         return dp[n];
@@ -10996,6 +11013,26 @@ public class AllOfThem {
         return sb.toString();
     }
 
+    //[780].到达终点
+    public boolean reachingPoints(int sx, int sy, int tx, int ty) {
+        // 1,1 -> 1,2 -> 3,2 -> 3,5
+        //正推方向有两个，反推方向就一个， 如果tx==ty，那么前一个状态是0,0，非法状态。
+        while (tx >= sx && ty >= sy) {
+            if (tx == sx && ty == sy) return true;
+            //用来加速判断（1,1 -> 1,2）
+            if (tx == sx && ty > sy && (ty - sy) % sx == 0) return true;
+            //用来加速判断（1,2 -> 3,2）
+            if (ty == sy && tx > sx && (tx - sx) % sy == 0) return true;
+            //本来是辗转相减，但是为了缩减次数换用取余
+            if (tx > ty) {
+                tx %= ty;
+            } else {
+                ty %= tx;
+            }
+        }
+        return false;
+    }
+
     //[785].判断二分图
     public class Solution785 {
         int[] color;
@@ -11718,6 +11755,64 @@ public class AllOfThem {
             }
         }
         return String.valueOf(arr);
+    }
+
+    //[952].按公因数计算最大组件大小
+    public int largestComponentSize(int[] nums) {
+        int max = Arrays.stream(nums).max().getAsInt();
+        UnionFind4 uf = new UnionFind4(max + 1);
+        for (int num : nums) {
+            double up = Math.sqrt(num);
+            for (int i = 2; i <= up; i++) {
+                if (num % i == 0) {
+                    uf.union(num, i);
+                    uf.union(num, num / i);
+                }
+            }
+        }
+
+        //因为通过了质因子作为中间桥梁，实际只会算数字的连通分量，故常规并查集直接求连通分量是不行的
+        //通过遍历每个数的根节点来计数可以排除掉质因子的数量
+        int ans = 0;
+        int[] cnt = new int[max + 1];
+        for (int num : nums) {
+            int root = uf.find(num);
+            cnt[root]++;
+            ans = Math.max(ans, cnt[root]);
+        }
+        return ans;
+    }
+
+    public static class UnionFind4 {
+        private int[] parent;
+
+        public UnionFind4(int size) {
+            parent = new int[size];
+            for (int i = 0; i < size; i++) {
+                parent[i] = i;
+            }
+        }
+
+        public void union(int p, int q) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            if (rootQ == rootP) return;
+            parent[rootP] = rootQ;
+        }
+
+        public int find(int x) {
+            while (x != parent[x]) {
+                parent[x] = parent[parent[x]];
+                x = parent[x];
+            }
+            return x;
+        }
+
+        public boolean connected(int p, int q) {
+            int rootP = find(p);
+            int rootQ = find(q);
+            return rootP == rootQ;
+        }
     }
 
     //[954].二倍数对数组
@@ -14763,6 +14858,63 @@ public class AllOfThem {
         }
         return left;
     }
+
+    //[6037].按奇偶性交换后的最大数字
+    public int largestInteger(int num) {
+        PriorityQueue<Integer> even = new PriorityQueue<>((a, b) -> b - a);
+        PriorityQueue<Integer> odd = new PriorityQueue<>((a, b) -> b - a);
+
+        for (char ch : (num + "").toCharArray()) {
+            (ch % 2 > 0 ? odd : even).offer(ch - '0');
+        }
+
+        int res = 0;
+        for (char ch : (num + "").toCharArray()) {
+            res = res * 10 + (ch % 2 > 0 ? odd : even).poll();
+        }
+        return res;
+    }
+
+    //[6038].向表达式添加括号后的最小结果
+    public String minimizeResult(String expression) {
+        String[] split = expression.split("\\+");
+        int min = Integer.MAX_VALUE;
+        String ans = "";
+        for (int i = 0; i < split[0].length(); i++) {
+            for (int j = 1; j <= split[1].length(); j++) {
+                int cur = (i > 0 ? Integer.parseInt(split[0].substring(0, i)) : 1) *
+                        (Integer.parseInt(split[0].substring(i)) + Integer.parseInt(split[1].substring(0, j))) *
+                        (j == split[1].length() ? 1 : Integer.parseInt(split[1].substring(j)));
+                if (cur < min) {
+                    min = cur;
+                    ans = split[0].substring(0, i)
+                            + '(' + split[0].substring(i) + '+' + split[1].substring(0, j) + ')'
+                            + split[1].substring(j);
+                }
+            }
+        }
+        return ans;
+    }
+
+    //[6039].K 次增加后的最大乘积
+    public static int maximumProduct(int[] nums, int k) {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        int BASE = (int) 1e9 + 7;
+        for (int num : nums) {
+            pq.offer(num);
+        }
+        while (!pq.isEmpty() && k > 0) {
+            pq.offer(pq.poll() + 1);
+            k--;
+        }
+        long ans = 1;
+        while (!pq.isEmpty()) {
+            ans *= pq.poll();
+            ans %= BASE;
+        }
+        return (int) ans;
+    }
+
 
     //[剑指 Offer 03].数组中重复的数字
     public int findRepeatNumber(int[] nums) {
