@@ -663,6 +663,8 @@ public class AllOfThem {
             h = h.next;
         }
         return dummyHead.next;
+
+
     }
 
     //[24].两两交换链表中的节点
@@ -1647,9 +1649,10 @@ public class AllOfThem {
             slow = slow.next;
             fast = fast.next;
         }
+        ListNode newHead = slow;
         slow.next = null;
         fast.next = head;
-        return slow;
+        return newHead;
     }
 
     //[62].不同路径
@@ -6773,6 +6776,36 @@ public class AllOfThem {
         }
     }
 
+    //[385].迷你语法分析器
+    public NestedInteger deserialize(String s) {
+//        if (s.charAt(0) != '[') return new NestedInteger(Integer.parseInt(s));
+//        Stack<NestedInteger> stack = new Stack<>();
+//        int num = 0, sign = 1;
+//        for(int i = 0; i < s.length(); i++) {
+//            char ch = s.charAt(i);
+//            if (ch == '[') {
+//                stack.push(new NestedInteger());
+//            } else if (ch == '-' ) {
+//                sign = -1;
+//            } else if (ch == ',' || ch == ']') {
+//                if (Character.isDigit(s.charAt(i-1))) {
+//                    stack.peek().add(new NestedInteger(sign * num));
+//                    sign = 1;
+//                    num = 0;
+//                }
+//                //前面非数字的时候
+//                if (ch == ']' && stack.size() > 1) {
+//                    NestedInteger last = stack.pop();
+//                    stack.peek().add(last);
+//                }
+//            } else {
+//                num = num * 10 + (ch - '0');
+//            }
+//        }
+//        return stack.peek();
+        return null;
+    }
+
     //[386].字典序排数
     public List<Integer> lexicalOrder(int n) {
         List<Integer> res = new ArrayList<>();
@@ -8242,6 +8275,108 @@ public class AllOfThem {
         }
     }
 
+    public class LFUCache2 {
+        Map<Integer, Node> keyMap;
+        Map<Integer, DoublyLinkedList> freqMap;
+        int capacity;
+        int minFreq;
+
+        public LFUCache2(int capacity) {
+            keyMap = new HashMap<>();
+            freqMap = new HashMap<>();
+            this.capacity = capacity;
+        }
+
+        public int get(int key) {
+            Node node = keyMap.get(key);
+            if (node == null) return -1;
+            updateFreq(node);
+            return node.value;
+        }
+
+        public void put(int key, int value) {
+            if (capacity == 0) return;
+            Node node = keyMap.get(key);
+            if (node != null) {
+                node.value = value;
+                updateFreq(node);
+            } else {
+                if (keyMap.size() == capacity) {
+                    DoublyLinkedList linkedList = freqMap.get(minFreq);
+                    Node deleteNode = linkedList.tail.pre;
+
+                    linkedList.removeNode(deleteNode);
+                    keyMap.remove(deleteNode.key);
+                }
+
+                node = new Node(key, value);
+                keyMap.put(key, node);
+
+                freqMap.put(1, new DoublyLinkedList());
+                DoublyLinkedList linkedList = freqMap.get(1);
+                linkedList.addNode2Head(node);
+
+                minFreq = 1;
+            }
+        }
+
+        private void updateFreq(Node node) {
+            int freq = node.freq;
+            DoublyLinkedList linkedList = freqMap.get(freq);
+            linkedList.removeNode(node);
+
+            if (freq == minFreq && linkedList.head.next == linkedList.tail) {
+                minFreq++;
+            }
+
+            node.freq++;
+
+            freqMap.putIfAbsent(freq + 1, new DoublyLinkedList());
+            linkedList = freqMap.get(freq + 1);
+            linkedList.addNode2Head(node);
+        }
+
+
+        class Node {
+            int key;
+            int value;
+            int freq = 1;
+            Node pre;
+            Node next;
+
+            public Node(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+        }
+
+        class DoublyLinkedList {
+            Node head;
+            Node tail;
+
+            public DoublyLinkedList() {
+                head = new Node(-1, -1);
+                tail = new Node(-1, -1);
+                head.next = tail;
+                tail.pre = head;
+            }
+
+            public void removeNode(Node node) {
+                node.pre.next = node.next;
+                node.next.pre = node.pre;
+                node.next = null;
+                node.pre = null;
+            }
+
+            public void addNode2Head(Node node) {
+                node.next = head.next;
+                node.next.pre = node;
+                node.pre = head;
+                head.next = node;
+            }
+        }
+    }
+
     //[462].最少移动次数使数组元素相等 II
     public int minMoves2(int[] nums) {
         //中位数，就是最少移动次数，常规操作肯定是排序之后，取中间的
@@ -8616,6 +8751,28 @@ public class AllOfThem {
                 }
             }
         }
+    }
+
+    //[479].最大回文数乘积
+    public int largestPalindrome(int n) {
+        if (n == 1) return 9;
+        //利用贪心的策略，优先取99 * xx ==> 回文
+        //其实可以通过计算出一个回文值，然后再去判断这个回文值能不能被99以下的数整除，如果能，就返回该回文。
+        int upper = (int)Math.pow(10, n) -1;
+        for(int i = upper; i >=0 ; i--) {
+            long p = i, t = i;
+            //根据左边的数，计算回文数
+            while(t != 0) {
+                p = p * 10 + (t % 10);
+                t /= 10;
+            }
+
+            //判断能否被整除
+            for (long j = upper; j * j >= p; j--) {
+                if (p % j == 0) return (int) (p % 1337);
+            }
+        }
+        return -1;
     }
 
     //[480].滑动窗口中位数
@@ -10139,6 +10296,69 @@ public class AllOfThem {
         return dfs(root.left, k, set) || dfs(root.right, k, set);
     }
 
+    //[658].找到 K 个最接近的元素
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        int n = arr.length;
+//        int idx = findUpperRight(arr, 0, n - 1, x);
+//        int left = idx - 1, right = idx;
+//        List<Integer> res = new ArrayList<>();
+//        while(k > 0) {
+//            if(isLeftClose(arr, left, right, x)) {
+//                res.add(arr[left]);
+//                left--;
+//            } else {
+//                res.add(arr[right]);
+//                right++;
+//            }
+//            k--;
+//        }
+//        Collections.sort(res);
+//        return res;
+
+        //left找的是最优左边界， right最多能到n-k的位置
+        //画图理解:
+        //x    |mid      mid+k|    r = mid, 排除掉右边
+        //|mid     mid+k|     x    l = mid+1， 排除掉左边一个
+        //|mid   x        mid+k|   r = mid, 排除掉右边
+        //|mid        x   mid+k|   l = mid+1, 排除掉左边一个
+        int left = 0, right = n - k;
+        while(left < right) {
+            int mid = left + (right - left) / 2;
+            if(x - arr[mid] > arr[mid + k] - x) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        List<Integer> res = new ArrayList<>();
+        for (int i = left; i < left + k; i++) {
+            res.add(arr[i]);
+        }
+        return res;
+    }
+
+    private int findUpperRight(int[] arr, int left, int right, int x) {
+        while(left < right) {
+            int mid = left + (right - left) / 2;
+            if (arr[mid] >= x) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    private boolean isLeftClose(int[] arr, int left, int right, int x) {
+        if(left < 0) {
+            return false;
+        }
+        if (right >= arr.length) {
+            return true;
+        }
+        return x - arr[left] <= arr[right] - x;
+    }
+
     //[662].二叉树最大宽度
     public int widthOfBinaryTree(TreeNode root) {
         if (root == null) return 0;
@@ -10495,13 +10715,13 @@ public class AllOfThem {
 
     //[701].二叉搜索树中的插入操作
     public TreeNode insertIntoBST(TreeNode root, int val) {
-//        TreeNode parent = null;
-//        while (root != null) {
-//            parent = root;
-//            if (root.val < val) {
-//                root = root.right;
+//        TreeNode parent = null, cur = root;
+//        while (cur != null) {
+//            parent = cur;
+//            if (cur.val < val) {
+//                cur = cur.right;
 //            } else {
-//                root = root.left;
+//                cur = cur.left;
 //            }
 //        }
 //        if (parent.val < val) {
@@ -11206,6 +11426,21 @@ public class AllOfThem {
         return set.size();
     }
 
+    //[806].写字符串需要的行数
+    public int[] numberOfLines(int[] widths, String s) {
+        int line = 1, count = 0;
+        for(char ch : s.toCharArray()) {
+            int cnt =  widths[ch - 'a'];
+            if (count + cnt > 100) {
+                count = cnt;
+                line++;
+            } else {
+                count += cnt;
+            }
+        }
+        return new int[] {line, count};
+    }
+
     //[807].保持城市天际线
     public int maxIncreaseKeepingSkyline(int[][] grid) {
         // 0 1 1
@@ -11229,6 +11464,38 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[819].最常见的单词
+    public String mostCommonWord(String paragraph, String[] banned) {
+        Map<String, Integer> cnt = new HashMap<>();
+        String mostCommon = "";
+        int maxCnt = 0;
+        int n = paragraph.length();
+        char[] cs = paragraph.toCharArray();
+        Set<String> bannedSet = new HashSet<>();
+        for (String str : banned) {
+            bannedSet.add(str.toLowerCase());
+        }
+        for (int i = 0; i < n;) {
+            if(!Character.isLetter(cs[i]) && ++i > 0) continue;
+
+            int j = i;
+            while (j < n && Character.isLetter(cs[j])) {
+                j++;
+            }
+
+            String key = paragraph.substring(i,j).toLowerCase();
+            if (!bannedSet.contains(key)) {
+                cnt.put(key, cnt.getOrDefault(key, 0) +1);
+                if (cnt.get(key) > maxCnt) {
+                    mostCommon = key;
+                    maxCnt = cnt.get(key);
+                }
+            }
+            i = j + 1;
+        }
+        return mostCommon;
     }
 
     //[825].适龄的朋友
