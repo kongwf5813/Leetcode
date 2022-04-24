@@ -789,6 +789,51 @@ public class AllOfThem {
         }
     }
 
+    //[32].最长有效括号
+    public int longestValidParentheses(String s) {
+        int n = s.length();
+        if (n == 0) return 0;
+        //以i为结尾的最长有效括号长度
+        //()                i == ) && i-1 == (  dp[i] = dp[i-2] +2;
+        //)(())             i == ) && i-1 == )  && i - dp[i-1]-1 == (   dp[i] = dp[i - dp[i-1]-2] + dp[i-1]+2;
+        //((())             i == ) && i-1 == )  && i - dp[i-1]-1 == (   dp[i] = dp[i-1]+2;
+        int[] dp = new int[n];
+        int maxAns = 0;
+        for (int i = 1; i < n; i++) {
+            if (s.charAt(i) == ')') {
+                if (s.charAt(i - 1) == '(') {
+                    dp[i] = (i >= 2 ? dp[i - 2] : 0) + 2;
+                } else if (i > dp[i - 1] && s.charAt(i - dp[i - 1] - 1) == '(') {
+                    dp[i] = dp[i - 1] + 2 + (i - dp[i - 1] - 2 > 0 ? dp[i - dp[i - 1] - 2] : 0);
+                }
+                maxAns = Math.max(maxAns, dp[i]);
+            }
+        }
+        return maxAns;
+
+//        Stack<Integer> stack = new Stack<>();
+//        //最后一个没有匹配成功的右括号位置
+//        stack.push(-1);
+//        int maxAns = 0;
+//        for (int i = 0; i < n; i++) {
+//            char ch = s.charAt(i);
+//            if (ch == '(') {
+//                stack.push(i);
+//            } else {
+//                stack.pop();
+        //本来遇到)就要把栈顶弹出去，发现空了，说明没有匹配
+//                if (stack.isEmpty()) {
+//                    //最后一个没有匹配成功的右括号位置
+//                    stack.push(i);
+//                } else {
+        //说明匹配成功了，就更新位置，栈顶位置就是右括号没有匹配的位置
+//                   maxAns = Math.max(maxAns, i - stack.peek());
+//                }
+//            }
+//        }
+//        return maxAns;
+    }
+
     //[33].搜索旋转排序数组
     public int search(int[] nums, int target) {
         int n = nums.length;
@@ -1183,29 +1228,47 @@ public class AllOfThem {
 
     //[42].接雨水
     public int trap(int[] height) {
-        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
-        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
-        int res = 0;
-        Stack<Integer> stack = new Stack<>();
-        for (int i = 0; i < height.length; i++) {
-            //   |   |
-            //   | | |
-            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
-            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
-                int cur = stack.pop();
-                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
-                if (stack.isEmpty()) {
-                    continue;
-                }
-                // 左右位置，并有左右位置得出「宽度」和「高度」
-                int l = stack.peek(), r = i;
-                int w = r - l + 1 - 2;
-                int h = Math.min(height[l], height[r]) - height[cur];
-                res += w * h;
+//        //找某侧最近一个比其大的值，使用单调栈维持栈内元素递减；
+//        //找某侧最近一个比其小的值，使用单调栈维持栈内元素递增
+//        int res = 0;
+//        Stack<Integer> stack = new Stack<>();
+//        for (int i = 0; i < height.length; i++) {
+//            //   |   |
+//            //   | | |
+//            //   l c r， 维护单调递减栈，当大元素进栈，会压栈，弹出小的元素，那么此时栈顶一定大于弹出的元素
+//            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
+//                int cur = stack.pop();
+//                // 如果栈内没有元素，说明当前位置左边没有比其高的柱子，跳过
+//                if (stack.isEmpty()) {
+//                    continue;
+//                }
+//                // 左右位置，并有左右位置得出「宽度」和「高度」
+//                int l = stack.peek(), r = i;
+//                int w = r - l + 1 - 2;
+//                int h = Math.min(height[l], height[r]) - height[cur];
+//                res += w * h;
+//            }
+//            stack.push(i);
+//        }
+//        return res;
+
+        //双指针解法最优
+        int n = height.length;
+        int leftMax = 0, rightMax = 0;
+        int left = 0, right = n - 1;
+        int ans = 0;
+        while (left <= right) {
+            leftMax = Math.max(leftMax, height[left]);
+            rightMax = Math.max(rightMax, height[right]);
+            if (leftMax < rightMax) {
+                ans += leftMax - height[left];
+                left++;
+            } else {
+                ans += rightMax - height[right];
+                right--;
             }
-            stack.push(i);
         }
-        return res;
+        return ans;
     }
 
     //[43].字符串相乘
@@ -4668,14 +4731,92 @@ public class AllOfThem {
     }
 
     //[224].基本计算器
-    public static int calculate(String s) {
+    public int calculate(String s) {
+        //法一：
 //        return dfsForCalculate(s, 0)[0];
-        Deque<Character> queue = new ArrayDeque<>();
-        for (char ch : s.toCharArray()) {
-            queue.offer(ch);
+        //法二：
+//        Deque<Character> queue = new ArrayDeque<>();
+//        for (char ch : s.toCharArray()) {
+//            queue.offer(ch);
+//        }
+//        return dfsForCalculate(queue);
+
+        //法三：宫水三叶
+        Map<Character, Integer> map = new HashMap<Character, Integer>() {{
+            put('-', 1);
+            put('+', 1);
+            put('*', 2);
+            put('/', 2);
+        }};
+        Stack<Integer> nums = new Stack<>();
+        Stack<Character> ops = new Stack<>();
+        nums.push(0);
+        int n = s.length();
+        char[] cs = s.toCharArray();
+        for (int i = 0; i < n; i++) {
+            char ch = cs[i];
+            if (ch == ' ') {
+                continue;
+            } else if (ch == '(') {
+                ops.push(ch);
+            } else if (ch == ')') {
+                while (!ops.isEmpty()) {
+                    if (ops.peek() != '(') {
+                        calc(nums, ops);
+                    } else {
+                        break;
+                    }
+                }
+            } else if (Character.isDigit(ch)) {
+                int j = i, num = 0;
+                while (j < n && Character.isDigit(cs[j])) {
+                    num = num * 10 + (cs[j] - '0');
+                    j++;
+                }
+                nums.push(num);
+                i = j - 1;
+            } else {
+                if (i > 0 && (cs[i - 1] == '(' || cs[i - 1] == '+' || cs[i - 1] == '-')) {
+                    nums.push(0);
+                }
+                while (!ops.isEmpty() && ops.peek() != '(') {
+                    char pre = ops.peek();
+                    //计算栈内的高优先级操作
+                    if (map.get(pre) >= map.get(ch)) {
+                        calc(nums, ops);
+                    } else {
+                        break;
+                    }
+                }
+                ops.push(ch);
+            }
         }
-        return dfsForCalculate(queue);
+        while (!ops.isEmpty()) {
+            calc(nums, ops);
+        }
+        return nums.peek();
     }
+
+    private void calc(Stack<Integer> nums, Stack<Character> ops) {
+        if (nums.isEmpty() || nums.size() < 2) return;
+        if (ops.isEmpty()) return;
+
+        int first = nums.pop();
+        int second = nums.pop();
+        char op = ops.pop();
+        int ans = 0;
+        if (op == '+') {
+            ans = first + second;
+        } else if (op == '-') {
+            ans = second - first;
+        } else if (op == '*') {
+            ans = first * second;
+        } else if (op == '/') {
+            ans = second / first;
+        }
+        nums.push(ans);
+    }
+
 
     private static int[] dfsForCalculate(String s, int start) {
         int n = s.length();
@@ -4997,21 +5138,35 @@ public class AllOfThem {
 
     //[238].除自身以外数组的乘积
     public int[] productExceptSelf(int[] nums) {
-        int n = nums.length;
-        int[] left = new int[n + 1];
-        int[] right = new int[n + 1];
-        left[0] = 1;
-        right[n] = 1;
-        for (int i = 0; i < n; i++) {
-            left[i + 1] = left[i] * nums[i];
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            right[i] = right[i + 1] * nums[i];
-        }
+//        int n = nums.length;
+//        int[] left = new int[n + 1];
+//        int[] right = new int[n + 1];
+//        left[0] = 1;
+//        right[n] = 1;
+//        for (int i = 0; i < n; i++) {
+//            left[i + 1] = left[i] * nums[i];
+//        }
+//        for (int i = n - 1; i >= 0; i--) {
+//            right[i] = right[i + 1] * nums[i];
+//        }
+//
+//        int[] res = new int[n];
+//        for (int i = 0; i < n; i++) {
+//            res[i] = left[i] * right[i + 1];
+//        }
+//        return res;
 
+        int n = nums.length;
         int[] res = new int[n];
+        int p = 1;
         for (int i = 0; i < n; i++) {
-            res[i] = left[i] * right[i + 1];
+            res[i] = p;
+            p *= nums[i];
+        }
+        int q = 1;
+        for (int i = n - 1; i >= 0; i--) {
+            res[i] *= q;
+            q *= nums[i];
         }
         return res;
     }
@@ -6808,10 +6963,25 @@ public class AllOfThem {
 
     //[386].字典序排数
     public List<Integer> lexicalOrder(int n) {
+//        List<Integer> res = new ArrayList<>();
+//        //从1到9开始选择，刚开始1个数字，后序有个层的概念
+//        for (int i = 1; i <= 9; i++) {
+//            dfsForLexicalOrder(n, i, res);
+//        }
+//        return res;
+
         List<Integer> res = new ArrayList<>();
-        //从1到9开始选择，刚开始1个数字，后序有个层的概念
-        for (int i = 1; i <= 9; i++) {
-            dfsForLexicalOrder(n, i, res);
+        int cur = 1;
+        for (int i = 1; i <= n; i++) {
+            res.add(cur);
+            if (cur * 10 <= n) {
+                cur *= 10;
+            } else {
+                while (cur % 10 == 9 || cur >= n) {
+                    cur /= 10;
+                }
+                cur++;
+            }
         }
         return res;
     }
@@ -6823,6 +6993,7 @@ public class AllOfThem {
         select.add(i);
         //选择
         for (int j = 0; j <= 9; j++) {
+            if (i * 10 + j > n) return;
             dfsForLexicalOrder(n, i * 10 + j, select);
         }
     }
@@ -7282,8 +7453,10 @@ public class AllOfThem {
             for (int[] direct : directs) {
                 int nx = x + direct[0];
                 int ny = y + direct[1];
-                if (nx < 0 || nx >= m - 1 || ny < 0 || ny >= n - 1 || visited[nx][ny]) continue;
-                if (h > heightMap[nx][ny]) ans += h - heightMap[nx][ny];
+                if (nx < 0 || nx >= m || ny < 0 || ny >= n || visited[nx][ny]) continue;
+                if (h > heightMap[nx][ny]) {
+                    ans += h - heightMap[nx][ny];
+                }
                 queue.offer(new int[]{nx, ny, Math.max(heightMap[nx][ny], h)});
                 visited[nx][ny] = true;
             }
@@ -8758,11 +8931,11 @@ public class AllOfThem {
         if (n == 1) return 9;
         //利用贪心的策略，优先取99 * xx ==> 回文
         //其实可以通过计算出一个回文值，然后再去判断这个回文值能不能被99以下的数整除，如果能，就返回该回文。
-        int upper = (int)Math.pow(10, n) -1;
-        for(int i = upper; i >=0 ; i--) {
+        int upper = (int) Math.pow(10, n) - 1;
+        for (int i = upper; i >= 0; i--) {
             long p = i, t = i;
             //根据左边的数，计算回文数
-            while(t != 0) {
+            while (t != 0) {
                 p = p * 10 + (t % 10);
                 t /= 10;
             }
@@ -9907,6 +10080,52 @@ public class AllOfThem {
         return dp[m][n];
     }
 
+    //[587].安装栅栏
+    int[] subtraction(int[] a, int[] b) { // 向量相减
+        return new int[]{a[0] - b[0], a[1] - b[1]};
+    }
+    double cross(int[] a, int[] b) { // 叉乘
+        return a[0] * b[1] - a[1] * b[0];
+    }
+    double getArea(int[] a, int[] b, int[] c) { // 向量 ab 转为 向量 ac 过程中扫过的面积
+        return cross(subtraction(b, a), subtraction(c, a));
+    }
+    public int[][] outerTrees(int[][] trees) {
+        Arrays.sort(trees, (a, b)->{
+            return a[0] != b[0] ? a[0] - b[0] : a[1] - b[1];
+        });
+        int n = trees.length, tp = 0;
+        int[] stk = new int[n + 10];
+        boolean[] vis = new boolean[n + 10];
+        stk[++tp] = 0; // 不标记起点
+        for (int i = 1; i < n; i++) {
+            int[] c = trees[i];
+            while (tp >= 2) {
+                int[] a = trees[stk[tp - 1]], b = trees[stk[tp]];
+                if (getArea(a, b, c) < 0) vis[stk[tp--]] = false;
+                else break;
+            }
+            stk[++tp] = i;
+            vis[i] = true;
+        }
+        int size = tp;
+        for (int i = n - 1; i >= 0; i--) {
+            if (vis[i]) continue;
+            int[] c = trees[i];
+            while (tp > size) {
+                int[] a = trees[stk[tp - 1]], b = trees[stk[tp]];
+                if (getArea(a, b, c) < 0) tp--;
+                    // vis[stk[tp--]] = false; // 非必须
+                else break;
+            }
+            stk[++tp] = i;
+            // vis[i] = true; // 非必须
+        }
+        int[][] ans = new int[tp - 1][2];
+        for (int i = 1; i < tp; i++) ans[i - 1] = trees[stk[i]];
+        return ans;
+    }
+
     //[589].N 叉树的前序遍历
     public List<Integer> preorder(Node root) {
         Stack<Node> stack = new Stack<>();
@@ -10322,9 +10541,9 @@ public class AllOfThem {
         //|mid   x        mid+k|   r = mid, 排除掉右边
         //|mid        x   mid+k|   l = mid+1, 排除掉左边一个
         int left = 0, right = n - k;
-        while(left < right) {
+        while (left < right) {
             int mid = left + (right - left) / 2;
-            if(x - arr[mid] > arr[mid + k] - x) {
+            if (x - arr[mid] > arr[mid + k] - x) {
                 left = mid + 1;
             } else {
                 right = mid;
@@ -10338,7 +10557,7 @@ public class AllOfThem {
     }
 
     private int findUpperRight(int[] arr, int left, int right, int x) {
-        while(left < right) {
+        while (left < right) {
             int mid = left + (right - left) / 2;
             if (arr[mid] >= x) {
                 right = mid;
@@ -10350,7 +10569,7 @@ public class AllOfThem {
     }
 
     private boolean isLeftClose(int[] arr, int left, int right, int x) {
-        if(left < 0) {
+        if (left < 0) {
             return false;
         }
         if (right >= arr.length) {
@@ -10396,7 +10615,7 @@ public class AllOfThem {
 
     //[679].24 点游戏
     public class Solution679 {
-        double EPISLON = 1e-6;
+        double EPSILON = 1e-6;
         double TARGET = 24;
 
         public boolean judgePoint24(int[] cards) {
@@ -10409,7 +10628,7 @@ public class AllOfThem {
         }
 
         private boolean helper(double[] nums) {
-            if (nums.length == 1) return Math.abs(nums[0] - TARGET) < EPISLON;
+            if (nums.length == 1) return Math.abs(nums[0] - TARGET) < EPSILON;
             for (int i = 0; i < nums.length; i++) {
                 for (int j = i + 1; j < nums.length; j++) {
                     double[] temp = new double[nums.length - 1];
@@ -10433,8 +10652,8 @@ public class AllOfThem {
             res.add(b - a);
             res.add(a * b);
             //小于1e-6认为是0
-            if (!(Math.abs(a) < EPISLON)) res.add(b / a);
-            if (!(Math.abs(b) < EPISLON)) res.add(a / b);
+            if (!(Math.abs(a) < EPSILON)) res.add(b / a);
+            if (!(Math.abs(b) < EPSILON)) res.add(a / b);
             return res;
         }
 
@@ -11196,6 +11415,41 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    public class Solution759 {
+        class Interval {
+            int start;
+            int end;
+
+            public Interval(int start, int end) {
+                this.start = start;
+                this.end = end;
+            }
+        }
+
+        public List<Interval> employeeFreeTime(List<List<Interval>> schedule) {
+            List<Interval> all = new ArrayList<>();
+            for (List<Interval> intervals : schedule) {
+                for (Interval interval : intervals) {
+                    all.add(interval);
+                }
+            }
+            Collections.sort(all, (a, b) -> a.start - b.start);
+            Interval first = all.get(0);
+            int end = first.end;
+            List<Interval> res = new ArrayList<>();
+            for (int i = 1; i < all.size(); i++) {
+                Interval cur = all.get(i);
+                //没有合并
+                if (cur.start > end) {
+                    res.add(new Interval(end, cur.start));
+                }
+                end = Math.max(cur.end, end);
+            }
+            return all;
+        }
+    }
+
+
     //[767].重构字符串
     public String reorganizeString(String s) {
         int[] cnt = new int[26];
@@ -11429,8 +11683,8 @@ public class AllOfThem {
     //[806].写字符串需要的行数
     public int[] numberOfLines(int[] widths, String s) {
         int line = 1, count = 0;
-        for(char ch : s.toCharArray()) {
-            int cnt =  widths[ch - 'a'];
+        for (char ch : s.toCharArray()) {
+            int cnt = widths[ch - 'a'];
             if (count + cnt > 100) {
                 count = cnt;
                 line++;
@@ -11438,7 +11692,7 @@ public class AllOfThem {
                 count += cnt;
             }
         }
-        return new int[] {line, count};
+        return new int[]{line, count};
     }
 
     //[807].保持城市天际线
@@ -11477,17 +11731,17 @@ public class AllOfThem {
         for (String str : banned) {
             bannedSet.add(str.toLowerCase());
         }
-        for (int i = 0; i < n;) {
-            if(!Character.isLetter(cs[i]) && ++i > 0) continue;
+        for (int i = 0; i < n; ) {
+            if (!Character.isLetter(cs[i]) && ++i > 0) continue;
 
             int j = i;
             while (j < n && Character.isLetter(cs[j])) {
                 j++;
             }
 
-            String key = paragraph.substring(i,j).toLowerCase();
+            String key = paragraph.substring(i, j).toLowerCase();
             if (!bannedSet.contains(key)) {
-                cnt.put(key, cnt.getOrDefault(key, 0) +1);
+                cnt.put(key, cnt.getOrDefault(key, 0) + 1);
                 if (cnt.get(key) > maxCnt) {
                     mostCommon = key;
                     maxCnt = cnt.get(key);
@@ -11496,6 +11750,56 @@ public class AllOfThem {
             i = j + 1;
         }
         return mostCommon;
+    }
+
+    //[821].字符的最短距离
+    public int[] shortestToChar(String s, char c) {
+        int n = s.length();
+        int[] res = new int[n];
+        Arrays.fill(res, n + 1);
+        char[] cs = s.toCharArray();
+        for (int i = 0, j = -1; i < n; i++) {
+            if (cs[i] == c) {
+                j = i;
+            }
+            if (j != -1) {
+                res[i] = i - j;
+            }
+        }
+        for (int i = n - 1, j = -1; i >= 0; i--) {
+            if (cs[i] == c) {
+                j = i;
+            }
+            if (j != -1) {
+                res[i] = Math.min(res[i], j - i);
+            }
+        }
+        return res;
+    }
+
+    //[824].山羊拉丁文
+    public String toGoatLatin(String sentence) {
+        int n = sentence.length();
+        char[] cs = sentence.toCharArray();
+        StringBuilder sb = new StringBuilder();
+        String last = "a";
+        for (int i = 0; i < n; ) {
+            int j = i;
+            while (j < n && cs[j] != ' ') j++;
+            if ("aeiouAEIOU".indexOf(cs[i]) == -1) {
+                sb.append(sentence.substring(i + 1, j)).append(cs[i]);
+            } else {
+                sb.append(sentence.substring(i, j));
+            }
+            sb.append("ma").append(last);
+
+            last += "a";
+            i = j + 1;
+            if (i < n) {
+                sb.append(' ');
+            }
+        }
+        return sb.toString();
     }
 
     //[825].适龄的朋友
@@ -11733,6 +12037,20 @@ public class AllOfThem {
             }
         }
         return res;
+    }
+
+    //[868].二进制间距
+    public int binaryGap(int n) {
+        int index = -1, maxAns = 0;
+        for (int i = 0; i < 32; i++) {
+            if ((n >> i & 1) == 1) {
+                if (index != -1) {
+                    maxAns = Math.max(i - index, maxAns);
+                }
+                index = i;
+            }
+        }
+        return maxAns;
     }
 
     //[875].爱吃香蕉的珂珂
@@ -12032,9 +12350,9 @@ public class AllOfThem {
             if (arr[i] > 2) continue;
             for (int j = 3; j >= 0; j--) {
                 if (i == j || arr[i] == 2 && arr[j] > 3) continue;
-                for (int k = 3; k >=0; k--) {
+                for (int k = 3; k >= 0; k--) {
                     if (k == i || k == j || arr[k] > 5) continue;
-                    return "" + arr[i] + arr[j] +":" + arr[k] + arr[6 - i - j -k];
+                    return "" + arr[i] + arr[j] + ":" + arr[k] + arr[6 - i - j - k];
                 }
             }
         }
@@ -12998,6 +13316,40 @@ public class AllOfThem {
         return res;
     }
 
+    //[1245].树的直径
+    int maxDiameter = 0;
+
+    public int treeDiameter(int[][] edges) {
+        Map<Integer, List<Integer>> g = new HashMap<>();
+        for (int[] edge : edges) {
+            g.putIfAbsent(edge[0], new ArrayList<>());
+            g.putIfAbsent(edge[1], new ArrayList<>());
+            g.get(edge[0]).add(edge[1]);
+            g.get(edge[1]).add(edge[0]);
+        }
+        dfsForTreeDiameter(g, 0, -1);
+        return maxDiameter;
+    }
+
+    private int dfsForTreeDiameter(Map<Integer, List<Integer>> g, int cur, int pre) {
+        int max1 = 0, max2 = 0;
+        for (int i : g.get(cur)) {
+            if (i != pre) {
+                int max = dfsForTreeDiameter(g, i, cur);
+                if (max > max1) {
+                    int temp = max1;
+                    max1 = max;
+                    max2 = temp;
+                } else if (max > max2) {
+                    max2 = max;
+                }
+            }
+        }
+        maxDiameter = Math.max(maxDiameter, max1 + max2);
+        //最大的单边路径
+        return max1 + 1;
+    }
+
     //[1248].统计「优美子数组」
     public int numberOfSubarrays(int[] nums, int k) {
         //奇数个数，可以转化为奇数为1，偶数为0看待，求和为k的子数组个数
@@ -13393,6 +13745,29 @@ public class AllOfThem {
 
     private int gcd2(int a, int b) {
         return b == 0 ? a : gcd2(b, a % b);
+    }
+
+    //[1458].两个子序列的最大点积
+    public int maxDotProduct(int[] nums1, int[] nums2) {
+        int m = nums1.length, n = nums2.length;
+        //以i为结尾的和以j为结尾的两个子序列的最大点积
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int xy = nums1[i] * nums2[j];
+                dp[i][j] = xy;
+                if (i > 0) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - 1][j]);
+                }
+                if (j > 0) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i][j - 1]);
+                }
+                if (i > 0 && j > 0) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - 1][j - 1] + xy);
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
     }
 
     //[1493].删掉一个元素以后全为 1 的最长子数组
