@@ -7256,20 +7256,32 @@ public class AllOfThem {
     //[398].随机数索引
     public class Solution398 {
         int[] nums;
+        Random random;
 
         public Solution398(int[] nums) {
             this.nums = nums;
+            this.random = new Random();
         }
 
         public int pick(int target) {
-            List<Integer> res = new ArrayList<>();
-            for (int i = 0; i < nums.length; i++) {
+//            List<Integer> res = new ArrayList<>();
+//            for (int i = 0; i < nums.length; i++) {
+//                if (target == nums[i]) {
+//                    res.add(i);
+//                }
+//            }
+//            Random random = new Random();
+//            return res.get(random.nextInt(res.size()));
+            int ans = -1;
+            for (int i = 0, cnt = 0; i < nums.length; i++) {
                 if (target == nums[i]) {
-                    res.add(i);
+                    cnt++;
+                    if (random.nextInt(cnt) == 0) {
+                        ans = i;
+                    }
                 }
             }
-            Random random = new Random();
-            return res.get(random.nextInt(res.size()));
+            return ans;
         }
     }
 
@@ -10084,14 +10096,17 @@ public class AllOfThem {
     int[] subtraction(int[] a, int[] b) { // 向量相减
         return new int[]{a[0] - b[0], a[1] - b[1]};
     }
+
     double cross(int[] a, int[] b) { // 叉乘
         return a[0] * b[1] - a[1] * b[0];
     }
+
     double getArea(int[] a, int[] b, int[] c) { // 向量 ab 转为 向量 ac 过程中扫过的面积
         return cross(subtraction(b, a), subtraction(c, a));
     }
+
     public int[][] outerTrees(int[][] trees) {
-        Arrays.sort(trees, (a, b)->{
+        Arrays.sort(trees, (a, b) -> {
             return a[0] != b[0] ? a[0] - b[0] : a[1] - b[1];
         });
         int n = trees.length, tp = 0;
