@@ -12133,6 +12133,26 @@ public class AllOfThem {
         return dp[0][n - 1] > 0;
     }
 
+    //[883].三维形体投影面积
+    public int projectionArea(int[][] grid) {
+        int n = grid.length;
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            int maxCol = 0, maxRow = 0;
+            for (int j = 0; j < n; j++) {
+                maxCol = Math.max(maxCol, grid[i][j]);
+                maxRow = Math.max(maxRow, grid[j][i]);
+
+                if (grid[i][j] > 0) {
+                    ans++;
+                }
+            }
+            ans += maxCol;
+            ans += maxRow;
+        }
+        return ans;
+    }
+
     //[884].两句话中的不常见单词
     public String[] uncommonFromSentences(String s1, String s2) {
         Map<String, Integer> count = new HashMap<>();
