@@ -7537,15 +7537,32 @@ public class AllOfThem {
     }
 
     //[417].太平洋大西洋水流问题
-    public List<List<Integer>> pacificAtlantic(int[][] heights) {
-        int m = heights.length, n = heights[0].length;
-
+   public List<List<Integer>> pacificAtlantic(int[][] heights) {
         List<List<Integer>> res = new ArrayList<>();
-        boolean[][] visited = new boolean[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (dfsForPacific(heights, visited, i, j, Integer.MAX_VALUE)
-                        && dfsForAtlantic(heights, visited, i, j, Integer.MAX_VALUE)) {
+        int m = heights.length, n = heights[0].length;
+        //能够流向太平洋的点
+        boolean[][] res1 = new boolean[m][n];
+        //能够流向大西洋的点
+        boolean[][] res2 = new boolean[m][n];
+        for (int i = 0; i < m;i++) {
+            if (!res1[i][0]) {
+                dfsForPacificAtlantic(heights, i, 0, res1);
+            }
+            if (!res2[i][n-1]) {
+                dfsForPacificAtlantic(heights, i, n-1, res2);
+            }
+        }
+        for (int j = 0; j < n; j++) {
+            if (!res1[0][j]) {
+                dfsForPacificAtlantic(heights, 0, j, res1);
+            }
+            if (!res2[m-1][j]) {
+                dfsForPacificAtlantic(heights, m-1, j, res2);
+            }
+        }
+        for (int i = 0; i < m;i++) {
+            for(int j = 0; j < n;j++) {
+                if (res1[i][j] && res2[i][j]) {
                     res.add(Arrays.asList(i, j));
                 }
             }
@@ -7553,44 +7570,17 @@ public class AllOfThem {
         return res;
     }
 
-    private boolean dfsForPacific(int[][] heights, boolean[][] visited, int x, int y, int pre) {
-        int m = heights.length, n = heights[0].length;
-        if (x >= m || y >= n || visited[x][y] || pre < heights[x][y]) {
-            return false;
+    int[][] directs = new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    private void dfsForPacificAtlantic(int[][] heights, int x, int y, boolean[][] res) {
+        res[x][y] = true;
+        for (int[] direct : directs) {
+            int nx = x + direct[0];
+            int ny = y + direct[1];
+            if (nx < 0 || ny < 0 || nx >= heights.length || ny >= heights[0].length) continue;
+            //后面的只能比前面的大于或者等于
+            if (res[nx][ny] || heights[x][y] > heights[nx][ny]) continue;
+            dfsForPacificAtlantic(heights, nx, ny, res);
         }
-        //即将触碰边界，提前返回
-        if (x <= 0 || y <= 0) {
-            return true;
-        }
-
-        visited[x][y] = true;
-        int height = heights[x][y];
-        boolean result = dfsForPacific(heights, visited, x - 1, y, height)
-                || dfsForPacific(heights, visited, x + 1, y, height)
-                || dfsForPacific(heights, visited, x, y - 1, height)
-                || dfsForPacific(heights, visited, x, y + 1, height);
-        visited[x][y] = false;
-        return result;
-    }
-
-    private boolean dfsForAtlantic(int[][] heights, boolean[][] visited, int x, int y, int pre) {
-        int m = heights.length, n = heights[0].length;
-        if (x < 0 || y < 0 || visited[x][y] || pre < heights[x][y]) {
-            return false;
-        }
-        //即将触碰边界，提前返回
-        if (x >= m - 1 || y >= n - 1) {
-            return true;
-        }
-
-        visited[x][y] = true;
-        int height = heights[x][y];
-        boolean result = dfsForAtlantic(heights, visited, x - 1, y, height)
-                || dfsForAtlantic(heights, visited, x + 1, y, height)
-                || dfsForAtlantic(heights, visited, x, y - 1, height)
-                || dfsForAtlantic(heights, visited, x, y + 1, height);
-        visited[x][y] = false;
-        return result;
     }
 
     //[419].甲板上的战舰
