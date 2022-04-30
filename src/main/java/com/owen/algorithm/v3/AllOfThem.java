@@ -72,44 +72,6 @@ public class AllOfThem {
         }
     }
 
-    public static class Solution427 {
-        public static class Node {
-            public boolean val;
-            public boolean isLeaf;
-            public Node topLeft;
-            public Node topRight;
-            public Node bottomLeft;
-            public Node bottomRight;
-
-            public Node() {
-                this.val = false;
-                this.isLeaf = false;
-                this.topLeft = null;
-                this.topRight = null;
-                this.bottomLeft = null;
-                this.bottomRight = null;
-            }
-
-            public Node(boolean val, boolean isLeaf) {
-                this.val = val;
-                this.isLeaf = isLeaf;
-                this.topLeft = null;
-                this.topRight = null;
-                this.bottomLeft = null;
-                this.bottomRight = null;
-            }
-
-            public Node(boolean val, boolean isLeaf, Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
-                this.val = val;
-                this.isLeaf = isLeaf;
-                this.topLeft = topLeft;
-                this.topRight = topRight;
-                this.bottomLeft = bottomLeft;
-                this.bottomRight = bottomRight;
-            }
-        }
-    }
-
     class Difference {
         int[] diffSum;
 
@@ -7743,24 +7705,67 @@ public class AllOfThem {
     }
 
     //[427].建立四叉树
-    public Solution427.Node construct(int[][] grid) {
-        return helper(grid, 0, 0, grid.length);
-    }
+    public class Solution427 {
+        public static class Node {
+            public boolean val;
+            public boolean isLeaf;
+            public Node topLeft;
+            public Node topRight;
+            public Node bottomLeft;
+            public Node bottomRight;
 
-    private Solution427.Node helper(int[][] grid, int i, int j, int len) {
-        if (len == 1) {
-            return new Solution427.Node(grid[i][j] == 1, true);
+            public Node() {
+                this.val = false;
+                this.isLeaf = false;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = null;
+                this.topRight = null;
+                this.bottomLeft = null;
+                this.bottomRight = null;
+            }
+
+            public Node(boolean val, boolean isLeaf, Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) {
+                this.val = val;
+                this.isLeaf = isLeaf;
+                this.topLeft = topLeft;
+                this.topRight = topRight;
+                this.bottomLeft = bottomLeft;
+                this.bottomRight = bottomRight;
+            }
+        }
+        public Node construct(int[][] grid) {
+            int n = grid.length;
+            int[][] preSum = new int[n+1][n+1];
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1 ; j <= n;j++) {
+                    preSum[i][j] = preSum[i-1][j] + preSum[i][j-1] - preSum[i-1][j-1] + grid[i-1][j-1];
+                }
+            }
+
+            return dfs(0, 0, n, n, preSum);
         }
 
-        int k = len / 2;
-        Solution427.Node tl = helper(grid, i, j, k);
-        Solution427.Node tr = helper(grid, i, j + k, k);
-        Solution427.Node bl = helper(grid, i + k, j, k);
-        Solution427.Node br = helper(grid, i + k, j + k, k);
-        if (tl.val == tr.val && bl.val == br.val && tl.val == bl.val && tl.isLeaf && tr.isLeaf && bl.isLeaf && br.isLeaf) {
-            return new Solution427.Node(tl.val, true);
-        } else {
-            return new Solution427.Node(true, false, tl, tr, bl, br);
+        private Node dfs(int r0, int c0, int r1, int c1, int[][] preSum) {
+            int sum = preSum[r1][c1] - preSum[r0][c1] - preSum[r1][c0] + preSum[r0][c0];
+            if (sum == 0) {
+                return new Node(false, true, null, null, null, null);
+            } else if (sum == (r1 - r0) * (c1 - c0)) {
+                return new Node(true, true, null, null, null, null);
+            }
+            Node node = new Node(false, false);
+            node.topLeft = dfs(r0, c0, (r0 + r1) /2, (c0 + c1) /2, preSum);
+            node.topRight = dfs(r0, (c0 + c1) /2, (r0 + r1) /2, c1, preSum);
+            node.bottomLeft = dfs((r0 + r1) /2, c0, r1, (c0 + c1) /2, preSum);
+            node.bottomRight = dfs((r0 + r1) /2, (c0 + c1) /2, r1, c1, preSum);
+            return node;
         }
     }
 
