@@ -12372,6 +12372,42 @@ public class AllOfThem {
         return String.valueOf(arr);
     }
 
+    //[937].重新排列日志文件
+    public String[] reorderLogFiles(String[] logs) {
+        int n = logs.length;
+        Log[] arr = new Log[n];
+        for (int i = 0; i < n; i++) {
+            arr[i] = new Log(logs[i], i);
+        }
+
+        Arrays.sort(arr, (a,b) -> {
+            if (a.type != b.type) return a.type - b.type;
+            else if (a.type == 1) return a.index - b.index;
+            else return a.content.compareTo(b.content) == 0 ? a.sign.compareTo(b.sign) : a.content.compareTo(b.content);
+        });
+
+        String[] res = new String[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = arr[i].orig;
+        }
+        return res;
+    }
+
+    class Log {
+        String orig, content, sign;
+        int index;
+        int type;
+        public Log(String log, int index) {
+            this.index = index;
+            orig = log;
+            int n = log.length(), i = 0;
+            while (i < n && log.charAt(i) != ' ') i++;
+            sign = log.substring(0, i);
+            content = log.substring(i+1);
+            type = Character.isDigit(content.charAt(0)) ? 1 : 0;
+        }
+    }
+
     //[949].给定数字能组成的最大时间
     public String largestTimeFromDigits(int[] arr) {
         String ans = "";
@@ -14289,6 +14325,13 @@ public class AllOfThem {
             }
         }
         return s.substring(0, end);
+    }
+
+    //[1823].找出游戏的获胜者
+    public int findTheWinner(int n, int k) {
+        if (n <= 1) return n;
+        int ans = (findTheWinner(n - 1, k) + k) % n;
+        return ans == 0 ? n : ans;
     }
 
     //[1876].长度为三且各字符不同的子字符串
