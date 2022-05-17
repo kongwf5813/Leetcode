@@ -3648,6 +3648,7 @@ public class AllOfThem {
             head.next = tail;
             tail.prev = head;
             this.capacity = capacity;
+            this.map = new HashMap<>();
         }
 
         public int get(int key) {
@@ -12450,7 +12451,6 @@ public class AllOfThem {
         }
         return ans;
     }
-
     public static class UnionFind4 {
         private int[] parent;
 
@@ -12480,6 +12480,35 @@ public class AllOfThem {
             int rootP = find(p);
             int rootQ = find(q);
             return rootP == rootQ;
+        }
+    }
+
+    //[953].验证外星语词典
+    public boolean isAlienSorted(String[] words, String order) {
+        int[] index = new int[26];
+        for (int i = 0; i < order.length(); i++) {
+            index[order.charAt(i) - 'a'] = i;
+        }
+
+        for (int i = 0; i < words.length -1; i++) {
+            if(!valid(words[i], words[i+1], index)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean valid(String first, String second, int[] index) {
+        int m = first.length(), n = second.length();
+        int i = 0;
+        while (i < m && i < n && first.charAt(i) == second.charAt(i)) i++;
+
+        if (i < m && i < n) {
+            return index[first.charAt(i) - 'a'] < index[second.charAt(i) - 'a'];
+        } else if (i == m) {
+            return true;
+        } else {
+            return false;
         }
     }
 
