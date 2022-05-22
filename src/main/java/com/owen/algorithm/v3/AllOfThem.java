@@ -7500,31 +7500,31 @@ public class AllOfThem {
     }
 
     //[417].太平洋大西洋水流问题
-   public List<List<Integer>> pacificAtlantic(int[][] heights) {
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
         List<List<Integer>> res = new ArrayList<>();
         int m = heights.length, n = heights[0].length;
         //能够流向太平洋的点
         boolean[][] res1 = new boolean[m][n];
         //能够流向大西洋的点
         boolean[][] res2 = new boolean[m][n];
-        for (int i = 0; i < m;i++) {
+        for (int i = 0; i < m; i++) {
             if (!res1[i][0]) {
                 dfsForPacificAtlantic(heights, i, 0, res1);
             }
-            if (!res2[i][n-1]) {
-                dfsForPacificAtlantic(heights, i, n-1, res2);
+            if (!res2[i][n - 1]) {
+                dfsForPacificAtlantic(heights, i, n - 1, res2);
             }
         }
         for (int j = 0; j < n; j++) {
             if (!res1[0][j]) {
                 dfsForPacificAtlantic(heights, 0, j, res1);
             }
-            if (!res2[m-1][j]) {
-                dfsForPacificAtlantic(heights, m-1, j, res2);
+            if (!res2[m - 1][j]) {
+                dfsForPacificAtlantic(heights, m - 1, j, res2);
             }
         }
-        for (int i = 0; i < m;i++) {
-            for(int j = 0; j < n;j++) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
                 if (res1[i][j] && res2[i][j]) {
                     res.add(Arrays.asList(i, j));
                 }
@@ -7533,7 +7533,8 @@ public class AllOfThem {
         return res;
     }
 
-    int[][] directs = new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+    int[][] directs = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
     private void dfsForPacificAtlantic(int[][] heights, int x, int y, boolean[][] res) {
         res[x][y] = true;
         for (int[] direct : directs) {
@@ -7742,12 +7743,13 @@ public class AllOfThem {
                 this.bottomRight = bottomRight;
             }
         }
+
         public Node construct(int[][] grid) {
             int n = grid.length;
-            int[][] preSum = new int[n+1][n+1];
+            int[][] preSum = new int[n + 1][n + 1];
             for (int i = 1; i <= n; i++) {
-                for (int j = 1 ; j <= n;j++) {
-                    preSum[i][j] = preSum[i-1][j] + preSum[i][j-1] - preSum[i-1][j-1] + grid[i-1][j-1];
+                for (int j = 1; j <= n; j++) {
+                    preSum[i][j] = preSum[i - 1][j] + preSum[i][j - 1] - preSum[i - 1][j - 1] + grid[i - 1][j - 1];
                 }
             }
 
@@ -7762,10 +7764,10 @@ public class AllOfThem {
                 return new Node(true, true, null, null, null, null);
             }
             Node node = new Node(false, false);
-            node.topLeft = dfs(r0, c0, (r0 + r1) /2, (c0 + c1) /2, preSum);
-            node.topRight = dfs(r0, (c0 + c1) /2, (r0 + r1) /2, c1, preSum);
-            node.bottomLeft = dfs((r0 + r1) /2, c0, r1, (c0 + c1) /2, preSum);
-            node.bottomRight = dfs((r0 + r1) /2, (c0 + c1) /2, r1, c1, preSum);
+            node.topLeft = dfs(r0, c0, (r0 + r1) / 2, (c0 + c1) / 2, preSum);
+            node.topRight = dfs(r0, (c0 + c1) / 2, (r0 + r1) / 2, c1, preSum);
+            node.bottomLeft = dfs((r0 + r1) / 2, c0, r1, (c0 + c1) / 2, preSum);
+            node.bottomRight = dfs((r0 + r1) / 2, (c0 + c1) / 2, r1, c1, preSum);
             return node;
         }
     }
@@ -8630,33 +8632,36 @@ public class AllOfThem {
 
     //[464].我能赢吗
     public boolean canIWin(int maxChoosableInteger, int desiredTotal) {
-        if (maxChoosableInteger >= desiredTotal) return true;
-        if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) return false;
-        int[] select = new int[maxChoosableInteger + 1];
-        return dfsForCanIWin(select, new HashMap<>(), desiredTotal);
+        //所有的和都比期望值小，先手不会赢，所以返回false
+        if (maxChoosableInteger * (maxChoosableInteger + 1) / 2 < desiredTotal) {
+            return false;
+        }
+        Map<Integer, Boolean> memo = new HashMap<>();
+        return dfs(maxChoosableInteger, desiredTotal, 0, 0, memo);
     }
 
-    private boolean dfsForCanIWin(int[] visited, Map<String, Boolean> result, int desiredTotal) {
-        String key = Arrays.toString(visited);
-        if (result.containsKey(key)) return result.get(key);
+    private boolean dfs(int maxChoosableInteger, int desiredTotal, int state, int total, Map<Integer, Boolean> memo) {
+        if (!memo.containsKey(state)) {
+            boolean res = false;
+            for (int i = 0; i < maxChoosableInteger; i++) {
+                if (((state >> i) & 1) == 1) {
+                    continue;
+                }
 
-        for (int i = 1; i < visited.length; i++) {
-            if (visited[i] == 1) {
-                continue;
+                //当前已经超过了期望值，先手赢得比赛
+                if (total + i + 1 >= desiredTotal) {
+                    res = true;
+                    break;
+                }
+                //后手输了比赛
+                if (!dfs(maxChoosableInteger, desiredTotal, state | (1 << i), total + i + 1, memo)) {
+                    res = true;
+                    break;
+                }
             }
-
-            visited[i] = 1;
-            if (i >= desiredTotal || !dfsForCanIWin(visited, result, desiredTotal - i)) {
-                result.put(key, true);
-                visited[i] = 0;
-                return true;
-            }
-
-            visited[i] = 0;
+            memo.put(state, res);
         }
-
-        result.put(key, false);
-        return false;
+        return memo.get(state);
     }
 
     //[468].验证IP地址
@@ -12381,7 +12386,7 @@ public class AllOfThem {
             arr[i] = new Log(logs[i], i);
         }
 
-        Arrays.sort(arr, (a,b) -> {
+        Arrays.sort(arr, (a, b) -> {
             if (a.type != b.type) return a.type - b.type;
             else if (a.type == 1) return a.index - b.index;
             else return a.content.compareTo(b.content) == 0 ? a.sign.compareTo(b.sign) : a.content.compareTo(b.content);
@@ -12398,13 +12403,14 @@ public class AllOfThem {
         String orig, content, sign;
         int index;
         int type;
+
         public Log(String log, int index) {
             this.index = index;
             orig = log;
             int n = log.length(), i = 0;
             while (i < n && log.charAt(i) != ' ') i++;
             sign = log.substring(0, i);
-            content = log.substring(i+1);
+            content = log.substring(i + 1);
             type = Character.isDigit(content.charAt(0)) ? 1 : 0;
         }
     }
@@ -12451,6 +12457,7 @@ public class AllOfThem {
         }
         return ans;
     }
+
     public static class UnionFind4 {
         private int[] parent;
 
@@ -12490,8 +12497,8 @@ public class AllOfThem {
             index[order.charAt(i) - 'a'] = i;
         }
 
-        for (int i = 0; i < words.length -1; i++) {
-            if(!valid(words[i], words[i+1], index)) {
+        for (int i = 0; i < words.length - 1; i++) {
+            if (!valid(words[i], words[i + 1], index)) {
                 return false;
             }
         }
