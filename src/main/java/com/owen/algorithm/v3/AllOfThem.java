@@ -10629,6 +10629,65 @@ public class AllOfThem {
         return res;
     }
 
+    //[675].为高尔夫比赛砍树
+    class Solution675 {
+        int N = 50;
+        int[][] g = new int[N][N];
+        int n, m;
+        public int cutOffTree(List<List<Integer>> forest) {
+            List<int[]> graph = new ArrayList<>();
+            n = forest.size();
+            m = forest.get(0).size();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < m; j++) {
+                    g[i][j] = forest.get(i).get(j);
+                    if (g[i][j] > 1) {
+                        graph.add(new int[] {g[i][j], i, j});
+                    }
+                }
+            }
+            if (g[0][0] == 0) return -1;
+            Collections.sort(graph, (a,b)->a[0]-b[0]);
+            int x = 0, y = 0, ans = 0;
+            for (int[] ne : graph) {
+                int nx = ne[1], ny = ne[2];
+                int d = bfs(x, y, nx, ny);
+                if (d == -1) return -1;
+                ans += d;
+                x = nx; y = ny;
+            }
+            return ans;
+        }
+
+        int [][] directs = new int[][] {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        int bfs(int x, int y, int nx, int ny) {
+            if (x == nx && y == ny) return 0;
+            int ans = 0;
+            Queue<int[]> queue = new LinkedList<>();
+            boolean[][] visited = new boolean[n][m];
+            queue.offer(new int[] {x, y});
+            visited[x][y] = true;
+            while (!queue.isEmpty()) {
+                int size = queue.size();
+                for (int i = 0; i < size; i++) {
+                    int[] cur = queue.poll();
+                    int cX = cur[0], cY = cur[1];
+                    for (int[] direct :directs) {
+                        int nX = cX + direct[0], nY = cY + direct[1];
+                        if (nX < 0 || nY <0 || nX >= n || nY >= m) continue;
+                        if (g[nX][nY] == 0 || visited[nX][nY]) continue;
+                        if (nX == nx && nY == ny) return ans +1;
+                        queue.offer(new int[] {nX, nY});
+                        visited[nX][nY] = true;
+                    }
+                }
+                ans++;
+            }
+            return -1;
+        }
+
+    }
+
     //[679].24 点游戏
     public class Solution679 {
         double EPSILON = 1e-6;
